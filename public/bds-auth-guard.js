@@ -1,6 +1,6 @@
 (function () {
-  const SESSION_KEY = "bds_auth_gate_v174_minimal";
-  const CHAT_REGISTRY_KEY = "bds_whatsapp_minimal_registry_v174";
+  const SESSION_KEY = "bds_auth_gate_v175_id";
+  const CHAT_REGISTRY_KEY = "bds_whatsapp_id_registry_v175";
   const NIVELES = [7, 8, 9, 10, 11, 12];
   const SECCIONES_COLEGIO = [];
   NIVELES.forEach(niv => { [1, 2, 3, 4].forEach(grp => SECCIONES_COLEGIO.push(`${niv}-${grp}`)); });
@@ -12,7 +12,11 @@
     { rol: "SuperAdmin", icono: "👑" }
   ];
 
-  const SVG_BUHO_ORIGINAL = "/buho-original.svg?v=174";
+  const SVG_BUHO_ORIGINAL = "/buho-original.svg?v=175";
+  const LOGO_MEP = "/logo.svg";
+  const ESCUDO_CTPMN = "/escudoCTPmercedesnorte.jpeg";
+  const LOGO_TEXTO_CTPMN = "/Logo OFICIAL CTPMN.png";
+
   const PALABRAS_PROHIBIDAS = ["tonto", "idiota", "estupido", "imbecil", "malparido", "mierda", "puta", "cabron", "carajo", "basura"];
 
   function filtrarGroserias(texto) {
@@ -82,9 +86,9 @@
   }
 
   function inyectarCSS() {
-    if (document.getElementById('bds-v174-css')) return;
+    if (document.getElementById('bds-v175-css')) return;
     const st = document.createElement('style');
-    st.id = 'bds-v174-css';
+    st.id = 'bds-v175-css';
     st.innerHTML = `
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
       html, body { font-family: 'Inter', system-ui, -apple-system, sans-serif !important; background: #070d19 !important; color: #f1f5f9 !important; margin: 0; padding: 0; }
@@ -106,22 +110,25 @@
   window.mostrarLoginSobrio = function () {
     inyectarCSS();
     actualizarFaviconOficial();
-    let old = document.getElementById('bds-login-v174');
+    let old = document.getElementById('bds-login-v175');
     if (old) old.remove();
 
     const gate = document.createElement('div');
-    gate.id = 'bds-login-v174';
+    gate.id = 'bds-login-v175';
     gate.style.cssText = 'position:fixed;inset:0;background:radial-gradient(circle at 50% 0%,#0f1f3d 0%,#060b16 70%);z-index:300000;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;';
 
     gate.innerHTML = `
       <div style="background:#0b1322;border:1px solid #1e293b;border-radius:14px;max-width:390px;width:100%;padding:28px;box-shadow:0 24px 60px rgba(0,0,0,0.8);box-sizing:border-box;">
         <div style="text-align:center;margin-bottom:20px;">
-          <img src="${SVG_BUHO_ORIGINAL}" width="60" height="60" alt="Búho Azul Original" style="margin-bottom:10px;filter:drop-shadow(0 4px 12px rgba(34,211,238,0.35));"/>
+          <div style="display:flex;justify-content:center;align-items:center;gap:12px;margin-bottom:10px;">
+            <img src="${ESCUDO_CTPMN}" width="54" height="64" alt="Escudo CTPMN" style="object-fit:contain;"/>
+            <img src="${SVG_BUHO_ORIGINAL}" width="54" height="54" alt="Búho Azul Original"/>
+          </div>
           <h1 style="margin:0;font-size:21px;font-weight:900;letter-spacing:-0.02em;color:#f8fafc;">prac<span style="color:#2dd4bf;">TICA</span>tecnica.com</h1>
-          <p style="margin:4px 0 0;font-size:11.5px;color:#94a3b8;">Plataforma Educativa • CTP Mercedes Norte</p>
+          <p style="margin:4px 0 0;font-size:11.5px;color:#94a3b8;">CTP Mercedes Norte • MEP Heredia • Circuito 04</p>
         </div>
 
-        <form id="f-login-v174" style="display:flex;flex-direction:column;gap:10px;">
+        <form id="f-login-v175" style="display:flex;flex-direction:column;gap:10px;">
           <div>
             <label style="display:block;font-size:11px;color:#cbd5e1;font-weight:500;margin-bottom:3px;">Correo Institucional o Gmail</label>
             <input id="lg-mail" type="email" value="maxi.salsa@gmail.com" required autofocus style="width:100%;box-sizing:border-box;background:#070d19;border:1px solid #334155;border-radius:8px;padding:9px 12px;color:#f8fafc;font-size:13px;"/>
@@ -145,7 +152,7 @@
             </div>
           </div>
           <button type="submit" style="margin-top:4px;background:#1d4ed8;color:#ffffff;border:none;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">
-            Entrar al Sistema Minimalista
+            Entrar al Sistema Soberano CTPMN
           </button>
         </form>
       </div>
@@ -153,7 +160,7 @@
 
     document.body.appendChild(gate);
 
-    document.getElementById('f-login-v174').onsubmit = (e) => {
+    document.getElementById('f-login-v175').onsubmit = (e) => {
       e.preventDefault();
       const mail = document.getElementById('lg-mail').value.trim();
       const nom = document.getElementById('lg-nom').value.trim();
@@ -169,7 +176,7 @@
       });
 
       gate.remove();
-      activarMinimalismo();
+      activarSoberania();
     };
   };
 
@@ -193,8 +200,8 @@
         <div style="background:#0b1322;border:1px solid #1e293b;border-radius:14px;max-width:650px;width:100%;padding:22px;box-shadow:0 25px 60px rgba(0,0,0,0.85);box-sizing:border-box;position:relative;">
           <button id="mp-close" style="position:absolute;top:14px;right:14px;background:#7f1d1d;color:#fff;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;font-weight:800;">✕</button>
           
-          <span style="background:#0284c7;color:#fff;font-size:10px;font-weight:800;padding:3px 8px;border-radius:99px;">MÓDULO OFICIAL • ${areaTitle}</span>
-          <h3 style="margin:10px 0 6px;font-size:16px;color:#fff;">Ítem ${idx + 1} de ${lista.length}</h3>
+          <span style="background:#0284c7;color:#fff;font-size:10px;font-weight:800;padding:3px 8px;border-radius:99px;">MÓDULO OFICIAL CTPMN • ${areaTitle}</span>
+          <h3 style="margin:10px 0 6px;font-size:16px;color:#fff;">Ítems ${idx + 1} de ${lista.length}</h3>
           <p style="font-size:13.5px;color:#f8fafc;font-weight:600;line-height:1.45;margin-bottom:14px;">${it.q}</p>
 
           <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
@@ -337,7 +344,7 @@
     function pintar() {
       chans = getChan();
       const cObj = chans.find(x => x.id === actId) || chans[0];
-      const sk = `bds_wa_min_msg_${cObj.id}`;
+      const sk = `bds_wa_id_msg_${cObj.id}`;
       let msgs = cObj.msgs;
       try { msgs = JSON.parse(localStorage.getItem(sk)) || cObj.msgs; } catch {}
 
@@ -430,9 +437,9 @@
   };
 
   // ============================================================================
-  // INTERFAZ MINIMALISTA SOBERANA
+  // INTERFAZ SOBERANA CTPMN
   // ============================================================================
-  function activarMinimalismo() {
+  function activarSoberania() {
     const s = getSesion();
     if (!s) { mostrarLoginSobrio(); return; }
     document.body.classList.add('bds-authenticated');
@@ -445,10 +452,11 @@
     hdr.id = 'bds-pro-header';
     hdr.innerHTML = `
       <div style="display:flex;align-items:center;gap:10px;">
+        <img src="${ESCUDO_CTPMN}" width="32" height="36" alt="Escudo CTPMN" style="object-fit:contain;cursor:pointer;" onclick="location.reload()"/>
         <img src="${SVG_BUHO_ORIGINAL}" width="32" height="32" alt="Búho Azul Original" style="border-radius:50%;cursor:pointer;" onclick="location.reload()"/>
         <div style="cursor:pointer;" onclick="location.reload()">
           <div style="font-size:13.5px;font-weight:800;color:#f8fafc;letter-spacing:-0.01em;">prac<span style="color:#2dd4bf;">TICA</span>tecnica.com</div>
-          <div style="font-size:10.5px;color:#94a3b8;"><b>${s.nombre}</b> • ${s.rol} (${s.seccion})</div>
+          <div style="font-size:10.5px;color:#94a3b8;"><b>${s.nombre}</b> • CTP Mercedes Norte (Circuito 04)</div>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;">
@@ -469,11 +477,11 @@
     shell.innerHTML = `
       <div style="background:#0b1322;border:1px solid #1e293b;border-radius:14px;padding:18px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
         <div style="display:flex;align-items:center;gap:12px;">
-          <img src="${SVG_BUHO_ORIGINAL}" width="46" height="46" alt="Búho"/>
+          <img src="${ESCUDO_CTPMN}" width="48" height="54" alt="Escudo" style="object-fit:contain;"/>
           <div>
-            <span style="background:#0284c7;color:#fff;font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:4px;">INTERFAZ SOBERANA MINIMALISTA</span>
-            <h2 style="margin:4px 0 2px;font-size:17px;color:#fff;">Motor de Práctica, Ítems & Especialidades MEP</h2>
-            <p style="margin:0;font-size:11.5px;color:#94a3b8;">Selecciona una materia o área para iniciar el entrenamiento con explicaciones pedagógicas.</p>
+            <span style="background:#0284c7;color:#fff;font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:4px;">COLEGIO MODELO CTP MERCEDES NORTE</span>
+            <h2 style="margin:4px 0 2px;font-size:17px;color:#fff;">Motor Académico, Técnico & Bilingüe (Circuito 04)</h2>
+            <p style="margin:0;font-size:11.5px;color:#94a3b8;">Selecciona una materia, especialidad o idioma para iniciar el entrenamiento interactivo.</p>
           </div>
         </div>
       </div>
@@ -500,7 +508,7 @@
     inyectarCSS();
     actualizarFaviconOficial();
     const s = getSesion();
-    if (s && s.email) activarMinimalismo();
+    if (s && s.email) activarSoberania();
     else mostrarLoginSobrio();
   });
 })();

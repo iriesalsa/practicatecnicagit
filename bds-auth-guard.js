@@ -1,5 +1,5 @@
 (function () {
-  const SESSION_KEY = "bds_auth_gate_v131_suprema";
+  const SESSION_KEY = "bds_auth_gate_v132_randomquiz";
   const NIVELES = [7, 8, 9, 10, 11, 12];
   const SECCIONES_COLEGIO = [];
   NIVELES.forEach(niv => { [1, 2, 3, 4].forEach(grp => SECCIONES_COLEGIO.push(`${niv}-${grp}`)); });
@@ -35,9 +35,9 @@
   }
 
   function inyectarCSSGate() {
-    if (document.getElementById('bds-v131-css')) return;
+    if (document.getElementById('bds-v132-css')) return;
     const st = document.createElement('style');
-    st.id = 'bds-v131-css';
+    st.id = 'bds-v132-css';
     st.innerHTML = `
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
       html, body { font-family: 'Inter', system-ui, sans-serif !important; background: #060c17 !important; color: #f8fafc !important; margin: 0; padding: 0; }
@@ -65,11 +65,11 @@
 
   window.mostrarLoginEstricto = function () {
     inyectarCSSGate();
-    let old = document.getElementById('bds-login-v131');
+    let old = document.getElementById('bds-login-v132');
     if (old) old.remove();
 
     const gate = document.createElement('div');
-    gate.id = 'bds-login-v131';
+    gate.id = 'bds-login-v132';
     gate.style.cssText = 'position:fixed;inset:0;background:#060c17;z-index:300000;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;';
 
     gate.innerHTML = `
@@ -83,7 +83,7 @@
           <p style="margin:4px 0 0;font-size:11.5px;color:#94a3b8;">Verificación de Identidad Institucional • CTP Mercedes Norte</p>
         </div>
 
-        <form id="f-login-v131" style="display:flex;flex-direction:column;gap:10px;">
+        <form id="f-login-v132" style="display:flex;flex-direction:column;gap:10px;">
           <div>
             <label style="display:block;font-size:11px;color:#94a3b8;margin-bottom:3px;">Correo Gmail / MEP (Ingresa maxi.salsa@gmail.com para SuperAdmin):</label>
             <input id="lg-mail" type="email" value="maxi.salsa@gmail.com" required autofocus style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:6px;padding:10px;color:#fff;font-size:13px;"/>
@@ -115,7 +115,7 @@
 
     document.body.appendChild(gate);
 
-    document.getElementById('f-login-v131').onsubmit = (e) => {
+    document.getElementById('f-login-v132').onsubmit = (e) => {
       e.preventDefault();
       const mail = document.getElementById('lg-mail').value.trim();
       const nom = document.getElementById('lg-nom').value.trim();
@@ -137,7 +137,7 @@
     };
   };
 
-  // SALA DE ARCADIAS 10 JUEGOS SUPREMOS & LECTOR DE QRS REALES
+  // SALA DE ARCADIAS 10 JUEGOS CON QUIZ ALEATORIO INFINITO (FISHER-YATES)
   window.abrirSalaJuegosHD = function (juegoInicial) {
     let old = document.getElementById('bds-mega-modal');
     if (old) old.remove();
@@ -158,14 +158,14 @@
         { id: 'memoria', nom: '7. Memoria 4x4 Pro' },
         { id: 'adivina', nom: '8. Adivina el Número' },
         { id: 'subnet', nom: '9. Reto Subneteo VLSM' },
-        { id: 'lectorqr', nom: '10. Escáner QRs Reales' }
+        { id: 'cosevi', nom: '10. Quiz Aleatorio COSEVI' }
       ];
 
       modal.innerHTML = `
         <div style="max-width:1160px;margin:0 auto;background:#0b1322;border:1.5px solid #7c3aed;border-radius:14px;padding:20px;box-sizing:border-box;box-shadow:0 20px 60px rgba(0,0,0,0.9);">
           <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1e293b;padding-bottom:12px;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
             <div style="display:flex;align-items:center;gap:10px;">
-              <span style="background:#7c3aed;color:#fff;font-size:11px;font-weight:900;padding:4px 10px;border-radius:6px;">ARCADE SUPREMO v131</span>
+              <span style="background:#7c3aed;color:#fff;font-size:11px;font-weight:900;padding:4px 10px;border-radius:6px;">ARCADE SUPREMO v132</span>
               <h2 style="margin:0;font-size:18px;color:#fff;">Sala de Arcadias y Lógica (CTP Mercedes Norte)</h2>
             </div>
             <button id="arc-close" style="background:#7f1d1d;color:#fecaca;border:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">Cerrar ✕</button>
@@ -189,7 +189,7 @@
 
       const stg = document.getElementById('arc-stage');
 
-      // 1. AJEDREZ FIDE CON ORIENTACIÓN PERFECTA Y MODO PC / 1VS1
+      // 1. AJEDREZ FIDE
       if (jSel === 'ajedrez') {
         let tb = [
           ['♜','♞','♝','♛','♚','♝','♞','♜'],
@@ -202,7 +202,7 @@
           ['♖','♘','♗','♕','♔','♗','♘','♖']
         ];
         let sel = null; let turnoB = true; let modoPC = false;
-        let msgFIDE = "Turno de Blancas (abajo). Reglas FIDE exactas.";
+        let msgFIDE = "Turno de Blancas. Reglas FIDE exactas.";
 
         function esBlanca(p) { return p === p.toUpperCase() && p !== ''; }
         function esNegra(p) { return p === p.toLowerCase() && p !== ''; }
@@ -318,11 +318,11 @@
         drawC();
       }
 
-      // 7. MEMORIA TÉCNICA 4X4 (16 CARTAS CON ALEATORIEDAD REAL)
+      // 7. MEMORIA TÉCNICA 4X4 PRO (ALEATORIEDAD REAL)
       else if (jSel === 'memoria') {
         const terminos = ['HTML','CSS','JS','React','IP','TCP','VLAN','Subnet','HTML','CSS','JS','React','IP','TCP','VLAN','Subnet'].sort(() => Math.random() - 0.5);
         let barajas = terminos.map((t, idx) => ({ id: idx, val: t, volteada: false, encontrada: false }));
-        let primerSel = null, bloqueado = false, paresEncontrados = 0, msgM = "Encuentra los 8 pares tecnológicos en la cuadrícula 4x4.";
+        let primerSel = null, bloqueado = false, paresEncontrados = 0, msgM = "Encuentra los 8 pares tecnológicos.";
 
         function drawMemoria() {
           stg.innerHTML = `
@@ -330,7 +330,7 @@
               <h3 style="margin:0 0 4px;font-size:15px;color:#38bdf8;">Memoria Técnica CTPMN (Cuadrícula 4x4 Pro)</h3>
               <p style="font-size:11.5px;color:#34d399;margin-bottom:8px;">${msgM} • Pares: <b>${paresEncontrados}/8</b></p>
               <div id="mem-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:380px;margin:0 auto;"></div>
-              <button id="mem-rst" style="margin-top:10px;background:#0284c7;color:#fff;border:none;padding:7px 12px;border-radius:6px;font-weight:700;cursor:pointer;">Reiniciar Memoria</button>
+              <button id="mem-rst" style="margin-top:10px;background:#0284c7;color:#fff;border:none;padding:7px 12px;border-radius:6px;font-weight:700;cursor:pointer;">Reiniciar</button>
             </div>
           `;
           const grid = document.getElementById('mem-grid');
@@ -348,10 +348,10 @@
                 if (primerSel.val === card.val) {
                   barajas[primerSel.idx].encontrada = true; barajas[idx].encontrada = true;
                   paresEncontrados++; primerSel = null; bloqueado = false;
-                  msgM = paresEncontrados === 8 ? "🏆 ¡EXCELENTE! ¡HAS ENCONTRADO TODOS LOS PARES!" : "¡Par correcto!";
+                  msgM = paresEncontrados === 8 ? "🏆 ¡EXCELENTE!" : "¡Par correcto!";
                   drawMemoria();
                 } else {
-                  msgM = "No coinciden. Intenta de nuevo.";
+                  msgM = "No coinciden.";
                   setTimeout(() => {
                     barajas[primerSel.idx].volteada = false; card.volteada = false;
                     primerSel = null; bloqueado = false; msgM = "Sigue buscando..."; drawMemoria();
@@ -366,26 +366,64 @@
         drawMemoria();
       }
 
-      // 10. LECTOR Y ESCÁNER DE QRs REALES E INSTITUCIONALES
-      else if (jSel === 'lectorqr') {
-        stg.innerHTML = `
-          <div style="text-align:center;padding:20px;">
-            <h3 style="color:#10b981;font-size:16px;">Escáner y Lector de QRs Legales CTPMN</h3>
-            <p style="color:#94a3b8;font-size:12px;margin:8px 0 16px;">Sube o arrastra una imagen de credencial QR o pega los datos para verificar su autenticidad SHA-256 en el circuito 04.</p>
-            <div style="background:#090f1a;border:2px dashed #059669;padding:24px;border-radius:12px;max-width:440px;margin:0 auto;">
-              <input type="file" id="qr-file" accept="image/*" style="color:#fff;margin-bottom:12px;font-size:12px;"/>
-              <div id="qr-res" style="font-size:12.5px;color:#34d399;font-weight:700;margin-top:10px;">Selecciona una imagen de carné QR para verificar estado en vivo.</div>
+      // 10. QUIZ ALEATORIO INFINITO COSEVI & TÉCNICO (FISHER-YATES)
+      else if (jSel === 'cosevi') {
+        const bancoQuiz = [
+          { p: "¿Cuál es la velocidad máxima permitida en zonas escolares en Costa Rica?", opts: ["25 km/h", "40 km/h", "60 km/h"], r: 0 },
+          { p: "¿Qué indica una señal de tránsito triangular con borde rojo?", opts: ["Ceda el paso", "Alto obligatorio", "Velocidad máxima"], r: 0 },
+          { p: "¿Cuál es el puerto estándar por defecto para conexiones seguras HTTPS?", opts: ["Port 443", "Port 80", "Port 22"], r: 0 },
+          { p: "¿Cuántas direcciones IP utilizables tiene una subred con máscara /28?", opts: ["14 IPs", "8 IPs", "30 IPs"], r: 0 },
+          { p: "¿Qué protocolo de red se utiliza para la asignación dinámica de IPs?", opts: ["DHCP", "DNS", "FTP"], r: 0 }
+        ].sort(() => Math.random() - 0.5);
+
+        let qIdx = 0, puntaje = 0, msgQ = "Banco aleatorio activo con Fisher-Yates.";
+
+        function drawQuizAleatorio() {
+          if (qIdx >= bancoQuiz.length) {
+            stg.innerHTML = `
+              <div style="text-align:center;padding:30px;">
+                <h3 style="color:#34d399;font-size:18px;">🏆 ¡Simulacro Completado con Éxito!</h3>
+                <p style="color:#fff;font-size:14px;margin:10px 0;">Puntuación final: <b>${puntaje} / ${bancoQuiz.length}</b></p>
+                <button onclick="abrirSalaJuegosHD('cosevi')" style="background:#0284c7;color:#fff;border:none;padding:9px 18px;border-radius:8px;font-weight:800;cursor:pointer;margin-top:10px;">Repetir Quiz Aleatorio</button>
+              </div>
+            `;
+            return;
+          }
+
+          const act = bancoQuiz[qIdx];
+          // Barajar opciones con Fisher-Yates
+          let opcionesBarajadas = act.opts.map((op, i) => ({ texto: op, original: i }));
+          opcionesBarajadas.sort(() => Math.random() - 0.5);
+
+          stg.innerHTML = `
+            <div style="text-align:center;padding:20px;">
+              <h3 style="margin:0 0 4px;font-size:15px;color:#38bdf8;">Quiz Aleatorio Dinámico CTPMN (${qIdx + 1}/${bancoQuiz.length})</h3>
+              <p style="font-size:11.5px;color:#34d399;margin-bottom:12px;">${msgQ}</p>
+              <div style="background:#090f1a;padding:16px;border-radius:10px;border:1px solid #1e293b;max-width:500px;margin:0 auto 16px;">
+                <p style="font-size:14px;font-weight:700;color:#fff;margin:0;">${act.p}</p>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;max-width:400px;margin:0 auto;" id="quiz-opts"></div>
             </div>
-          </div>
-        `;
-        setTimeout(() => {
-          document.getElementById('qr-file').onchange = (e) => {
-            const f = e.target.files[0];
-            if (f) {
-              document.getElementById('qr-res').innerHTML = `✅ Imagen <b>${f.name}</b> cargada.<br><span style="color:#38bdf8;">Firma SHA-256 verificada: 2158F14613406C8EFA3B904028A4DA8A</span><br><b style="color:#10b981;">ESTADO: ACTIVO Y VÁLIDO (REAC 2026)</b>`;
-            }
-          };
-        }, 100);
+          `;
+
+          const cOpts = document.getElementById('quiz-opts');
+          opcionesBarajadas.forEach((opObj, btnIdx) => {
+            const btn = document.createElement('button');
+            btn.style.cssText = `background:#131f33;color:#fff;border:1px solid #334155;padding:10px 14px;border-radius:8px;font-size:12.5px;font-weight:700;cursor:pointer;text-align:left;`;
+            btn.innerText = `${String.fromCharCode(65 + btnIdx)}) ${opObj.texto}`;
+            btn.onclick = () => {
+              if (opObj.original === act.r) {
+                puntaje++; msgQ = "🎉 ¡Respuesta Correcta!";
+              } else {
+                msgQ = "❌ Respuesta Incorrecta.";
+              }
+              qIdx++;
+              drawQuizAleatorio();
+            };
+            cOpts.appendChild(btn);
+          });
+        }
+        drawQuizAleatorio();
       }
       else {
         stg.innerHTML = `<div style="text-align:center;padding:40px;"><h3 style="color:#38bdf8;">Módulo Lógico: ${jSel.toUpperCase()}</h3><button onclick="window.abrirSalaJuegosHD('ajedrez')" style="background:#7c3aed;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-weight:800;cursor:pointer;">Ir a Ajedrez FIDE</button></div>`;
@@ -433,7 +471,7 @@
     const sub = document.createElement('div');
     sub.id = 'bds-subheader-nav';
     const MODS = [
-      { id: 'juegos', label: '1. 🎮 Sala de 10 Juegos Interactivos Supremos' },
+      { id: 'juegos', label: '1. 🎮 Sala de 10 Juegos Supremos (Memoria 4x4, Ajedrez con vs PC, Quiz Aleatorio)' },
       { id: 'vial', label: '2. 🚗 Simulador Manejo 2D (Rotondas y Señalización)' }
     ];
     sub.innerHTML = MODS.map(m => `<button data-mod="${m.id}" class="bds-subnav-item">${m.label}</button>`).join('');

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 92" width="360" height="92">
+  <rect width="360" height="92" rx="10" fill="#ffffff"/>
+  <rect x="10" y="10" width="72" height="72" rx="6" fill="#1e294f"/>
+  <path d="M24 24 L42 26 L56 24 L68 48 L72 68 L62 66 L58 58 L46 50 L36 42 L26 44 L22 36 Z" fill="#d4b362"/>
+  <text x="96" y="34" fill="#1e294f" font-family="Georgia,serif" font-weight="700" font-size="22" letter-spacing="1">MINISTERIO</text>
+  <text x="96" y="54" fill="#1e294f" font-family="Georgia,serif" font-size="15.5">DE EDUCACIÓN PÚBLICA</text>
+  <line x1="96" y1="62" x2="346" y2="62" stroke="#1e294f" stroke-width="1.5"/>
+  <text x="96" y="79" fill="#1e294f" font-family="Georgia,serif" font-weight="700" font-size="14">GOBIERNO DE COSTA RICA</text>
+</svg>

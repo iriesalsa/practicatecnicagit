@@ -1,32 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="512" height="512">
   <defs>
-    <radialGradient id="gradBg" cx="50%" cy="50%" r="50%">
-      <stop offset="60%" stop-color="#0022ff"/>
-      <stop offset="100%" stop-color="#000b2e"/>
+    <radialGradient id="gBg" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#1d4ed8"/>
+      <stop offset="75%" stop-color="#0022e8"/>
+      <stop offset="100%" stop-color="#040b24"/>
     </radialGradient>
-    <linearGradient id="gradMint" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#22d3ee"/>
-      <stop offset="50%" stop-color="#2dd4bf"/>
-      <stop offset="100%" stop-color="#10b981"/>
+    <linearGradient id="gMint" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#45f3d1"/>
+      <stop offset="100%" stop-color="#14b8a6"/>
     </linearGradient>
   </defs>
-  <!-- Círculo base exterior -->
-  <circle cx="250" cy="250" r="240" fill="#020617" stroke="#1d4ed8" stroke-width="10"/>
-  <!-- Círculo interior azul profundo -->
-  <circle cx="250" cy="250" r="215" fill="url(#gradBg)" stroke="#22d3ee" stroke-width="6"/>
-  <!-- Orejas / plumas superiores anguladas en turquesa -->
-  <path d="M 110,140 Q 150,110 185,155 Q 150,170 110,140 Z" fill="url(#gradMint)"/>
-  <path d="M 390,140 Q 350,110 315,155 Q 350,170 390,140 Z" fill="url(#gradMint)"/>
-  <!-- Ojo izquierdo -->
-  <circle cx="180" cy="235" r="72" fill="#020617"/>
-  <circle cx="180" cy="235" r="58" fill="url(#gradMint)"/>
-  <circle cx="180" cy="235" r="32" fill="#020617"/>
-  <circle cx="168" cy="222" r="11" fill="#ffffff"/>
-  <!-- Ojo derecho -->
-  <circle cx="320" cy="235" r="72" fill="#020617"/>
-  <circle cx="320" cy="235" r="58" fill="url(#gradMint)"/>
-  <circle cx="320" cy="235" r="32" fill="#020617"/>
-  <circle cx="308" cy="222" r="11" fill="#ffffff"/>
-  <!-- Pico central en diamante turquesa -->
-  <polygon points="250,265 295,350 250,445 205,350" fill="url(#gradMint)" stroke="#020617" stroke-width="8" stroke-linejoin="round"/>
+  <circle cx="250" cy="250" r="242" fill="#040a1a" stroke="#1e40af" stroke-width="8"/>
+  <circle cx="250" cy="250" r="212" fill="url(#gBg)"/>
+  <path d="M90 120 Q160 115 215 170 Q150 185 88 152 Q105 140 90 120 Z" fill="url(#gMint)"/>
+  <path d="M410 120 Q340 115 285 170 Q350 185 412 152 Q395 140 410 120 Z" fill="url(#gMint)"/>
+  <circle cx="176" cy="242" r="76" fill="#040a1a"/>
+  <circle cx="176" cy="242" r="60" fill="url(#gMint)"/>
+  <circle cx="176" cy="242" r="34" fill="#040a1a"/>
+  <circle cx="164" cy="228" r="11" fill="#ffffff"/>
+  <circle cx="324" cy="242" r="76" fill="#040a1a"/>
+  <circle cx="324" cy="242" r="60" fill="url(#gMint)"/>
+  <circle cx="324" cy="242" r="34" fill="#040a1a"/>
+  <circle cx="312" cy="228" r="11" fill="#ffffff"/>
+  <polygon points="250,256 296,348 250,446 204,348" fill="url(#gMint)" stroke="#040a1a" stroke-width="8" stroke-linejoin="round"/>
 </svg>

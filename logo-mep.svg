@@ -1,21 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 86" width="380" height="86">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 430 96" width="430" height="96">
   <defs>
-    <linearGradient id="mepBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#132245"/>
+    <linearGradient id="mepCard" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#142347"/>
       <stop offset="100%" stop-color="#0b152c"/>
     </linearGradient>
-    <linearGradient id="crGold" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#f3d478"/>
-      <stop offset="100%" stop-color="#c99b3b"/>
+    <linearGradient id="crMapGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f2d37a"/>
+      <stop offset="100%" stop-color="#c99f44"/>
     </linearGradient>
   </defs>
-  <rect x="1.5" y="1.5" width="377" height="83" rx="12" fill="url(#mepBg)" stroke="#334b7a" stroke-width="1.5"/>
-  <rect x="12" y="12" width="62" height="62" rx="9" fill="#091124" stroke="#c99b3b" stroke-width="1.2" stroke-opacity="0.65"/>
-  <!-- Silueta estilizada de Costa Rica en dorado metálico -->
-  <path d="M21 24 C27 22 33 25 41 24 L48 27 L57 38 C60 44 63 50 64 56 L61 63 L55 61 C54 57 52 54 48 53 L43 49 C39 45 36 42 32 41 L29 44 L24 41 C23 36 22 31 21 24 Z" fill="url(#crGold)"/>
-  <circle cx="24" cy="54" r="2.2" fill="url(#crGold)"/>
-  <text x="88" y="33" fill="#f8fafc" font-family="Georgia,'Times New Roman',serif" font-weight="700" font-size="21" letter-spacing="1.6">MINISTERIO</text>
-  <text x="88" y="51" fill="#cbd5e1" font-family="Georgia,'Times New Roman',serif" font-size="13.5" letter-spacing="0.8">DE EDUCACIÓN PÚBLICA</text>
-  <line x1="88" y1="58" x2="362" y2="58" stroke="#c99b3b" stroke-width="1" stroke-opacity="0.7"/>
-  <text x="88" y="72" fill="#e5c158" font-family="system-ui,-apple-system,sans-serif" font-weight="700" font-size="10.5" letter-spacing="1.4">GOBIERNO DE COSTA RICA • HEREDIA • CIRCUITO 02</text>
+  <rect x="2" y="2" width="426" height="92" rx="12" fill="url(#mepCard)" stroke="#334c7d" stroke-width="1.5"/>
+  <!-- Cuadro azul marino con silueta fiel de Costa Rica e Isla del Coco -->
+  <rect x="14" y="14" width="68" height="68" rx="6" fill="#1b2a52" stroke="#c99f44" stroke-width="1" stroke-opacity="0.55"/>
+  <path d="M23 23 L26 20 L31 24 L45 25 L51 23 L56 32 L64 43 L73 53 L71 57 L68 62 L69 72 L66 74 L63 67 L60 66 L58 60 L54 63 L48 56 L40 47 L35 44 L36 49 L32 51 L26 44 L23 36 L25 32 L21 28 Z" fill="url(#crMapGold)"/>
+  <circle cx="28" cy="61" r="2.6" fill="url(#crMapGold)"/>
+  <text x="98" y="38" fill="#f8fafc" font-family="Georgia,'Times New Roman',serif" font-weight="700" font-size="26" letter-spacing="1.4">MINISTERIO</text>
+  <text x="98" y="59" fill="#dbeafe" font-family="Georgia,'Times New Roman',serif" font-size="16" letter-spacing="0.6">DE EDUCACIÓN PÚBLICA</text>
+  <line x1="98" y1="67" x2="412" y2="67" stroke="#c99f44" stroke-width="1.2" stroke-opacity="0.8"/>
+  <text x="98" y="83" fill="#e7c667" font-family="Georgia,'Times New Roman',serif" font-weight="700" font-size="13.5" letter-spacing="0.8">GOBIERNO DE COSTA RICA</text>
 </svg>

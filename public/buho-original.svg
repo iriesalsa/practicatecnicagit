@@ -1,26 +1,30 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="512" height="512">
-  <defs>
-    <radialGradient id="gBg" cx="50%" cy="45%" r="55%">
-      <stop offset="0%" stop-color="#1d4ed8"/>
-      <stop offset="75%" stop-color="#0022e8"/>
-      <stop offset="100%" stop-color="#040b24"/>
-    </radialGradient>
-    <linearGradient id="gMint" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#45f3d1"/>
-      <stop offset="100%" stop-color="#14b8a6"/>
-    </linearGradient>
-  </defs>
-  <circle cx="250" cy="250" r="242" fill="#040a1a" stroke="#1e40af" stroke-width="8"/>
-  <circle cx="250" cy="250" r="212" fill="url(#gBg)"/>
-  <path d="M90 120 Q160 115 215 170 Q150 185 88 152 Q105 140 90 120 Z" fill="url(#gMint)"/>
-  <path d="M410 120 Q340 115 285 170 Q350 185 412 152 Q395 140 410 120 Z" fill="url(#gMint)"/>
-  <circle cx="176" cy="242" r="76" fill="#040a1a"/>
-  <circle cx="176" cy="242" r="60" fill="url(#gMint)"/>
-  <circle cx="176" cy="242" r="34" fill="#040a1a"/>
-  <circle cx="164" cy="228" r="11" fill="#ffffff"/>
-  <circle cx="324" cy="242" r="76" fill="#040a1a"/>
-  <circle cx="324" cy="242" r="60" fill="url(#gMint)"/>
-  <circle cx="324" cy="242" r="34" fill="#040a1a"/>
-  <circle cx="312" cy="228" r="11" fill="#ffffff"/>
-  <polygon points="250,256 296,348 250,446 204,348" fill="url(#gMint)" stroke="#040a1a" stroke-width="8" stroke-linejoin="round"/>
+  <!-- Aro exterior azul marino profundo y círculo azul rey exacto -->
+  <circle cx="250" cy="250" r="244" fill="#050d26"/>
+  <circle cx="250" cy="250" r="204" fill="#002bff"/>
+  <!-- Pieza continua turquesa: cejas emplumadas con doble punta + puente central + pico afilado -->
+  <path d="M250 228
+           C232 184 184 156 128 134
+           C108 126 95 112 88 94
+           C86 122 94 146 116 164
+           C100 162 88 156 78 148
+           C88 178 112 198 148 206
+           C188 214 218 228 228 258
+           L208 292 L250 442 L292 292 L272 258
+           C282 228 312 214 352 206
+           C388 198 412 178 422 148
+           C412 156 400 162 384 164
+           C406 146 414 122 412 94
+           C405 112 392 126 372 134
+           C316 156 268 184 250 228 Z" fill="#00f5be"/>
+  <!-- Ojo izquierdo -->
+  <circle cx="164" cy="256" r="78" fill="#02050d"/>
+  <circle cx="164" cy="256" r="61" fill="#00f5be"/>
+  <circle cx="164" cy="256" r="39" fill="#02050d"/>
+  <circle cx="179" cy="241" r="11" fill="#ffffff"/>
+  <!-- Ojo derecho -->
+  <circle cx="336" cy="256" r="78" fill="#02050d"/>
+  <circle cx="336" cy="256" r="61" fill="#00f5be"/>
+  <circle cx="336" cy="256" r="39" fill="#02050d"/>
+  <circle cx="351" cy="241" r="11" fill="#ffffff"/>
 </svg>

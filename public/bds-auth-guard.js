@@ -1,9 +1,9 @@
 (function () {
-  const SESSION_KEY = "bds_session_v178_ctpmn_c02";
-  const LOCK_KEY = "bds_lock_attempts_v178";
-  const TRIAL_KEY = "bds_trial_start_v178";
-  const XP_KEY = "bds_xp_profile_v178";
-  const CHAT_KEY = "bds_chats_v178_c02";
+  const SESSION_KEY = "bds_session_v179_ctpmn_c02";
+  const LOCK_KEY = "bds_lock_attempts_v179";
+  const TRIAL_KEY = "bds_trial_start_v179";
+  const XP_KEY = "bds_xp_profile_v179";
+  const CHAT_KEY = "bds_chats_v179_c02";
 
   const NIVELES = [7, 8, 9, 10, 11, 12];
   const SECCIONES = [];
@@ -30,8 +30,8 @@
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v178.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v178.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v179.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v179.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -113,7 +113,7 @@
   }
 
   function cerrarSesion() {
-    const keep = [LOCK_KEY, XP_KEY, CHAT_KEY, TRIAL_KEY, "bds_permisos_v178_c02", "bds_notas_excel_v178_c02"].map(k => [k, localStorage.getItem(k)]);
+    const keep = [LOCK_KEY, XP_KEY, CHAT_KEY, TRIAL_KEY, "bds_permisos_v179_c02", "bds_notas_excel_v179_c02"].map(k => [k, localStorage.getItem(k)]);
     sessionStorage.clear(); localStorage.clear();
     keep.forEach(([k, v]) => { if (v !== null) localStorage.setItem(k, v); });
     document.body.classList.remove("bds-authenticated");
@@ -128,9 +128,9 @@
   }
 
   function inyectarEstilos() {
-    if (document.getElementById("bds-v178-css")) return;
+    if (document.getElementById("bds-v179-css")) return;
     const st = document.createElement("style");
-    st.id = "bds-v178-css";
+    st.id = "bds-v179-css";
     st.innerHTML = `
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
       *, *::before, *::after { box-sizing: border-box; }
@@ -197,9 +197,9 @@
   // ==================== LOGIN SOBERANO ESTÉTICO ====================
   function mostrarLogin(vista = "login") {
     inyectarEstilos(); setFavicon();
-    const old = document.getElementById("bds-login-v178"); if (old) old.remove();
+    const old = document.getElementById("bds-login-v179"); if (old) old.remove();
     const gate = document.createElement("div");
-    gate.id = "bds-login-v178";
+    gate.id = "bds-login-v179";
     gate.style.cssText = "position:fixed;inset:0;background:radial-gradient(circle at 50% 0%,#0f2247 0%,#060c17 72%);z-index:300000;display:flex;align-items:center;justify-content:center;padding:14px;overflow-y:auto;";
 
     const getInt = () => parseInt(localStorage.getItem(LOCK_KEY) || "0", 10);
@@ -298,7 +298,7 @@
 
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid #1e293b;font-size:11.5px;">
             <button type="button" id="lg-rec" style="background:none;border:none;color:#94a3b8;cursor:pointer;padding:0;">¿Olvidó su contraseña?</button>
-            <span style="color:#64748b;font-weight:600;">PWA Multi-SO • v178.0</span>
+            <span style="color:#64748b;font-weight:600;">PWA Multi-SO • v179.0</span>
           </div>
         </div>
       `;
@@ -744,6 +744,22 @@
         </div>
       </div>
 
+            <!-- BLOQUE ADMISIÓN UNIVERSITARIA UCR • TEC • UNA • UNED • UTN -->
+      <div class="bds-card" style="margin-bottom:14px;background:linear-gradient(135deg,#0c1d3d 0%,#0b1322 100%);border-color:#0284c7;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+          <div style="font-size:11.5px;font-weight:800;color:#38bdf8;letter-spacing:0.03em;">🎓 ADMISIÓN UNIVERSITARIA Y PRUEBAS NACIONALES (SIMULACROS 10–60 + CALCULADORA DE NOTA):</div>
+          <button onclick="window.bdsGo('admision','ucr')" style="background:#0284c7;color:#fff;border:none;padding:6px 12px;border-radius:7px;font-size:11.5px;font-weight:800;cursor:pointer;">Abrir Centro de Admisión →</button>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          <button onclick="window.bdsGo('admision','ucr')" class="bds-quick-btn" style="background:#0284c7;">🏛️ UCR (PAA 200–800)</button>
+          <button onclick="window.bdsGo('admision','tec')" class="bds-quick-btn" style="background:#1d4ed8;">⚙️ TEC (Aptitud 200–800)</button>
+          <button onclick="window.bdsGo('admision','una')" class="bds-quick-btn" style="background:#dc2626;">🎓 UNA (PAA 0–900)</button>
+          <button onclick="window.bdsGo('admision','uned')" class="bds-quick-btn" style="background:#059669;">🌐 UNED (Diagnóstico)</button>
+          <button onclick="window.bdsGo('admision','utn')" class="bds-quick-btn" style="background:#ea580c;">🔧 UTN (Articulación CTP)</button>
+          <button onclick="window.bdsGo('admision','pne')" class="bds-quick-btn" style="background:#7c3aed;">🇨🇷 Pruebas Nacionales MEP</button>
+        </div>
+      </div>
+
       <!-- 4 MÓDULOS PEDAGÓGICOS Y LÚDICOS -->
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin-bottom:16px;">
         <div class="bds-card" style="cursor:pointer;border-top:3px solid #10b981;" onclick="window.bdsGo('practica')">
@@ -824,7 +840,7 @@
           ["admin", "notas", "📊 Registro de Notas Excel"],
           ["admin", "qr", "🪪 Carné & Escáner QR SHA-256"],
           ["practica", null, "🧭 Práctica Libre y Guiada"],
-          ["simulacro", null, "⏱️ Simulacro (10–60 Ítems)"],
+          ["simulacro", null, "⏱️ Simulacro (10–60 Ítems)"],["admision", null, "🎓 Admisión UCR/TEC/UNA/UNED/UTN"],
           ["biblioteca", null, "📚 Libros & Afiches Marca Blanca"],
           ["juegos", null, "♟️ Ajedrez FIDE & 6 Juegos"]
         ].map(([k, p, l]) => `<button data-dw="${k}" data-dp="${p||''}" style="text-align:left;background:#131f33;color:#f1f5f9;border:1px solid #26354d;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;min-height:42px;">${l}</button>`).join("")}
@@ -871,7 +887,7 @@
       ["inicio","🏠 Inicio & 8 Roles"],
       ["admin","📅 Horarios, Permisos & Dirección"],
       ["practica","🧭 Práctica Guiada"],
-      ["simulacro","⏱️ Simulacro (10–60)"],
+      ["simulacro","⏱️ Simulacro (10–60)"],["admision","🎓 Admisión UCR/TEC/UNA/UNED"],
       ["biblioteca","📚 Libros & Afiches"],
       ["juegos","♟️ Juegos & Ajedrez"]
     ].map(([k, l]) => `<button data-v="${k}" class="bds-nav-btn">${l}</button>`).join("");
@@ -899,7 +915,7 @@
       }
       else if (v === "practica") renderEvaluacion(shell, "guiada", subParam || "ALL");
       else if (v === "simulacro") renderEvaluacion(shell, "simulacro", subParam || "ALL");
-      else if (v === "biblioteca") renderBiblioteca(shell);
+      else if (v === "admision") { if (window.BDS_RENDER_ADMISION) window.BDS_RENDER_ADMISION(shell, subParam || "ucr", ganarXP); } else if (v === "biblioteca") { if (window.BDS_RENDER_BIBLIOTECA_ILUSTRADA) window.BDS_RENDER_BIBLIOTECA_ILUSTRADA(shell, { malla: window.BDS_MALLA_MEP || [], ganarXP, abrirPractica: (m, a) => { setNavActive(m === "simulacro" ? "simulacro" : "practica"); renderEvaluacion(shell, m, a); }, IMG_ESCUDO, IMG_MEP }); else renderBiblioteca(shell); }
       else if (v === "juegos") window.BDS_RENDER_SALA_JUEGOS(shell, ganarXP);
       else renderInicio(shell);
       window.scrollTo(0, 0);

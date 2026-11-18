@@ -1,9 +1,19 @@
 (function () {
-  const SESSION_KEY = "bds_auth_gate_v137_mobile_sync";
+  const SESSION_KEY = "bds_auth_gate_v138_rbac";
   const NIVELES = [7, 8, 9, 10, 11, 12];
   const SECCIONES_COLEGIO = [];
   NIVELES.forEach(niv => { [1, 2, 3, 4].forEach(grp => SECCIONES_COLEGIO.push(`${niv}-${grp}`)); });
-  const ROLES_INSTITUCIONALES = ["Estudiante", "Docente MEP", "Profesor Guía", "Auxiliar Administrativo", "Subdirector(a)", "Director(a)"];
+  
+  // ROLES INSTITUCIONALES (SuperAdmin y Directivos NO llevan sección)
+  const ROLES_INSTITUCIONALES = [
+    { rol: "SuperAdmin", requiereSeccion: false },
+    { rol: "Director(a)", requiereSeccion: false },
+    { rol: "Subdirector(a)", requiereSeccion: false },
+    { rol: "Guarda / Seguridad", requiereSeccion: false },
+    { rol: "Profesor Guía", requiereSeccion: true },
+    { rol: "Docente MEP", requiereSeccion: true },
+    { rol: "Estudiante", requiereSeccion: true }
+  ];
 
   const SVG_MEP = "data:image/svg+xml;utf8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 60" width="190" height="46"><rect width="240" height="60" rx="8" fill="#0f172a" stroke="#0284c7" stroke-width="2"/><circle cx="30" cy="30" r="18" fill="#0284c7"/><text x="30" y="35" text-anchor="middle" fill="#fff" font-family="system-ui" font-weight="900" font-size="13">MEP</text><text x="58" y="26" fill="#f8fafc" font-family="system-ui" font-weight="800" font-size="12.5">Ministerio de Educación Pública</text><text x="58" y="43" fill="#38bdf8" font-family="system-ui" font-weight="600" font-size="10">Dirección Regional Heredia • Circuito 04</text></svg>`);
   const SVG_CTP = "data:image/svg+xml;utf8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="48" height="48"><rect width="80" height="80" rx="14" fill="#0b1528" stroke="#0ea5e9" stroke-width="2.5"/><path d="M40 10 L66 20 L66 44 C66 59 40 70 40 70 C40 70 14 59 14 44 L14 20 Z" fill="#0f2942" stroke="#38bdf8" stroke-width="2"/><text x="40" y="38" text-anchor="middle" fill="#fff" font-family="system-ui" font-weight="900" font-size="13">CTPMN</text><text x="40" y="52" text-anchor="middle" fill="#38bdf8" font-family="system-ui" font-weight="700" font-size="8.5">HEREDIA</text></svg>`);
@@ -40,9 +50,9 @@
   }
 
   function inyectarCSSGate() {
-    if (document.getElementById('bds-v137-css')) return;
+    if (document.getElementById('bds-v138-css')) return;
     const st = document.createElement('style');
-    st.id = 'bds-v137-css';
+    st.id = 'bds-v138-css';
     st.innerHTML = `
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
       html, body { font-family: 'Inter', system-ui, sans-serif !important; background: #060c17 !important; color: #f8fafc !important; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -64,21 +74,17 @@
         padding: 6px 11px; border-radius: 6px; font-size: 11.5px; font-weight: 600; cursor: pointer; flex-shrink: 0;
       }
       .bds-subnav-item:hover { background: #0284c7; border-color: #0284c7; color: #fff; }
-      @media (max-width: 768px) {
-        #bds-pro-header { padding: 6px 10px; font-size: 12px; }
-        .bds-subnav-item { padding: 5px 9px; font-size: 11px; }
-      }
     `;
     document.head.appendChild(st);
   }
 
   window.mostrarLoginEstricto = function () {
     inyectarCSSGate();
-    let old = document.getElementById('bds-login-v137');
+    let old = document.getElementById('bds-login-v138');
     if (old) old.remove();
 
     const gate = document.createElement('div');
-    gate.id = 'bds-login-v137';
+    gate.id = 'bds-login-v138';
     gate.style.cssText = 'position:fixed;inset:0;background:#060c17;z-index:300000;display:flex;align-items:center;justify-content:center;padding:14px;overflow-y:auto;';
 
     gate.innerHTML = `
@@ -89,28 +95,28 @@
         </div>
         <div style="text-align:center;margin-bottom:16px;">
           <h1 style="margin:0;font-size:20px;font-weight:800;color:#fff;">prac<span style="color:#0ea5e9;">TICA</span>tecnica.com</h1>
-          <p style="margin:4px 0 0;font-size:11px;color:#94a3b8;">Sincronización Móvil & Calidad Total • CTP Mercedes Norte</p>
+          <p style="margin:4px 0 0;font-size:11px;color:#94a3b8;">Acceso Institucional • CTP Mercedes Norte</p>
         </div>
 
         <div id="auth-error-msg" style="display:none;background:#450a0a;color:#fca5a5;padding:8px;border-radius:6px;font-size:11px;margin-bottom:10px;text-align:center;font-weight:700;"></div>
 
-        <form id="f-login-v137" style="display:flex;flex-direction:column;gap:9px;">
+        <form id="f-login-v138" style="display:flex;flex-direction:column;gap:9px;">
           <div>
-            <label style="display:block;font-size:10.5px;color:#94a3b8;margin-bottom:2px;">Correo Gmail / MEP:</label>
-            <input id="lg-mail" type="email" placeholder="tucorreo@gmail.com o @est.mep.go.cr" required autofocus style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:6px;padding:9px;color:#fff;font-size:12.5px;"/>
+            <label style="display:block;font-size:10.5px;color:#94a3b8;margin-bottom:2px;">Correo Institucional / Gmail (Ingresa maxi.salsa@gmail.com para SuperAdmin):</label>
+            <input id="lg-mail" type="email" value="maxi.salsa@gmail.com" required autofocus style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:6px;padding:9px;color:#fff;font-size:12.5px;"/>
           </div>
           <div>
             <label style="display:block;font-size:10.5px;color:#94a3b8;margin-bottom:2px;">Nombre y Apellidos:</label>
-            <input id="lg-nom" type="text" placeholder="Escribe tu nombre completo" required style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:6px;padding:9px;color:#fff;font-size:12.5px;"/>
+            <input id="lg-nom" type="text" value="Ing. Max Salazar Sánchez" required style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:6px;padding:9px;color:#fff;font-size:12.5px;"/>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">
             <div>
-              <label style="display:block;font-size:10px;color:#94a3b8;margin-bottom:2px;">Rol:</label>
+              <label style="display:block;font-size:10px;color:#94a3b8;margin-bottom:2px;">Rol Institucional:</label>
               <select id="lg-rol" style="width:100%;background:#060c17;border:1px solid #334155;border-radius:6px;padding:8px;color:#fff;font-size:11.5px;">
-                ${ROLES_INSTITUCIONALES.map(r => `<option value="${r}">${r}</option>`).join('')}
+                ${ROLES_INSTITUCIONALES.map((r, i) => `<option value="${r.rol}" ${i===0?'selected':''}>${r.rol}</option>`).join('')}
               </select>
             </div>
-            <div>
+            <div id="wrapper-seccion">
               <label style="display:block;font-size:10px;color:#94a3b8;margin-bottom:2px;">Sección:</label>
               <select id="lg-sec" style="width:100%;background:#060c17;border:1px solid #334155;border-radius:6px;padding:8px;color:#fff;font-size:11.5px;">
                 ${SECCIONES_COLEGIO.map(sc => `<option value="${sc}" ${sc==='11-1'?'selected':''}>Sección ${sc}</option>`).join('')}
@@ -118,7 +124,7 @@
             </div>
           </div>
           <button type="submit" style="margin-top:6px;background:#ffffff;color:#0f172a;border:1px solid #cbd5e1;padding:10px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 12px rgba(0,0,0,0.3);">
-            ${GOOGLE_SVG} <span>Iniciar Sesión Sincronizada</span>
+            ${GOOGLE_SVG} <span>Iniciar Sesión Verificada</span>
           </button>
         </form>
       </div>
@@ -126,11 +132,35 @@
 
     document.body.appendChild(gate);
 
-    document.getElementById('f-login-v137').onsubmit = (e) => {
+    // Ocultar sección si el rol no la requiere (SuperAdmin, Directores, Guardas)
+    const rolSelect = document.getElementById('lg-rol');
+    const secWrapper = document.getElementById('wrapper-seccion');
+    const mailInput = document.getElementById('lg-mail');
+
+    function actualizarVisibilidadSeccion() {
+      const rolAct = rolSelect.value;
+      const esSup = esSuperAdminSoberano(mailInput.value);
+      if (esSup || rolAct === 'SuperAdmin' || rolAct.includes('Director') || rolAct.includes('Guarda')) {
+        secWrapper.style.display = 'none';
+      } else {
+        secWrapper.style.display = 'block';
+      }
+    }
+
+    rolSelect.onchange = actualizarVisibilidadSeccion;
+    mailInput.oninput = () => {
+      if (esSuperAdminSoberano(mailInput.value)) {
+        rolSelect.value = 'SuperAdmin';
+      }
+      actualizarVisibilidadSeccion();
+    };
+    actualizarVisibilidadSeccion();
+
+    document.getElementById('f-login-v138').onsubmit = (e) => {
       e.preventDefault();
-      const mail = document.getElementById('lg-mail').value.trim();
+      const mail = mailInput.value.trim();
       const nom = document.getElementById('lg-nom').value.trim();
-      const rolSel = document.getElementById('lg-rol').value;
+      const rolSel = rolSelect.value;
       const secSel = document.getElementById('lg-sec').value;
       const errBox = document.getElementById('auth-error-msg');
 
@@ -141,21 +171,16 @@
       }
 
       const esMax = esSuperAdminSoberano(mail);
-      
-      if (!esMax && mail.toLowerCase().includes('max')) {
-        errBox.style.display = 'block';
-        errBox.innerText = "🚫 Acceso denegado: Intento de suplantación.";
-        return;
-      }
+      const rolFinal = esMax ? 'SuperAdmin' : rolSel;
+      const seccionFinal = (rolFinal === 'SuperAdmin' || rolFinal.includes('Director') || rolFinal.includes('Guarda')) ? 'N/A (Institucional)' : secSel;
 
-      // Sincronización automática de datos del usuario activo para formularios
       setSesion({
-        id: esMax ? 'SUPERADMIN-MAX' : ('ID-' + secSel),
+        id: esMax ? 'SUPERADMIN-MAX' : ('ID-' + seccionFinal),
         nombre: esMax ? 'Ing. Max Salazar Sánchez' : (nom || 'Usuario'),
         email: mail,
-        rol: esMax ? 'SuperAdmin' : rolSel,
+        rol: rolFinal,
         esSuperAdmin: esMax,
-        seccion: secSel
+        seccion: seccionFinal
       });
 
       gate.remove();
@@ -170,7 +195,7 @@
     const modal = document.createElement('div');
     modal.id = 'bds-mega-modal';
     modal.style.cssText = 'position:fixed;top:84px;left:0;right:0;bottom:0;background:#060c17;z-index:99995;overflow-y:auto;padding:12px;font-family:Inter,system-ui,sans-serif;color:#f8fafc;box-sizing:border-box;';
-    modal.innerHTML = `<div style="max-width:1100px;margin:0 auto;background:#0b1322;border:1.5px solid #7c3aed;border-radius:12px;padding:16px;"><button onclick="document.getElementById('bds-mega-modal').remove()" style="background:#7f1d1d;color:#fff;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;float:right;font-size:11px;">Cerrar ✕</button><h3 style="color:#fff;margin:0 0 12px;font-size:16px;">Sala de Arcadias y Simuladores • CTPMN</h3><p style="color:#94a3b8;font-size:12px;">Módulos interactivos sincronizados para dispositivos móviles y escritorio.</p></div>`;
+    modal.innerHTML = `<div style="max-width:1100px;margin:0 auto;background:#0b1322;border:1.5px solid #7c3aed;border-radius:12px;padding:16px;"><button onclick="document.getElementById('bds-mega-modal').remove()" style="background:#7f1d1d;color:#fff;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;float:right;font-size:11px;">Cerrar ✕</button><h3 style="color:#fff;margin:0 0 12px;font-size:16px;">Sala de Arcadias y Simuladores • CTPMN</h3><p style="color:#94a3b8;font-size:12px;">Módulos interactivos operativos.</p></div>`;
     document.body.appendChild(modal);
   };
 
@@ -190,10 +215,10 @@
         <div>
           <div style="font-size:13.5px;font-weight:800;color:#fff;">
             prac<span style="color:#0ea5e9;">TICA</span>tecnica.com
-            ${esMaxReal ? `<span style="background:#f59e0b;color:#020617;font-size:9.5px;font-weight:900;padding:2px 5px;border-radius:3px;margin-left:5px;">SUPERADMIN</span>` : ''}
+            ${esMaxReal ? `<span style="background:#f59e0b;color:#020617;font-size:9.5px;font-weight:900;padding:2px 5px;border-radius:3px;margin-left:5px;">SUPERADMIN SOBERANO</span>` : ''}
           </div>
           <div style="font-size:10px;color:#38bdf8;">
-            <b>${s.nombre} (${s.email})</b> • <b>${s.rol}</b> • <b style="color:#34d399;">Sección ${s.seccion}</b>
+            <b>${s.nombre} (${s.email})</b> • Rol: <b>${s.rol}</b> • <b style="color:#34d399;">${s.seccion}</b>
           </div>
         </div>
       </div>

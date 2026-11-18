@@ -46,7 +46,7 @@
   
 <script id="pt_cache_v81">
   (function(){
-    if (localStorage.getItem('pt_version') !== 'v82.0') {
+    if (localStorage.getItem('pt_version') !== 'v83.0') {
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations().then(function(regs) {
           for(let r of regs) { r.unregister(); }
@@ -57,7 +57,7 @@
           for (let name of names) caches.delete(name);
         });
       }
-      localStorage.setItem('pt_version', 'v82.0');
+      localStorage.setItem('pt_version', 'v83.0');
     }
   })();
 </script>
@@ -65,7 +65,7 @@
   <body class="bg-slate-950 text-slate-100 antialiased notranslate" translate="no">
     <div id="root"></div>
     <script src="/bds-auth-guard.js?v=v3sovereign"></script>
-<script src="/bds-auth-guard.js?v=82"></script>
-<script src="/bds-mega-suite.js?v=82"></script>
+<script src="/bds-auth-guard.js?v=83"></script>
+<script src="/bds-mega-suite.js?v=83"></script>
 </body>
 </html>

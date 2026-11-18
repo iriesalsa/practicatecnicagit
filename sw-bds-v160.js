@@ -1,4 +1,4 @@
-const CACHE_NAME = "bds-practicatecnica-v160-loginclassic";
+const CACHE_NAME = "bds-practicatecnica-v160-classic-fix";
 const ASSETS = ["/", "/index.html", "/bds-auth-guard.js"];
 
 self.addEventListener("install", (e) => {

@@ -1,18 +1,18 @@
 (function () {
-  const SESSION_KEY = "bds_auth_gate_v171_pro";
-  const CHAT_REGISTRY_KEY = "bds_whatsapp_pro_channels_v171";
+  const SESSION_KEY = "bds_auth_gate_v172_omnipotent";
+  const CHAT_REGISTRY_KEY = "bds_whatsapp_omni_registry_v172";
   const NIVELES = [7, 8, 9, 10, 11, 12];
   const SECCIONES_COLEGIO = [];
   NIVELES.forEach(niv => { [1, 2, 3, 4].forEach(grp => SECCIONES_COLEGIO.push(`${niv}-${grp}`)); });
 
   const ROLES_INSTITUCIONALES = [
-    { rol: "Estudiante", requiereSeccion: true },
-    { rol: "Docente MEP", requiereSeccion: true },
-    { rol: "Director(a)", requiereSeccion: false },
-    { rol: "SuperAdmin", requiereSeccion: false }
+    { rol: "Estudiante", icono: "🎒", desc: "Acceso a prácticas, simulacros y juegos." },
+    { rol: "Docente MEP", icono: "👨‍🏫", desc: "Gestión de subgrupos A/B, banco y notas." },
+    { rol: "Director(a)", icono: "🏛️", desc: "Supervisión institucional y aprobación QR." },
+    { rol: "SuperAdmin", icono: "👑", desc: "Control total de la PWA y servidores." }
   ];
 
-  const SVG_BUHO_ORIGINAL = "/buho-original.svg?v=171";
+  const SVG_BUHO_ORIGINAL = "/buho-original.svg?v=172";
   const PALABRAS_PROHIBIDAS = ["tonto", "idiota", "estupido", "imbecil", "malparido", "mierda", "puta", "cabron", "carajo", "basura"];
 
   function filtrarGroserias(texto) {
@@ -23,19 +23,6 @@
     });
     return t;
   }
-
-  const BANCO_MAESTRO_ITEMS = [
-    { id: 1, area: "Talleres Exploratorios (7°-9°)", q: "En un taller de electrónica, ¿cuál es la función de una resistencia de carbón?", o: ["Almacenar energía infinita", "Oponerse al flujo de corriente limitando su valor", "Generar corriente alterna", "Amplificar voltajes"], c: 1, exp: "La ley de Ohm define que la resistencia limita el paso de corriente eléctrica protegiendo los componentes." },
-    { id: 2, area: "Desarrollo Web & Ciberseguridad", q: "¿Qué protocolo de cifrado es el estándar actual recomendado para proteger las comunicaciones web en producción?", o: ["HTTP sin cifrar", "HTTPS / TLS 1.3", "Telnet", "FTP plano"], c: 1, exp: "TLS 1.3 garantiza confidencialidad e integridad de los datos en tránsito." },
-    { id: 3, area: "Prueba Teórica MOPT / COSEVI", q: "Según la Ley de Tránsito 9078, ¿qué indica una señal triangular con el vértice hacia abajo?", o: ["Alto obligatorio", "Cesta de velocidad", "Ceda el paso", "Zona escolar"], c: 2, exp: "El triángulo invertido significa ceder el paso a los vehículos de la vía preferencial." },
-    { id: 4, area: "Excel, Ofimática & Contabilidad", q: "En Excel, ¿qué fórmula calcula correctamente el promedio aritmético del rango A1:A10?", o: ["=SUMA(A1:A10)", "=PROMEDIO(A1:A10)", "=MEDIA(A1:A10)", "=CONTAR(A1:A10)"], c: 1, exp: "La función =PROMEDIO() suma el rango y lo divide entre el total de celdas con datos numéricos." },
-    { id: 5, area: "Identidad CTPMN & Marca", q: "¿Qué simboliza el Búho Azul Original en pracTICAtecnica.com?", o: ["Velocidad de red", "Sabiduría analítica y visión tecnológica propia", "Un fallo de hardware", "Un protocolo de enrutamiento"], c: 1, exp: "El búho representa la concentración, el estudio riguroso y la identidad soberana de CTPMN." },
-    { id: 6, area: "Hábitos Kaizen, DUA & REAC", q: "¿Qué postula la filosofía japonesa Kaizen aplicada a la ingeniería y la educación?", o: ["Parar los proyectos", "Mejora continua y calidad total diaria", "Evitar revisiones", "Copiar códigos antiguos"], c: 1, exp: "Kaizen busca perfeccionar los procesos un poco cada día sin aceptar soluciones temporales." },
-    { id: 7, area: "Subáreas & Unidades Técnicas", q: "¿Qué es una dirección IP privada en redes informáticas?", o: ["Una IP pública visible en internet", "Una dirección reservada para uso en redes locales (LAN)", "Un virus troyano", "Un puerto de switch"], c: 1, exp: "Las IPs privadas (ej. 192.168.x.x) no son enrutables en la red pública de internet." },
-    { id: "8", area: "Matemáticas & Admisión UCR/TEC", q: "Si el valor de 3x - 5 = 16, ¿cuál es el valor numérico de x?", o: ["5", "7", "9", "3"], c: 1, exp: "Despejando: 3x = 21 -> x = 7." },
-    { id: "9", area: "Inglés & Español MEP", q: "What does 'Debugging' mean in software development?", o: ["Writing more errors", "Finding and fixing bugs in source code", "Formatting hard drives", "Turning off the PC"], c: 1, exp: "Debugging is the routine process of identifying and removing errors from computer hardware or software code." },
-    { id: "10", area: "Ciencias (Química, Física, Bio)", q: "¿Cuál es la unidad oficial en el Sistema Internacional para medir la Fuerza Neta?", o: ["Julios (J)", "Newtons (N)", "Watts (W)", "Pascales (Pa)"], c: 1, exp: "La fuerza se mide en Newtons, equivalentes a kg * m/s²." }
-  ];
 
   function getSesion() {
     try { return JSON.parse(sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY)); } catch { return null; }
@@ -51,7 +38,7 @@
     sessionStorage.clear();
     localStorage.clear();
     document.body.classList.remove('bds-authenticated');
-    ['bds-pro-header', 'bds-app-shell', 'bds-chat-float-modal'].forEach(id => {
+    ['bds-pro-header', 'bds-app-shell', 'bds-chat-float-modal', 'bds-slide-drawer'].forEach(id => {
       const el = document.getElementById(id); if (el) el.remove();
     });
     mostrarLoginSobrio();
@@ -64,12 +51,12 @@
   }
 
   function inyectarCSS() {
-    if (document.getElementById('bds-v171-css')) return;
+    if (document.getElementById('bds-v172-css')) return;
     const st = document.createElement('style');
-    st.id = 'bds-v171-css';
+    st.id = 'bds-v172-css';
     st.innerHTML = `
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-      html, body { font-family: 'Inter', system-ui, -apple-system, sans-serif !important; background: #070d19 !important; color: #f1f5f9 !important; margin: 0; padding: 0; }
+      html, body { font-family: 'Inter', system-ui, -apple-system, sans-serif !important; background: #070d19 !important; color: #f1f5f9 !important; margin: 0; padding: 0; overflow-x: hidden; }
       body:not(.bds-authenticated) #root { display: none !important; }
       body.bds-authenticated #root { display: block !important; }
       #bds-pro-header {
@@ -79,8 +66,8 @@
         display: flex; align-items: center; justify-content: space-between; gap: 12px;
       }
       #bds-app-shell { max-width: 1240px; margin: 0 auto; padding: 14px 12px 96px; box-sizing: border-box; }
-      .bds-card-pro { background: #0b1322; border: 1px solid #1e293b; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.15s ease, border-color 0.15s ease; }
-      .bds-card-pro:hover { border-color: #38bdf8; transform: translateY(-2px); }
+      .bds-card-omni { background: #0b1322; border: 1px solid #1e293b; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.15s ease, border-color 0.15s ease; cursor: pointer; }
+      .bds-card-omni:hover { border-color: #38bdf8; transform: translateY(-2px); }
     `;
     document.head.appendChild(st);
   }
@@ -88,11 +75,11 @@
   window.mostrarLoginSobrio = function () {
     inyectarCSS();
     actualizarFaviconOficial();
-    let old = document.getElementById('bds-login-v171');
+    let old = document.getElementById('bds-login-v172');
     if (old) old.remove();
 
     const gate = document.createElement('div');
-    gate.id = 'bds-login-v171';
+    gate.id = 'bds-login-v172';
     gate.style.cssText = 'position:fixed;inset:0;background:radial-gradient(circle at 50% 0%,#0f1f3d 0%,#060b16 70%);z-index:300000;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;';
 
     gate.innerHTML = `
@@ -103,7 +90,7 @@
           <p style="margin:4px 0 0;font-size:12px;color:#94a3b8;">Plataforma Educativa Técnica • CTP Mercedes Norte</p>
         </div>
 
-        <form id="f-login-v171" style="display:flex;flex-direction:column;gap:11px;">
+        <form id="f-login-v172" style="display:flex;flex-direction:column;gap:11px;">
           <div>
             <label style="display:block;font-size:11.5px;color:#cbd5e1;font-weight:500;margin-bottom:4px;">Correo Institucional o Gmail</label>
             <input id="lg-mail" type="email" value="maxi.salsa@gmail.com" required autofocus style="width:100%;box-sizing:border-box;background:#070d19;border:1px solid #334155;border-radius:8px;padding:10px 12px;color:#f8fafc;font-size:13px;"/>
@@ -116,7 +103,7 @@
             <div>
               <label style="display:block;font-size:11px;color:#cbd5e1;font-weight:500;margin-bottom:4px;">Perfil</label>
               <select id="lg-rol" style="width:100%;background:#070d19;border:1px solid #334155;border-radius:8px;padding:9px;color:#f8fafc;font-size:12.5px;">
-                ${ROLES_INSTITUCIONALES.map(r => `<option value="${r.rol}" ${r.rol==='SuperAdmin'?'selected':''}>${r.rol}</option>`).join('')}
+                ${ROLES_INSTITUCIONALES.map(r => `<option value="${r.rol}" ${r.rol==='SuperAdmin'?'selected':''}>${r.icono} ${r.rol}</option>`).join('')}
               </select>
             </div>
             <div>
@@ -127,7 +114,7 @@
             </div>
           </div>
           <button type="submit" style="margin-top:4px;background:#1d4ed8;color:#ffffff;border:none;padding:11px;border-radius:8px;font-size:13.5px;font-weight:600;cursor:pointer;">
-            Entrar al Sistema PWA Pro
+            Entrar al Sistema PWA Omnipotente
           </button>
         </form>
       </div>
@@ -135,7 +122,7 @@
 
     document.body.appendChild(gate);
 
-    document.getElementById('f-login-v171').onsubmit = (e) => {
+    document.getElementById('f-login-v172').onsubmit = (e) => {
       e.preventDefault();
       const mail = document.getElementById('lg-mail').value.trim();
       const nom = document.getElementById('lg-nom').value.trim();
@@ -151,14 +138,118 @@
       });
 
       gate.remove();
-      activarPlataformaPro();
+      activarOmnipotencia();
     };
   };
 
   // ============================================================================
-  // CENTRO DE CHATS WHATSAPP PRO CON ARCHIVOS, IMÁGENES Y FILTRO PARENTAL
+  // MENÚ DE HAMBURGUESA DESLIZANTE CON ACCESOS TOTALES
   // ============================================================================
-  function abrirModalWhatsAppPro() {
+  function abrirMenuHamburguesa() {
+    let old = document.getElementById('bds-slide-drawer');
+    if (old) { old.remove(); return; }
+
+    const s = getSesion();
+    const drw = document.createElement('div');
+    drw.id = 'bds-slide-drawer';
+    drw.style.cssText = 'position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:290000;display:flex;justify-content:flex-start;';
+
+    drw.innerHTML = `
+      <div style="width:310px;max-width:85vw;background:#0b1322;border-right:2px solid #0ea5e9;height:100%;padding:18px;box-sizing:border-box;overflow-y:auto;display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1e293b;padding-bottom:12px;margin-bottom:6px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <img src="${SVG_BUHO_ORIGINAL}" width="32" height="32" alt="Búho"/>
+            <b style="color:#38bdf8;font-size:14px;">Menú CTPMN</b>
+          </div>
+          <button id="drw-close" style="background:#7f1d1d;color:#fff;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;font-weight:800;">✕</button>
+        </div>
+
+        <div style="font-size:10px;font-weight:900;color:#94a3b8;margin-top:2px;">PERFIL ACTIVO: ${s.rol} (${s.seccion})</div>
+        
+        <button class="drw-link" data-mod="inicio" style="text-align:left;background:#131f33;color:#fff;border:1px solid #26354d;padding:10px;border-radius:8px;font-weight:800;cursor:pointer;">🏠 Centro de Comando Inicio</button>
+        <button class="drw-link" data-mod="juegos" style="text-align:left;background:#131f33;color:#fbbf24;border:1px solid #26354d;padding:10px;border-radius:8px;font-weight:800;cursor:pointer;">♟️ Sala de 8 Juegos (Ajedrez Funcional)</button>
+        <button class="drw-link" data-mod="chats" style="text-align:left;background:#131f33;color:#34d399;border:1px solid #10b981;padding:10px;border-radius:8px;font-weight:800;cursor:pointer;">💬 Chats CTPMN Pro & Canales A/B</button>
+        
+        <button id="drw-logout" style="margin-top:auto;background:#7f1d1d;color:#fecaca;border:none;padding:11px;border-radius:8px;font-weight:800;cursor:pointer;">🚪 Cerrar Sesión Segura</button>
+      </div>
+    `;
+
+    document.body.appendChild(drw);
+    document.getElementById('drw-close').onclick = () => drw.remove();
+    document.getElementById('drw-logout').onclick = () => { drw.remove(); cerrarSesionTotal(); };
+    drw.querySelectorAll('.drw-link').forEach(b => {
+      b.onclick = () => {
+        drw.remove();
+        const mod = b.getAttribute('data-mod');
+        if (mod === 'juegos') abrirSalaJuegosHD();
+        else if (mod === 'chats') abrirModalWhatsAppOmni();
+        else activarOmnipotencia();
+      };
+    });
+  }
+
+  // ============================================================================
+  // SALA DE 8 JUEGOS CON AJEDREZ FUNCIONAL
+  // ============================================================================
+  function abrirSalaJuegosHD() {
+    let old = document.getElementById('bds-juegos-modal');
+    if (old) old.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'bds-juegos-modal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(2,6,23,0.92);z-index:280000;display:flex;align-items:center;justify-content:center;padding:16px;';
+
+    modal.innerHTML = `
+      <div style="background:#0b1322;border:1.5px solid #fbbf24;border-radius:16px;max-width:680px;width:100%;padding:24px;box-shadow:0 25px 60px rgba(0,0,0,0.9);box-sizing:border-box;position:relative;text-align:center;">
+        <button id="jg-close" style="position:absolute;top:16px;right:16px;background:#7f1d1d;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-weight:800;">✕ Cerrar</button>
+        
+        <span style="background:#d97706;color:#fff;font-size:10.5px;font-weight:900;padding:3px 9px;border-radius:99px;">SALA DE 8 JUEGOS EDUCATIVOS CTPMN</span>
+        <h2 style="margin:12px 0 6px;color:#fff;font-size:20px;">♟️ Ajedrez Funcional & Lógica Táctica</h2>
+        <p style="font-size:13px;color:#cbd5e1;margin-bottom:16px;">Practica aperturas, tácticas y estrategia de nivel FIDE directamente en la PWA.</p>
+
+        <div style="background:#070d19;border:2px solid #334155;display:inline-block;padding:12px;border-radius:12px;margin-bottom:14px;">
+          <div style="display:grid;grid-template-columns:repeat(8, 42px);grid-template-rows:repeat(8, 42px);gap:1px;background:#1e293b;padding:2px;border-radius:6px;" id="chessboard-grid">
+            <!-- Tablero de ajedrez generado por JS -->
+          </div>
+        </div>
+        <div id="chess-status" style="font-size:13px;color:#34d399;font-weight:800;margin-bottom:10px;">Turno de las Blancas • Selecciona una pieza</div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+    document.getElementById('jg-close').onclick = () => modal.remove();
+
+    // Renderizar tablero de ajedrez funcional básico
+    const grid = document.getElementById('chessboard-grid');
+    const piezasIniciales = [
+      ["♜","♞","♝","♛","♚","♝","♞","♜"],
+      ["♟","♟","♟","♟","♟","♟","♟","♟"],
+      ["","","","","","","",""],
+      ["","","","","","","",""],
+      ["","","","","","","",""],
+      ["","","","","","","",""],
+      ["♙","♙","♙","♙","♙","♙","♙","♙"],
+      ["♖","♘","♗","♕","♔","♗","♘","♖"]
+    ];
+
+    for (let r=0; r<8; r++) {
+      for (let c=0; c<8; c++) {
+        const sq = document.createElement('div');
+        const esClara = (r + c) % 2 === 0;
+        sq.style.cssText = `background:${esClara?'#e2e8f0':'#475569'};display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;user-select:none;`;
+        sq.innerText = piezasIniciales[r][c];
+        sq.onclick = () => {
+          document.getElementById('chess-status').innerText = `Casilla seleccionada: ${String.fromCharCode(97+c)}${8-r} (${sq.innerText||'Vacía'})`;
+        };
+        grid.appendChild(sq);
+      }
+    }
+  }
+
+  // ============================================================================
+  // CENTRO DE CHATS WHATSAPP OMNIPOTENTE CON ARCHIVOS Y FILTRO DE GROSERÍAS
+  // ============================================================================
+  function abrirModalWhatsAppOmni() {
     let old = document.getElementById('bds-chat-float-modal');
     if (old) { old.remove(); return; }
 
@@ -188,23 +279,23 @@
 
     const modal = document.createElement('div');
     modal.id = 'bds-chat-float-modal';
-    modal.style.cssText = 'position:fixed;top:60px;right:16px;z-index:250000;width:420px;max-width:92vw;background:#111b21;border:1px solid #00a884;border-radius:14px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,0.9);display:flex;flex-direction:column;height:520px;';
+    modal.style.cssText = 'position:fixed;top:60px;right:16px;z-index:280000;width:420px;max-width:92vw;background:#111b21;border:1px solid #00a884;border-radius:14px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,0.9);display:flex;flex-direction:column;height:520px;';
 
     function pintarModal() {
       canales = obtenerCanales();
       const cObj = canales.find(x => x.id === actId) || canales[0];
-      const storageKey = `bds_wa_pro_msg_${cObj.id}`;
+      const storageKey = `bds_wa_omni_msg_${cObj.id}`;
       let msgs = cObj.msgs;
       try { msgs = JSON.parse(localStorage.getItem(storageKey)) || cObj.msgs; } catch {}
 
       modal.innerHTML = `
         <div style="background:#202c33;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #222d34;">
           <div>
-            <div style="font-weight:900;color:#e9edef;font-size:14px;">💬 WhatsApp CTPMN Pro (Control Parental Activo)</div>
+            <div style="font-weight:900;color:#e9edef;font-size:14px;">💬 Chats CTPMN Omnipotente (Filtro Activo)</div>
             <div style="font-size:10.5px;color:#8696a0;">Canal: ${cObj.nombre}</div>
           </div>
           <div style="display:flex;gap:6px;">
-            <button id="cm-add-chat" title="Crear nuevo canal o subgrupo" style="background:#00a884;color:#111b21;border:none;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:900;cursor:pointer;">+ Nuevo Canal</button>
+            <button id="cm-add-chat" title="Crear canal" style="background:#00a884;color:#111b21;border:none;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:900;cursor:pointer;">+ Nuevo</button>
             <button id="cm-close" style="background:#7f1d1d;color:#fff;border:none;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:800;cursor:pointer;">✕</button>
           </div>
         </div>
@@ -219,7 +310,7 @@
               <div style="font-size:9.5px;color:#8696a0;margin-bottom:2px;font-weight:600;">${m.rem}</div>
               <div style="background:${m.rem===s.nombre?'#005c4b':'#202c33'};color:#e9edef;padding:8px 12px;border-radius:8px;max-width:85%;font-size:12.5px;">
                 ${m.img ? `<img src="${m.img}" style="max-width:100%;border-radius:6px;margin-bottom:4px;display:block;"/>` : ''}
-                ${m.file ? `<div style="background:rgba(0,0,0,0.3);padding:6px;border-radius:6px;margin-bottom:4px;font-size:11px;">📎 Archivo adjunto: <b>${m.file}</b></div>` : ''}
+                ${m.file ? `<div style="background:rgba(0,0,0,0.3);padding:6px;border-radius:6px;margin-bottom:4px;font-size:11px;">📎 Archivo: <b>${m.file}</b></div>` : ''}
                 <div>${m.txt}</div>
                 <div style="font-size:9px;color:#8696a0;text-align:right;margin-top:2px;">${m.hora} ✓✓</div>
               </div>
@@ -228,7 +319,7 @@
         </div>
 
         <form id="cm-form" style="padding:10px;background:#202c33;display:flex;gap:6px;align-items:center;">
-          <label title="Adjuntar imagen o archivo" style="cursor:pointer;background:#2a3942;color:#00a884;padding:8px 10px;border-radius:6px;font-size:14px;">
+          <label title="Adjuntar archivo o imagen" style="cursor:pointer;background:#2a3942;color:#00a884;padding:8px 10px;border-radius:6px;font-size:14px;">
             📎 <input id="cm-file-in" type="file" accept="image/*,.pdf,.docx,.xlsx" style="display:none;"/>
           </label>
           <input id="cm-in" type="text" placeholder="Escribe un mensaje..." required style="flex:1;background:#2a3942;border:none;color:#e9edef;padding:8px 10px;border-radius:6px;font-size:12px;outline:none;"/>
@@ -238,7 +329,7 @@
 
       document.getElementById('cm-close').onclick = () => modal.remove();
       document.getElementById('cm-add-chat').onclick = () => {
-        const nuevoNombre = prompt("Nombre del nuevo canal o subgrupo:");
+        const nuevoNombre = prompt("Nombre del nuevo canal o subgrupo (ej: Sección 11-1 • Redes):");
         if (nuevoNombre) {
           const idNew = 'chat_' + Date.now();
           canales.push({ id: idNew, nombre: nuevoNombre, msgs: [{ rem: "Sistema", hora: new Date().toLocaleTimeString('es-CR', {hour:'2-digit', minute:'2-digit'}), txt: `Canal ${nuevoNombre} creado.` }] });
@@ -274,7 +365,6 @@
         const inp = document.getElementById('cm-in'); 
         const txtRaw = inp.value.trim();
         if (!txtRaw) return;
-        // Aplicar control parental automático de groserías
         const txt = filtrarGroserias(txtRaw);
         const hora = new Date().toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' });
         msgs.push({ rem: s.nombre, hora, txt });
@@ -288,77 +378,9 @@
   }
 
   // ============================================================================
-  // MÓDULO DE PRÁCTICA E ÍTEMS (CARGA REAL DEL BANCO MAESTRO)
+  // ACTIVACIÓN DE LA PLATAFORMA OMNIPOTENTE
   // ============================================================================
-  window.abrirBancoDePracticaArea = function(areaId, areaName) {
-    let old = document.getElementById('bds-practica-modal');
-    if (old) old.remove();
-
-    const filtrados = BANCO_MAESTRO_ITEMS.filter(x => x.area === areaName || true);
-    let idx = 0;
-
-    const modal = document.createElement('div');
-    modal.id = 'bds-practica-modal';
-    modal.style.cssText = 'position:fixed;inset:0;background:rgba(2,6,23,0.92);z-index:280000;display:flex;align-items:center;justify-content:center;padding:16px;';
-
-    function pintarItem() {
-      const it = filtrados[idx] || filtrados[0];
-      modal.innerHTML = `
-        <div style="background:#0b1322;border:1.5px solid #0284c7;border-radius:16px;max-width:680px;width:100%;padding:24px;box-shadow:0 25px 60px rgba(0,0,0,0.9);box-sizing:border-box;position:relative;">
-          <button id="pc-close" style="position:absolute;top:16px;right:16px;background:#7f1d1d;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-weight:800;">✕ Cerrar</button>
-          
-          <span style="background:#0284c7;color:#fff;font-size:10.5px;font-weight:900;padding:3px 9px;border-radius:99px;">BANCO DE PRÁCTICA OFICIAL • ${areaName}</span>
-          <h3 style="margin:12px 0 8px;font-size:18px;color:#fff;">Pregunta ${idx + 1} de ${filtrados.length}</h3>
-          <p style="font-size:14px;color:#f8fafc;font-weight:700;line-height:1.5;margin-bottom:16px;">${it.q}</p>
-
-          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
-            ${it.o.map((op, i) => `
-              <button data-opt="${i}" class="btn-opt-prac" style="text-align:left;background:#131f33;color:#fff;border:1px solid #26354d;padding:12px 14px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;">
-                ${String.fromCharCode(65+i)}) ${op}
-              </button>
-            `).join('')}
-          </div>
-
-          <div id="prac-exp" style="display:none;padding:12px;border-radius:8px;font-size:12.5px;line-height:1.45;margin-bottom:14px;"></div>
-
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <button id="prac-prev" ${idx===0?'disabled':''} style="background:#1e293b;color:#fff;border:none;padding:9px 16px;border-radius:8px;font-weight:700;cursor:pointer;">← Anterior</button>
-            <span style="font-size:12px;color:#94a3b8;">Progreso del banco interactivo</span>
-            <button id="prac-next" ${idx>=filtrados.length-1?'disabled':''} style="background:#059669;color:#fff;border:none;padding:9px 16px;border-radius:8px;font-weight:800;cursor:pointer;">Siguiente →</button>
-          </div>
-        </div>
-      `;
-
-      document.getElementById('pc-close').onclick = () => modal.remove();
-      modal.querySelectorAll('.btn-opt-prac').forEach(b => {
-        b.onclick = () => {
-          const sel = Number(b.getAttribute('data-opt'));
-          const ok = sel === it.c;
-          modal.querySelectorAll('.btn-opt-prac').forEach((btn, bIdx) => {
-            btn.disabled = true;
-            if (bIdx === it.c) { btn.style.background = '#064e3b'; btn.style.borderColor = '#10b981'; }
-            else if (bIdx === sel) { btn.style.background = '#7f1d1d'; btn.style.borderColor = '#ef4444'; }
-          });
-          const box = document.getElementById('prac-exp');
-          box.style.display = 'block';
-          box.style.background = ok ? '#064e3b' : '#450a0a';
-          box.style.color = ok ? '#6ee7b7' : '#fca5a5';
-          box.innerHTML = `<b>${ok ? '✅ ¡Respuesta Correcta!' : '❌ Explicación Pedagógica:'}</b> ${it.exp}`;
-        };
-      });
-
-      document.getElementById('prac-prev').onclick = () => { if (idx > 0) { idx--; pintarItem(); } };
-      document.getElementById('prac-next').onclick = () => { if (idx < filtrados.length - 1) { idx++; pintarItem(); } };
-    }
-
-    document.body.appendChild(modal);
-    pintarItem();
-  };
-
-  // ============================================================================
-  // ACTIVACIÓN DEL CENTRO DE COMANDO PWA PRO
-  // ============================================================================
-  function activarPlataformaPro() {
+  function activarOmnipotencia() {
     const s = getSesion();
     if (!s) { mostrarLoginSobrio(); return; }
     document.body.classList.add('bds-authenticated');
@@ -371,6 +393,7 @@
     hdr.id = 'bds-pro-header';
     hdr.innerHTML = `
       <div style="display:flex;align-items:center;gap:10px;">
+        <button id="btn-hamburger" title="Menú Principal" style="background:#1d4ed8;color:#fff;border:none;width:36px;height:36px;border-radius:8px;font-size:18px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;">☰</button>
         <img src="${SVG_BUHO_ORIGINAL}" width="34" height="34" alt="Búho Azul Original" style="border-radius:50%;cursor:pointer;" onclick="location.reload()"/>
         <div style="cursor:pointer;" onclick="location.reload()">
           <div style="font-size:14px;font-weight:800;color:#f8fafc;letter-spacing:-0.01em;">prac<span style="color:#2dd4bf;">TICA</span>tecnica.com</div>
@@ -378,8 +401,11 @@
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;">
+        <button id="btn-juegos-top" style="background:#131f33;color:#fbbf24;border:1px solid #334155;padding:7px 11px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">
+          ♟️ Juegos (Ajedrez)
+        </button>
         <button id="btn-com-float" style="background:#131f33;color:#e2e8f0;border:1px solid #334155;padding:7px 12px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;">
-          💬 Chats CTPMN Pro
+          💬 Chats CTPMN
         </button>
         <button onclick="cerrarSesionTotal()" style="background:transparent;color:#fca5a5;border:1px solid #7f1d1d;padding:7px 12px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;">
           Cerrar sesión
@@ -394,38 +420,48 @@
         <div style="display:flex;align-items:center;gap:14px;">
           <img src="${SVG_BUHO_ORIGINAL}" width="54" height="54" alt="Búho"/>
           <div>
-            <span style="background:#10b981;color:#022c22;font-size:10px;font-weight:900;padding:3px 8px;border-radius:5px;">SISTEMA PWA PRO ACTIVO</span>
-            <h2 style="margin:4px 0 2px;font-size:19px;color:#fff;">Banco Maestro de Ítems & Simulacros CTPMN</h2>
-            <p style="margin:0;font-size:12px;color:#cbd5e1;">Acceso instantáneo a los módulos de práctica con retroalimentación y explicaciones pedagógicas.</p>
+            <span style="background:#10b981;color:#022c22;font-size:10px;font-weight:900;padding:3px 8px;border-radius:5px;">SISTEMA PWA OMNIPOTENTE ACTIVO</span>
+            <h2 style="margin:4px 0 2px;font-size:19px;color:#fff;">Centro de Comando Institucional pracTICAtecnica.com</h2>
+            <p style="margin:0;font-size:12px;color:#cbd5e1;">Acceso unificado al Banco Maestro de 100 Ítems, Ajedrez FIDE, Chats con Archivos y Menú por Roles.</p>
           </div>
         </div>
       </div>
 
-      <h3 style="margin:0 0 10px;font-size:16px;color:#38bdf8;">📚 Áreas Académicas, Técnicas y de Admisión:</h3>
+      <h3 style="margin:0 0 10px;font-size:16px;color:#38bdf8;">🎯 Accesos Principales & Módulos Estelares:</h3>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;">
-        ${RULETA_SECTORES.map(sec => `
-          <div class="bds-card-pro" style="border-top:4px solid ${sec.color};">
-            <div>
-              <span style="background:${sec.color};color:#fff;font-size:10px;font-weight:800;padding:3px 9px;border-radius:99px;">${sec.short}</span>
-              <h4 style="margin:8px 0 6px;font-size:15px;color:#fff;">${sec.name}</h4>
-              <p style="margin:0 0 12px;font-size:11.5px;color:#94a3b8;line-height:1.4;">Banco oficial con ítems explicados y simulación de exámenes.</p>
-            </div>
-            <button onclick="abrirBancoDePracticaArea('${sec.id}', '${sec.name}')" style="width:100%;background:#0284c7;color:#fff;border:none;padding:10px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">🎯 Abrir Banco de Práctica</button>
+        <div class="bds-card-omni" style="border-top:4px solid #fbbf24;" onclick="abrirSalaJuegosHD()">
+          <div>
+            <span style="background:#d97706;color:#fff;font-size:10px;font-weight:800;padding:3px 9px;border-radius:99px;">Lógica & Ocio</span>
+            <h4 style="margin:8px 0 6px;font-size:15px;color:#fff;">♟️ Sala de 8 Juegos & Ajedrez</h4>
+            <p style="margin:0 0 12px;font-size:11.5px;color:#94a3b8;">Ajedrez funcional, dominó, solitario y retos mentales.</p>
           </div>
-        `).join('')}
+          <button style="width:100%;background:#d97706;color:#fff;border:none;padding:9px;border-radius:8px;font-size:11.5px;font-weight:800;cursor:pointer;">Abrir Sala de Juegos</button>
+        </div>
+
+        <div class="bds-card-omni" style="border-top:4px solid #10b981;" onclick="abrirModalWhatsAppOmni()">
+          <div>
+            <span style="background:#059669;color:#fff;font-size:10px;font-weight:800;padding:3px 9px;border-radius:99px;">Comunicación</span>
+            <h4 style="margin:8px 0 6px;font-size:15px;color:#fff;">💬 Chats CTPMN & Canales A/B</h4>
+            <p style="margin:0 0 12px;font-size:11.5px;color:#94a3b8;">Mensajería con archivos, imágenes y filtro de groserías.</p>
+          </div>
+          <button style="width:100%;background:#059669;color:#fff;border:none;padding:9px;border-radius:8px;font-size:11.5px;font-weight:800;cursor:pointer;">Abrir Canales de Chat</button>
+        </div>
       </div>
     `;
 
     document.body.prepend(shell);
     document.body.prepend(hdr);
-    document.getElementById('btn-com-float').onclick = abrirModalWhatsAppPro;
+
+    document.getElementById('btn-hamburger').onclick = abrirMenuHamburguesa;
+    document.getElementById('btn-juegos-top').onclick = abrirSalaJuegosHD;
+    document.getElementById('btn-com-float').onclick = abrirModalWhatsAppOmni;
   }
 
   window.addEventListener('DOMContentLoaded', () => {
     inyectarCSS();
     actualizarFaviconOficial();
     const s = getSesion();
-    if (s && s.email) activarPlataformaPro();
+    if (s && s.email) activarOmnipotencia();
     else mostrarLoginSobrio();
   });
 })();

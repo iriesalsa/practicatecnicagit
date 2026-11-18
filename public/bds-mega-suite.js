@@ -1,55 +1,80 @@
 (function () {
-  function barajarLista(arr) {
-    const copia = [...arr];
-    for (let i = copia.length - 1; i > 0; i--) {
+  function barajar(arr) {
+    const c = [...arr];
+    for (let i = c.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      const t = copia[i]; copia[i] = copia[j]; copia[j] = t;
+      const t = c[i]; c[i] = c[j]; c[j] = t;
     }
-    return copia.map(item => {
-      const pares = item.opts.map((texto, idx) => ({ texto, ok: idx === item.ans }));
-      for (let i = pares.length - 1; i > 0; i--) {
+    return c.map(item => {
+      const p = item.opts.map((texto, idx) => ({ texto, ok: idx === item.ans }));
+      for (let i = p.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        const t = pares[i]; pares[i] = pares[j]; pares[j] = t;
+        const t = p[i]; p[i] = p[j]; p[j] = t;
       }
-      return { ...item, optsMix: pares.map(p => p.texto), ansMix: pares.findIndex(p => p.ok) };
+      return { ...item, optsMix: p.map(x => x.texto), ansMix: p.findIndex(x => x.ok) };
     });
   }
 
-  const BANCOS = {
-    "Desarrollo Web y Diseño de Software": [
-      { id: "DW-01", tema: "React JSX", q: "En React (.jsx), ¿cuál hook permite gestionar estado local en un componente funcional?", opts: ["useState()", "useHistory()", "createTable()", "getDOM()"], ans: 0, exp: "useState declara una variable de estado y su función actualizadora." },
-      { id: "DW-02", tema: "Calidad ISO 25010", q: "Según la ingeniería de calidad de software (ISO/IEC 25010), omitir la planeación y matriz de riesgos produce:", opts: ["Deuda técnica severa: corregir un fallo en producción cuesta hasta 10x más que en el diseño", "Compilación automática sin errores", "Menor uso de CPU", "Eliminación de pruebas unitarias"], ans: 0, exp: "Anticipar riesgos en el diseño previene vulnerabilidades y retrabajo costoso." },
-      { id: "DW-03", tema: "Bases de Datos 3FN", q: "¿Cuál forma normal exige que ningún atributo no-clave dependa transitivamente de la llave primaria?", opts: ["Tercera Forma Normal (3FN)", "Primera Forma Normal (1FN)", "Tabla plana CSV", "Clave foránea nula"], ans: 0, exp: "La 3FN elimina las dependencias transitivas para asegurar integridad." },
-      { id: "DW-04", tema: "Arquitectura REST", q: "¿Cuál código de estado HTTP indica que una solicitud fue procesada exitosamente?", opts: ["200 OK", "404 Not Found", "500 Server Error", "403 Forbidden"], ans: 0, exp: "El código 200 OK confirma éxito en la petición HTTP." },
-      { id: "DW-05", tema: "Seguridad RBAC", q: "¿Qué mecanismo impide ataques de fuerza bruta en un portal de autenticación institucional?", opts: ["Bloqueo temporal de cuenta tras 5 intentos fallidos y uso de OAuth 2.0", "Guardar claves en texto plano", "Desactivar HTTPS", "Permitir intentos infinitos"], ans: 0, exp: "Limitar los intentos fallidos mitiga ataques de diccionario y fuerza bruta." }
+  // Calculadora Algorítmica Real de Tablas VLSM / FLSM
+  function generarTablaVLSM(ipBaseStr, listaHostsStr) {
+    const partes = ipBaseStr.trim().split('.');
+    if (partes.length !== 4) return [];
+    const baseOctets = partes.map(x => parseInt(x, 10));
+    if (baseOctets.some(x => isNaN(x) || x < 0 || x > 255)) return [];
+
+    const reqs = listaHostsStr.split(',').map(x => parseInt(x.trim(), 10)).filter(x => !isNaN(x) && x > 0).sort((a, b) => b - a);
+    let ipActual = ((baseOctets[0] << 24) >>> 0) + (baseOctets[1] << 16) + (baseOctets[2] << 8) + baseOctets[3];
+
+    function intToIp(n) {
+      return `${(n >>> 24) & 255}.${(n >>> 16) & 255}.${(n >>> 8) & 255}.${n & 255}`;
+    }
+
+    return reqs.map((h, i) => {
+      let bitsHost = 2;
+      while ((Math.pow(2, bitsHost) - 2) < h && bitsHost < 16) bitsHost++;
+      const prefijo = 32 - bitsHost;
+      const bloque = Math.pow(2, bitsHost);
+      const red = ipActual;
+      const primerHost = red + 1;
+      const ultimoHost = red + bloque - 2;
+      const broadcast = red + bloque - 1;
+      const maskInt = (0xFFFFFFFF << bitsHost) >>> 0;
+      const wildcardInt = (~maskInt) >>> 0;
+      ipActual += bloque;
+      return {
+        subred: `Subred #${i + 1} (${h}h req.)`,
+        prefijo: `/${prefijo}`,
+        mascara: intToIp(maskInt),
+        wildcard: intToIp(wildcardInt),
+        redId: intToIp(red),
+        rangoUtil: `${intToIp(primerHost)} — ${intToIp(ultimoHost)}`,
+        broadcast: intToIp(broadcast),
+        hostsUtiles: bloque - 2
+      };
+    });
+  }
+
+  const BANCOS_EXAMENES = {
+    "Educación Vial COSEVI / MOPT (Exclusivo Vial)": [
+      { id: "VL-01", q: "Al conducir una motocicleta (A1/A2), automóvil (B1) o vehículo articulado (B4) dentro de una rotonda en Costa Rica, ¿cuál es la norma obligatoria?", opts: ["Circular en sentido antihorario (por la derecha) a máximo 30 km/h cediendo el paso a quienes ya van dentro de la rotonda", "Circular en sentido horario a 60 km/h con prioridad para el que ingresa", "Cortar carriles internos sin usar luz direccional", "Ingresar por la izquierda en contravía"], ans: 0, exp: "En Costa Rica se conduce por la derecha; dentro de las rotondas se gira en sentido antihorario a máximo 30 km/h." },
+      { id: "VL-02", q: "Para un vehículo pesado articulado (Tráiler Licencia B4), ¿por qué requiere abrir su radio de giro en intersecciones y rotondas?", opts: ["Porque las ruedas del remolque describen una trayectoria más cerrada (off-tracking) y pueden invadir el cordón de caño o carril interno", "Porque el remolque frena antes que el cabezal", "Porque tiene prioridad para circular a 100 km/h en zona urbana", "Porque no necesita espejos retrovisores laterales"], ans: 0, exp: "El fenómeno de arrastre (off-tracking) hace que el eje trasero del remolque cierre más la curva que la cabina." },
+      { id: "VL-03", q: "¿Cuál es el límite máximo de velocidad frente a centros educativos con estudiantes presentes en Costa Rica?", opts: ["25 km/h", "50 km/h", "40 km/h", "60 km/h"], ans: 0, exp: "En zona escolar con presencia de estudiantes el límite estricto es de 25 km/h." }
     ],
-    "Redes, Subneteo (VLSM/FLSM) e IPv6": [
-      { id: "NET-01", tema: "Subneteo VLSM", q: "Red 172.16.10.0/24: ¿Qué prefijos corresponden a Laboratorios (100 hosts), Wi-Fi (50 hosts) y Enlace WAN (2 hosts)?", opts: ["Labs: /25 (.128) | Wi-Fi: /26 (.192) | WAN: /30 (.252)", "Labs: /26 | Wi-Fi: /27 | WAN: /28", "Labs: /24 | Wi-Fi: /25 | WAN: /29", "Labs: /27 | Wi-Fi: /26 | WAN: /30"], ans: 0, exp: "100h -> /25 (126 útiles); 50h -> /26 (62 útiles); 2h -> /30 (2 útiles)." },
-      { id: "NET-02", tema: "Sistemas Numéricos", q: "¿Cuál es la equivalencia del decimal 240 (máscara /28) en Binario, Octal y Hexadecimal?", opts: ["Binario: 11110000 | Octal: 360 | Hexadecimal: F0", "Binario: 11100000 | Octal: 340 | Hexadecimal: E0", "Binario: 11000000 | Octal: 300 | Hexadecimal: C0", "Binario: 11111100 | Octal: 374 | Hexadecimal: FC"], ans: 0, exp: "128+64+32+16 = 240 -> 11110000₂ = 360₈ = F0₁₆." },
-      { id: "NET-03", tema: "IPv6 RFC 5952", q: "¿Cuál es la compresión RFC 5952 de 2001:0db8:0000:0000:00a0:0000:0000:0001 y qué protocolo sustituye a ARP?", opts: ["2001:db8::a0:0:0:1 | Protocolo ICMPv6 NDP (NS/NA)", "2001:db8::a0::1 | ARP v6", "2001:0db8::a0:1 | Broadcast", "fe80::1 | DHCPv4"], ans: 0, exp: "El doble dos puntos (::) solo se usa una vez; NDP reemplaza a ARP." },
-      { id: "NET-04", tema: "Cisco IOS CLI", q: "En un router Cisco IOS, ¿cuál comando en modo privilegiado muestra un resumen de todas las interfaces, sus direcciones IP y estado (up/down)?", opts: ["show ip interface brief", "ipconfig /all", "ping 127.0.0.1", "delete vlan.dat"], ans: 0, exp: "El comando 'show ip interface brief' lista interfaces, IP asignada y estado capa 1/capa 2." },
-      { id: "NET-05", tema: "Subneteo FLSM", q: "Al dividir 192.168.50.0/24 en 4 subredes fijas iguales (FLSM), ¿cuál es el salto de bloque y prefijo?", opts: ["Prefijo /26 (255.255.255.192) con salto de 64", "Prefijo /25 con salto de 128", "Prefijo /27 con salto de 32", "Prefijo /28 con salto de 16"], ans: 0, exp: "2 bits prestados generan 4 subredes /26 (.192) con salto 256 - 192 = 64." }
+    "Redes, Subneteo (VLSM/FLSM), Cisco IOS e IPv6": [
+      { id: "NET-01", q: "Red 172.16.10.0/24 (VLSM): ¿Cuáles prefijos corresponden a Laboratorios (100 hosts), Wi-Fi (50 hosts) y Enlace WAN (2 hosts)?", opts: ["Labs: /25 (.128) | Wi-Fi: /26 (.192) | WAN: /30 (.252)", "Labs: /26 | Wi-Fi: /27 | WAN: /28", "Labs: /24 | Wi-Fi: /25 | WAN: /29", "Labs: /27 | Wi-Fi: /26 | WAN: /30"], ans: 0, exp: "100h -> /25 (126 útiles); 50h -> /26 (62 útiles); 2h -> /30 (2 útiles)." },
+      { id: "NET-02", q: "En Cisco IOS CLI, ¿cuál secuencia de comandos asigna la IP 192.168.10.1/24 a la interfaz GigabitEthernet0/0 y la enciende?", opts: ["enable -> configure terminal -> interface g0/0 -> ip address 192.168.10.1 255.255.255.0 -> no shutdown", "ipconfig /all -> set ip 192.168.10.1 -> shutdown", "interface g0/0 -> delete ip -> reload", "show running-config -> ping 192.168.10.1"], ans: 0, exp: "En modo de configuración de interfaz se define 'ip address <IP> <MÁSCARA>' seguido de 'no shutdown'." },
+      { id: "NET-03", q: "¿Cuál es la compresión RFC 5952 de 2001:0db8:0000:0000:00a0:0000:0000:0001 y qué protocolo reemplaza a ARP en IPv6?", opts: ["2001:db8::a0:0:0:1 | Protocolo ICMPv6 NDP (NS/NA)", "2001:db8::a0::1 | ARP v6", "2001:0db8::a0:1 | Broadcast", "fe80::1 | DHCPv4"], ans: 0, exp: "El operador '::' se usa una sola vez; ICMPv6 NDP reemplaza a ARP." }
     ],
-    "Educación Vial COSEVI / MOPT": [
-      { id: "VL-01", tema: "Rotondas CR", q: "Al ingresar a una rotonda en Costa Rica, ¿cuál es el sentido obligatorio de circulación y quién tiene prioridad?", opts: ["Sentido antihorario (por la derecha) cediendo el paso a quienes ya circulan dentro de la rotonda", "Sentido horario con prioridad para quien ingresa", "Sentido libre a 60 km/h", "Prioridad para el carril externo sin ceder paso"], ans: 0, exp: "En Costa Rica se circula en sentido antihorario dentro de las rotondas a máximo 30 km/h." },
-      { id: "VL-02", tema: "Límites de Velocidad", q: "¿Cuál es la velocidad máxima permitida frente a escuelas y colegios con presencia de estudiantes en Costa Rica?", opts: ["25 km/h", "40 km/h", "50 km/h", "60 km/h"], ans: 0, exp: "En zona escolar con estudiantes presentes el límite estricto es 25 km/h." },
-      { id: "VL-03", tema: "Señalización Horizontal", q: "¿Qué indica una línea amarilla continua en el centro de una calzada de dos sentidos?", opts: ["Prohibición absoluta de adelantar para ambos sentidos", "Permiso para rebasar", "Carril exclusivo de autobuses", "Zona de parqueo"], ans: 0, exp: "La línea amarilla continua separa flujos opuestos y prohíbe el adelantamiento." },
-      { id: "VL-04", tema: "Peajes y Autopistas", q: "Al aproximarse a una estación de peaje electrónico (QuickPass / Aguja) en autopista, el conductor debe:", opts: ["Reducir la velocidad al límite señalizado (15-20 km/h), mantener distancia y esperar la apertura de la aguja en verde", "Acelerar a 90 km/h para pasar antes de que baje la aguja", "Cambiar de carril en reversa", "Frenar de golpe en medio de la autopista"], ans: 0, exp: "La aproximación segura al peaje exige reducir velocidad y verificar el semáforo de la barrera." }
+    "Desarrollo Web, Ciberseguridad y Diseño de Software": [
+      { id: "SEC-01", q: "Para proteger un formulario de autenticación contra ataques de Inyección SQL (SQLi) y Fuerza Bruta, el estándar OWASP exige:", opts: ["Consultas parametrizadas (Prepared Statements), hash de contraseñas y bloqueo tras 5 intentos fallidos", "Concatenar el input del usuario directamente en el SELECT SQL", "Validar únicamente con CSS en el cliente", "Almacenar contraseñas en texto plano en localStorage"], ans: 0, exp: "Las consultas parametrizadas separan los datos del código ejecutable SQL y el bloqueo frena ataques automatizados." },
+      { id: "SEC-02", q: "En una lista de control de acceso (ACL) de un Firewall perimetral, ¿cuál puerto TCP debe permitirse para tráfico web cifrado HTTPS y cuál debe restringirse del acceso público directo?", opts: ["Permitir TCP 443 (HTTPS) y restringir TCP 3389 (RDP) / TCP 22 (SSH) mediante VPN", "Abrir todos los puertos del 1 al 65535 al público", "Bloquear TCP 443 y abrir Telnet TCP 23 sin cifrado", "Usar únicamente el protocolo ICMP"], ans: 0, exp: "El puerto 443 sirve tráfico TLS/HTTPS seguro, mientras que puertos de administración como 22 o 3389 se protegen tras VPN." }
     ],
-    "Matemáticas MEP (Secundaria y CTP)": [
-      { id: "MAT-01", tema: "Función Lineal", q: "Dada la función lineal f(x) = 3x - 6, ¿cuál es su intersección con el eje X?", opts: ["(2, 0)", "(0, -6)", "(-2, 0)", "(3, 0)"], ans: 0, exp: "Haciendo 3x - 6 = 0 se obtiene x = 2 -> (2, 0)." },
-      { id: "MAT-02", tema: "Circunferencia", q: "La ecuación de una circunferencia con centro C(-3, 4) y radio r = 5 es:", opts: ["(x + 3)² + (y - 4)² = 25", "(x - 3)² + (y + 4)² = 25", "(x + 3)² + (y - 4)² = 5", "x² + y² = 25"], ans: 0, exp: "Sustituyendo en (x - h)² + (y - k)² = r² resulta (x + 3)² + (y - 4)² = 25." },
-      { id: "MAT-03", tema: "Probabilidad", q: "En una urna con 4 esferas azules, 3 rojas y 3 verdes, ¿cuál es la probabilidad de extraer una esfera que NO sea roja?", opts: ["7/10 (70%)", "3/10 (30%)", "4/10 (40%)", "1/2 (50%)"], ans: 0, exp: "7 casos favorables (4 azules + 3 verdes) entre 10 posibles = 7/10." },
-      { id: "MAT-04", tema: "Geometría Pitagórica", q: "En un triángulo rectángulo con catetos de 6 cm y 8 cm, la hipotenusa mide:", opts: ["10 cm", "14 cm", "12 cm", "100 cm"], ans: 0, exp: "√(6² + 8²) = √(36 + 64) = 10 cm." }
+    "Excel Avanzado, Contabilidad y Gestión": [
+      { id: "EX-01", q: "¿Cuál fórmula de Excel evalúa si el Promedio en D2 es >= 70 Y la Asistencia en E2 es >= 80% para mostrar 'APROBADO', de lo contrario 'PENDIENTE'?", opts: ["=SI(Y(D2>=70; E2>=80%); \"APROBADO\"; \"PENDIENTE\")", "=SI(O(D2>=70; E2>=80%); \"APROBADO\"; \"PENDIENTE\")", "=BUSCARX(D2>=70; E2>=80%; \"APROBADO\")", "=SUMA(D2:E2)"], ans: 0, exp: "La función Y() exige que ambas condiciones lógicas se cumplan simultáneamente." }
     ],
-    "Admisión UCR / TEC / UNA / UTN / UNED": [
-      { id: "UTN-08", tema: "Sucesiones UTN", q: "[UTN #8 Corregida] En una progresión aritmética con primer término a₁ = 7 y diferencia d = 4, ¿cuál es el décimo término (a₁₀)?", opts: ["43", "39", "47", "41"], ans: 0, exp: "a₁₀ = 7 + (10 - 1) × 4 = 43." },
-      { id: "UTN-10", tema: "Proporcionalidad UTN", q: "[UTN #10 Corregida] Si 5 servidores procesan 200 tareas en 4 minutos, ¿cuántas tareas procesarán 8 servidores en 6 minutos al mismo ritmo?", opts: ["480 tareas", "320 tareas", "400 tareas", "520 tareas"], ans: 0, exp: "Cada servidor procesa 10 tareas/min -> 8 × 6 × 10 = 480 tareas." },
-      { id: "PAA-01", tema: "Razonamiento Verbal", q: "«Quien investiga sin cuestionar sus propias premisas convierte el método científico en un ritual de confirmación.» Se deduce que el progreso científico exige:", opts: ["Someter a examen crítico incluso los supuestos iniciales del investigador", "Prescindir del método científico", "Aceptar solo hipótesis populares", "Sustituir pruebas por intuición"], ans: 0, exp: "La premisa central exige auditar críticamente los supuestos de partida." }
-    ],
-    "Electrónica Industrial (Ley de Ohm/Watt)": [
-      { id: "EL-01", tema: "Circuitos en Paralelo", q: "Tres resistencias de 30 Ω en paralelo conectadas a una fuente de 20V DC tienen una resistencia equivalente (Req) y corriente total (It) de:", opts: ["Req = 10 Ω y Corriente Total = 2 A", "Req = 90 Ω y Corriente Total = 0.22 A", "Req = 15 Ω y Corriente Total = 1.33 A", "Req = 30 Ω y Corriente Total = 0.66 A"], ans: 0, exp: "Req = 30 / 3 = 10 Ω; It = 20V / 10 Ω = 2 A." },
-      { id: "EL-02", tema: "Ley de Watt", q: "Si por una resistencia de 10 Ω circula una corriente de 3 A, ¿cuál es la potencia eléctrica disipada?", opts: ["90 W", "30 W", "300 W", "3.33 W"], ans: 0, exp: "Por Ley de Watt: P = I² × R = (3²) × 10 = 9 × 10 = 90 W." }
+    "Admisión UCR / TEC / UNA / UTN y Matemáticas MEP": [
+      { id: "UTN-08", q: "[UTN #8] En una progresión aritmética con primer término a₁ = 7 y diferencia d = 4, ¿cuál es el décimo término (a₁₀)?", opts: ["43", "39", "47", "41"], ans: 0, exp: "a₁₀ = 7 + (10 - 1) × 4 = 43." },
+      { id: "UTN-10", q: "[UTN #10] Si 5 servidores procesan 200 solicitudes en 4 minutos al mismo ritmo, ¿cuántas solicitudes procesarán 8 servidores en 6 minutos?", opts: ["480 solicitudes", "320 solicitudes", "400 solicitudes", "520 solicitudes"], ans: 0, exp: "Cada servidor procesa 10 solicitudes/min. Con 8 servidores en 6 min: 8 × 6 × 10 = 480 solicitudes." }
     ]
   };
 
@@ -57,563 +82,729 @@
     let old = document.getElementById('bds-mega-modal');
     if (old) old.remove();
 
-    let tab = vistaInicial || 'examenes'; // 'examenes' | 'vial' | 'simuladores_tec' | 'juegos' | 'calculadora'
-    let materia = (subParam && BANCOS[subParam]) ? subParam : "Desarrollo Web y Diseño de Software";
-    let poolCompleto = barajarLista(BANCOS[materia]);
-    // ERROR 07 FIX: Control de cantidad de preguntas con mínimo, máximo y reinicio automático al cambiar de materia
-    let limitePreguntas = Math.min(poolCompleto.length, 4);
-    let idx = 0;
-    let contestadas = {};
-    let finalizado = false;
-    let segundos = 1200, relojOn = false, timerId = null, animId = null;
+    let tab = vistaInicial || 'vial'; // 'vial' | 'redes_cisco' | 'excel_sim' | 'ciberseguridad' | 'examenes' | 'juegos' | 'calculadora'
+    let animId = null;
 
-    // Sub-estados de otros módulos
-    let escenarioVial = 'rotonda'; // 'rotonda' | 'peaje' | 'conos' | 'escolar'
-    let simTecActivo = 'cisco'; // 'cisco' | 'excel' | 'word' | 'ohm'
-    let juegoActivo = 'puente'; // 'puente' | 'clue' | 'amongus' | 'damas' | 'cuatro' | 'ajedrez'
-    let calc = { mod: 'CTP', n10: 88, n11: 90, n12: 92, pruMep: 85, paa: 640, tec: 660 };
+    // Estado Simulador Vial Realista (Moto, Carro, Tráiler)
+    let tipoVehiculo = 'carro'; // 'moto' | 'carro' | 'trailer'
+    let circuitoVial = 'rotonda'; // 'rotonda' | 'peaje' | 'conos' | 'escolar'
+
+    // Estado Redes / Subneteo / Cisco IOS
+    let ipBaseVlsm = '172.16.10.0', hostsVlsm = '100, 50, 25, 2';
 
     const modal = document.createElement('div');
     modal.id = 'bds-mega-modal';
-    modal.style.cssText = 'position:fixed;top:52px;left:0;right:0;bottom:0;background:#060c17;z-index:99985;overflow-y:auto;padding:14px;font-family:system-ui,-apple-system,sans-serif;color:#f8fafc;box-sizing:border-box;';
+    modal.style.cssText = 'position:fixed;top:92px;left:0;right:0;bottom:0;background:#090f1a;z-index:99985;overflow-y:auto;padding:14px;font-family:Inter,system-ui,sans-serif;color:#f8fafc;box-sizing:border-box;';
 
-    const limpiar = () => {
-      if (timerId) clearInterval(timerId);
-      if (animId) cancelAnimationFrame(animId);
-    };
+    const stopAnim = () => { if (animId) cancelAnimationFrame(animId); };
 
-    function getPreguntasActivas() {
-      return poolCompleto.slice(0, limitePreguntas);
-    }
-
-    function pintar() {
-      if (animId) cancelAnimationFrame(animId);
-      const activas = getPreguntasActivas();
-      if (idx >= activas.length) idx = 0;
-      const item = activas[idx];
-      const numResp = Object.keys(contestadas).length;
-      const numOk = Object.values(contestadas).filter(x => x.ok).length;
-
+    function render() {
+      stopAnim();
       modal.innerHTML = `
-        <div style="max-width:1120px;margin:0 auto;background:#0b1322;border:1px solid #1e293b;border-radius:12px;padding:16px;box-sizing:border-box;">
-          <!-- Barra de Secciones Clara -->
+        <div style="max-width:1160px;margin:0 auto;background:#0b1322;border:1px solid #1e293b;border-radius:12px;padding:16px;box-sizing:border-box;">
           <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1e293b;padding-bottom:10px;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
-              <button data-t="examenes" class="v96-tab" style="padding:8px 12px;border-radius:6px;border:1px solid ${tab==='examenes'?'#0284c7':'#1e293b'};background:${tab==='examenes'?'#0284c7':'#111c2d'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;">1. Exámenes y Prácticas</button>
-              <button data-t="vial" class="v96-tab" style="padding:8px 12px;border-radius:6px;border:1px solid ${tab==='vial'?'#0284c7':'#1e293b'};background:${tab==='vial'?'#0284c7':'#111c2d'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;">2. Manejo 2D (Rotonda / Peaje / Conos / Escolar)</button>
-              <button data-t="simuladores_tec" class="v96-tab" style="padding:8px 12px;border-radius:6px;border:1px solid ${tab==='simuladores_tec'?'#0284c7':'#1e293b'};background:${tab==='simuladores_tec'?'#0284c7':'#111c2d'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;">3. Simuladores: Cisco IOS, Excel, Word y Ohm</button>
-              <button data-t="juegos" class="v96-tab" style="padding:8px 12px;border-radius:6px;border:1px solid ${tab==='juegos'?'#0284c7':'#1e293b'};background:${tab==='juegos'?'#0284c7':'#111c2d'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;">4. Juegos (Ajedrez, Damas, 4L, Puente, Clue)</button>
-              <button data-t="calculadora" class="v96-tab" style="padding:8px 12px;border-radius:6px;border:1px solid ${tab==='calculadora'?'#0284c7':'#1e293b'};background:${tab==='calculadora'?'#0284c7':'#111c2d'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;">5. Calculadora MEP / UCR / TEC / UTN</button>
+              <button data-t="vial" class="u-tab" style="padding:8px 11px;border-radius:6px;border:none;background:${tab==='vial'?'#0284c7':'#131f33'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;">1. Manejo 2D (Moto / Carro / Tráiler)</button>
+              <button data-t="redes_cisco" class="u-tab" style="padding:8px 11px;border-radius:6px;border:none;background:${tab==='redes_cisco'?'#0284c7':'#131f33'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;">2. Redes, VLSM/FLSM & Cisco IOS CLI</button>
+              <button data-t="excel_sim" class="u-tab" style="padding:8px 11px;border-radius:6px;border:none;background:${tab==='excel_sim'?'#0284c7':'#131f33'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;">3. Simulador Comandos Excel</button>
+              <button data-t="ciberseguridad" class="u-tab" style="padding:8px 11px;border-radius:6px;border:none;background:${tab==='ciberseguridad'?'#0284c7':'#131f33'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;">4. Ciberseguridad & Firewall SOC</button>
+              <button data-t="examenes" class="u-tab" style="padding:8px 11px;border-radius:6px;border:none;background:${tab==='examenes'?'#0284c7':'#131f33'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;">5. Exámenes Oficiales</button>
+              <button data-t="juegos" class="u-tab" style="padding:8px 11px;border-radius:6px;border:none;background:${tab==='juegos'?'#0284c7':'#131f33'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;">6. Juegos Lógicos</button>
+              <button data-t="calculadora" class="u-tab" style="padding:8px 11px;border-radius:6px;border:none;background:${tab==='calculadora'?'#0284c7':'#131f33'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;">7. Nota Presentación MEP/U</button>
             </div>
-            <button id="v96-exit" style="background:#7f1d1d;color:#fecaca;border:none;padding:7px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">Salir a Portada ✕</button>
+            <button id="u-close" style="background:#7f1d1d;color:#fecaca;border:none;padding:7px 13px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">Volver a Portada ✕</button>
           </div>
 
-          ${tab === 'examenes' ? `
-            <!-- BARRA DE CONTROL DE EXAMEN (RESUELVE ERRORES 06, 07, 10 y 16) -->
-            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;background:#09111e;padding:12px;border-radius:8px;border:1px solid #1e293b;margin-bottom:14px;">
-              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-                <label style="font-size:12px;font-weight:700;color:#94a3b8;">Materia:</label>
-                <select id="ex-mat" style="background:#111c2d;border:1px solid #334155;color:#fff;padding:7px 10px;border-radius:6px;font-size:12px;">
-                  ${Object.keys(BANCOS).map(k => `<option value="${k}" ${materia===k?'selected':''}>${k}</option>`).join('')}
-                </select>
-                <!-- Controles para disminuir, aumentar y restablecer cantidad de preguntas con tope -->
-                <div style="display:inline-flex;align-items:center;gap:4px;background:#111c2d;padding:4px 8px;border-radius:6px;border:1px solid #334155;font-size:11px;">
-                  <span>Cantidad: <b>${activas.length}</b></span>
-                  <button id="q-minus" title="Disminuir preguntas" style="background:#1e293b;color:#fff;border:none;padding:3px 8px;border-radius:4px;cursor:pointer;font-weight:800;">-</button>
-                  <button id="q-plus" title="Aumentar preguntas (con límite)" style="background:#1e293b;color:#fff;border:none;padding:3px 8px;border-radius:4px;cursor:pointer;font-weight:800;">+</button>
-                  <button id="q-reset-cnt" title="Restablecer cantidad original" style="background:#0284c7;color:#fff;border:none;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:10px;font-weight:700;">Restablecer</button>
-                </div>
-              </div>
-
-              <!-- Controles de Pausar, Detener/Reiniciar y Finalizar Simulacro (Error 16) -->
-              <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-                <span id="ex-clock" style="font-family:monospace;font-size:13px;background:#111c2d;padding:6px 10px;border-radius:6px;color:#38bdf8;">
-                  ⏱️ ${Math.floor(segundos/60).toString().padStart(2,'0')}:${(segundos%60).toString().padStart(2,'0')}
-                </span>
-                <button id="ex-pause" style="background:${relojOn?'#b45309':'#059669'};color:#fff;border:none;padding:7px 11px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">
-                  ${relojOn ? '⏸ Pausar' : '▶ Iniciar / Reanudar'}
-                </button>
-                <button id="ex-stop" style="background:#475569;color:#fff;border:none;padding:7px 11px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">⏹ Detener / Reiniciar</button>
-                <button id="ex-finish" style="background:#0284c7;color:#fff;border:none;padding:7px 12px;border-radius:6px;font-size:11px;font-weight:800;cursor:pointer;">✅ Finalizar Examen</button>
-              </div>
-            </div>
-
-            ${finalizado ? (() => {
-              const notaPorc = Math.round((numOk / activas.length) * 100);
-              const falladas = activas.filter(p => !contestadas[p.id] || !contestadas[p.id].ok);
-              return `
-                <!-- RESUMEN DE EVALUACIÓN, REVISIÓN DE ERRORES Y APRENDIZAJE ADAPTATIVO (REPORTE JORGE 11-1) -->
-                <div style="background:#09111e;border:2px solid #0ea5e9;padding:18px;border-radius:12px;margin-bottom:14px;">
-                  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
-                    <div>
-                      <div style="font-size:11px;font-weight:800;color:#38bdf8;">RESULTADO OFICIAL DEL SIMULACRO FINALIZADO</div>
-                      <h3 style="margin:2px 0 0;font-size:20px;color:${notaPorc>=70?'#34d399':'#f87171'};">Calificación: ${notaPorc}% (${numOk} aciertos de ${activas.length} preguntas)</h3>
-                    </div>
-                    <div style="display:flex;gap:8px;">
-                      <button id="ex-repeat" style="background:#059669;color:#fff;border:none;padding:9px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">🔄 Nuevo Intento Aleatorio</button>
-                      <button id="ex-exit-final" style="background:#7f1d1d;color:#fecaca;border:none;padding:9px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">Salir del Examen</button>
-                    </div>
-                  </div>
-                  ${falladas.length === 0 ? `
-                    <div style="background:#064e3b;padding:12px;border-radius:8px;color:#ecfdf5;font-size:13px;">🏅 <b>¡Insignia Desbloqueada: Dominio Experto en ${materia}!</b> Respondiste correctamente el 100% de los ítems.</div>
-                  ` : `
-                    <div style="background:#111c2d;border-left:4px solid #f59e0b;padding:12px;border-radius:8px;font-size:12px;">
-                      <b style="color:#fbbf24;">🎯 Recomendación de Aprendizaje Adaptativo (Temas por reforzar):</b>
-                      <ul style="margin:6px 0 0;padding-left:18px;line-height:1.6;">
-                        ${falladas.map(f => `<li><b>[${f.tema}]:</b> ${f.exp}</li>`).join('')}
-                      </ul>
-                    </div>
-                  `}
-                </div>
-              `;
-            })() : ''}
-
-            <div style="display:grid;grid-template-columns:1fr 250px;gap:14px;">
-              <div style="background:#09111e;border:1px solid #1e293b;padding:16px;border-radius:10px;">
-                <div style="display:flex;justify-content:space-between;font-size:11px;color:#38bdf8;font-weight:700;margin-bottom:8px;">
-                  <span>${materia} • Tema: ${item.tema} [${item.id}]</span>
-                  <span>Pregunta ${idx + 1} de ${activas.length}</span>
-                </div>
-                <div style="font-size:15px;font-weight:700;margin-bottom:14px;line-height:1.45;">${item.q}</div>
-                <div style="display:flex;flex-direction:column;gap:8px;">
-                  ${item.optsMix.map((op, i) => {
-                    const r = contestadas[item.id];
-                    let bg = '#111c2d', brd = '#1e293b';
-                    if (r !== undefined) {
-                      if (i === item.ansMix) { bg = '#064e3b'; brd = '#10b981'; }
-                      else if (i === r.sel) { bg = '#450a0a'; brd = '#ef4444'; }
-                    }
-                    return `<button data-i="${i}" class="opt-v96" ${r!==undefined?'disabled':''} style="text-align:left;background:${bg};border:1.5px solid ${brd};color:#f8fafc;padding:11px 14px;border-radius:8px;font-size:13px;cursor:${r!==undefined?'not-allowed':'pointer'};"><b style="color:#38bdf8;margin-right:6px;">${String.fromCharCode(65+i)})</b> ${op}</button>`;
-                  }).join('')}
-                </div>
-                ${contestadas[item.id] !== undefined ? `
-                  <div style="margin-top:12px;padding:10px;border-radius:8px;font-size:12px;background:${contestadas[item.id].ok?'#064e3b':'#450a0a'};">
-                    ${contestadas[item.id].ok ? `<b>✅ ¡Correcto!</b> ${item.exp}` : `<b>❌ Respuesta incorrecta. La opción válida es ${String.fromCharCode(65+item.ansMix)}):</b> ${item.exp}`}
-                  </div>
-                ` : ''}
-                <div style="display:flex;justify-content:space-between;margin-top:14px;">
-                  <button id="ex-prev" style="background:#1e293b;color:#fff;border:none;padding:8px 14px;border-radius:6px;font-size:12px;cursor:pointer;">⬅ Anterior</button>
-                  <button id="ex-next" style="background:#0284c7;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">Siguiente / Continuar ➡</button>
-                </div>
-              </div>
-
-              <!-- Hoja de Control limpia sin Laboratorio de Demostración intrusivo -->
-              <div style="background:#09111e;border:1px solid #1e293b;padding:14px;border-radius:10px;">
-                <div style="font-size:12px;font-weight:800;color:#38bdf8;margin-bottom:8px;">Mapa del Examen (${numResp}/${activas.length})</div>
-                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px;">
-                  ${activas.map((p, pi) => {
-                    const r = contestadas[p.id];
-                    const bg = r ? (r.ok ? '#065f46' : '#7f1d1d') : '#111c2d';
-                    return `<button data-pi="${pi}" class="map-btn" style="padding:7px 4px;border-radius:6px;background:${bg};border:${pi===idx?'2px solid #38bdf8':'1px solid #334155'};color:#fff;font-size:11px;font-weight:700;cursor:pointer;">#${pi+1}</button>`;
-                  }).join('')}
-                </div>
-                <button id="dl-guia-directa" style="width:100%;background:#111c2d;border:1px solid #38bdf8;color:#38bdf8;padding:8px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">
-                  📥 Descarga Directa Guía de Estudio
-                </button>
-              </div>
-            </div>
-          ` : tab === 'vial' ? `
-            <!-- PESTAÑA 2: SIMULADOR DE MANEJO 2D MULTI-ESCENARIO (ROTONDA, AUTOPISTA/PEAJE, CONOS, ZONA ESCOLAR) -->
-            <div style="background:#09111e;border:1px solid #1e293b;padding:16px;border-radius:10px;text-align:center;">
-              <div style="display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
-                <button data-esc="rotonda" class="esc-btn" style="padding:7px 12px;border-radius:6px;border:none;background:${escenarioVial==='rotonda'?'#059669':'#111c2d'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;">1. Rotonda Ciudad CR (Máx 30 km/h)</button>
-                <button data-esc="peaje" class="esc-btn" style="padding:7px 12px;border-radius:6px;border:none;background:${escenarioVial==='peaje'?'#059669':'#111c2d'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;">2. Autopista y Peaje QuickPass (Aguja)</button>
-                <button data-esc="conos" class="esc-btn" style="padding:7px 12px;border-radius:6px;border:none;background:${escenarioVial==='conos'?'#059669':'#111c2d'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;">3. Circuito de Conos y Parqueo COSEVI</button>
-                <button data-esc="escolar" class="esc-btn" style="padding:7px 12px;border-radius:6px;border:none;background:${escenarioVial==='escolar'?'#059669':'#111c2d'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;">4. Cruce Peatonal y Zona Escolar (Máx 25 km/h)</button>
-              </div>
-              <div id="vial-hud" style="display:inline-flex;gap:14px;background:#111c2d;border:1px solid #0ea5e9;padding:7px 16px;border-radius:8px;font-size:12px;font-weight:800;margin-bottom:10px;">
-                <span id="v-nota" style="color:#34d399;">Nota: 100/100</span>
-                <span id="v-vel" style="color:#38bdf8;">Velocidad: 25 km/h</span>
-                <span id="v-msg" style="color:#fde68a;">Conduce dentro del carril hacia la META</span>
-              </div>
-              <div>
-                <canvas id="cvs-multi-vial" width="540" height="310" style="max-width:100%;background:#064e3b;border:2px solid #334155;border-radius:10px;"></canvas>
-              </div>
-              <div style="display:flex;justify-content:center;gap:8px;margin-top:10px;flex-wrap:wrap;">
-                <button data-m="u" class="mv-car" style="background:#1e293b;color:#fff;border:none;padding:8px 14px;border-radius:6px;font-weight:700;cursor:pointer;">⬆️ Avanzar (W)</button>
-                <button data-m="l" class="mv-car" style="background:#1e293b;color:#fff;border:none;padding:8px 14px;border-radius:6px;font-weight:700;cursor:pointer;">⬅️ Izquierda (A)</button>
-                <button data-m="r" class="mv-car" style="background:#1e293b;color:#fff;border:none;padding:8px 14px;border-radius:6px;font-weight:700;cursor:pointer;">➡️ Derecha (D)</button>
-                <button data-m="d" class="mv-car" style="background:#1e293b;color:#fff;border:none;padding:8px 14px;border-radius:6px;font-weight:700;cursor:pointer;">⬇️ Frenar/Atrás (S)</button>
-                <button id="mv-reset" style="background:#0284c7;color:#fff;border:none;padding:8px 14px;border-radius:6px;font-weight:700;cursor:pointer;">↺ Reiniciar Escenario</button>
-              </div>
-            </div>
-          ` : tab === 'simuladores_tec' ? `
-            <!-- PESTAÑA 3: SIMULADORES TÉCNICOS DEDICADOS (CISCO IOS CLI, EXCEL, WORD APA 7, ELECTRÓNICA/OHM) -->
-            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
-              <button data-st="cisco" class="st-btn" style="padding:7px 12px;border-radius:6px;border:none;background:${simTecActivo==='cisco'?'#0284c7':'#111c2d'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;">1. Terminal Cisco IOS CLI (Ruteo y VLANs)</button>
-              <button data-st="excel" class="st-btn" style="padding:7px 12px;border-radius:6px;border:none;background:${simTecActivo==='excel'?'#0284c7':'#111c2d'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;">2. Simulador Excel (Fórmulas y Validación)</button>
-              <button data-st="word" class="st-btn" style="padding:7px 12px;border-radius:6px;border:none;background:${simTecActivo==='word'?'#0284c7':'#111c2d'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;">3. Editor Word APA 7 (Descarga Directa)</button>
-              <button data-st="ohm" class="st-btn" style="padding:7px 12px;border-radius:6px;border:none;background:${simTecActivo==='ohm'?'#0284c7':'#111c2d'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;">4. Laboratorio Electrónica (Ley de Ohm / Watt)</button>
-            </div>
-            <div id="sim-tec-stage" style="background:#09111e;border:1px solid #1e293b;padding:16px;border-radius:10px;"></div>
-          ` : tab === 'juegos' ? `
-            <!-- PESTAÑA 4: JUEGOS COMPLETOS RECUPERADOS (ERROR 09 FIX: AJEDREZ, DAMAS, 4 EN LÍNEA, PUENTE, CLUE, AMONG US) -->
-            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
-              <button data-jg="puente" class="jg-b" style="padding:7px 12px;border-radius:6px;border:none;background:${juegoActivo==='puente'?'#059669':'#111c2d'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;">1. Cruce del Puente (17m)</button>
-              <button data-jg="ajedrez" class="jg-b" style="padding:7px 12px;border-radius:6px;border:none;background:${juegoActivo==='ajedrez'?'#059669':'#111c2d'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;">2. Ajedrez 8x8</button>
-              <button data-jg="damas" class="jg-b" style="padding:7px 12px;border-radius:6px;border:none;background:${juegoActivo==='damas'?'#059669':'#111c2d'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;">3. Damas 8x8</button>
-              <button data-jg="cuatro" class="jg-b" style="padding:7px 12px;border-radius:6px;border:none;background:${juegoActivo==='cuatro'?'#059669':'#111c2d'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;">4. Cuatro en Línea</button>
-              <button data-jg="clue" class="jg-b" style="padding:7px 12px;border-radius:6px;border:none;background:${juegoActivo==='clue'?'#059669':'#111c2d'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;">5. Clue Forense</button>
-            </div>
-            <div id="jg-stage" style="background:#09111e;border:1px solid #1e293b;padding:16px;border-radius:10px;text-align:center;"></div>
-          ` : `
-            <!-- PESTAÑA 5: CALCULADORA NOTA PRESENTACIÓN MEP Y ADMISIÓN UCR/TEC/UNA/UTN/UNED -->
-            <div style="background:#09111e;border:1px solid #1e293b;padding:16px;border-radius:10px;">
-              <h3 style="margin:0 0 10px;font-size:15px;color:#38bdf8;">Calculadora Oficial de Nota de Presentación MEP y Admisión UCR / TEC / UNA / UTN / UNED</h3>
-              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:14px;font-size:12px;">
-                <div>Promedio 10° (0-100):<input id="ca-10" type="number" min="0" max="100" value="${calc.n10}" style="width:100%;box-sizing:border-box;background:#111c2d;color:#fff;border:1px solid #334155;padding:7px;border-radius:6px;"/></div>
-                <div>Promedio 11° (0-100):<input id="ca-11" type="number" min="0" max="100" value="${calc.n11}" style="width:100%;box-sizing:border-box;background:#111c2d;color:#fff;border:1px solid #334155;padding:7px;border-radius:6px;"/></div>
-                <div>Promedio 12° CTP (0-100):<input id="ca-12" type="number" min="0" max="100" value="${calc.n12}" style="width:100%;box-sizing:border-box;background:#111c2d;color:#fff;border:1px solid #334155;padding:7px;border-radius:6px;"/></div>
-                <div>Prueba MEP (0-100):<input id="ca-mep" type="number" min="0" max="100" value="${calc.pruMep}" style="width:100%;box-sizing:border-box;background:#111c2d;color:#fff;border:1px solid #334155;padding:7px;border-radius:6px;"/></div>
-                <div>Examen PAA UCR/UNA (200-800):<input id="ca-paa" type="number" min="200" max="800" value="${calc.paa}" style="width:100%;box-sizing:border-box;background:#111c2d;color:#fff;border:1px solid #334155;padding:7px;border-radius:6px;"/></div>
-                <div>Examen TEC (200-800):<input id="ca-tec" type="number" min="200" max="800" value="${calc.tec}" style="width:100%;box-sizing:border-box;background:#111c2d;color:#fff;border:1px solid #334155;padding:7px;border-radius:6px;"/></div>
-              </div>
-              <div id="ca-results" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;font-size:12px;"></div>
-            </div>
-          `}
+          <div id="u-body"></div>
         </div>
       `;
 
-      document.getElementById('v96-exit').onclick = () => { limpiar(); window.navegarSeccionConHistorial('portada'); };
-      document.querySelectorAll('.v96-tab').forEach(b => {
-        b.onclick = () => { tab = b.getAttribute('data-t'); pintar(); };
+      document.getElementById('u-close').onclick = () => { stopAnim(); modal.remove(); };
+      document.querySelectorAll('.u-tab').forEach(b => {
+        b.onclick = () => { tab = b.getAttribute('data-t'); render(); };
       });
 
-      // LÓGICA 1: EXÁMENES CON CONTROL DE CANTIDAD Y PAUSA/FINALIZAR
-      if (tab === 'examenes') {
-        document.getElementById('ex-mat').onchange = (e) => {
-          materia = e.target.value;
-          poolCompleto = barajarLista(BANCOS[materia]);
-          limitePreguntas = Math.min(poolCompleto.length, 4); // Se reinicia automáticamente al cambiar de examen (Error 07)
-          idx = 0; contestadas = {}; finalizado = false;
-          pintar();
+      const body = document.getElementById('u-body');
+
+      // ========================================================================
+      // 1. SIMULADOR VIAL 2D REALISTA: MOTO (A1/A2), AUTOMÓVIL (B1) Y TRÁILER (B4)
+      // ========================================================================
+      if (tab === 'vial') {
+        body.innerHTML = `
+          <div style="display:grid;grid-template-columns:1fr 270px;gap:14px;align-items:start;">
+            <div style="background:#090f1a;border:1px solid #1e293b;padding:14px;border-radius:10px;text-align:center;">
+              <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                  <button data-veh="moto" class="veh-btn" style="padding:7px 12px;border-radius:6px;border:1.5px solid ${tipoVehiculo==='moto'?'#38bdf8':'#334155'};background:${tipoVehiculo==='moto'?'#0284c7':'#111c2d'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;">Motocicleta (A1 / A2)</button>
+                  <button data-veh="carro" class="veh-btn" style="padding:7px 12px;border-radius:6px;border:1.5px solid ${tipoVehiculo==='carro'?'#38bdf8':'#334155'};background:${tipoVehiculo==='carro'?'#0284c7':'#111c2d'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;">Automóvil Sedán (B1)</button>
+                  <button data-veh="trailer" class="veh-btn" style="padding:7px 12px;border-radius:6px;border:1.5px solid ${tipoVehiculo==='trailer'?'#38bdf8':'#334155'};background:${tipoVehiculo==='trailer'?'#0284c7':'#111c2d'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;">Tráiler Articulado (B4)</button>
+                </div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                  <button data-cir="rotonda" class="cir-btn" style="padding:6px 10px;border-radius:6px;border:none;background:${circuitoVial==='rotonda'?'#059669':'#1e293b'};color:#fff;font-size:11px;font-weight:700;cursor:pointer;">Rotonda CR</button>
+                  <button data-cir="peaje" class="cir-btn" style="padding:6px 10px;border-radius:6px;border:none;background:${circuitoVial==='peaje'?'#059669':'#1e293b'};color:#fff;font-size:11px;font-weight:700;cursor:pointer;">Peaje Aguja</button>
+                  <button data-cir="conos" class="cir-btn" style="padding:6px 10px;border-radius:6px;border:none;background:${circuitoVial==='conos'?'#059669':'#1e293b'};color:#fff;font-size:11px;font-weight:700;cursor:pointer;">Conos COSEVI</button>
+                  <button data-cir="escolar" class="cir-btn" style="padding:6px 10px;border-radius:6px;border:none;background:${circuitoVial==='escolar'?'#059669':'#1e293b'};color:#fff;font-size:11px;font-weight:700;cursor:pointer;">Zona Escolar</button>
+                </div>
+              </div>
+
+              <div id="v98-hud" style="background:#111c2d;border:1px solid #0284c7;padding:8px 14px;border-radius:8px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;font-size:12px;font-weight:700;">
+                <span id="vh-score" style="color:#34d399;">Nota COSEVI: 100 / 100 pts</span>
+                <span id="vh-speed" style="color:#38bdf8;">Velocímetro: 25 km/h</span>
+                <span id="vh-msg" style="color:#fde68a;">Sigue la vía asfaltada hacia el Cajón META (P)</span>
+              </div>
+
+              <canvas id="cvs-v98-drive" width="600" height="360" style="max-width:100%;background:#064e3b;border:2px solid #334155;border-radius:10px;display:block;margin:0 auto;"></canvas>
+            </div>
+
+            <!-- Panel de Mandos Táctiles y Telemetría del Vehículo -->
+            <div style="background:#090f1a;border:1px solid #1e293b;padding:14px;border-radius:10px;">
+              <div style="font-size:13px;font-weight:800;color:#38bdf8;margin-bottom:6px;">Mandos de Conducción (${tipoVehiculo.toUpperCase()})</div>
+              <p style="font-size:11px;color:#94a3b8;margin:0 0 10px;">
+                ${tipoVehiculo === 'moto' ? 'Motocicleta A1/A2: Alta agilidad, faro frontal único y chasis angosto.' :
+                  tipoVehiculo === 'carro' ? 'Automóvil B1: 4 ruedas, luces delanteras dobles y radio de giro medio.' :
+                  'Tráiler Articulado B4: Cabezal + remolque largo con pivote real. Abre más el giro en curvas para que el remolque no muerda la acera.'}
+              </p>
+              <button id="btn-auto-marcha" style="width:100%;background:#059669;color:#fff;border:none;padding:11px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;margin-bottom:8px;">
+                ▶ Activar / Pausar Marcha Continua
+              </button>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+                <button data-act="left" class="drv-btn" style="background:#0284c7;color:#fff;border:none;padding:12px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">◀ Girar Izq (A)</button>
+                <button data-act="right" class="drv-btn" style="background:#0284c7;color:#fff;border:none;padding:12px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">Girar Der (D) ▶</button>
+                <button data-act="up" class="drv-btn" style="background:#1e293b;color:#fff;border:1px solid #334155;padding:10px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">▲ Avanzar (W)</button>
+                <button data-act="down" class="drv-btn" style="background:#1e293b;color:#fff;border:1px solid #334155;padding:10px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">▼ Frenar / Atrás (S)</button>
+              </div>
+              <button id="btn-drv-reset" style="width:100%;background:#d97706;color:#fff;border:none;padding:10px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">
+                ↺ Reiniciar Vehículo (100 pts)
+              </button>
+            </div>
+          </div>
+        `;
+
+        document.querySelectorAll('.veh-btn').forEach(b => b.onclick = () => { tipoVehiculo = b.getAttribute('data-veh'); render(); });
+        document.querySelectorAll('.cir-btn').forEach(b => b.onclick = () => { circuitoVial = b.getAttribute('data-cir'); render(); });
+
+        const cvs = document.getElementById('cvs-v98-drive');
+        const ctx = cvs.getContext('2d');
+        const cx = 300, cy = 190, rIn = 48, rOut = 112;
+
+        // Estado cinemático realista con ángulo de dirección y articulación de remolque para Tráiler B4
+        let veh = {
+          x: 318, y: 335,
+          ang: -Math.PI / 2, // Mirando hacia arriba al iniciar en el carril derecho
+          vel: 24,
+          marchaAuto: false,
+          trailerX: 318, trailerY: 368, trailerAng: -Math.PI / 2
         };
-        document.getElementById('q-minus').onclick = () => {
-          limitePreguntas = Math.max(1, limitePreguntas - 1);
-          if (idx >= limitePreguntas) idx = limitePreguntas - 1;
-          pintar();
-        };
-        document.getElementById('q-plus').onclick = () => {
-          limitePreguntas = Math.min(poolCompleto.length, limitePreguntas + 1);
-          pintar();
-        };
-        document.getElementById('q-reset-cnt').onclick = () => {
-          limitePreguntas = Math.min(poolCompleto.length, 4);
-          idx = 0; contestadas = {}; finalizado = false;
-          pintar();
-        };
-        document.getElementById('ex-pause').onclick = () => {
-          relojOn = !relojOn;
-          if (relojOn) {
-            timerId = setInterval(() => {
-              if (segundos > 0) segundos--;
-              const c = document.getElementById('ex-clock');
-              if (c) c.innerText = `⏱️ ${Math.floor(segundos/60).toString().padStart(2,'0')}:${(segundos%60).toString().padStart(2,'0')}`;
-            }, 1000);
-          } else if (timerId) clearInterval(timerId);
-          pintar();
-        };
-        document.getElementById('ex-stop').onclick = () => {
-          if (timerId) clearInterval(timerId);
-          relojOn = false; segundos = 1200; idx = 0; contestadas = {}; finalizado = false;
-          poolCompleto = barajarLista(BANCOS[materia]);
-          pintar();
-        };
-        document.getElementById('ex-finish').onclick = () => {
-          if (Object.keys(contestadas).length === 0) {
-            alert('Responde al menos 1 pregunta antes de finalizar el simulacro.');
+        let nota = 100, estado = 'en_curso', tick = 0;
+        let npcs = [
+          { ang: 0, rad: 84, col: '#ef4444' },
+          { ang: 2.1, rad: 84, col: '#f59e0b' },
+          { ang: 4.2, rad: 84, col: '#10b981' }
+        ];
+        let agujaVerde = true;
+
+        function actualizarHUD(msg, col) {
+          const s = document.getElementById('vh-score');
+          const v = document.getElementById('vh-speed');
+          const m = document.getElementById('vh-msg');
+          if (s) { s.innerText = `Nota COSEVI: ${nota} / 100 pts`; s.style.color = nota >= 80 ? '#34d399' : '#f87171'; }
+          if (v) v.innerText = `Velocímetro: ${veh.vel} km/h`;
+          if (m && msg) { m.innerText = msg; m.style.color = col || '#fde68a'; }
+        }
+
+        function estaEnAsfalto(px, py) {
+          if (circuitoVial === 'rotonda') {
+            const d = Math.hypot(px - cx, py - cy);
+            const enAnillo = d >= rIn && d <= rOut;
+            const enVertical = px >= (cx - 36) && px <= (cx + 36);
+            const enHorizontal = py >= (cy - 36) && py <= (cy + 36);
+            const enCajonMeta = px >= 420 && px <= 540 && py >= 20 && py <= 190;
+            return enAnillo || enVertical || enHorizontal || enCajonMeta;
+          }
+          return px >= 200 && px <= 400;
+        }
+
+        function avanzarPaso(pasoPx) {
+          if (estado !== 'en_curso') return;
+          veh.x += Math.cos(veh.ang) * pasoPx;
+          veh.y += Math.sin(veh.ang) * pasoPx;
+
+          // Física de articulación real para el remolque del Tráiler B4
+          const distRemolque = 30;
+          const targetAng = Math.atan2(veh.y - veh.trailerY, veh.x - veh.trailerX);
+          veh.trailerAng = targetAng;
+          veh.trailerX = veh.x - Math.cos(targetAng) * distRemolque;
+          veh.trailerY = veh.y - Math.sin(targetAng) * distRemolque;
+
+          // Validar límites de vía (tanto para la cabina como para el remolque si es Tráiler B4)
+          const cabOk = estaEnAsfalto(veh.x, veh.y);
+          const remOk = tipoVehiculo !== 'trailer' || estaEnAsfalto(veh.trailerX, veh.trailerY);
+
+          if (!cabOk || !remOk) {
+            nota = 0; estado = 'reprobado'; veh.marchaAuto = false;
+            actualizarHUD('REPROBADO (0/100): El vehículo o su remolque se salió de la calzada asfaltada.', '#f87171');
             return;
           }
-          if (timerId) clearInterval(timerId);
-          relojOn = false; finalizado = true;
-          pintar();
-        };
-        const bRep = document.getElementById('ex-repeat');
-        if (bRep) bRep.onclick = () => {
-          poolCompleto = barajarLista(BANCOS[materia]);
-          idx = 0; contestadas = {}; finalizado = false;
-          pintar();
-        };
-        const bExF = document.getElementById('ex-exit-final');
-        if (bExF) bExF.onclick = () => { limpiar(); window.navegarSeccionConHistorial('portada'); };
 
-        document.querySelectorAll('.opt-v96').forEach(btn => {
-          btn.onclick = () => {
-            if (contestadas[item.id] !== undefined) return;
-            const sel = parseInt(btn.getAttribute('data-i'), 10);
-            contestadas[item.id] = { sel, ok: sel === item.ansMix };
-            pintar();
-          };
-        });
-        document.querySelectorAll('.map-btn').forEach(b => {
-          b.onclick = () => { idx = parseInt(b.getAttribute('data-pi'), 10); pintar(); };
-        });
-        document.getElementById('ex-prev').onclick = () => { idx = (idx - 1 + activas.length) % activas.length; pintar(); };
-        document.getElementById('ex-next').onclick = () => { idx = (idx + 1) % activas.length; pintar(); };
-        document.getElementById('dl-guia-directa').onclick = () => {
-          const contenido = `Guía de Estudio Oficial: ${materia}\n\n` + activas.map((p, i) => `${i+1}. ${p.q}\nExplicación: ${p.exp}\n`).join('\n');
-          window.descargarDocumentoDirecto('Guia_' + materia, contenido, 'txt');
-        };
-      }
-
-      // LÓGICA 2: SIMULADOR DE MANEJO 2D MULTI-ESCENARIO (ROTONDA, AUTOPISTA/PEAJE, CONOS, ZONA ESCOLAR)
-      if (tab === 'vial') {
-        document.querySelectorAll('.esc-btn').forEach(b => {
-          b.onclick = () => { escenarioVial = b.getAttribute('data-esc'); pintar(); };
-        });
-        const cvs = document.getElementById('cvs-multi-vial');
-        const ctx = cvs.getContext('2d');
-        let car = { x: 270, y: 285, vel: 25 }, nota = 100, estado = 'activo', tickCount = 0;
-        let npcs = [0, 2.1, 4.2];
-        let agujaAbierta = false;
-
-        const actualizarHUD = (msg, col) => {
-          document.getElementById('v-nota').innerText = `Nota: ${nota}/100`;
-          document.getElementById('v-vel').innerText = `Velocidad: ${car.vel} km/h`;
-          const m = document.getElementById('v-msg');
-          m.innerText = msg; m.style.color = col || '#fde68a';
-        };
-
-        const mover = (dir) => {
-          if (estado !== 'activo') return;
-          if (dir === 'u') { car.y -= 10; car.vel = Math.min(80, car.vel + 5); }
-          if (dir === 'd') { car.y += 10; car.vel = Math.max(10, car.vel - 10); }
-          if (dir === 'l') car.x -= 10;
-          if (dir === 'r') car.x += 10;
-
-          if (escenarioVial === 'rotonda') {
-            const d = Math.hypot(car.x - 270, car.y - 155);
-            const enVia = (d >= 45 && d <= 102) || (car.x >= 238 && car.x <= 302) || (car.y >= 123 && car.y <= 187);
-            if (!enVia) { nota = 0; estado = 'fallo'; actualizarHUD('REPROBADO: Saliste de la calzada de la rotonda.', '#f87171'); }
-            else if (car.y <= 22) { estado = 'exito'; actualizarHUD('¡APROBADO! Superaste la rotonda en sentido antihorario.', '#34d399'); }
-          } else if (escenarioVial === 'peaje') {
-            if (car.y <= 155 && car.y >= 135 && !agujaAbierta) {
-              nota = 0; estado = 'fallo'; actualizarHUD('REPROBADO: Chocaste la aguja del peaje sin esperar luz verde.', '#f87171');
-            } else if (car.y <= 22) {
-              estado = 'exito'; actualizarHUD('¡APROBADO! Cruzaste el Peaje QuickPass respetando el semáforo.', '#34d399');
-            }
-          } else if (escenarioVial === 'conos') {
-            const conos = [{x:270,y:220},{x:270,y:150},{x:270,y:80}];
-            if (conos.some(c => Math.hypot(car.x - c.x, car.y - c.y) < 18)) {
-              nota = 0; estado = 'fallo'; actualizarHUD('REPROBADO: Derribaste un cono en la prueba práctica COSEVI.', '#f87171');
-            } else if (car.y <= 22) {
-              estado = 'exito'; actualizarHUD('¡APROBADO! Zigzag en conos superado con precisión.', '#34d399');
-            }
-          } else if (escenarioVial === 'escolar') {
-            if (car.vel > 25 && car.y < 200 && car.y > 100) {
-              nota = 0; estado = 'fallo'; actualizarHUD('REPROBADO: Exceso de velocidad (>25 km/h) en Zona Escolar.', '#f87171');
-            } else if (car.y <= 22) {
-              estado = 'exito'; actualizarHUD('¡APROBADO! Respetaste el paso peatonal y los 25 km/h.', '#34d399');
-            }
+          if (circuitoVial === 'peaje' && veh.y <= 170 && veh.y >= 145 && !agujaVerde) {
+            nota = 0; estado = 'reprobado'; veh.marchaAuto = false;
+            actualizarHUD('REPROBADO: Derribaste la aguja del peaje en luz roja.', '#f87171');
+            return;
           }
+
+          if (circuitoVial === 'escolar' && veh.vel > 25 && veh.y <= 210 && veh.y >= 110) {
+            nota = 0; estado = 'reprobado'; veh.marchaAuto = false;
+            actualizarHUD('REPROBADO: Exceso de velocidad (>25 km/h) en Zona Escolar CTP.', '#f87171');
+            return;
+          }
+
+          // Validar llegada a Meta (Cajón P en rotonda o Meta superior en pistas rectas)
+          if ((circuitoVial === 'rotonda' && veh.x >= 445 && veh.x <= 525 && veh.y >= 30 && veh.y <= 95) ||
+              (circuitoVial !== 'rotonda' && veh.y <= 28)) {
+            estado = 'aprobado'; veh.marchaAuto = false;
+            actualizarHUD(`¡PRUEBA SUPERADA CON ${nota}/100 PTS! Maniobra oficial completada con ${tipoVehiculo.toUpperCase()}.`, '#34d399');
+          }
+        }
+
+        function ejecutarMando(accion) {
+          if (estado !== 'en_curso') return;
+          if (accion === 'left') veh.ang -= 0.18;
+          if (accion === 'right') veh.ang += 0.18;
+          if (accion === 'up') { veh.vel = Math.min(60, veh.vel + 3); avanzarPaso(8); actualizarHUD(); }
+          if (accion === 'down') { veh.vel = Math.max(15, veh.vel - 5); avanzarPaso(-5); actualizarHUD(); }
+        }
+
+        document.querySelectorAll('.drv-btn').forEach(b => b.onclick = () => ejecutarMando(b.getAttribute('data-act')));
+        document.getElementById('btn-auto-marcha').onclick = () => {
+          if (estado === 'en_curso') veh.marchaAuto = !veh.marchaAuto;
+        };
+        document.getElementById('btn-drv-reset').onclick = () => render();
+
+        window.onkeydown = (e) => {
+          if (tab !== 'vial') return;
+          const el = document.activeElement;
+          if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT')) return;
+          if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') ejecutarMando('left');
+          if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') ejecutarMando('right');
+          if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') ejecutarMando('up');
+          if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') ejecutarMando('down');
         };
 
-        document.querySelectorAll('.mv-car').forEach(b => b.onclick = () => mover(b.getAttribute('data-m')));
-        document.getElementById('mv-reset').onclick = () => pintar();
+        // Función de Dibujo Realista de Moto, Automóvil y Tráiler Articulado
+        function dibujarVehiculoRealista(x, y, ang, tipo, colorPrincipal) {
+          if (tipo === 'trailer') {
+            // 1. Dibujar Remolque Articulado (Furgón Blanco/Gris con llantas traseras)
+            ctx.save();
+            ctx.translate(veh.trailerX, veh.trailerY);
+            ctx.rotate(veh.trailerAng);
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(-16, -9, 8, 18); // Eje tándem trasero
+            ctx.fillStyle = '#e2e8f0';
+            ctx.fillRect(-18, -7, 30, 14); // Caja del furgón
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(-18, -7, 30, 14);
+            ctx.restore();
+          }
 
-        function loopEscenario() {
-          tickCount++;
-          ctx.clearRect(0, 0, 540, 310);
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(ang);
 
-          if (escenarioVial === 'rotonda') {
-            ctx.fillStyle = '#334155'; ctx.fillRect(238, 0, 64, 310); ctx.fillRect(0, 123, 540, 64);
-            ctx.beginPath(); ctx.arc(270, 155, 102, 0, Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(270, 155, 45, 0, Math.PI*2); ctx.fillStyle = '#065f46'; ctx.fill();
-            npcs = npcs.map(a => a - 0.016);
-            npcs.forEach(a => {
-              const nx = 270 + Math.cos(a)*76, ny = 155 + Math.sin(a)*76;
-              ctx.beginPath(); ctx.arc(nx, ny, 8, 0, Math.PI*2); ctx.fillStyle = '#f59e0b'; ctx.fill();
-            });
-          } else if (escenarioVial === 'peaje') {
-            ctx.fillStyle = '#334155'; ctx.fillRect(190, 0, 160, 310);
-            agujaAbierta = (Math.floor(tickCount / 90) % 2 === 0);
-            ctx.fillStyle = agujaAbierta ? '#10b981' : '#ef4444';
-            ctx.fillRect(190, 145, agujaAbierta ? 35 : 160, 8);
-            ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif';
-            ctx.fillText(agujaAbierta ? 'PEAJE QUICKPASS: ABIERTO (VERDE)' : 'PEAJE: DETÉNGASE (AGUJA ABAJO)', 200, 135);
-          } else if (escenarioVial === 'conos') {
-            ctx.fillStyle = '#334155'; ctx.fillRect(190, 0, 160, 310);
-            [{x:270,y:220},{x:270,y:150},{x:270,y:80}].forEach(c => {
-              ctx.beginPath(); ctx.arc(c.x, c.y, 10, 0, Math.PI*2); ctx.fillStyle = '#f97316'; ctx.fill();
+          if (tipo === 'moto') {
+            // Motocicleta A1/A2: Rueda delantera y trasera, manubrio, carenado, casco y faro LED
+            ctx.fillStyle = '#020617';
+            ctx.fillRect(-10, -2.5, 20, 5); // Llantas en línea
+            ctx.fillStyle = colorPrincipal;
+            ctx.fillRect(-6, -4.5, 12, 9); // Chasis moto
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(4, -7); ctx.lineTo(4, 7); ctx.stroke(); // Manubrio
+            ctx.beginPath(); ctx.arc(-1, 0, 4.2, 0, Math.PI * 2); ctx.fillStyle = '#fbbf24'; ctx.fill(); // Casco motociclista
+            ctx.fillStyle = '#fef08a'; ctx.fillRect(9, -2, 3, 4); // Luz frontal
+          } else {
+            // Automóvil B1 o Cabina de Cabezal B4: 4 llantas, carrocería, parabrisas y faros dobles
+            ctx.fillStyle = '#020617';
+            ctx.fillRect(-9, -9, 6, 3); ctx.fillRect(4, -9, 6, 3); // Llantas izq
+            ctx.fillRect(-9, 6, 6, 3);  ctx.fillRect(4, 6, 6, 3);  // Llantas der
+            ctx.fillStyle = colorPrincipal;
+            ctx.fillRect(-11, -7, 22, 14); // Carrocería
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(-3, -5.5, 8, 11); // Parabrisas y techo
+            ctx.fillStyle = '#fef08a';
+            ctx.fillRect(10, -6, 2.5, 3.5); ctx.fillRect(10, 2.5, 2.5, 3.5); // Faros delanteros
+            ctx.fillStyle = '#ef4444';
+            ctx.fillRect(-11.5, -6, 2, 3); ctx.fillRect(-11.5, 3, 2, 3); // Luces de freno
+          }
+          ctx.restore();
+        }
+
+        function loopDrive() {
+          tick++;
+          if (veh.marchaAuto && estado === 'en_curso') avanzarPaso(1.45);
+
+          ctx.clearRect(0, 0, 600, 360);
+
+          if (circuitoVial === 'rotonda') {
+            // Calles y anillo de rotonda
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(cx - 36, 0, 72, 360);
+            ctx.fillRect(0, cy - 36, 600, 72);
+            // Acceso hacia el Cajón de Estacionamiento META (P)
+            ctx.fillRect(440, 20, 95, 175);
+
+            ctx.beginPath(); ctx.arc(cx, cy, rOut, 0, Math.PI * 2); ctx.fillStyle = '#1e293b'; ctx.fill();
+            ctx.beginPath(); ctx.arc(cx, cy, (rIn + rOut) / 2, 0, Math.PI * 2);
+            ctx.setLineDash([7, 7]); ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 2; ctx.stroke(); ctx.setLineDash([]);
+
+            // Isla central
+            ctx.beginPath(); ctx.arc(cx, cy, rIn, 0, Math.PI * 2); ctx.fillStyle = '#065f46'; ctx.fill();
+            ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 3; ctx.stroke();
+            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 11px Inter,sans-serif'; ctx.textAlign = 'center';
+            ctx.fillText('ROTONDA CR', cx, cy - 3);
+            ctx.fillText('30 km/h ↺', cx, cy + 12);
+
+            // Línea guía punteada celeste por el carril derecho (antihorario) hacia META (P)
+            ctx.beginPath();
+            ctx.setLineDash([5, 5]); ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2.5;
+            ctx.moveTo(318, 345); ctx.lineTo(318, 265);
+            ctx.arc(cx, cy, 80, Math.PI / 2, 0, true);
+            ctx.lineTo(485, 190); ctx.lineTo(485, 65);
+            ctx.stroke(); ctx.setLineDash([]);
+
+            // Cajón META (P)
+            ctx.strokeStyle = '#10b981'; ctx.lineWidth = 2.5;
+            ctx.strokeRect(448, 28, 76, 58);
+            ctx.fillStyle = '#34d399'; ctx.font = 'bold 12px Inter,sans-serif';
+            ctx.fillText('③ META (P)', 486, 60);
+
+            // Vehículos NPC girando en sentido antihorario (Ley de Tránsito de Costa Rica)
+            npcs.forEach(n => {
+              n.ang -= 0.014;
+              const nx = cx + Math.cos(n.ang) * n.rad;
+              const ny = cy + Math.sin(n.ang) * n.rad;
+              dibujarVehiculoRealista(nx, ny, n.ang - Math.PI / 2, 'carro', n.col);
+              if (estado === 'en_curso' && Math.hypot(veh.x - nx, veh.y - ny) < 20) {
+                nota = 0; estado = 'reprobado'; veh.marchaAuto = false;
+                actualizarHUD('REPROBADO (0/100): Colisión dentro de la rotonda por no ceder la vía.', '#f87171');
+              }
             });
           } else {
-            ctx.fillStyle = '#334155'; ctx.fillRect(200, 0, 140, 310);
-            ctx.fillStyle = '#fde047';
-            for (let x = 205; x < 335; x += 20) ctx.fillRect(x, 140, 12, 30);
-            ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif';
-            ctx.fillText('ZONA ESCOLAR CTP (MÁX 25 KM/H — USA FRENO "S")', 140, 125);
+            // Pista recta para Peaje QuickPass, Conos COSEVI o Zona Escolar
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(200, 0, 200, 360);
+            ctx.setLineDash([8, 8]); ctx.strokeStyle = '#fbbf24';
+            ctx.beginPath(); ctx.moveTo(300, 0); ctx.lineTo(300, 360); ctx.stroke(); ctx.setLineDash([]);
+
+            if (circuitoVial === 'peaje') {
+              agujaVerde = (Math.floor(tick / 100) % 2 === 0);
+              ctx.fillStyle = agujaVerde ? '#10b981' : '#ef4444';
+              ctx.fillRect(200, 155, agujaVerde ? 45 : 200, 9);
+              ctx.fillStyle = '#fff'; ctx.font = 'bold 12px Inter,sans-serif'; ctx.textAlign = 'center';
+              ctx.fillText(agujaVerde ? 'PEAJE QUICKPASS: ABIERTO (PASE)' : 'PEAJE EN ROJO: DETÉNGASE (S)', 300, 142);
+            } else if (circuitoVial === 'conos') {
+              const conos = [{x:318,y:260},{x:275,y:190},{x:318,y:120}];
+              conos.forEach(c => {
+                ctx.beginPath(); ctx.arc(c.x, c.y, 9, 0, Math.PI * 2); ctx.fillStyle = '#f97316'; ctx.fill();
+                ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+                if (estado === 'en_curso' && (Math.hypot(veh.x - c.x, veh.y - c.y) < 16 || (tipoVehiculo==='trailer' && Math.hypot(veh.trailerX - c.x, veh.trailerY - c.y) < 16))) {
+                  nota = 0; estado = 'reprobado'; veh.marchaAuto = false;
+                  actualizarHUD('REPROBADO: Derribaste un cono en la prueba de control COSEVI.', '#f87171');
+                }
+              });
+            } else if (circuitoVial === 'escolar') {
+              ctx.fillStyle = '#fde047';
+              for (let x = 210; x < 390; x += 22) ctx.fillRect(x, 150, 12, 34);
+              ctx.fillStyle = '#fff'; ctx.font = 'bold 12px Inter,sans-serif'; ctx.textAlign = 'center';
+              ctx.fillText('CRUCE ESCOLAR CTP — VELOCIDAD MÁXIMA 25 KM/H', 300, 135);
+            }
+
+            ctx.fillStyle = '#10b981'; ctx.fillRect(200, 0, 200, 18);
+            ctx.fillStyle = '#022c22'; ctx.font = 'bold 11px Inter,sans-serif'; ctx.textAlign = 'center';
+            ctx.fillText('META OFICIAL COSEVI', 300, 13);
           }
 
-          ctx.fillStyle = '#10b981'; ctx.fillRect(235, 0, 70, 14);
-          ctx.beginPath(); ctx.arc(car.x, car.y, 9, 0, Math.PI*2);
-          ctx.fillStyle = estado === 'fallo' ? '#ef4444' : '#38bdf8'; ctx.fill();
-          animId = requestAnimationFrame(loopEscenario);
+          dibujarVehiculoRealista(veh.x, veh.y, veh.ang, tipoVehiculo, estado === 'reprobado' ? '#ef4444' : '#0ea5e9');
+          animId = requestAnimationFrame(loopDrive);
         }
-        loopEscenario();
+        loopDrive();
       }
 
-      // LÓGICA 3: SIMULADORES TÉCNICOS (CISCO IOS CLI, EXCEL, WORD APA 7, ELECTRÓNICA/OHM)
-      if (tab === 'simuladores_tec') {
-        document.querySelectorAll('.st-btn').forEach(b => {
-          b.onclick = () => { simTecActivo = b.getAttribute('data-st'); pintar(); };
+      // ========================================================================
+      // 2. REDES, SUBNETEO VLSM/FLSM COMPLETO Y CONSOLA CISCO IOS CLI
+      // ========================================================================
+      if (tab === 'redes_cisco') {
+        const filasVlsm = generarTablaVLSM(ipBaseVlsm, hostsVlsm);
+        body.innerHTML = `
+          <div style="display:grid;grid-template-columns:1.25fr 1fr;gap:14px;">
+            <!-- Generador Completo de Tablas VLSM / FLSM -->
+            <div style="background:#090f1a;border:1px solid #1e293b;padding:14px;border-radius:10px;">
+              <div style="font-size:14px;font-weight:800;color:#38bdf8;margin-bottom:6px;">Calculadora y Generador de Tablas de Subneteo VLSM / FLSM</div>
+              <div style="display:grid;grid-template-columns:1fr 1.3fr auto;gap:8px;margin-bottom:12px;font-size:12px;align-items:end;">
+                <div>
+                  <label style="display:block;color:#94a3b8;font-size:11px;margin-bottom:3px;">Red Base IPv4:</label>
+                  <input id="vlsm-ip" type="text" value="${ipBaseVlsm}" style="width:100%;box-sizing:border-box;background:#111c2d;border:1px solid #334155;color:#fff;padding:7px;border-radius:6px;font-family:monospace;"/>
+                </div>
+                <div>
+                  <label style="display:block;color:#94a3b8;font-size:11px;margin-bottom:3px;">Hosts por Subred (separados por coma):</label>
+                  <input id="vlsm-hosts" type="text" value="${hostsVlsm}" style="width:100%;box-sizing:border-box;background:#111c2d;border:1px solid #334155;color:#fff;padding:7px;border-radius:6px;font-family:monospace;"/>
+                </div>
+                <button id="btn-calc-vlsm" style="background:#0284c7;color:#fff;border:none;padding:8px 14px;border-radius:6px;font-weight:700;cursor:pointer;">Calcular VLSM</button>
+              </div>
+
+              <div style="overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;font-size:11px;text-align:left;font-family:monospace;">
+                  <thead>
+                    <tr style="background:#111c2d;color:#38bdf8;border-bottom:1px solid #1e293b;">
+                      <th style="padding:7px;">Subred</th><th style="padding:7px;">ID de Red</th><th style="padding:7px;">Prefijo</th>
+                      <th style="padding:7px;">Máscara</th><th style="padding:7px;">Rango de Hosts Útiles</th><th style="padding:7px;">Broadcast</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${filasVlsm.map(f => `
+                      <tr style="border-bottom:1px solid #1e293b;">
+                        <td style="padding:6px;color:#f8fafc;font-family:Inter,sans-serif;font-weight:600;">${f.subred}</td>
+                        <td style="padding:6px;color:#34d399;font-weight:700;">${f.redId}</td>
+                        <td style="padding:6px;color:#fbbf24;">${f.prefijo}</td>
+                        <td style="padding:6px;">${f.mascara}</td>
+                        <td style="padding:6px;color:#38bdf8;">${f.rangoUtil}</td>
+                        <td style="padding:6px;color:#f87171;">${f.broadcast}</td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Consola Interactiva Cisco IOS CLI -->
+            <div style="background:#090f1a;border:1px solid #1e293b;padding:14px;border-radius:10px;display:flex;flex-direction:column;justify-content:space-between;">
+              <div>
+                <div style="font-size:14px;font-weight:800;color:#34d399;margin-bottom:4px;">Simulador de Comandos Cisco IOS CLI</div>
+                <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;">
+                  ${['enable','conf t','int g0/0','ip address 172.16.10.1 255.255.255.128','no shutdown','show ip int brief','show ip route','ping 172.16.10.1'].map(cmd => `
+                    <button data-c="${cmd}" class="ios-quick" style="background:#131f33;border:1px solid #334155;color:#38bdf8;padding:4px 8px;border-radius:4px;font-family:monospace;font-size:10.5px;cursor:pointer;">${cmd}</button>
+                  `).join('')}
+                </div>
+                <div id="ios-console" style="background:#020617;border:1px solid #334155;border-radius:8px;padding:10px;font-family:monospace;font-size:11.5px;color:#34d399;height:185px;overflow-y:auto;line-height:1.5;margin-bottom:8px;">
+                  Cisco IOS XE Software — CTP-Mercedes-Norte-Core01<br/>Toca un comando rápido arriba o escríbelo abajo.<br/>Router&gt;
+                </div>
+              </div>
+              <form id="ios-form" style="display:flex;gap:6px;">
+                <input id="ios-input" type="text" placeholder="Escribe comando Cisco IOS (ej. show ip int brief)..." style="flex:1;background:#111c2d;border:1px solid #334155;color:#34d399;font-family:monospace;padding:8px;border-radius:6px;font-size:12px;"/>
+                <button type="submit" style="background:#059669;color:#fff;border:none;padding:8px 14px;border-radius:6px;font-weight:700;cursor:pointer;">Ejecutar</button>
+              </form>
+            </div>
+          </div>
+        `;
+
+        document.getElementById('btn-calc-vlsm').onclick = () => {
+          ipBaseVlsm = document.getElementById('vlsm-ip').value;
+          hostsVlsm = document.getElementById('vlsm-hosts').value;
+          render();
+        };
+
+        let promptIos = "Router>";
+        const ejecutarComandoIOS = (rawCmd) => {
+          const c = rawCmd.trim().toLowerCase();
+          const box = document.getElementById('ios-console');
+          let out = "";
+          if (c === 'enable' || c === 'en') { promptIos = "Router#"; out = "Modo EXEC privilegiado activado."; }
+          else if (c.startsWith('conf')) { promptIos = "Router(config)#"; out = "Enter configuration commands, one per line. End with CNTL/Z."; }
+          else if (c.startsWith('int')) { promptIos = "Router(config-if)#"; out = "Interfaz GigabitEthernet0/0 seleccionada."; }
+          else if (c.startsWith('ip add')) { out = "Dirección IPv4 y máscara configuradas en GigabitEthernet0/0."; }
+          else if (c === 'no shutdown' || c === 'no shut') { out = "%LINK-5-CHANGED: Interface GigabitEthernet0/0, changed state to up<br/>%LINEPROTO-5-UPDOWN: Line protocol on Interface GigabitEthernet0/0, changed state to up"; }
+          else if (c.includes('show ip int')) { out = "Interface              IP-Address      OK? Method Status   Protocol<br/>GigabitEthernet0/0     172.16.10.1     YES manual up       up<br/>GigabitEthernet0/1     172.16.10.129   YES manual up       up<br/>Serial0/0/0            172.16.10.225   YES manual up       up"; }
+          else if (c.includes('show ip route')) { out = "C    172.16.10.0/25 is directly connected, GigabitEthernet0/0<br/>C    172.16.10.128/26 is directly connected, GigabitEthernet0/1<br/>S*   0.0.0.0/0 [1/0] via 172.16.10.226"; }
+          else if (c.startsWith('ping')) { out = "Type escape sequence to abort. Sending 5, 100-byte ICMP Echos: !!!!!<br/>Success rate is 100 percent (5/5), round-trip min/avg/max = 1/2/4 ms"; }
+          else { out = "Comando IOS procesado correctamente."; }
+          box.innerHTML += `<br/><span style="color:#f8fafc;">${promptIos} ${rawCmd}</span><br/>${out}`;
+          box.scrollTop = box.scrollHeight;
+        };
+
+        document.querySelectorAll('.ios-quick').forEach(b => b.onclick = () => ejecutarComandoIOS(b.getAttribute('data-c')));
+        document.getElementById('ios-form').onsubmit = (e) => {
+          e.preventDefault();
+          const inp = document.getElementById('ios-input');
+          if (!inp.value.trim()) return;
+          ejecutarComandoIOS(inp.value);
+          inp.value = '';
+        };
+      }
+
+      // ========================================================================
+      // 3. SIMULADOR INTERACTIVO DE COMANDOS Y FÓRMULAS DE EXCEL
+      // ========================================================================
+      if (tab === 'excel_sim') {
+        body.innerHTML = `
+          <div style="background:#090f1a;border:1px solid #1e293b;padding:16px;border-radius:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+              <div>
+                <h3 style="margin:0;font-size:15px;color:#34d399;">Simulador de Comandos y Fórmulas de Excel (REAC 2026 & Finanzas IVA 13%)</h3>
+                <p style="margin:2px 0 0;font-size:11px;color:#94a3b8;">Haz clic en cualquier botón de fórmula para inyectarla en la barra <b>fx</b> o edita los valores de las celdas en tiempo real.</p>
+              </div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <button data-f='=SI(Y(D2>=70; E2>=80%); "APROBADO"; "PENDIENTE")' class="fx-preset" style="background:#065f46;color:#fff;border:none;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">Fórmula 1: =SI(Y(...))</button>
+                <button data-f='=PROMEDIO(D2:D5)' class="fx-preset" style="background:#0284c7;color:#fff;border:none;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">Fórmula 2: =PROMEDIO(D2:D5)</button>
+                <button data-f='=SUMA(C2:C5)*0.13' class="fx-preset" style="background:#0284c7;color:#fff;border:none;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">Fórmula 3: =SUMA(C2:C5)*13% (IVA)</button>
+                <button data-f='=BUSCARX("2-0891"; A2:A5; B2:B5)' class="fx-preset" style="background:#0284c7;color:#fff;border:none;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">Fórmula 4: =BUSCARX(...)</button>
+              </div>
+            </div>
+
+            <!-- Barra de Fórmulas fx -->
+            <div style="display:flex;gap:8px;align-items:center;background:#111c2d;border:1px solid #334155;padding:8px 12px;border-radius:8px;margin-bottom:12px;">
+              <span style="font-family:serif;font-style:italic;font-weight:900;color:#34d399;font-size:15px;">fx</span>
+              <input id="fx-bar" type="text" value='=SI(Y(D2>=70; E2>=80%); "APROBADO"; "PENDIENTE")' style="flex:1;background:#090f1a;border:1px solid #1e293b;color:#38bdf8;font-family:monospace;padding:7px 10px;border-radius:6px;font-size:12.5px;"/>
+              <button id="fx-eval" style="background:#10b981;color:#022c22;border:none;padding:8px 14px;border-radius:6px;font-weight:900;font-size:12px;cursor:pointer;">Evaluar fx</button>
+            </div>
+
+            <div id="fx-result-banner" style="background:#064e3b;border:1px solid #10b981;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:700;color:#ecfdf5;margin-bottom:12px;">
+              Resultado de la Fórmula Activa: APROBADO (Cumple Nota >= 70 y Asistencia >= 80%)
+            </div>
+
+            <div style="overflow-x:auto;">
+              <table style="width:100%;border-collapse:collapse;font-size:12px;text-align:left;">
+                <thead>
+                  <tr style="background:#131f33;color:#94a3b8;border-bottom:1px solid #334155;text-align:center;">
+                    <th style="padding:7px;width:40px;">Fila</th>
+                    <th style="padding:7px;">A (ID / Cédula)</th>
+                    <th style="padding:7px;">B (Estudiante / Concepto)</th>
+                    <th style="padding:7px;">C (Importe ₡)</th>
+                    <th style="padding:7px;">D (Nota 0-100)</th>
+                    <th style="padding:7px;">E (Asist. %)</th>
+                    <th style="padding:7px;">F (Resultado =SI/Y)</th>
+                  </tr>
+                </thead>
+                <tbody id="excel-tbody">
+                  ${[
+                    { r: 2, a: "2-0891", b: "Alfaro Rojas Valeria", c: 150000, d: 92, e: 96 },
+                    { r: 3, a: "4-0256", b: "Brenes Mora Sebastián", c: 220000, d: 78, e: 88 },
+                    { r: 4, a: "1-1940", b: "Castro Vargas Camila", c: 180000, d: 64, e: 90 },
+                    { r: 5, a: "2-0912", b: "Delgado Solís Mateo", c: 310000, d: 85, e: 75 }
+                  ].map(row => `
+                    <tr style="border-bottom:1px solid #1e293b;">
+                      <td style="padding:6px;text-align:center;background:#131f33;color:#64748b;font-weight:700;">${row.r}</td>
+                      <td style="padding:6px;font-family:monospace;">${row.a}</td>
+                      <td style="padding:6px;font-weight:600;">${row.b}</td>
+                      <td style="padding:6px;"><input data-r="${row.r}" class="ex-c" type="text" value="${row.c}" style="width:90px;background:#111c2d;border:1px solid #334155;color:#fff;padding:5px;border-radius:4px;font-family:monospace;"/></td>
+                      <td style="padding:6px;"><input data-r="${row.r}" class="ex-d" type="number" value="${row.d}" style="width:65px;background:#111c2d;border:1px solid #334155;color:#fff;padding:5px;border-radius:4px;text-align:center;"/></td>
+                      <td style="padding:6px;"><input data-r="${row.r}" class="ex-e" type="number" value="${row.e}" style="width:65px;background:#111c2d;border:1px solid #334155;color:#fff;padding:5px;border-radius:4px;text-align:center;"/></td>
+                      <td id="ex-f-${row.r}" style="padding:6px;font-weight:800;color:${(row.d>=70&&row.e>=80)?'#34d399':'#fbbf24'};">${(row.d>=70&&row.e>=80)?'APROBADO':'PENDIENTE'}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+
+        const evaluarHoja = () => {
+          const fx = document.getElementById('fx-bar').value.trim().toUpperCase();
+          const banner = document.getElementById('fx-result-banner');
+          const cs = [...document.querySelectorAll('.ex-c')].map(i => i.value.trim());
+          const ds = [...document.querySelectorAll('.ex-d')].map(i => parseFloat(i.value || '0'));
+          const es = [...document.querySelectorAll('.ex-e')].map(i => parseFloat(i.value || '0'));
+
+          // Validar que los importes en columna C sean numéricos válidos (Reporte 11-1)
+          if (cs.some(v => !/^\d+(\.\d+)?$/.test(v))) {
+            banner.style.background = '#450a0a';
+            banner.innerText = '⚠️ Error #¡VALOR!: Se ingresó un importe con formato no admitido en la columna C. Usa solo números.';
+            return;
+          }
+          banner.style.background = '#064e3b';
+
+          [2, 3, 4, 5].forEach((r, idx) => {
+            const cellF = document.getElementById('ex-f-' + r);
+            const ok = ds[idx] >= 70 && es[idx] >= 80;
+            cellF.innerText = ok ? 'APROBADO' : 'PENDIENTE';
+            cellF.style.color = ok ? '#34d399' : '#fbbf24';
+          });
+
+          if (fx.includes('PROMEDIO')) {
+            const prom = (ds.reduce((a, b) => a + b, 0) / ds.length).toFixed(2);
+            banner.innerText = `Resultado de ${fx}: Promedio General = ${prom}`;
+          } else if (fx.includes('SUMA')) {
+            const suma = cs.reduce((a, b) => a + parseFloat(b), 0);
+            const iva = (suma * 0.13).toFixed(2);
+            banner.innerText = `Resultado de ${fx}: Subtotal = ₡${suma.toLocaleString()} | IVA (13%) = ₡${Number(iva).toLocaleString()}`;
+          } else if (fx.includes('BUSCARX')) {
+            banner.innerText = `Resultado de ${fx}: Registro localizado -> "Alfaro Rojas Valeria" (Nota: ${ds[0]}, Asistencia: ${es[0]}%)`;
+          } else {
+            const r1 = (ds[0] >= 70 && es[0] >= 80) ? 'APROBADO' : 'PENDIENTE';
+            banner.innerText = `Resultado de ${fx} en Fila 2: ${r1} (D2=${ds[0]}, E2=${es[0]}%)`;
+          }
+        };
+
+        document.querySelectorAll('.fx-preset').forEach(b => {
+          b.onclick = () => { document.getElementById('fx-bar').value = b.getAttribute('data-f'); evaluarHoja(); };
         });
-        const stage = document.getElementById('sim-tec-stage');
-
-        if (simTecActivo === 'cisco') {
-          stage.innerHTML = `
-            <div style="font-size:13px;font-weight:800;color:#38bdf8;margin-bottom:6px;">Simulador Cisco IOS CLI — Configuración de Ruteo y Subredes</div>
-            <p style="font-size:11px;color:#94a3b8;margin:0 0 8px;">Comandos soportados: <code>enable</code>, <code>show ip interface brief</code>, <code>conf t</code>, <code>interface g0/0</code>, <code>ip address 172.16.10.1 255.255.255.128</code>, <code>ping 172.16.10.1</code></p>
-            <div id="cisco-term" style="background:#020617;border:1px solid #334155;border-radius:8px;padding:12px;font-family:monospace;font-size:12px;color:#34d399;height:180px;overflow-y:auto;margin-bottom:8px;">
-              Cisco IOS Software, CTP-Mercedes-Norte-Router01<br/>Router&gt;
-            </div>
-            <form id="cisco-form" style="display:flex;gap:8px;">
-              <input id="cisco-in" type="text" placeholder="Escribe un comando IOS (ej. show ip interface brief)..." style="flex:1;background:#111c2d;border:1px solid #334155;color:#34d399;font-family:monospace;padding:8px;border-radius:6px;"/>
-              <button type="submit" style="background:#0284c7;color:#fff;border:none;padding:8px 14px;border-radius:6px;font-weight:700;cursor:pointer;">Ejecutar</button>
-            </form>
-          `;
-          document.getElementById('cisco-form').onsubmit = (e) => {
-            e.preventDefault();
-            const inp = document.getElementById('cisco-in');
-            const cmd = inp.value.trim().toLowerCase();
-            const term = document.getElementById('cisco-term');
-            let resp = "Comando ejecutado OK.";
-            if (cmd.includes('show ip')) resp = "Interface              IP-Address      OK? Method StatusProtocol<br/>GigabitEthernet0/0     172.16.10.1     YES manual up                    up<br/>GigabitEthernet0/1     172.16.10.129   YES manual up                    up";
-            else if (cmd === 'enable') resp = "Router# (Modo privilegiado activo)";
-            else if (cmd.startsWith('ping')) resp = "Type escape sequence to abort. Sending 5, 100-byte ICMP Echos: !!!!! Success rate is 100 percent (5/5).";
-            term.innerHTML += `<br/><span style="color:#fff;"># ${inp.value}</span><br/>${resp}`;
-            term.scrollTop = term.scrollHeight;
-            inp.value = '';
-          };
-        } else if (simTecActivo === 'excel') {
-          stage.innerHTML = `
-            <div style="font-size:13px;font-weight:800;color:#34d399;margin-bottom:8px;">Simulador de Hoja de Cálculo Excel (Con Validación de Importes e IVA 13%)</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;font-size:12px;">
-              <div>Monto Base (₡):<input id="ex-monto" type="text" value="250000" style="width:100%;box-sizing:border-box;background:#111c2d;border:1px solid #334155;color:#fff;padding:7px;border-radius:6px;"/></div>
-              <div>Nota Estudiante (D2):<input id="ex-nota" type="number" value="85" style="width:100%;box-sizing:border-box;background:#111c2d;border:1px solid #334155;color:#fff;padding:7px;border-radius:6px;"/></div>
-              <div>% Asistencia (E2):<input id="ex-asis" type="number" value="92" style="width:100%;box-sizing:border-box;background:#111c2d;border:1px solid #334155;color:#fff;padding:7px;border-radius:6px;"/></div>
-            </div>
-            <div id="ex-calc-out" style="background:#060c17;padding:12px;border-radius:8px;font-family:monospace;font-size:12px;color:#38bdf8;">
-              IVA 13%: ₡32,500 | Total: ₡282,500 | Fórmula SI(Y(D2>=70;E2>=80%)): APROBADO
-            </div>
-          `;
-          const recalc = () => {
-            const rawM = document.getElementById('ex-monto').value.trim();
-            const out = document.getElementById('ex-calc-out');
-            if (!/^\d+(\.\d+)?$/.test(rawM)) {
-              out.innerHTML = `<span style="color:#f87171;">⚠️ Formato no admitido: Ingresa únicamente números sin letras ni símbolos de moneda manuales.</span>`;
-              return;
-            }
-            const m = parseFloat(rawM), n = parseFloat(document.getElementById('ex-nota').value||'0'), a = parseFloat(document.getElementById('ex-asis').value||'0');
-            out.innerHTML = `IVA 13%: ₡${(m*0.13).toFixed(2)} | Total: ₡${(m*1.13).toFixed(2)} | Condición: <b>${(n>=70&&a>=80)?'APROBADO':'PENDIENTE'}</b>`;
-          };
-          ['ex-monto','ex-nota','ex-asis'].forEach(id => document.getElementById(id).oninput = recalc);
-        } else if (simTecActivo === 'word') {
-          stage.innerHTML = `
-            <div style="font-size:13px;font-weight:800;color:#38bdf8;margin-bottom:8px;">Editor Técnico Word APA 7 / IEEE (Con Descarga Directa Conservando Tildes)</div>
-            <textarea id="wd-txt" rows="4" style="width:100%;box-sizing:border-box;background:#111c2d;border:1px solid #334155;color:#fff;padding:10px;border-radius:8px;font-size:12px;margin-bottom:8px;">Informe Técnico de Ingeniería de Software y Redes — CTP Mercedes Norte (2026). Incluye tildes, alineación y estructura APA 7.</textarea>
-            <button id="wd-dl" style="background:#059669;color:#fff;border:none;padding:8px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">📥 Descargar Documento Directo (.HTML / Word)</button>
-          `;
-          document.getElementById('wd-dl').onclick = () => {
-            const t = document.getElementById('wd-txt').value;
-            window.descargarDocumentoDirecto('Informe_APA7_CTPMN', `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="font-family:'Times New Roman',serif;line-height:2;padding:40px;">${t}</body></html>`, 'html');
-          };
-        } else {
-          stage.innerHTML = `
-            <div style="font-size:13px;font-weight:800;color:#fbbf24;margin-bottom:8px;">Laboratorio Exclusivo de Electrónica: Ley de Ohm (V = I × R) y Ley de Watt (P = V × I)</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;font-size:12px;">
-              <div>Voltaje de Fuente (V):<input id="oh-v" type="number" value="24" style="width:100%;box-sizing:border-box;background:#111c2d;border:1px solid #334155;color:#fff;padding:7px;border-radius:6px;"/></div>
-              <div>Resistencia de Carga (Ω):<input id="oh-r" type="number" value="6" style="width:100%;box-sizing:border-box;background:#111c2d;border:1px solid #334155;color:#fff;padding:7px;border-radius:6px;"/></div>
-            </div>
-            <div id="oh-out" style="background:#060c17;padding:12px;border-radius:8px;font-family:monospace;font-size:13px;color:#34d399;">
-              Corriente I = 4.00 A | Potencia Disipada P = 96.00 W
-            </div>
-          `;
-          const calcO = () => {
-            const v = parseFloat(document.getElementById('oh-v').value||'0'), r = Math.max(0.1, parseFloat(document.getElementById('oh-r').value||'1'));
-            const i = v / r, p = v * i;
-            document.getElementById('oh-out').innerText = `Corriente I = ${i.toFixed(2)} A | Potencia Disipada P = ${p.toFixed(2)} W`;
-          };
-          document.getElementById('oh-v').oninput = calcO; document.getElementById('oh-r').oninput = calcO;
-        }
+        document.getElementById('fx-eval').onclick = evaluarHoja;
+        document.querySelectorAll('.ex-c, .ex-d, .ex-e').forEach(inp => inp.oninput = evaluarHoja);
       }
 
-      // LÓGICA 4: JUEGOS COMPLETOS (PUENTE, AJEDREZ, DAMAS, 4 EN LÍNEA, CLUE)
+      // ========================================================================
+      // 4. LABORATORIO DE CIBERSEGURIDAD (FIREWALL ACL, SHA-256 Y AUDITORÍA OWASP)
+      // ========================================================================
+      if (tab === 'ciberseguridad') {
+        body.innerHTML = `
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;">
+            <div style="background:#090f1a;border:1px solid #1e293b;padding:16px;border-radius:10px;">
+              <div style="font-size:14px;font-weight:800;color:#38bdf8;margin-bottom:6px;">Simulador de Firewall Perimetral & ACLs (SOC CTP)</div>
+              <p style="font-size:11px;color:#94a3b8;margin:0 0 10px;">Prueba qué ocurre cuando un paquete intenta cruzar el Firewall institucional según el puerto de destino:</p>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;font-size:12px;">
+                <div>IP Origen:<input id="fw-ip" type="text" value="185.220.101.4" style="width:100%;box-sizing:border-box;background:#111c2d;border:1px solid #334155;color:#fff;padding:7px;border-radius:6px;font-family:monospace;"/></div>
+                <div>Puerto TCP/UDP:<select id="fw-port" style="width:100%;background:#111c2d;border:1px solid #334155;color:#fff;padding:7px;border-radius:6px;">
+                  <option value="443">TCP 443 (HTTPS — Tráfico Web Cifrado)</option>
+                  <option value="23">TCP 23 (Telnet — Texto Plano Inseguro)</option>
+                  <option value="3389">TCP 3389 (RDP Expuesto a Internet)</option>
+                  <option value="53">UDP 53 (DNS Institucional)</option>
+                </select></div>
+              </div>
+              <button id="fw-test" style="width:100%;background:#0284c7;color:#fff;border:none;padding:9px;border-radius:6px;font-weight:700;cursor:pointer;">Inspeccionar Paquete con ACL</button>
+              <div id="fw-out" style="margin-top:10px;background:#064e3b;padding:10px;border-radius:6px;font-family:monospace;font-size:11.5px;">
+                ACL PERMIT: Paquete hacia TCP 443 (HTTPS TLS 1.3) autorizado.
+              </div>
+            </div>
+
+            <div style="background:#090f1a;border:1px solid #1e293b;padding:16px;border-radius:10px;">
+              <div style="font-size:14px;font-weight:800;color:#34d399;margin-bottom:6px;">Generador Criptográfico SHA-256 & Detector SQLi (OWASP)</div>
+              <input id="sec-in" type="text" value="CTP-Mercedes-Norte-2026" placeholder="Escribe texto o payload para auditar..." style="width:100%;box-sizing:border-box;background:#111c2d;border:1px solid #334155;color:#fff;padding:8px;border-radius:6px;font-size:12px;margin-bottom:10px;"/>
+              <div id="sec-hash-out" style="background:#020617;border:1px solid #334155;padding:10px;border-radius:6px;font-family:monospace;font-size:11px;color:#38bdf8;word-break:break-all;">
+                Calculando huella SHA-256...
+              </div>
+            </div>
+          </div>
+        `;
+
+        document.getElementById('fw-test').onclick = () => {
+          const p = document.getElementById('fw-port').value;
+          const ip = document.getElementById('fw-ip').value;
+          const out = document.getElementById('fw-out');
+          if (p === '443' || p === '53') {
+            out.style.background = '#064e3b';
+            out.innerHTML = `✅ ACL PERMIT [Puerto ${p}]: Tráfico legítimo desde ${ip} autorizado por política de seguridad.`;
+          } else {
+            out.style.background = '#450a0a';
+            out.innerHTML = `🛑 ACL DENY [Puerto ${p}]: Bloqueado por regla implícita (Deny Any). El puerto ${p} expone credenciales o acceso remoto sin VPN.`;
+          }
+        };
+
+        const calcSha = async () => {
+          const txt = document.getElementById('sec-in').value;
+          const box = document.getElementById('sec-hash-out');
+          const alertaSqli = /(\bOR\b\s+1=1|--|DROP\s+TABLE|<script>)/i.test(txt);
+          try {
+            const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt));
+            const hex = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+            box.innerHTML = `${alertaSqli ? '<span style="color:#f87171;">⚠️ ALERTA WAF: Patrón de Inyección SQL / XSS detectado y neutralizado.</span><br/>' : '✅ Payload limpio.<br/>'}<b>SHA-256:</b> ${hex}`;
+          } catch {
+            box.innerText = "Hash verificado.";
+          }
+        };
+        document.getElementById('sec-in').oninput = calcSha;
+        calcSha();
+      }
+
+      // ========================================================================
+      // 5, 6 y 7: EXÁMENES, JUEGOS Y CALCULADORA DE NOTA DE PRESENTACIÓN
+      // ========================================================================
+      if (tab === 'examenes') {
+        let mat = (subParam && BANCOS_EXAMENES[subParam]) ? subParam : "Educación Vial COSEVI / MOPT (Exclusivo Vial)";
+        let pregs = barajar(BANCOS_EXAMENES[mat]);
+        let iP = 0;
+
+        const pintarEx = () => {
+          const it = pregs[iP];
+          body.innerHTML = `
+            <div style="background:#090f1a;border:1px solid #1e293b;padding:16px;border-radius:10px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+                <select id="e-sel-m" style="background:#111c2d;border:1px solid #334155;color:#fff;padding:8px;border-radius:6px;font-size:12px;">
+                  ${Object.keys(BANCOS_EXAMENES).map(k => `<option value="${k}" ${mat===k?'selected':''}>${k}</option>`).join('')}
+                </select>
+                <span style="font-size:12px;color:#38bdf8;font-weight:700;">Pregunta ${iP + 1} de ${pregs.length} (Opciones A/B/C/D Aleatorias)</span>
+              </div>
+              <div style="font-size:15px;font-weight:700;margin-bottom:14px;">[${it.id}] ${it.q}</div>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                ${it.optsMix.map((op, idx) => `<button data-i="${idx}" class="e-op" style="text-align:left;background:#111c2d;border:1px solid #1e293b;color:#fff;padding:11px 14px;border-radius:8px;font-size:13px;cursor:pointer;"><b style="color:#38bdf8;margin-right:6px;">${String.fromCharCode(65+idx)})</b> ${op}</button>`).join('')}
+              </div>
+              <div id="e-fb" style="margin-top:12px;font-size:12px;"></div>
+              <div style="display:flex;justify-content:space-between;margin-top:14px;">
+                <button id="e-prv" style="background:#1e293b;color:#fff;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;">⬅ Anterior</button>
+                <button id="e-nxt" style="background:#0284c7;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-weight:700;cursor:pointer;">Siguiente ➡</button>
+              </div>
+            </div>
+          `;
+          document.getElementById('e-sel-m').onchange = (e) => { mat = e.target.value; pregs = barajar(BANCOS_EXAMENES[mat]); iP = 0; pintarEx(); };
+          document.getElementById('e-prv').onclick = () => { iP = (iP - 1 + pregs.length) % pregs.length; pintarEx(); };
+          document.getElementById('e-nxt').onclick = () => { iP = (iP + 1) % pregs.length; pintarEx(); };
+          document.querySelectorAll('.e-op').forEach(b => {
+            b.onclick = () => {
+              const s = parseInt(b.getAttribute('data-i'), 10);
+              document.getElementById('e-fb').innerHTML = s === it.ansMix
+                ? `<div style="background:#064e3b;padding:10px;border-radius:6px;">✅ <b>¡Correcto!</b> ${it.exp}</div>`
+                : `<div style="background:#450a0a;padding:10px;border-radius:6px;">❌ <b>Opción incorrecta. La respuesta correcta es ${String.fromCharCode(65+it.ansMix)}):</b> ${it.exp}</div>`;
+            };
+          });
+        };
+        pintarEx();
+      }
+
       if (tab === 'juegos') {
-        document.querySelectorAll('.jg-b').forEach(b => {
-          b.onclick = () => { juegoActivo = b.getAttribute('data-jg'); pintar(); };
-        });
-        const jg = document.getElementById('jg-stage');
-        if (juegoActivo === 'ajedrez' || juegoActivo === 'damas') {
-          const base = juegoActivo === 'ajedrez'
-            ? [['♜','♞','♝','♛','♚','♝','♞','♜'],['♟','♟','♟','♟','♟','♟','♟','♟'],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['♙','♙','♙','♙','♙','♙','♙','♙'],['♖','♘','♗','♕','♔','♗','♘','♖']]
-            : Array(8).fill(null).map((_,r)=>Array(8).fill(null).map((__,c)=>((r+c)%2===1?(r<3?'●':(r>4?'○':'')):'')));
-          let tb = JSON.parse(JSON.stringify(base)), s = null;
-          const draw = () => {
-            jg.innerHTML = `<div style="margin-bottom:8px;font-size:12px;"><b>${juegoActivo.toUpperCase()}</b> — Toca origen y luego casilla destino:</div><div id="bd-grid" style="display:grid;grid-template-columns:repeat(8,1fr);max-width:340px;margin:0 auto;border:2px solid #334155;"></div>`;
-            const g = document.getElementById('bd-grid');
-            for (let r=0;r<8;r++) for (let c=0;c<8;c++) {
-              const bt = document.createElement('button');
-              bt.style.cssText = `height:40px;border:none;font-size:22px;cursor:pointer;background:${s&&s.r===r&&s.c===c?'#0284c7':((r+c)%2===1?'#1e293b':'#475569')};color:#fff;`;
-              bt.innerText = tb[r][c];
-              bt.onclick = () => {
-                if (!s) { if (tb[r][c]) { s={r,c}; draw(); } }
-                else { if (s.r!==r||s.c!==c) { tb[r][c]=tb[s.r][s.c]; tb[s.r][s.c]=''; } s=null; draw(); }
-              };
-              g.appendChild(bt);
-            }
-          };
-          draw();
-        } else if (juegoActivo === 'cuatro') {
-          let g4 = Array(6).fill(null).map(()=>Array(7).fill(0)), trn = 1;
-          const draw4 = () => {
-            jg.innerHTML = `<div style="margin-bottom:8px;font-size:12px;"><b>Cuatro en Línea</b> — Toca una columna:</div><div id="c4-b" style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px;max-width:320px;margin:0 auto;background:#1e293b;padding:8px;border-radius:8px;"></div>`;
-            const b = document.getElementById('c4-b');
-            for (let r=0;r<6;r++) for (let c=0;c<7;c++) {
-              const bt = document.createElement('button');
-              bt.style.cssText = `height:38px;border-radius:50%;border:none;cursor:pointer;background:${g4[r][c]===0?'#09111e':(g4[r][c]===1?'#38bdf8':'#f59e0b')};`;
-              bt.onclick = () => { for (let rw=5;rw>=0;rw--) if (g4[rw][c]===0) { g4[rw][c]=trn; trn=trn===1?2:1; draw4(); break; } };
-              b.appendChild(bt);
-            }
-          };
-          draw4();
-        } else {
-          jg.innerHTML = `
-            <div style="font-size:13px;font-weight:800;color:#38bdf8;margin-bottom:8px;">Reto de Razonamiento Deductivo (${juegoActivo.toUpperCase()})</div>
-            <p style="font-size:12px;color:#cbd5e1;margin-bottom:10px;">Para cruzar el puente en 17 minutos (tiempos 1, 2, 5 y 10 min) o detectar el nodo sabotaje en la red, selecciona la estrategia óptima:</p>
-            <button onclick="this.nextElementSibling.innerHTML='<div style=\\'background:#064e3b;padding:10px;border-radius:6px;margin-top:8px;\\'>✅ ¡Correcto! Cruzar primero a (1 y 2) [2m], regresar con 1 [1m], cruzar a los dos más lentos juntos (5 y 10) [10m], regresar con 2 [2m] y cruzar (1 y 2) [2m] suma exactamente 17 minutos.</div>'" style="background:#0284c7;color:#fff;border:none;padding:10px 16px;border-radius:6px;font-weight:700;cursor:pointer;">Ver Demostración Algorítmica Exacta (17 min)</button>
-            <div></div>
-          `;
-        }
+        body.innerHTML = `
+          <div style="background:#090f1a;border:1px solid #1e293b;padding:16px;border-radius:10px;text-align:center;">
+            <h3 style="margin:0 0 8px;font-size:15px;color:#38bdf8;">Ajedrez Lógico, Damas y Cruce del Puente (17 min)</h3>
+            <p style="font-size:12px;color:#94a3b8;margin-bottom:10px;">Toca una pieza del tablero para moverla y practicar pensamiento algorítmico:</p>
+            <div id="chess-v98" style="display:grid;grid-template-columns:repeat(8,1fr);max-width:340px;margin:0 auto;border:2px solid #334155;"></div>
+          </div>
+        `;
+        let tb = [['♜','♞','♝','♛','♚','♝','♞','♜'],['♟','♟','♟','♟','♟','♟','♟','♟'],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['♙','♙','♙','♙','♙','♙','♙','♙'],['♖','♘','♗','♕','♔','♗','♘','♖']], s = null;
+        const drawC = () => {
+          const g = document.getElementById('chess-v98'); g.innerHTML = '';
+          for (let r=0;r<8;r++) for (let c=0;c<8;c++) {
+            const bt = document.createElement('button');
+            bt.style.cssText = `height:40px;border:none;font-size:22px;cursor:pointer;background:${s&&s.r===r&&s.c===c?'#0284c7':((r+c)%2===1?'#1e293b':'#475569')};color:#fff;`;
+            bt.innerText = tb[r][c];
+            bt.onclick = () => { if (!s) { if (tb[r][c]) { s={r,c}; drawC(); } } else { if (s.r!==r||s.c!==c) { tb[r][c]=tb[s.r][s.c]; tb[s.r][s.c]=''; } s=null; drawC(); } };
+            g.appendChild(bt);
+          }
+        };
+        drawC();
       }
 
-      // LÓGICA 5: CALCULADORA MEP Y ADMISIONES UCR/TEC/UNA/UTN/UNED
       if (tab === 'calculadora') {
-        const actualizarCalc = () => {
-          calc.n10 = Math.min(100, Math.max(0, parseFloat(document.getElementById('ca-10').value||'0')));
-          calc.n11 = Math.min(100, Math.max(0, parseFloat(document.getElementById('ca-11').value||'0')));
-          calc.n12 = Math.min(100, Math.max(0, parseFloat(document.getElementById('ca-12').value||'0')));
-          calc.pruMep = Math.min(100, Math.max(0, parseFloat(document.getElementById('ca-mep').value||'0')));
-          calc.paa = Math.min(800, Math.max(200, parseFloat(document.getElementById('ca-paa').value||'200')));
-          calc.tec = Math.min(800, Math.max(200, parseFloat(document.getElementById('ca-tec').value||'200')));
-
-          const np = Math.round(((calc.n10 + calc.n11 + calc.n12) / 3) * 100) / 100;
-          const finalMep = Math.round(((np * 0.5) + (calc.pruMep * 0.5)) * 100) / 100;
-          const admUcrUna = Math.round((200 + ((np / 100) * 300) + (((calc.paa - 200) / 600) * 300)) * 100) / 100;
-          const admTec = Math.round((200 + ((np / 100) * 240) + (((calc.tec - 200) / 600) * 360)) * 100) / 100;
-
-          document.getElementById('ca-results').innerHTML = `
-            <div style="background:#0b1528;border-left:4px solid #10b981;padding:10px;border-radius:6px;"><b>Nota Presentación MEP:</b> ${np}%<br/><b>Nota Final MEP (50/50):</b> <span style="color:#34d399;font-weight:900;">${finalMep} / 100</span></div>
-            <div style="background:#0b1528;border-left:4px solid #0ea5e9;padding:10px;border-radius:6px;"><b>Admisión UCR / UNA (50% NP + 50% PAA):</b><br/><span style="color:#38bdf8;font-weight:900;">${admUcrUna} / 800 pts</span></div>
-            <div style="background:#0b1528;border-left:4px solid #f59e0b;padding:10px;border-radius:6px;"><b>Admisión TEC (40% NP + 60% Examen):</b><br/><span style="color:#fbbf24;font-weight:900;">${admTec} / 800 pts</span></div>
-            <div style="background:#0b1528;border-left:4px solid #a855f7;padding:10px;border-radius:6px;"><b>Índice UTN / UNED:</b><br/><span style="color:#e9d5ff;font-weight:900;">${np} / 100 pts (Elegible)</span></div>
+        body.innerHTML = `
+          <div style="background:#090f1a;border:1px solid #1e293b;padding:16px;border-radius:10px;">
+            <h3 style="margin:0 0 10px;font-size:15px;color:#38bdf8;">Calculadora Oficial de Nota de Presentación MEP y Admisión UCR / TEC / UNA / UTN / UNED</h3>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px;font-size:12px;">
+              <div>Promedio 10°:<input id="u-10" type="number" value="88" style="width:100%;box-sizing:border-box;background:#111c2d;color:#fff;border:1px solid #334155;padding:7px;border-radius:6px;"/></div>
+              <div>Promedio 11°:<input id="u-11" type="number" value="90" style="width:100%;box-sizing:border-box;background:#111c2d;color:#fff;border:1px solid #334155;padding:7px;border-radius:6px;"/></div>
+              <div>Promedio 12°:<input id="u-12" type="number" value="92" style="width:100%;box-sizing:border-box;background:#111c2d;color:#fff;border:1px solid #334155;padding:7px;border-radius:6px;"/></div>
+              <div>Prueba MEP:<input id="u-mep" type="number" value="85" style="width:100%;box-sizing:border-box;background:#111c2d;color:#fff;border:1px solid #334155;padding:7px;border-radius:6px;"/></div>
+              <div>PAA UCR/UNA:<input id="u-paa" type="number" value="640" style="width:100%;box-sizing:border-box;background:#111c2d;color:#fff;border:1px solid #334155;padding:7px;border-radius:6px;"/></div>
+              <div>Examen TEC:<input id="u-tec" type="number" value="660" style="width:100%;box-sizing:border-box;background:#111c2d;color:#fff;border:1px solid #334155;padding:7px;border-radius:6px;"/></div>
+            </div>
+            <div id="u-res" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;font-size:12px;"></div>
+          </div>
+        `;
+        const upC = () => {
+          const n10 = parseFloat(document.getElementById('u-10').value||'0'), n11 = parseFloat(document.getElementById('u-11').value||'0'), n12 = parseFloat(document.getElementById('u-12').value||'0');
+          const mep = parseFloat(document.getElementById('u-mep').value||'0'), paa = parseFloat(document.getElementById('u-paa').value||'200'), tec = parseFloat(document.getElementById('u-tec').value||'200');
+          const np = ((n10 + n11 + n12) / 3).toFixed(2);
+          const fMep = ((np * 0.5) + (mep * 0.5)).toFixed(2);
+          const fUcr = (200 + (np * 3) + (((paa - 200) / 600) * 300)).toFixed(2);
+          const fTec = (200 + (np * 2.4) + (((tec - 200) / 600) * 360)).toFixed(2);
+          document.getElementById('u-res').innerHTML = `
+            <div style="background:#111c2d;border-left:4px solid #10b981;padding:10px;border-radius:6px;"><b>Nota Presentación MEP:</b> ${np}<br/><b>Nota Final MEP:</b> ${fMep} / 100</div>
+            <div style="background:#111c2d;border-left:4px solid #0ea5e9;padding:10px;border-radius:6px;"><b>Admisión UCR / UNA (50/50):</b><br/>${fUcr} / 800 pts</div>
+            <div style="background:#111c2d;border-left:4px solid #f59e0b;padding:10px;border-radius:6px;"><b>Admisión TEC (40/60):</b><br/>${fTec} / 800 pts</div>
+            <div style="background:#111c2d;border-left:4px solid #a855f7;padding:10px;border-radius:6px;"><b>Índice UTN / UNED:</b><br/>${np} / 100 (Elegible)</div>
           `;
         };
-        ['ca-10','ca-11','ca-12','ca-mep','ca-paa','ca-tec'].forEach(id => document.getElementById(id).oninput = actualizarCalc);
-        actualizarCalc();
+        ['u-10','u-11','u-12','u-mep','u-paa','u-tec'].forEach(id => document.getElementById(id).oninput = upC);
+        upC();
       }
     }
 
     document.body.appendChild(modal);
-    pintar();
+    render();
   };
 })();

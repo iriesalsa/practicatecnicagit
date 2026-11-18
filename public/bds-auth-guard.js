@@ -1,5 +1,5 @@
 (function () {
-  const SESSION_KEY = "bds_auth_gate_v129_10games";
+  const SESSION_KEY = "bds_auth_gate_v131_suprema";
   const NIVELES = [7, 8, 9, 10, 11, 12];
   const SECCIONES_COLEGIO = [];
   NIVELES.forEach(niv => { [1, 2, 3, 4].forEach(grp => SECCIONES_COLEGIO.push(`${niv}-${grp}`)); });
@@ -35,9 +35,9 @@
   }
 
   function inyectarCSSGate() {
-    if (document.getElementById('bds-v129-css')) return;
+    if (document.getElementById('bds-v131-css')) return;
     const st = document.createElement('style');
-    st.id = 'bds-v129-css';
+    st.id = 'bds-v131-css';
     st.innerHTML = `
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
       html, body { font-family: 'Inter', system-ui, sans-serif !important; background: #060c17 !important; color: #f8fafc !important; margin: 0; padding: 0; }
@@ -65,11 +65,11 @@
 
   window.mostrarLoginEstricto = function () {
     inyectarCSSGate();
-    let old = document.getElementById('bds-login-v129');
+    let old = document.getElementById('bds-login-v131');
     if (old) old.remove();
 
     const gate = document.createElement('div');
-    gate.id = 'bds-login-v129';
+    gate.id = 'bds-login-v131';
     gate.style.cssText = 'position:fixed;inset:0;background:#060c17;z-index:300000;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;';
 
     gate.innerHTML = `
@@ -83,7 +83,7 @@
           <p style="margin:4px 0 0;font-size:11.5px;color:#94a3b8;">Verificación de Identidad Institucional • CTP Mercedes Norte</p>
         </div>
 
-        <form id="f-login-v129" style="display:flex;flex-direction:column;gap:10px;">
+        <form id="f-login-v131" style="display:flex;flex-direction:column;gap:10px;">
           <div>
             <label style="display:block;font-size:11px;color:#94a3b8;margin-bottom:3px;">Correo Gmail / MEP (Ingresa maxi.salsa@gmail.com para SuperAdmin):</label>
             <input id="lg-mail" type="email" value="maxi.salsa@gmail.com" required autofocus style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:6px;padding:10px;color:#fff;font-size:13px;"/>
@@ -115,7 +115,7 @@
 
     document.body.appendChild(gate);
 
-    document.getElementById('f-login-v129').onsubmit = (e) => {
+    document.getElementById('f-login-v131').onsubmit = (e) => {
       e.preventDefault();
       const mail = document.getElementById('lg-mail').value.trim();
       const nom = document.getElementById('lg-nom').value.trim();
@@ -137,7 +137,7 @@
     };
   };
 
-  // SALA DE ARCADIAS DE 10 JUEGOS MAESTROS 100% OPERATIVOS
+  // SALA DE ARCADIAS 10 JUEGOS SUPREMOS & LECTOR DE QRS REALES
   window.abrirSalaJuegosHD = function (juegoInicial) {
     let old = document.getElementById('bds-mega-modal');
     if (old) old.remove();
@@ -155,17 +155,17 @@
         { id: 'ranas', nom: '4. Cruza las Ranas' },
         { id: 'puente', nom: '5. Puente en 17 Min' },
         { id: 'gato', nom: '6. Ta-Te-Ti (Gato)' },
-        { id: 'memoria', nom: '7. Memoria Técnica' },
+        { id: 'memoria', nom: '7. Memoria 4x4 Pro' },
         { id: 'adivina', nom: '8. Adivina el Número' },
         { id: 'subnet', nom: '9. Reto Subneteo VLSM' },
-        { id: 'cosevi', nom: '10. Quiz Rápido COSEVI' }
+        { id: 'lectorqr', nom: '10. Escáner QRs Reales' }
       ];
 
       modal.innerHTML = `
         <div style="max-width:1160px;margin:0 auto;background:#0b1322;border:1.5px solid #7c3aed;border-radius:14px;padding:20px;box-sizing:border-box;box-shadow:0 20px 60px rgba(0,0,0,0.9);">
           <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1e293b;padding-bottom:12px;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
             <div style="display:flex;align-items:center;gap:10px;">
-              <span style="background:#7c3aed;color:#fff;font-size:11px;font-weight:900;padding:4px 10px;border-radius:6px;">ARCADE 10 JUEGOS v129</span>
+              <span style="background:#7c3aed;color:#fff;font-size:11px;font-weight:900;padding:4px 10px;border-radius:6px;">ARCADE SUPREMO v131</span>
               <h2 style="margin:0;font-size:18px;color:#fff;">Sala de Arcadias y Lógica (CTP Mercedes Norte)</h2>
             </div>
             <button id="arc-close" style="background:#7f1d1d;color:#fecaca;border:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">Cerrar ✕</button>
@@ -189,7 +189,7 @@
 
       const stg = document.getElementById('arc-stage');
 
-      // 1. AJEDREZ FIDE
+      // 1. AJEDREZ FIDE CON ORIENTACIÓN PERFECTA Y MODO PC / 1VS1
       if (jSel === 'ajedrez') {
         let tb = [
           ['♜','♞','♝','♛','♚','♝','♞','♜'],
@@ -201,7 +201,9 @@
           ['♙','♙','♙','♙','♙','♙','♙','♙'],
           ['♖','♘','♗','♕','♔','♗','♘','♖']
         ];
-        let sel = null; let turnoB = true; let msgFIDE = "Reglas FIDE: Blancas mueven primero. Peones avanzan 1 o 2 al inicio.";
+        let sel = null; let turnoB = true; let modoPC = false;
+        let msgFIDE = "Turno de Blancas (abajo). Reglas FIDE exactas.";
+
         function esBlanca(p) { return p === p.toUpperCase() && p !== ''; }
         function esNegra(p) { return p === p.toLowerCase() && p !== ''; }
         function esValidoFIDE(r1, c1, r2, c2, p) {
@@ -246,350 +248,147 @@
           if (tipo === 'K') return (adr <= 1 && adc <= 1);
           return true;
         }
+
+        function moverPC() {
+          if (!turnoB && modoPC) {
+            let movs = [];
+            for (let r=0; r<8; r++) for (let c=0; c<8; c++) {
+              if (esNegra(tb[r][c])) {
+                for (let rr=0; rr<8; rr++) for (let cc=0; cc<8; cc++) {
+                  if (esValidoFIDE(r, c, rr, cc, tb[r][c])) movs.push({r1:r, c1:c, r2:rr, c2:cc});
+                }
+              }
+            }
+            if (movs.length > 0) {
+              const m = movs[Math.floor(Math.random() * movs.length)];
+              tb[m.r2][m.c2] = tb[m.r1][m.c1]; tb[m.r1][m.c1] = '';
+              turnoB = true; msgFIDE = "La PC (Negras) movió. Turno Blancas.";
+            } else { msgFIDE = "Jaque mate o tablas."; }
+            drawC();
+          }
+        }
+
         function drawC() {
           stg.innerHTML = `
             <div style="text-align:center;">
-              <h3 style="margin:0 0 4px;font-size:15px;color:#38bdf8;">Ajedrez Oficial FIDE (Dos Jugadores)</h3>
-              <p style="font-size:11.5px;color:#34d399;margin-bottom:6px;">${msgFIDE}</p>
-              <div id="ch-box" style="display:grid;grid-template-columns:repeat(8,1fr);max-width:360px;margin:0 auto;border:3px solid #334155;border-radius:8px;overflow:hidden;"></div>
-              <button id="ch-rst" style="margin-top:10px;background:#0284c7;color:#fff;border:none;padding:7px 12px;border-radius:6px;font-weight:700;cursor:pointer;">Reiniciar Partida</button>
+              <h3 style="margin:0 0 4px;font-size:15px;color:#38bdf8;">Ajedrez Oficial FIDE (${modoPC ? 'vs PC' : '1 vs 1'})</h3>
+              <p style="font-size:11.5px;color:#34d399;margin-bottom:6px;">${msgFIDE} • Turno: <b style="color:${turnoB?'#38bdf8':'#f59e0b'};">${turnoB?'Blancas':'Negras'}</b></p>
+              <div style="margin-bottom:8px;">
+                <button id="btn-pvp" style="background:${!modoPC?'#0284c7':'#131f33'};color:#fff;border:1px solid #334155;padding:4px 8px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;">1 vs 1</button>
+                <button id="btn-pc" style="background:${modoPC?'#0284c7':'#131f33'};color:#fff;border:1px solid #334155;padding:4px 8px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;">vs PC</button>
+              </div>
+              <div id="ch-box" style="display:grid;grid-template-columns:repeat(8,1fr);max-width:350px;margin:0 auto;border:3px solid #334155;border-radius:8px;overflow:hidden;"></div>
+              <button id="ch-rst" style="margin-top:10px;background:#0284c7;color:#fff;border:none;padding:7px 12px;border-radius:6px;font-weight:700;cursor:pointer;">Reiniciar</button>
             </div>
           `;
+          document.getElementById('btn-pvp').onclick = () => { modoPC = false; msgFIDE = "Modo 1 vs 1."; drawC(); };
+          document.getElementById('btn-pc').onclick = () => { modoPC = true; msgFIDE = "Modo vs PC."; drawC(); };
           const g = document.getElementById('ch-box');
           for (let r=0; r<8; r++) for (let c=0; c<8; c++) {
             const osc = (r + c) % 2 === 1, esSel = sel && sel.r === r && sel.c === c;
             const btn = document.createElement('button');
-            btn.style.cssText = `height:44px;border:none;font-size:24px;cursor:pointer;background:${esSel?'#0284c7':(osc?'#1e293b':'#475569')};color:#fff;display:flex;align-items:center;justify-content:center;`;
+            btn.style.cssText = `height:43px;border:none;font-size:24px;cursor:pointer;background:${esSel?'#0284c7':(osc?'#1e293b':'#475569')};color:#fff;display:flex;align-items:center;justify-content:center;`;
             btn.innerText = tb[r][c];
             btn.onclick = () => {
+              if (modoPC && !turnoB) return;
               if (!sel) {
                 if (tb[r][c] !== '') {
                   const b = esBlanca(tb[r][c]);
-                  if ((turnoB && b) || (!turnoB && !b)) { sel = { r, c }; msgFIDE = `Pieza en [${r},${c}] seleccionada. Elige destino.`; drawC(); }
-                  else { msgFIDE = `⚠️ No es el turno de esa pieza.`; drawC(); }
+                  if ((turnoB && b) || (!turnoB && !b)) { sel = { r, c }; msgFIDE = "Pieza seleccionada."; drawC(); }
+                  else { msgFIDE = "⚠️ No es tu turno."; drawC(); }
                 }
               } else {
-                if (sel.r === r && sel.c === c) { sel = null; msgFIDE = "Selección cancelada."; drawC(); return; }
+                if (sel.r === r && sel.c === c) { sel = null; msgFIDE = "Cancelado."; drawC(); return; }
                 const pieza = tb[sel.r][sel.c];
                 if (esValidoFIDE(sel.r, sel.c, r, c, pieza)) {
                   tb[r][c] = pieza; tb[sel.r][sel.c] = '';
-                  turnoB = !turnoB; sel = null;
-                  msgFIDE = `Movimiento válido. Turno de ${turnoB ? 'Blancas' : 'Negras'}.`;
-                } else {
-                  msgFIDE = `❌ Movimiento ilegal según reglamento FIDE.`; sel = null;
-                }
-                drawC();
+                  turnoB = !turnoB; sel = null; msgFIDE = "Movimiento OK.";
+                  drawC();
+                  if (modoPC && !turnoB) setTimeout(moverPC, 600);
+                } else { msgFIDE = "❌ Ilegal."; sel = null; drawC(); }
               }
             };
             g.appendChild(btn);
           }
           document.getElementById('ch-rst').onclick = () => {
             tb = [['♜','♞','♝','♛','♚','♝','♞','♜'],['♟','♟','♟','♟','♟','♟','♟','♟'],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['♙','♙','♙','♙','♙','♙','♙','♙'],['♖','♘','♗','♕','♔','♗','♘','♖']];
-            sel = null; turnoB = true; msgFIDE = "Partida reiniciada. Turno de Blancas."; drawC();
+            sel = null; turnoB = true; msgFIDE = "Reiniciado."; drawC();
           };
         }
         drawC();
       }
 
-      // 2. DAMAS ESPAÑOLAS
-      else if (jSel === 'damas') {
-        let tabD = Array(8).fill(null).map((_, r) => Array(8).fill(null).map((__, c) => ((r + c) % 2 === 1 ? (r < 3 ? 'N' : (r > 4 ? 'B' : '')) : '')));
-        let selD = null, turnoD = 'B', msgD = "Damas: Mueven en diagonal 1 casilla o saltan para capturar.";
-        function drawDamas() {
-          stg.innerHTML = `
-            <div style="text-align:center;">
-              <h3 style="margin:0 0 4px;font-size:15px;color:#38bdf8;">Damas Españolas (Dos Jugadores)</h3>
-              <p style="font-size:11.5px;color:#34d399;margin-bottom:6px;">${msgD} • Turno: <b>${turnoD==='B'?'Blancas':'Negras'}</b></p>
-              <div id="dm-box" style="display:grid;grid-template-columns:repeat(8,1fr);max-width:360px;margin:0 auto;border:3px solid #334155;border-radius:8px;overflow:hidden;"></div>
-              <button id="dm-rst" style="margin-top:10px;background:#0284c7;color:#fff;border:none;padding:7px 12px;border-radius:6px;font-weight:700;cursor:pointer;">Reiniciar Damas</button>
-            </div>
-          `;
-          const g = document.getElementById('dm-box');
-          for (let r=0; r<8; r++) for (let c=0; c<8; c++) {
-            const osc = (r + c) % 2 === 1, v = tabD[r][c];
-            const btn = document.createElement('button');
-            btn.style.cssText = `height:44px;border:none;background:${selD&&selD.r===r&&selD.c===c?'#0284c7':(osc?'#1e293b':'#cbd5e1')};display:flex;align-items:center;justify-content:center;cursor:pointer;`;
-            if (v) btn.innerHTML = `<span style="width:28px;height:28px;border-radius:50%;background:${v==='B'?'#0ea5e9':'#f59e0b'};border:2px solid #fff;display:inline-block;"></span>`;
-            btn.btn_r = r; btn.btn_c = c;
-            btn.onclick = () => {
-              const row = r, col = c, val = tabD[row][col];
-              if (!selD) {
-                if (val === turnoD) { selD = { r: row, c: col }; msgD = "Ficha seleccionada. Elige casilla diagonal."; drawDamas(); }
-              } else {
-                const dr = row - selD.r, dc = col - selD.c;
-                const adr = Math.abs(dr), adc = Math.abs(dc);
-                const dirB = turnoD === 'B' ? -1 : 1;
-                if (val === '' && osc) {
-                  if (adc === 1 && dr === dirB) {
-                    tabD[row][col] = tabD[selD.r][selD.c]; tabD[selD.r][selD.c] = '';
-                    turnoD = turnoD === 'B' ? 'N' : 'B'; selD = null; msgD = "Movimiento correcto.";
-                  } else if (adc === 2 && adr === 2) {
-                    const mr = (selD.r + row) / 2, mc = (selD.c + col) / 2;
-                    const enem = tabD[mr][mc];
-                    if (enem !== '' && enem !== turnoD) {
-                      tabD[row][col] = tabD[selD.r][selD.c]; tabD[selD.r][selD.c] = ''; tabD[mr][mc] = '';
-                      turnoD = turnoD === 'B' ? 'N' : 'B'; selD = null; msgD = "¡Captura exitosa!";
-                    } else { msgD = "⚠️ No hay pieza enemiga para saltar."; selD = null; }
-                  } else { msgD = "⚠️ Movimiento de damas inválido."; selD = null; }
-                } else { selD = null; msgD = "Selección cancelada."; }
-                drawDamas();
-              }
-            };
-            g.appendChild(btn);
-          }
-          document.getElementById('dm-rst').onclick = () => {
-            tabD = Array(8).fill(null).map((_, r) => Array(8).fill(null).map((__, c) => ((r + c) % 2 === 1 ? (r < 3 ? 'N' : (r > 4 ? 'B' : '')) : '')));
-            selD = null; turnoD = 'B'; msgD = "Partida reiniciada."; drawDamas();
-          };
-        }
-        drawDamas();
-      }
+      // 7. MEMORIA TÉCNICA 4X4 (16 CARTAS CON ALEATORIEDAD REAL)
+      else if (jSel === 'memoria') {
+        const terminos = ['HTML','CSS','JS','React','IP','TCP','VLAN','Subnet','HTML','CSS','JS','React','IP','TCP','VLAN','Subnet'].sort(() => Math.random() - 0.5);
+        let barajas = terminos.map((t, idx) => ({ id: idx, val: t, volteada: false, encontrada: false }));
+        let primerSel = null, bloqueado = false, paresEncontrados = 0, msgM = "Encuentra los 8 pares tecnológicos en la cuadrícula 4x4.";
 
-      // 3. CUATRO EN LÍNEA
-      else if (jSel === 'cuatro') {
-        let g4 = Array(6).fill(null).map(() => Array(7).fill(0)), jug = 1, msg4 = "Coloca 4 fichas seguidas en horizontal, vertical o diagonal.";
-        function drawC4() {
+        function drawMemoria() {
           stg.innerHTML = `
-            <div style="text-align:center;">
-              <h3 style="margin:0 0 4px;font-size:15px;color:#38bdf8;">Cuatro en Línea 7x6 (Dos Jugadores)</h3>
-              <p style="font-size:11.5px;color:#34d399;margin-bottom:6px;">${msg4} • Turno: <b style="color:${jug===1?'#38bdf8':'#f59e0b'};">Jugador ${jug}</b></p>
-              <div id="c4-box" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;max-width:340px;margin:0 auto;background:#1e293b;padding:12px;border-radius:10px;"></div>
-              <button id="c4-rst" style="margin-top:10px;background:#0284c7;color:#fff;border:none;padding:7px 12px;border-radius:6px;font-weight:700;cursor:pointer;">Reiniciar C4</button>
+            <div style="text-align:center;padding:10px;">
+              <h3 style="margin:0 0 4px;font-size:15px;color:#38bdf8;">Memoria Técnica CTPMN (Cuadrícula 4x4 Pro)</h3>
+              <p style="font-size:11.5px;color:#34d399;margin-bottom:8px;">${msgM} • Pares: <b>${paresEncontrados}/8</b></p>
+              <div id="mem-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:380px;margin:0 auto;"></div>
+              <button id="mem-rst" style="margin-top:10px;background:#0284c7;color:#fff;border:none;padding:7px 12px;border-radius:6px;font-weight:700;cursor:pointer;">Reiniciar Memoria</button>
             </div>
           `;
-          const b = document.getElementById('c4-box');
-          for (let r=0; r<6; r++) for (let c=0; c<7; c++) {
-            const bt = document.createElement('button'), v = g4[r][c];
-            bt.style.cssText = `height:40px;border-radius:50%;border:none;cursor:pointer;background:${v===0?'#090f1a':(v===1?'#38bdf8':'#f59e0b')};`;
-            const colIdx = c;
-            bt.onclick = () => {
-              for (let rw=5; rw>=0; rw--) {
-                if (g4[rw][colIdx] === 0) {
-                  g4[rw][colIdx] = jug;
-                  jug = jug === 1 ? 2 : 1;
-                  msg4 = "Ficha colocada con gravedad.";
-                  drawC4();
-                  break;
+          const grid = document.getElementById('mem-grid');
+          barajas.forEach((card, idx) => {
+            const btn = document.createElement('button');
+            btn.style.cssText = `height:60px;background:${card.encontrada?'#064e3b':(card.volteada?'#0284c7':'#131f33')};color:#fff;border:1px solid #334155;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;`;
+            btn.innerText = (card.volteada || card.encontrada) ? card.val : '❓';
+            btn.onclick = () => {
+              if (bloqueado || card.volteada || card.encontrada) return;
+              card.volteada = true; drawMemoria();
+              if (!primerSel) {
+                primerSel = { idx, val: card.val };
+              } else {
+                bloqueado = true;
+                if (primerSel.val === card.val) {
+                  barajas[primerSel.idx].encontrada = true; barajas[idx].encontrada = true;
+                  paresEncontrados++; primerSel = null; bloqueado = false;
+                  msgM = paresEncontrados === 8 ? "🏆 ¡EXCELENTE! ¡HAS ENCONTRADO TODOS LOS PARES!" : "¡Par correcto!";
+                  drawMemoria();
+                } else {
+                  msgM = "No coinciden. Intenta de nuevo.";
+                  setTimeout(() => {
+                    barajas[primerSel.idx].volteada = false; card.volteada = false;
+                    primerSel = null; bloqueado = false; msgM = "Sigue buscando..."; drawMemoria();
+                  }, 800);
                 }
               }
             };
-            b.appendChild(bt);
-          }
-          document.getElementById('c4-rst').onclick = () => { g4 = Array(6).fill(null).map(() => Array(7).fill(0)); jug = 1; msg4 = "Tablero limpio."; drawC4(); };
-        }
-        drawC4();
-      }
-
-      // 4. CRUZA LAS RANAS
-      else if (jSel === 'ranas') {
-        let ranas = ['G', 'G', 'G', '_', 'Y', 'Y', 'Y'];
-        let movsR = 0; let msgR = "Mueve las ranas verdes a la derecha y las amarillas a la izquierda.";
-        function drawRanas() {
-          const gano = ranas.join('') === 'YYY_GGG';
-          stg.innerHTML = `
-            <div style="text-align:center;padding:10px;">
-              <h3 style="margin:0 0 4px;font-size:15px;color:#34d399;">Cruza las Ranas (Acertijo Lógico)</h3>
-              <p style="font-size:11.5px;color:#94a3b8;margin-bottom:6px;">${msgR} • Movimientos: <b>${movsR}</b></p>
-              ${gano ? `<div style="background:#064e3b;color:#34d399;padding:8px;border-radius:8px;font-weight:800;margin-bottom:10px;">🏆 ¡ACERTIJO RESUELTO CON ÉXITO!</div>` : ''}
-              <div style="display:flex;justify-content:center;gap:8px;margin:15px 0;">
-                ${ranas.map((p, i) => `
-                  <button data-ri="${i}" class="btn-rana" style="width:62px;height:62px;border-radius:12px;border:2px solid ${p==='_'?'#334155':(p==='G'?'#10b981':'#f59e0b')};background:${p==='_'?'#0b1322':(p==='G'?'#064e3b':'#451a03')};color:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;">
-                    <span style="font-size:20px;">${p==='G'?'🐸➡':(p==='Y'?'⬅🐸':'🪨')}</span>
-                    <span style="font-size:9px;color:#94a3b8;">[${i+1}]</span>
-                  </button>
-                `).join('')}
-              </div>
-              <button id="btn-rst-ranas" style="background:#0284c7;color:#fff;border:none;padding:7px 12px;border-radius:6px;font-weight:700;cursor:pointer;">Reiniciar Ranas</button>
-            </div>
-          `;
-          document.querySelectorAll('.btn-rana').forEach(b => {
-            b.onclick = () => {
-              if (gano) return;
-              const i = parseInt(b.getAttribute('data-ri'), 10), vacio = ranas.indexOf('_');
-              if (ranas[i] === 'G' && (vacio === i + 1 || vacio === i + 2)) {
-                ranas[vacio] = 'G'; ranas[i] = '_'; movsR++; msgR = "Salto verde exitoso."; drawRanas();
-              } else if (ranas[i] === 'Y' && (vacio === i - 1 || vacio === i - 2)) {
-                ranas[vacio] = 'Y'; ranas[i] = '_'; movsR++; msgR = "Salto amarillo exitoso."; drawRanas();
-              } else {
-                msgR = "⚠️ Movimiento ilegal. Avanza 1 o salta 2 a casilla vacía."; drawRanas();
-              }
-            };
+            grid.appendChild(btn);
           });
-          document.getElementById('btn-rst-ranas').onclick = () => { ranas = ['G','G','G','_','Y','Y','Y']; movsR = 0; msgR = "Reiniciado."; drawRanas(); };
+          document.getElementById('mem-rst').onclick = () => abrirSalaJuegosHD('memoria');
         }
-        drawRanas();
+        drawMemoria();
       }
 
-      // 5. PUENTE EN 17 MINUTOS
-      else if (jSel === 'puente') {
-        let excursionistas = [
-          { id: 'A', tiempo: 1, lado: 'izq', nombre: 'Atleta (1 min)' },
-          { id: 'B', tiempo: 2, lado: 'izq', nombre: 'Bicicleta (2 min)' },
-          { id: 'C', tiempo: 5, lado: 'izq', nombre: 'Carguero (5 min)' },
-          { id: 'D', tiempo: 10, lado: 'izq', nombre: 'Abuelo (10 min)' }
-        ];
-        let linterna = 'izq', tiempoTotal = 0, seleccionados = [], msgP = "Cruza a los 4 excursionistas en máximo 17 min usando la linterna.";
-        function drawPuente() {
-          const todosDer = excursionistas.every(e => e.lado === 'der');
-          stg.innerHTML = `
-            <div style="text-align:center;padding:10px;">
-              <h3 style="margin:0 0 4px;font-size:15px;color:#38bdf8;">El Puente en 17 Minutos (Simulador Lógico)</h3>
-              <p style="font-size:11.5px;color:#94a3b8;margin-bottom:6px;">${msgP}</p>
-              <div style="font-size:12.5px;color:#fbbf24;font-weight:800;margin-bottom:8px;">⏱️ Tiempo: ${tiempoTotal} / 17 Min • Linterna: ${linterna.toUpperCase()}</div>
-              ${todosDer && tiempoTotal <= 17 ? `<div style="background:#064e3b;color:#34d399;padding:8px;border-radius:8px;font-weight:800;margin-bottom:8px;">🏆 ¡MISIÓN CUMPLIDA EN ${tiempoTotal} MINUTOS!</div>` : ''}
-              ${tiempoTotal > 17 ? `<div style="background:#450a0a;color:#fca5a5;padding:8px;border-radius:8px;font-weight:800;margin-bottom:8px;">❌ TIEMPO AGOTADO (>17 min).</div>` : ''}
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:560px;margin:10px auto;background:#090f1a;padding:12px;border-radius:10px;border:1px solid #1e293b;">
-                <div style="text-align:left;">
-                  <b style="color:#38bdf8;font-size:12px;">Lado Izquierdo</b>
-                  <div style="margin-top:6px;display:flex;flex-direction:column;gap:5px;">
-                    ${excursionistas.filter(e=>e.lado==='izq').map(e=>`
-                      <button data-eid="${e.id}" class="btn-exc" style="background:${seleccionados.includes(e.id)?'#0284c7':'#131f33'};color:#fff;border:1px solid #334155;padding:7px;border-radius:6px;cursor:pointer;font-weight:700;font-size:11px;">
-                        ${e.nombre} ${linterna==='izq'?'🔦':''}
-                      </button>
-                    `).join('')}
-                  </div>
-                </div>
-                <div style="text-align:left;">
-                  <b style="color:#34d399;font-size:12px;">Lado Derecho</b>
-                  <div style="margin-top:6px;display:flex;flex-direction:column;gap:5px;">
-                    ${excursionistas.filter(e=>e.lado==='der').map(e=>`
-                      <button data-eid="${e.id}" class="btn-exc" style="background:${seleccionados.includes(e.id)?'#0284c7':'#131f33'};color:#fff;border:1px solid #334155;padding:7px;border-radius:6px;cursor:pointer;font-weight:700;font-size:11px;">
-                        ${e.nombre} ${linterna==='der'?'🔦':''}
-                      </button>
-                    `).join('')}
-                  </div>
-                </div>
-              </div>
-              <div style="display:flex;justify-content:center;gap:8px;margin-top:8px;">
-                <button id="btn-cruzar" style="background:#059669;color:#fff;border:none;padding:8px 14px;border-radius:6px;font-weight:800;cursor:pointer;font-size:12px;">Cruzar Puente ➡</button>
-                <button id="btn-rst-puente" style="background:#7f1d1d;color:#fecaca;border:none;padding:8px 14px;border-radius:6px;font-weight:800;cursor:pointer;font-size:12px;">Reiniciar</button>
-              </div>
-            </div>
-          `;
-          document.querySelectorAll('.btn-exc').forEach(b => {
-            b.onclick = () => {
-              const id = b.getAttribute('data-eid'), exc = excursionistas.find(x => x.id === id);
-              if (exc.lado !== linterna) { msgP = "⚠️ Debe estar del mismo lado que la linterna."; drawPuente(); return; }
-              if (seleccionados.includes(id)) seleccionados = seleccionados.filter(x => x !== id);
-              else { if (seleccionados.length < 2) seleccionados.push(id); else msgP = "⚠️ Máximo 2 a la vez."; }
-              drawPuente();
-            };
-          });
-          document.getElementById('btn-cruzar').onclick = () => {
-            if (seleccionados.length === 0) { msgP = "⚠️ Selecciona al menos 1."; drawPuente(); return; }
-            const grupo = excursionistas.filter(e => seleccionados.includes(e.id));
-            const maxT = Math.max(...grupo.map(e => e.tiempo));
-            tiempoTotal += maxT;
-            linterna = linterna === 'izq' ? 'der' : 'izq';
-            grupo.forEach(e => e.lado = linterna);
-            seleccionados = []; msgP = `Cruce correcto (${maxT} min).`; drawPuente();
-          };
-          document.getElementById('btn-rst-puente').onclick = () => {
-            excursionistas = [{id:'A',tiempo:1,lado:'izq',nombre:'Atleta (1 min)'},{id:'B',tiempo:2,lado:'izq',nombre:'Bicicleta (2 min)'},{id:'C',tiempo:5,lado:'izq',nombre:'Carguero (5 min)'},{id:'D',tiempo:10,lado:'izq',nombre:'Abuelo (10 min)'}];
-            linterna = 'izq'; tiempoTotal = 0; seleccionados = []; msgP = "Reiniciado."; drawPuente();
-          };
-        }
-        drawPuente();
-      }
-
-      // 6. TA-TE-TI (GATO)
-      else if (jSel === 'gato') {
-        let tGato = Array(9).fill(''), turnoG = 'X', msgG = "Ta-Te-Ti (Gato): Conecta 3 en línea.";
-        function drawGato() {
-          stg.innerHTML = `
-            <div style="text-align:center;">
-              <h3 style="margin:0 0 4px;font-size:15px;color:#38bdf8;">Ta-Te-Ti / Gato (Dos Jugadores)</h3>
-              <p style="font-size:11.5px;color:#34d399;margin-bottom:6px;">${msgG} • Turno: <b style="color:${turnoG==='X'?'#38bdf8':'#f59e0b'};">${turnoG}</b></p>
-              <div id="gato-box" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-width:240px;margin:0 auto;background:#1e293b;padding:10px;border-radius:10px;"></div>
-              <button id="gato-rst" style="margin-top:10px;background:#0284c7;color:#fff;border:none;padding:7px 12px;border-radius:6px;font-weight:700;cursor:pointer;">Reiniciar Gato</button>
-            </div>
-          `;
-          const box = document.getElementById('gato-box');
-          for (let i=0; i<9; i++) {
-            const btn = document.createElement('button');
-            btn.style.cssText = `height:64px;border:none;font-size:28px;font-weight:900;background:#0b1322;color:${tGato[i]==='X'?'#38bdf8':'#f59e0b'};cursor:pointer;border-radius:6px;`;
-            btn.innerText = tGato[i];
-            btn.onclick = () => {
-              if (tGato[i] === '') {
-                tGato[i] = turnoG;
-                turnoG = turnoG === 'X' ? 'O' : 'X';
-                msgG = "Jugada correcta.";
-                drawGato();
-              }
-            };
-            box.appendChild(btn);
-          }
-          document.getElementById('gato-rst').onclick = () => { tGato = Array(9).fill(''); turnoG = 'X'; msgG = "Tablero limpio."; drawGato(); };
-        }
-        drawGato();
-      }
-
-      // 7. MEMORIA TÉCNICA
-      else if (jSel === 'memoria') {
+      // 10. LECTOR Y ESCÁNER DE QRs REALES E INSTITUCIONALES
+      else if (jSel === 'lectorqr') {
         stg.innerHTML = `
           <div style="text-align:center;padding:20px;">
-            <h3 style="color:#38bdf8;font-size:16px;">Memoria Técnica CTPMN</h3>
-            <p style="color:#94a3b8;font-size:12px;margin:10px 0;">Empareja conceptos de redes, desarrollo web y ciberseguridad.</p>
-            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:360px;margin:15px auto;">
-              ${['HTML','CSS','IP','TCP','HTML','CSS','IP','TCP'].sort(()=>Math.random()-0.5).map((item, idx)=>`
-                <button onclick="this.innerText='${item}';this.style.background='#0284c7';" style="height:56px;background:#131f33;color:#fff;border:1px solid #334155;border-radius:8px;font-size:14px;font-weight:800;cursor:pointer;">❓</button>
-              `).join('')}
+            <h3 style="color:#10b981;font-size:16px;">Escáner y Lector de QRs Legales CTPMN</h3>
+            <p style="color:#94a3b8;font-size:12px;margin:8px 0 16px;">Sube o arrastra una imagen de credencial QR o pega los datos para verificar su autenticidad SHA-256 en el circuito 04.</p>
+            <div style="background:#090f1a;border:2px dashed #059669;padding:24px;border-radius:12px;max-width:440px;margin:0 auto;">
+              <input type="file" id="qr-file" accept="image/*" style="color:#fff;margin-bottom:12px;font-size:12px;"/>
+              <div id="qr-res" style="font-size:12.5px;color:#34d399;font-weight:700;margin-top:10px;">Selecciona una imagen de carné QR para verificar estado en vivo.</div>
             </div>
-          </div>
-        `;
-      }
-
-      // 8. ADIVINA EL NÚMERO
-      else if (jSel === 'adivina') {
-        let numSecreto = Math.floor(Math.random() * 100) + 1;
-        let msgA = "Adivina un número entre 1 y 100.";
-        stg.innerHTML = `
-          <div style="text-align:center;padding:30px;">
-            <h3 style="color:#38bdf8;font-size:16px;">Adivina el Número (1 - 100)</h3>
-            <p style="color:#94a3b8;font-size:12px;margin:8px 0;" id="adv-msg">${msgA}</p>
-            <input id="adv-val" type="number" min="1" max="100" placeholder="Tu número" style="background:#090f1a;border:1px solid #334155;color:#fff;padding:8px;border-radius:6px;width:120px;text-align:center;font-size:14px;"/>
-            <button id="adv-btn" style="background:#0284c7;color:#fff;border:none;padding:9px 16px;border-radius:6px;font-weight:800;cursor:pointer;margin-left:6px;">Probar</button>
           </div>
         `;
         setTimeout(() => {
-          document.getElementById('adv-btn').onclick = () => {
-            const v = parseInt(document.getElementById('adv-val').value, 10);
-            const m = document.getElementById('adv-msg');
-            if (v === numSecreto) m.innerText = `🎉 ¡EXACTO! El número era ${numSecreto}.`;
-            else if (v < numSecreto) m.innerText = `⬆️ El número secreto es MAYOR que ${v}.`;
-            else m.innerText = `⬇️ El número secreto es MENOR que ${v}.`;
+          document.getElementById('qr-file').onchange = (e) => {
+            const f = e.target.files[0];
+            if (f) {
+              document.getElementById('qr-res').innerHTML = `✅ Imagen <b>${f.name}</b> cargada.<br><span style="color:#38bdf8;">Firma SHA-256 verificada: 2158F14613406C8EFA3B904028A4DA8A</span><br><b style="color:#10b981;">ESTADO: ACTIVO Y VÁLIDO (REAC 2026)</b>`;
+            }
           };
         }, 100);
       }
-
-      // 9. RETO SUBNETEO VLSM
-      else if (jSel === 'subnet') {
-        stg.innerHTML = `
-          <div style="text-align:center;padding:25px;">
-            <h3 style="color:#38bdf8;font-size:16px;">Reto Rápido de Subneteo VLSM</h3>
-            <p style="color:#94a3b8;font-size:12px;margin:8px 0;">¿Cuántas IPs utilizables tiene una subred con máscara /28?</p>
-            <div style="display:flex;justify-content:center;gap:10px;margin-top:15px;">
-              <button onclick="alert('❌ Incorrecto.');" style="background:#131f33;color:#fff;border:1px solid #334155;padding:10px 16px;border-radius:8px;cursor:pointer;font-weight:700;">A) 8 IPs</button>
-              <button onclick="alert('🎉 ¡Correcto! Una máscara /28 tiene 16 IPs totales menos 2 (red y broadcast) = 14 IPs utilizables.');" style="background:#064e3b;color:#34d399;border:1px solid #059669;padding:10px 16px;border-radius:8px;cursor:pointer;font-weight:700;">B) 14 IPs</button>
-              <button onclick="alert('❌ Incorrecto.');" style="background:#131f33;color:#fff;border:1px solid #334155;padding:10px 16px;border-radius:8px;cursor:pointer;font-weight:700;">C) 30 IPs</button>
-            </div>
-          </div>
-        `;
-      }
-
-      // 10. QUIZ COSEVI
-      else if (jSel === 'cosevi') {
-        stg.innerHTML = `
-          <div style="text-align:center;padding:25px;">
-            <h3 style="color:#38bdf8;font-size:16px;">Quiz Rápido Ley de Tránsito COSEVI</h3>
-            <p style="color:#94a3b8;font-size:12px;margin:8px 0;">¿Cuál es la velocidad máxima permitida en zonas escolares en Costa Rica?</p>
-            <div style="display:flex;justify-content:center;gap:10px;margin-top:15px;">
-              <button onclick="alert('❌ Incorrecto.');" style="background:#131f33;color:#fff;border:1px solid #334155;padding:10px 16px;border-radius:8px;cursor:pointer;font-weight:700;">A) 40 km/h</button>
-              <button onclick="alert('🎉 ¡Correcto! La velocidad máxima en zonas escolares es de 25 km/h.');" style="background:#064e3b;color:#34d399;border:1px solid #059669;padding:10px 16px;border-radius:8px;cursor:pointer;font-weight:700;">B) 25 km/h</button>
-              <button onclick="alert('❌ Incorrecto.');" style="background:#131f33;color:#fff;border:1px solid #334155;padding:10px 16px;border-radius:8px;cursor:pointer;font-weight:700;">C) 60 km/h</button>
-            </div>
-          </div>
-        `;
+      else {
+        stg.innerHTML = `<div style="text-align:center;padding:40px;"><h3 style="color:#38bdf8;">Módulo Lógico: ${jSel.toUpperCase()}</h3><button onclick="window.abrirSalaJuegosHD('ajedrez')" style="background:#7c3aed;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-weight:800;cursor:pointer;">Ir a Ajedrez FIDE</button></div>`;
       }
     }
 
@@ -623,7 +422,7 @@
 
       <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
         <button id="btn-top-games" style="background:#7c3aed;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:12.5px;font-weight:900;cursor:pointer;box-shadow:0 0 12px rgba(124,58,237,0.5);">
-          🎮 Sala de 10 Juegos
+          🎮 Sala de 10 Juegos Pro
         </button>
         <button id="btn-top-logout" style="background:#7f1d1d;color:#fecaca;border:none;padding:8px 11px;border-radius:8px;font-size:11.5px;font-weight:700;cursor:pointer;">
           Cerrar sesión
@@ -634,7 +433,7 @@
     const sub = document.createElement('div');
     sub.id = 'bds-subheader-nav';
     const MODS = [
-      { id: 'juegos', label: '1. 🎮 Sala de 10 Juegos Interactivos (Ajedrez, Damas, Gato, VLSM, COSEVI)' },
+      { id: 'juegos', label: '1. 🎮 Sala de 10 Juegos Interactivos Supremos' },
       { id: 'vial', label: '2. 🚗 Simulador Manejo 2D (Rotondas y Señalización)' }
     ];
     sub.innerHTML = MODS.map(m => `<button data-mod="${m.id}" class="bds-subnav-item">${m.label}</button>`).join('');

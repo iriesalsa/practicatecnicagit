@@ -1,197 +1,490 @@
 (function () {
-  const BANCO_PRO_MAX = [
-    { id: "NET-01", esp: "Redes (Subneteo VLSM/FLSM)", niv: "11°", saber: "Subneteo Variable VLSM IPv4", ind: "Segmenta bloques IPv4 según demanda de hosts sin solapar rangos.", q: "Dada la red 172.16.10.0/24: ¿Qué prefijos y máscaras corresponden a Laboratorios (100 hosts), Wi-Fi (50 hosts) y Administración (25 hosts)?", opts: ["Labs: /25 (.128) | Wi-Fi: /26 (.192) | Admin: /27 (.224)", "Labs: /26 (.192) | Wi-Fi: /27 (.224) | Admin: /28 (.240)", "Labs: /24 (.0) | Wi-Fi: /25 (.128) | Admin: /26 (.192)"], ans: 0, exp: "100h -> 7 bits (/25 = 126 útiles); 50h -> 6 bits (/26 = 62 útiles); 25h -> 5 bits (/27 = 30 útiles)." },
-    { id: "NET-02", esp: "Redes (Subneteo VLSM/FLSM)", niv: "11°", saber: "Subneteo Fijo FLSM y Enlaces WAN", ind: "Calcula saltos de bloque fijos y optimiza enlaces punto a punto.", q: "Al dividir 192.168.50.0/24 en 4 subredes iguales (FLSM), ¿cuáles son las 4 direcciones de subred y qué prefijo se usa en un enlace WAN de 2 routers?", opts: ["Subredes: .0, .64, .128 y .192 (/26) | Enlace WAN: /30 (255.255.255.252)", "Subredes: .0 y .128 (/25) | Enlace WAN: /28", "Subredes: .0, .32, .64, .96 (/27) | Enlace WAN: /29"], ans: 0, exp: "Con /26 (.192) el salto es 256-192 = 64. Para WAN de 2 routers se usa /30 (2²-2 = 2 hosts útiles)." },
-    { id: "BAS-01", esp: "Sistemas Numéricos", niv: "10°", saber: "Conversión Binario, Octal, Decimal y Hexadecimal", ind: "Realiza conversiones exactas entre bases 2, 8, 10 y 16.", q: "¿Cuál es la equivalencia exacta del octeto decimal 240 (máscara /28) en Binario, Octal y Hexadecimal?", opts: ["Binario: 11110000 | Octal: 360 | Hexadecimal: F0", "Binario: 11100000 | Octal: 340 | Hexadecimal: E0", "Binario: 11000000 | Octal: 300 | Hexadecimal: C0"], ans: 0, exp: "128+64+32+16 = 240 -> 11110000₂ | En tríos (011 110 000) = 360₈ | En nibbles (1111 0000) = F0₁₆." },
-    { id: "BAS-02", esp: "Sistemas Numéricos", niv: "10°", saber: "Conversión de Máscaras y Direcciones Hexadecimales", ind: "Traduce octetos de red entre hexadecimal, binario y decimal.", q: "El octeto decimal 252 (máscara /30) se representa en Binario, Octal y Hexadecimal como:", opts: ["Binario: 11111100 | Octal: 374 | Hexadecimal: FC", "Binario: 11111000 | Octal: 370 | Hexadecimal: F8", "Binario: 11111110 | Octal: 376 | Hexadecimal: FE"], ans: 0, exp: "252 = 255 - 3 -> 11111100₂ | Octal: 011(3) 111(7) 100(4) = 374₈ | Hex: 1111(F) 1100(C) = FC₁₆." },
-    { id: "IPV6-01", esp: "IPv6 y Protocolos", niv: "12°", saber: "Compresión RFC 5952, ICMPv6 NDP y SLAAC", ind: "Comprime direcciones IPv6 e identifica protocolos de resolución y autoconfiguración.", q: "¿Cuál es la compresión RFC 5952 de 2001:0db8:0000:0000:00a0:0000:0000:0001 y qué protocolo reemplaza a ARP en IPv6?", opts: ["2001:db8::a0:0:0:1 | Protocolo ICMPv6 NDP (Neighbor Solicitation 135 / Advertisement 136)", "2001:db8::a0::1 | Protocolo ARP v6", "2001:0db8::a0:1 | Broadcast ff02::1"], ans: 0, exp: "Los ceros iniciales se eliminan y '::' solo se usa una vez. NDP reemplaza por completo a ARP." },
-    { id: "IPV6-02", esp: "IPv6 y Protocolos", niv: "12°", saber: "Prefijos IPv6 (Link-Local, GUA, ULA y Multicast)", ind: "Distingue el alcance de prefijos IPv6 en topologías empresariales.", q: "En IPv6, ¿cuál prefijo identifica una dirección Link-Local (obligatoria en cada interfaz para NDP/SLAAC) y cuál identifica Multicast?", opts: ["Link-Local: fe80::/10 | Multicast: ff00::/8", "Link-Local: 2000::/3 | Multicast: fc00::/7", "Link-Local: ::1/128 | Multicast: fe80::/10"], ans: 0, exp: "fe80::/10 opera en el enlace local sin cruzar el router; ff00::/8 reemplaza al Broadcast en IPv6." },
-    { id: "SW-01", esp: "Diseño de Software y Calidad", niv: "12°", saber: "Administración de la Calidad (ISO 25010) y Riesgos de Planeación", ind: "Analiza el impacto de omitir la anticipación de riesgos en la arquitectura de software.", q: "¿Cuál es el principal riesgo técnico y económico de iniciar la codificación sin planeación de arquitectura ni matriz de riesgos?", opts: ["Deuda técnica exponencial: corregir un defecto arquitectónico o de seguridad en producción cuesta hasta 10x más que en la fase de diseño", "El sistema se vuelve inmune al Scope Creep", "Disminuye la complejidad ciclomática del código"], ans: 0, exp: "La prevención temprana en el diseño evita retrabajo crítico, caídas en producción y vulnerabilidades de datos." },
-    { id: "SW-02", esp: "Diseño de Software y Calidad", niv: "12°", saber: "Riesgos de Sobre-planeación vs Agilidad Controlada", ind: "Mitiga la parálisis por análisis y el Scope Creep mediante entregas verificables.", q: "¿Cómo se equilibra el riesgo entre la 'Parálisis por Análisis' (sobre-planeación rígida) y la improvisación en el diseño de software?", opts: ["Con planeación iterativa, arquitectura modular, matriz de riesgos viva y criterios de aceptación (Definition of Done)", "Omitiendo toda documentación y pruebas de seguridad", "Congelando el contacto con los usuarios hasta el cierre anual"], ans: 0, exp: "La ingeniería moderna combina arquitectura base sólida con ciclos iterativos validados." },
-    { id: "OFF-01", esp: "Excel y Word Técnico", niv: "10°-12°", saber: "Funciones Lógicas SI/Y/O, BUSCARX y Documentación SRS", ind: "Construye fórmulas condicionales anidadas y documentos técnicos con secciones.", q: "¿Cuál fórmula de Excel evalúa en F2 si Nota (D2)>=70 Y Asistencia (E2)>=80% para mostrar 'APROBADO', y si Nota>=60 con Asistencia>=80% 'AMPLIACIÓN', si no 'REPROBADO'?", opts: ["=SI(Y(D2>=70;E2>=80%);\"APROBADO\";SI(Y(D2>=60;E2>=80%);\"AMPLIACIÓN\";\"REPROBADO\"))", "=SI(O(D2>=70;E2>=80%);\"APROBADO\";\"REPROBADO\")", "=BUSCARX(D2>=70;E2>=80%;\"APROBADO\")"], ans: 0, exp: "El SI anidado combinado con Y() evalúa ambos requisitos reglamentarios en cada nivel." },
-    { id: "ESP-01", esp: "Contabilidad, Electrónica y Logística", niv: "11°-12°", saber: "Prueba Ácida, Ley de Ohm y Punto de Reorden (ROP)", ind: "Resuelve casos cuantitativos de gestión empresarial e industrial.", q: "En Electrónica: 3 resistencias de 30 Ω en paralelo a 20V DC. En Logística: Demanda 50 uds/día, entrega 6 días, seguridad 100 uds. ¿Req/Corriente y ROP?", opts: ["Electrónica: Req = 10 Ω, I = 2 A | Logística: ROP = 400 unidades", "Electrónica: Req = 90 Ω, I = 0.22 A | Logística: ROP = 300 unidades", "Electrónica: Req = 15 Ω, I = 1 A | Logística: ROP = 200 unidades"], ans: 0, exp: "Paralelo: 30/3 = 10 Ω -> I = 20V/10Ω = 2A. Logística: ROP = (50*6) + 100 = 400 uds." }
-  ];
+  // Algoritmo Fisher-Yates para barajar opciones y que la correcta NUNCA sea siempre la opción A (Reporte 11-1 #1)
+  function barajarOpciones(listaPreguntas) {
+    return listaPreguntas.map(item => {
+      const pares = item.opts.map((texto, idx) => ({ texto, esCorrecta: idx === item.ans }));
+      for (let i = pares.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = pares[i];
+        pares[i] = pares[j];
+        pares[j] = temp;
+      }
+      return {
+        ...item,
+        optsBarajadas: pares.map(p => p.texto),
+        ansBarajada: pares.findIndex(p => p.esCorrecta)
+      };
+    });
+  }
 
-  window.abrirMegaSuiteEducativa = function () {
-    let old = document.getElementById('bds-mega-modal');
-    if (old) old.remove();
+  // Bancos Estrictamente Separados por Categoría (Cero mezcla de COSEVI con Ohm o Web con UCR)
+  const BANCOS_POR_MATERIA = {
+    "Desarrollo Web y Software": [
+      { id: "WEB-01", q: "En el desarrollo de aplicaciones React (.jsx), ¿cuál hook permite gestionar el estado local de un componente funcional?", opts: ["useState()", "useHistory()", "createTable()", "getElement()"], ans: 0, exp: "useState declara una variable de estado y su función actualizadora en React." },
+      { id: "WEB-02", q: "En Diseño de Software, ¿cuál es la consecuencia directa de omitir la matriz de riesgos y la planeación arquitectónica?", opts: ["Deuda técnica alta: corregir en producción cuesta hasta 10 veces más que en la etapa de diseño", "Compilación instantánea sin errores", "Reducción del ancho de banda", "Eliminación de pruebas de usuario"], ans: 0, exp: "Anticipar riesgos en el diseño evita vulnerabilidades y retrabajo costoso en producción." },
+      { id: "WEB-03", q: "¿Qué código de estado HTTP confirma que una petición GET o POST fue procesada exitosamente por el servidor?", opts: ["200 OK", "404 Not Found", "500 Internal Server Error", "403 Forbidden"], ans: 0, exp: "La serie 2xx (200 OK / 201 Created) indica éxito en el protocolo HTTP." }
+    ],
+    "Redes, Subneteo e IPv6": [
+      { id: "NET-01", q: "Dada la red 172.16.10.0/24 (VLSM): ¿Qué prefijo y máscara corresponden a Laboratorios (100 hosts) y a Wi-Fi (50 hosts)?", opts: ["Labs: /25 (255.255.255.128) | Wi-Fi: /26 (255.255.255.192)", "Labs: /26 (.192) | Wi-Fi: /27 (.224)", "Labs: /24 (.0) | Wi-Fi: /25 (.128)", "Labs: /30 (.252) | Wi-Fi: /29 (.248)"], ans: 0, exp: "100 hosts requieren 7 bits (/25 = 126 útiles); 50 hosts requieren 6 bits (/26 = 62 útiles)." },
+      { id: "NET-02", q: "¿Cuál es la equivalencia exacta del octeto decimal 240 (máscara /28) en Binario, Octal y Hexadecimal?", opts: ["Binario: 11110000 | Octal: 360 | Hexadecimal: F0", "Binario: 11100000 | Octal: 340 | Hexadecimal: E0", "Binario: 11000000 | Octal: 300 | Hexadecimal: C0", "Binario: 11111100 | Octal: 374 | Hexadecimal: FC"], ans: 0, exp: "128+64+32+16 = 240 -> 11110000₂ = 360₈ = F0₁₆." },
+      { id: "NET-03", q: "¿Cuál es la compresión RFC 5952 de 2001:0db8:0000:0000:00a0:0000:0000:0001 y qué protocolo reemplaza a ARP en IPv6?", opts: ["2001:db8::a0:0:0:1 | Protocolo ICMPv6 NDP (NS/NA)", "2001:db8::a0::1 | Protocolo ARP extendido", "2001:0db8::a0:1 | Broadcast ff02::1", "fe80::1 | Protocolo DHCPv4"], ans: 0, exp: "El doble dos puntos (::) solo se usa una vez; NDP reemplaza a ARP en IPv6." }
+    ],
+    "Admisión UTN / UCR / TEC (Verificado)": [
+      { id: "UTN-08", q: "[Pregunta 8 UTN Corregida] En una progresión aritmética donde el primer término es 7 y la diferencia constante es 4, ¿cuál es el valor exacto del décimo término (a₁₀)?", opts: ["43", "39", "47", "40"], ans: 0, exp: "Fórmula verificada: aₙ = a₁ + (n - 1)·d -> a₁₀ = 7 + (10 - 1)·4 = 7 + 36 = 43." },
+      { id: "UTN-10", q: "[Pregunta 10 UTN Corregida] Si 5 servidores procesan 200 solicitudes en 4 minutos al mismo ritmo, ¿cuántas solicitudes procesarán 8 servidores en 6 minutos?", opts: ["480 solicitudes", "320 solicitudes", "400 solicitudes", "600 solicitudes"], ans: 0, exp: "Cada servidor procesa 200 / (5 * 4) = 10 solicitudes por minuto. Por tanto, 8 servidores en 6 minutos procesan 8 * 6 * 10 = 480 solicitudes." },
+      { id: "UTN-11", q: "Si el 20% de un número equivale a 45, ¿cuál es el 60% de ese mismo número?", opts: ["135", "225", "90", "150"], ans: 0, exp: "Como 60% es el triple de 20%, el resultado es 45 × 3 = 135." }
+    ],
+    "Educación Vial COSEVI / MOPT (Exclusivo Vial)": [
+      { id: "VIAL-01", q: "Según la Ley de Tránsito de Costa Rica, al ingresar y circular dentro de una rotonda, ¿cuál es el sentido correcto de circulación y quién tiene la prioridad de paso?", opts: ["Se circula en sentido antihorario (hacia la derecha) y tiene prioridad el vehículo que ya circula dentro de la rotonda", "Se circula en sentido horario y tiene prioridad quien entra", "Se puede girar en cualquier sentido a 80 km/h", "Tiene prioridad el vehículo que toque bocina"], ans: 0, exp: "En Costa Rica se conduce por la derecha; por tanto, en las rotondas se circula en sentido antihorario a máximo 30 km/h cediendo el paso a quienes ya están dentro." },
+      { id: "VIAL-02", q: "En ausencia de señalización específica, ¿cuál es el límite máximo de velocidad frente a centros educativos y hospitalarios en Costa Rica?", opts: ["25 km/h", "60 km/h", "40 km/h", "50 km/h"], ans: 0, exp: "En zona escolar o frente a centros de salud con presencia de peatones, el límite estricto es de 25 km/h." }
+    ],
+    "Electrónica y Circuitos (Exclusivo Ohm/Watt)": [
+      { id: "ELEC-01", q: "Tres resistencias de 30 Ω conectadas en paralelo a una fuente de 20V DC presentan una resistencia equivalente (Req) y corriente total (It) de:", opts: ["Req = 10 Ω y Corriente Total = 2 A", "Req = 90 Ω y Corriente Total = 0.22 A", "Req = 15 Ω y Corriente Total = 1.33 A", "Req = 30 Ω y Corriente Total = 0.66 A"], ans: 0, exp: "Req = 30 / 3 = 10 Ω. Por Ley de Ohm: I = 20V / 10 Ω = 2 A." }
+    ],
+    "Excel, Word y Gestión Empresarial": [
+      { id: "OFF-01", q: "¿Cuál fórmula de Excel evalúa si Nota (D2)>=70 Y Asistencia (E2)>=80% para mostrar 'APROBADO', de lo contrario 'PENDIENTE'?", opts: ["=SI(Y(D2>=70; E2>=80%); \"APROBADO\"; \"PENDIENTE\")", "=SI(O(D2>=70; E2>=80%); \"APROBADO\"; \"PENDIENTE\")", "=BUSCARX(D2>=70; E2>=80%; \"APROBADO\")", "=SUMA.SI(D2:E2; \">=70\")"], ans: 0, exp: "La función lógica Y() exige el cumplimiento simultáneo de ambos criterios." }
+    ]
+  };
 
-    let xp = parseInt(localStorage.getItem('bds_xp_points') || '500', 10);
-    let aciertos = parseInt(localStorage.getItem('bds_qa_aciertos') || '0', 10);
-    let respondidas = parseInt(localStorage.getItem('bds_qa_total') || '0', 10);
-    let filtro = 'TODAS';
+  window.abrirMegaSuiteEducativa = function (vistaInicial) {
+    let previo = document.getElementById('bds-mega-modal');
+    if (previo) previo.remove();
+
+    let tabActiva = vistaInicial || 'practicas'; // 'practicas' | 'rotonda_cr' | 'ajedrez' | 'chats' | 'tramites'
+    let materiaSel = "Desarrollo Web y Software";
+    let listaActual = barajarOpciones(BANCOS_POR_MATERIA[materiaSel]);
     let idx = 0;
+    let aciertos = 0, totalResp = 0;
 
-    const categorias = ['TODAS', ...new Set(BANCO_PRO_MAX.map(x => x.esp))];
+    // Temporizador MANUAL (Reporte QA 11-1: No iniciar solo)
+    let timerCorriendo = false;
+    let segundos = 0;
+    let intervaloTimer = null;
+    let animRotonda = null;
 
     const wrap = document.createElement('div');
     wrap.id = 'bds-mega-modal';
-    wrap.style.cssText = 'position:fixed;inset:0;background:rgba(3,9,20,0.97);z-index:100001;overflow-y:auto;padding:12px;font-family:system-ui,-apple-system,sans-serif;color:#fff;box-sizing:border-box;';
+    wrap.style.cssText = 'position:fixed;inset:0;background:rgba(6,12,23,0.98);z-index:100001;overflow-y:auto;padding:12px 12px 70px;font-family:system-ui,-apple-system,sans-serif;color:#f8fafc;box-sizing:border-box;';
 
-    function getItems() {
-      return filtro === 'TODAS' ? BANCO_PRO_MAX : BANCO_PRO_MAX.filter(x => x.esp === filtro);
+    function limpiarRecursos() {
+      if (intervaloTimer) clearInterval(intervaloTimer);
+      if (animRotonda) cancelAnimationFrame(animRotonda);
+    }
+
+    function formatearTiempo(s) {
+      const m = Math.floor(s / 60).toString().padStart(2, '0');
+      const sec = (s % 60).toString().padStart(2, '0');
+      return `${m}:${sec}`;
     }
 
     function pintar() {
-      const lista = getItems();
-      if (idx >= lista.length) idx = 0;
-      const it = lista[idx];
-      const notaActual = respondidas > 0 ? Math.round((aciertos / respondidas) * 100) : 100;
+      if (animRotonda) cancelAnimationFrame(animRotonda);
+      if (idx >= listaActual.length) idx = 0;
+      const item = listaActual[idx];
 
       wrap.innerHTML = `
-        <div style="max-width:1080px;margin:0 auto;background:#0b192c;border:1px solid #06b6d4;border-radius:18px;padding:18px;box-sizing:border-box;">
-          <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1e293b;padding-bottom:12px;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+        <div style="max-width:1100px;margin:0 auto;background:#0b1322;border:1px solid #1e293b;border-radius:12px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,0.9);">
+          <!-- Header Sticky Fijo que NUNCA desaparece al bajar en celular (Reporte QA 11-1) -->
+          <div style="position:sticky;top:0;z-index:20;background:#09111e;border-bottom:1px solid #1e293b;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
             <div>
-              <h2 style="margin:0;font-size:18px;color:#22d3ee;">🦉 Suite BDS Pro Max — CTP Mercedes Norte (REAC 2026)</h2>
-              <p style="margin:2px 0 0;font-size:11px;color:#94a3b8;">Simuladores en Tiempo Real + Pruebas de Redes (VLSM/FLSM/IPv6), Bases, Diseño de Software y Excel/Word</p>
+              <h2 style="margin:0;font-size:16px;font-weight:800;color:#f8fafc;">Plataforma Académica & Simuladores — CTP Mercedes Norte</h2>
+              <p style="margin:2px 0 0;font-size:11px;color:#64748b;">Bancos verificados con opciones aleatorias • Módulos independientes sin cruces de materia</p>
             </div>
-            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-              <span id="xp-b" style="background:#064e3b;border:1px solid #10b981;color:#6ee7b7;padding:6px 10px;border-radius:99px;font-size:11px;font-weight:800;">⚡ ${xp} XP | Nota: ${notaActual}% (${aciertos}/${respondidas})</span>
-              <button id="reset-b" style="background:#334155;color:#fff;border:none;padding:7px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">🔄 Reiniciar Nota</button>
-              <button id="csv-b" style="background:#0284c7;color:#fff;border:none;padding:7px 11px;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;">📥 CSV MEP</button>
-              <button id="close-s" style="background:#ef4444;color:#fff;border:none;padding:7px 13px;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;">Cerrar ✕</button>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="background:#111c2d;border:1px solid #1e293b;padding:5px 10px;border-radius:6px;font-size:12px;color:#38bdf8;font-weight:700;">
+                Aciertos: ${aciertos}/${totalResp}
+              </span>
+              <button id="m-close" style="background:#7f1d1d;color:#fecaca;border:1px solid #991b1b;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">Cerrar ✕</button>
             </div>
           </div>
 
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(225px,1fr));gap:10px;margin-bottom:14px;">
-            <div style="background:#071220;border:1px solid #1e293b;padding:11px;border-radius:12px;">
-              <div style="font-weight:800;font-size:12px;color:#34d399;margin-bottom:5px;">1. Conversor Dec ↔ Bin / Oct / Hex</div>
-              <input id="s-dec" type="number" value="240" min="0" max="65535" style="width:100%;box-sizing:border-box;background:#0f172a;border:1px solid #334155;color:#fff;padding:7px;border-radius:7px;margin-bottom:5px;font-size:12px;"/>
-              <div id="o-dec" style="font-family:monospace;font-size:11px;line-height:1.5;">Bin: <b style="color:#22d3ee;">11110000</b><br/>Oct: <b style="color:#fbbf24;">360</b> | Hex: <b style="color:#34d399;">0xF0</b></div>
-            </div>
+          <!-- Navegación Sobria y Clara (5 Módulos Bien Definidos) -->
+          <div style="display:flex;gap:6px;flex-wrap:wrap;padding:12px 16px;background:#0b1322;border-bottom:1px solid #1e293b;">
+            <button data-t="practicas" class="m-tab" style="padding:8px 12px;border-radius:6px;border:1px solid ${tabActiva==='practicas'?'#0284c7':'#1e293b'};background:${tabActiva==='practicas'?'#0284c7':'#111c2d'};color:#fff;font-size:12px;font-weight:600;cursor:pointer;">1. Simulacros y Redes (Opciones Aleatorias)</button>
+            <button data-t="rotonda_cr" class="m-tab" style="padding:8px 12px;border-radius:6px;border:1px solid ${tabActiva==='rotonda_cr'?'#0284c7':'#1e293b'};background:${tabActiva==='rotonda_cr'?'#0284c7':'#111c2d'};color:#fff;font-size:12px;font-weight:600;cursor:pointer;">2. Simulador Vial 2D (Rotonda Costa Rica)</button>
+            <button data-t="ajedrez" class="m-tab" style="padding:8px 12px;border-radius:6px;border:1px solid ${tabActiva==='ajedrez'?'#0284c7':'#1e293b'};background:${tabActiva==='ajedrez'?'#0284c7':'#111c2d'};color:#fff;font-size:12px;font-weight:600;cursor:pointer;">3. Ajedrez Lógico Estudiantil</button>
+            <button data-t="chats" class="m-tab" style="padding:8px 12px;border-radius:6px;border:1px solid ${tabActiva==='chats'?'#0284c7':'#1e293b'};background:${tabActiva==='chats'?'#0284c7':'#111c2d'};color:#fff;font-size:12px;font-weight:600;cursor:pointer;">4. Canales de Chat por Sección (11-1 / 12-1)</button>
+            <button data-t="tramites" class="m-tab" style="padding:8px 12px;border-radius:6px;border:1px solid ${tabActiva==='tramites'?'#0284c7':'#1e293b'};background:${tabActiva==='tramites'?'#0284c7':'#111c2d'};color:#fff;font-size:12px;font-weight:600;cursor:pointer;">5. Justificar Ausencia / Permiso Personal</button>
+          </div>
 
-            <div style="background:#071220;border:1px solid #1e293b;padding:11px;border-radius:12px;">
-              <div style="font-weight:800;font-size:12px;color:#22d3ee;margin-bottom:5px;">2. Subneteo IPv4 (/24 a /30)</div>
-              <input id="s-cidr" type="range" min="24" max="30" value="26" style="width:100%;"/>
-              <div id="o-cidr" style="font-family:monospace;font-size:11px;line-height:1.5;">Prefijo: <b>/26</b> (.192)<br/>Salto: <b>64</b> | Hosts Útiles: <b style="color:#34d399;">62</b></div>
-            </div>
+          <div style="padding:16px;">
+            ${tabActiva === 'practicas' ? `
+              <!-- MÓDULO 1: SIMULACROS CON ALEATORIEDAD REAL + TEMPORIZADOR MANUAL + CALCULADORAS -->
+              <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;background:#09111e;padding:12px;border-radius:8px;border:1px solid #1e293b;">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                  <label style="font-size:12px;font-weight:700;color:#94a3b8;">Materia Estricta:</label>
+                  <select id="sel-materia-estricta" style="background:#111c2d;border:1px solid #334155;color:#fff;padding:7px 10px;border-radius:6px;font-size:12px;">
+                    ${Object.keys(BANCOS_POR_MATERIA).map(m => `<option value="${m}" ${materiaSel===m?'selected':''}>${m}</option>`).join('')}
+                  </select>
+                  <button id="btn-rebarajar" style="background:#1e293b;border:1px solid #334155;color:#38bdf8;padding:7px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">Barajar Opciones (A/B/C/D)</button>
+                </div>
 
-            <div style="background:#071220;border:1px solid #1e293b;padding:11px;border-radius:12px;">
-              <div style="font-weight:800;font-size:12px;color:#c084fc;margin-bottom:5px;">3. Compresor IPv6 (RFC 5952)</div>
-              <input id="s-v6" type="text" value="2001:0db8:0000:0000:00a0:0000:0000:0001" style="width:100%;box-sizing:border-box;background:#0f172a;border:1px solid #334155;color:#fff;padding:7px;border-radius:7px;font-size:10px;font-family:monospace;margin-bottom:5px;"/>
-              <div id="o-v6" style="font-family:monospace;font-size:11px;color:#e9d5ff;word-break:break-all;"><b>2001:db8::a0:0:0:1</b></div>
-            </div>
-
-            <div style="background:#071220;border:1px solid #1e293b;padding:11px;border-radius:12px;">
-              <div style="font-weight:800;font-size:12px;color:#fbbf24;margin-bottom:5px;">4. Evaluador Excel / Nota REAC</div>
-              <div style="display:flex;gap:5px;margin-bottom:5px;">
-                <input id="s-nota" type="number" value="85" min="0" max="100" placeholder="Nota" style="width:50%;background:#0f172a;border:1px solid #334155;color:#fff;padding:6px;border-radius:7px;font-size:12px;"/>
-                <input id="s-asis" type="number" value="92" min="0" max="100" placeholder="%Asist" style="width:50%;background:#0f172a;border:1px solid #334155;color:#fff;padding:6px;border-radius:7px;font-size:12px;"/>
+                <!-- Control Manual del Temporizador (No inicia solo) -->
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span id="lbl-timer" style="font-family:monospace;font-size:13px;color:#e2e8f0;background:#111c2d;padding:5px 10px;border-radius:6px;border:1px solid #1e293b;">
+                    Tiempo: ${formatearTiempo(segundos)} ${timerCorriendo ? '(Activo)' : '(Pausado)'}
+                  </span>
+                  <button id="btn-toggle-timer" style="background:${timerCorriendo?'#b45309':'#059669'};color:#fff;border:none;padding:7px 11px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">
+                    ${timerCorriendo ? 'Pausar Reloj' : 'Iniciar Simulacro Con Tiempo'}
+                  </button>
+                </div>
               </div>
-              <div id="o-excel" style="font-family:monospace;font-size:11px;color:#34d399;"><b>APROBADO (Nivel 3 REAC)</b></div>
-            </div>
-          </div>
 
-          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
-            ${categorias.map(c => `
-              <button data-cat="${c}" class="cat-btn" style="padding:7px 11px;border-radius:8px;border:1px solid ${filtro===c?'#22d3ee':'#334155'};background:${filtro===c?'#06b6d4':'#0f172a'};color:${filtro===c?'#020617':'#cbd5e1'};font-size:11px;font-weight:800;cursor:pointer;">
-                ${c}
-              </button>
-            `).join('')}
-          </div>
+              <!-- Tarjeta de Pregunta con Opciones Barajadas -->
+              <div style="background:#09111e;border:1px solid #1e293b;padding:16px;border-radius:10px;margin-bottom:16px;">
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:#38bdf8;margin-bottom:8px;font-weight:700;">
+                  <span>Área Exclusiva: ${materiaSel} • Código [${item.id}]</span>
+                  <span>Ejercicio ${idx + 1} de ${listaActual.length}</span>
+                </div>
+                <div style="font-size:15px;font-weight:700;color:#f8fafc;margin-bottom:14px;line-height:1.45;">${item.q}</div>
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                  ${item.optsBarajadas.map((op, i) => `
+                    <button data-i="${i}" class="btn-opt-qa" style="text-align:left;background:#111c2d;border:1px solid #1e293b;color:#f8fafc;padding:11px 14px;border-radius:8px;font-size:13px;cursor:pointer;transition:border 0.15s;">
+                      <b style="color:#38bdf8;margin-right:6px;">${String.fromCharCode(65 + i)})</b> ${op}
+                    </button>
+                  `).join('')}
+                </div>
+                <div id="qa-feedback" style="margin-top:12px;font-size:12px;"></div>
+                <div style="display:flex;justify-content:space-between;margin-top:14px;">
+                  <button id="qa-prev" style="background:#1e293b;color:#fff;border:none;padding:8px 14px;border-radius:6px;font-size:12px;cursor:pointer;">Anterior</button>
+                  <button id="qa-next" style="background:#0284c7;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">Siguiente Ejercicio</button>
+                </div>
+              </div>
 
-          <div style="background:#071220;border:1px solid #06b6d4;padding:16px;border-radius:14px;">
-            <div style="background:#0b192c;border-left:4px solid #06b6d4;padding:8px 10px;border-radius:6px;margin-bottom:10px;font-size:11px;color:#cbd5e1;">
-              <b>${it.esp} (${it.niv})</b> • <b>Saber Esencial:</b> ${it.saber} • <b>Indicador Cotidiano REAC:</b> ${it.ind}
-            </div>
-            <div style="font-size:15px;font-weight:800;margin-bottom:12px;line-height:1.4;">[${it.id}] ${it.q}</div>
-            <div style="display:flex;flex-direction:column;gap:8px;">
-              ${it.opts.map((op, i) => `<button data-i="${i}" class="opt-b" style="min-height:44px;text-align:left;background:#112236;border:1px solid #334155;color:#fff;padding:10px 12px;border-radius:9px;font-size:13px;cursor:pointer;"><b>${String.fromCharCode(65+i)})</b> ${op}</button>`).join('')}
-            </div>
-            <div id="fb-b" style="margin-top:10px;font-size:12px;"></div>
-            <div style="display:flex;justify-content:space-between;margin-top:12px;gap:8px;">
-              <button id="p-q" style="background:#1e293b;color:#fff;border:none;padding:9px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">⬅ Anterior</button>
-              <button id="n-q" style="background:#06b6d4;color:#020617;border:none;padding:9px 14px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">Siguiente (${idx+1}/${lista.length}) ➡</button>
-            </div>
+              <!-- Herramientas de Laboratorio Rápidas (Redes / Bases / IPv6) -->
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;">
+                <div style="background:#09111e;border:1px solid #1e293b;padding:12px;border-radius:8px;">
+                  <div style="font-size:12px;font-weight:700;color:#38bdf8;margin-bottom:6px;">Conversor Decimal ↔ Bin / Oct / Hex</div>
+                  <input id="calc-dec" type="number" value="240" min="0" max="65535" style="width:100%;box-sizing:border-box;background:#111c2d;border:1px solid #334155;color:#fff;padding:6px;border-radius:6px;font-size:12px;margin-bottom:6px;"/>
+                  <div id="calc-dec-out" style="font-family:monospace;font-size:11px;color:#cbd5e1;">Bin: <b>11110000</b> | Oct: <b>360</b> | Hex: <b>0xF0</b></div>
+                </div>
+                <div style="background:#09111e;border:1px solid #1e293b;padding:12px;border-radius:8px;">
+                  <div style="font-size:12px;font-weight:700;color:#38bdf8;margin-bottom:6px;">Calculadora Subneteo IPv4 (/24 a /30)</div>
+                  <input id="calc-cidr" type="range" min="24" max="30" value="26" style="width:100%;"/>
+                  <div id="calc-cidr-out" style="font-family:monospace;font-size:11px;color:#cbd5e1;">Prefijo: <b>/26</b> (.192) | Salto: <b>64</b> | Útiles: <b>62</b></div>
+                </div>
+                <div style="background:#09111e;border:1px solid #1e293b;padding:12px;border-radius:8px;">
+                  <div style="font-size:12px;font-weight:700;color:#38bdf8;margin-bottom:6px;">Compresor IPv6 (RFC 5952)</div>
+                  <input id="calc-v6" type="text" value="2001:0db8:0000:0000:00a0:0000:0000:0001" style="width:100%;box-sizing:border-box;background:#111c2d;border:1px solid #334155;color:#fff;padding:6px;border-radius:6px;font-size:11px;font-family:monospace;margin-bottom:6px;"/>
+                  <div id="calc-v6-out" style="font-family:monospace;font-size:11px;color:#38bdf8;"><b>2001:db8::a0:0:0:1</b></div>
+                </div>
+              </div>
+            ` : tabActiva === 'rotonda_cr' ? `
+              <!-- MÓDULO 2: SIMULADOR VIAL 2D CORREGIDO (SENTIDO ANTIHORARIO COSTA RICA + FLECHAS) -->
+              <div style="background:#09111e;border:1px solid #1e293b;padding:16px;border-radius:10px;text-align:center;">
+                <h3 style="margin:0 0 6px;font-size:15px;color:#38bdf8;">Simulador Vial 2D — Rotonda de Costa Rica (Circulación por la Derecha / Sentido Antihorario)</h3>
+                <p style="margin:0 0 12px;font-size:12px;color:#cbd5e1;background:#111c2d;display:inline-block;padding:6px 14px;border-radius:6px;border:1px solid #0284c7;">
+                  Instrucciones de Control: Usa las <b>Flechas del Teclado (⬆️ ⬇️ ⬅️ ➡️)</b>, las teclas <b>W A S D</b> o los <b>botones táctiles en pantalla</b> para mover tu vehículo azul. Cede el paso a los vehículos que ya giran en sentido antihorario dentro de la rotonda.
+                </p>
+                <div style="display:flex;justify-content:center;margin-bottom:10px;">
+                  <canvas id="canvas-rotonda-cr" width="520" height="320" style="max-width:100%;background:#0f172a;border:1px solid #334155;border-radius:10px;"></canvas>
+                </div>
+                <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;">
+                  <button data-dir="up" class="btn-car-move" style="background:#1e293b;color:#fff;border:1px solid #334155;padding:8px 16px;border-radius:6px;font-weight:700;cursor:pointer;">⬆️ Avanzar</button>
+                  <button data-dir="left" class="btn-car-move" style="background:#1e293b;color:#fff;border:1px solid #334155;padding:8px 16px;border-radius:6px;font-weight:700;cursor:pointer;">⬅️ Izquierda</button>
+                  <button data-dir="right" class="btn-car-move" style="background:#1e293b;color:#fff;border:1px solid #334155;padding:8px 16px;border-radius:6px;font-weight:700;cursor:pointer;">➡️ Derecha</button>
+                  <button data-dir="down" class="btn-car-move" style="background:#1e293b;color:#fff;border:1px solid #334155;padding:8px 16px;border-radius:6px;font-weight:700;cursor:pointer;">⬇️ Retroceder</button>
+                </div>
+              </div>
+            ` : tabActiva === 'ajedrez' ? `
+              <!-- MÓDULO 3: AJEDREZ LÓGICO ESTUDIANTIL -->
+              <div style="background:#09111e;border:1px solid #1e293b;padding:16px;border-radius:10px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+                  <div>
+                    <h3 style="margin:0;font-size:15px;color:#38bdf8;">Ajedrez Lógico & Pensamiento Algorítmico — CTP Mercedes Norte</h3>
+                    <p style="margin:2px 0 0;font-size:12px;color:#94a3b8;">Haz clic en una pieza para seleccionarla y luego en la casilla de destino. Turno actual: <b id="chess-turn-lbl" style="color:#f8fafc;">Blancas</b></p>
+                  </div>
+                  <button id="chess-reset" style="background:#0284c7;color:#fff;border:none;padding:7px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">Reiniciar Tablero</button>
+                </div>
+                <div id="chess-board-box" style="display:grid;grid-template-columns:repeat(8,1fr);max-width:380px;margin:0 auto;border:2px solid #334155;border-radius:6px;overflow:hidden;"></div>
+              </div>
+            ` : tabActiva === 'chats' ? `
+              <!-- MÓDULO 4: CANALES DE CHAT POR SECCIÓN Y ESPECIALIDAD -->
+              <div style="display:grid;grid-template-columns:220px 1fr;gap:12px;background:#09111e;border:1px solid #1e293b;border-radius:10px;padding:12px;min-height:340px;">
+                <div style="border-right:1px solid #1e293b;padding-right:10px;display:flex;flex-direction:column;gap:6px;">
+                  <div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:4px;">CANALES DE SECCIÓN</div>
+                  <button data-ch="Sección 11-1 (Desarrollo Web)" class="ch-btn" style="text-align:left;background:#0284c7;color:#fff;border:none;padding:8px 10px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;"># Sección 11-1 (QA / Web)</button>
+                  <button data-ch="Sección 12-1 (Diseño Software)" class="ch-btn" style="text-align:left;background:#111c2d;color:#cbd5e1;border:none;padding:8px 10px;border-radius:6px;font-size:12px;cursor:pointer;"># Sección 12-1 (Software)</button>
+                  <button data-ch="Redes y Ciberseguridad" class="ch-btn" style="text-align:left;background:#111c2d;color:#cbd5e1;border:none;padding:8px 10px;border-radius:6px;font-size:12px;cursor:pointer;"># Laboratorio Redes IPv4/v6</button>
+                  <button data-ch="Consultas Profesor Guía" class="ch-btn" style="text-align:left;background:#111c2d;color:#cbd5e1;border:none;padding:8px 10px;border-radius:6px;font-size:12px;cursor:pointer;"># Avisos Profesor Guía</button>
+                </div>
+                <div style="display:flex;flex-direction:column;justify-content:space-between;">
+                  <div>
+                    <div id="ch-title" style="font-size:14px;font-weight:800;color:#38bdf8;border-bottom:1px solid #1e293b;padding-bottom:8px;margin-bottom:10px;">Canal Activo: # Sección 11-1 (Desarrollo Web)</div>
+                    <div id="ch-msgs" style="display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto;font-size:12px;">
+                      <div style="background:#111c2d;padding:8px 12px;border-radius:8px;"><b>Profesor Max:</b> ¡Excelente trabajo con el reporte de QA de hoy a la 11-1! Ya aplicamos el algoritmo Fisher-Yates para las respuestas, el giro antihorario en la rotonda de CR y el filtro estricto de materias.</div>
+                      <div style="background:#111c2d;padding:8px 12px;border-radius:8px;"><b>Coordinación Técnica:</b> Recuerden exportar su comprobante CSV al finalizar el simulacro de subneteo y Excel.</div>
+                    </div>
+                  </div>
+                  <form id="ch-form" style="display:flex;gap:8px;margin-top:10px;">
+                    <input id="ch-inp" type="text" placeholder="Escribe un mensaje académico en el canal de tu sección..." required style="flex:1;background:#111c2d;border:1px solid #334155;color:#fff;padding:9px 12px;border-radius:6px;font-size:12px;"/>
+                    <button type="submit" style="background:#0284c7;color:#fff;border:none;padding:9px 16px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">Enviar</button>
+                  </form>
+                </div>
+              </div>
+            ` : `
+              <!-- MÓDULO 5: FORMULARIOS SEPARADOS Y CON CABECERA FIJA (REPORTE QA AARON Y DYLAN) -->
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;">
+                <div style="background:#09111e;border:1px solid #1e293b;padding:16px;border-radius:10px;">
+                  <h3 style="margin:0 0 6px;font-size:14px;color:#38bdf8;position:sticky;top:0;background:#09111e;padding:4px 0;">Formulario A: Justificación Oficial de Ausencia o Tardía Estudiantil (REAC)</h3>
+                  <p style="margin:0 0 10px;font-size:11px;color:#94a3b8;">Plazo reglamentario: 3 días hábiles siguientes al reintegro con comprobante médico o legal.</p>
+                  <div style="display:flex;flex-direction:column;gap:8px;">
+                    <input type="text" placeholder="Nombre del Estudiante y Sección (Ej. 11-1)" style="background:#111c2d;border:1px solid #334155;color:#fff;padding:8px;border-radius:6px;font-size:12px;"/>
+                    <select style="background:#111c2d;border:1px solid #334155;color:#fff;padding:8px;border-radius:6px;font-size:12px;">
+                      <option>Justificación de Ausencia a Lecciones</option>
+                      <option>Justificación de Llegada Tardía</option>
+                    </select>
+                    <input type="date" style="background:#111c2d;border:1px solid #334155;color:#fff;padding:8px;border-radius:6px;font-size:12px;"/>
+                    <textarea rows="2" placeholder="Detalle el motivo de la ausencia o tardía..." style="background:#111c2d;border:1px solid #334155;color:#fff;padding:8px;border-radius:6px;font-size:12px;"></textarea>
+                    <button onclick="alert('Justificación de ausencia/tardía registrada con éxito para revisión del Profesor Guía.')" style="background:#0284c7;color:#fff;border:none;padding:9px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">Enviar Justificación de Ausencia/Tardía</button>
+                  </div>
+                </div>
+
+                <div style="background:#09111e;border:1px solid #1e293b;padding:16px;border-radius:10px;">
+                  <h3 style="margin:0 0 6px;font-size:14px;color:#10b981;position:sticky;top:0;background:#09111e;padding:4px 0;">Formulario B: Solicitud de Permiso Personal / Salida Anticipada</h3>
+                  <p style="margin:0 0 10px;font-size:11px;color:#94a3b8;">Trámite independiente para retiro anticipado con autorización firmada o gestión laboral docente.</p>
+                  <div style="display:flex;flex-direction:column;gap:8px;">
+                    <input type="text" placeholder="Nombre del Solicitante" style="background:#111c2d;border:1px solid #334155;color:#fff;padding:8px;border-radius:6px;font-size:12px;"/>
+                    <select style="background:#111c2d;border:1px solid #334155;color:#fff;padding:8px;border-radius:6px;font-size:12px;">
+                      <option>Permiso de Salida Anticipada con Encargado Legal</option>
+                      <option>Permiso Personal / Cita Oficial Programada</option>
+                    </select>
+                    <input type="time" style="background:#111c2d;border:1px solid #334155;color:#fff;padding:8px;border-radius:6px;font-size:12px;"/>
+                    <textarea rows="2" placeholder="Observaciones de la solicitud de permiso..." style="background:#111c2d;border:1px solid #334155;color:#fff;padding:8px;border-radius:6px;font-size:12px;"></textarea>
+                    <button onclick="alert('Solicitud de Permiso Personal enviada a Coordinación / Dirección.')" style="background:#059669;color:#fff;border:none;padding:9px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">Registrar Solicitud de Permiso Personal</button>
+                  </div>
+                </div>
+              </div>
+            `}
           </div>
         </div>
       `;
 
-      document.getElementById('close-s').onclick = () => wrap.remove();
-      document.getElementById('p-q').onclick = () => { idx = (idx - 1 + lista.length) % lista.length; pintar(); };
-      document.getElementById('n-q').onclick = () => { idx = (idx + 1) % lista.length; pintar(); };
-
-      document.getElementById('reset-b').onclick = () => {
-        aciertos = 0; respondidas = 0;
-        localStorage.setItem('bds_qa_aciertos', '0');
-        localStorage.setItem('bds_qa_total', '0');
-        pintar();
-      };
-
-      document.querySelectorAll('.cat-btn').forEach(b => {
-        b.onclick = () => { filtro = b.getAttribute('data-cat'); idx = 0; pintar(); };
+      document.getElementById('m-close').onclick = () => { limpiarRecursos(); wrap.remove(); };
+      document.querySelectorAll('.m-tab').forEach(b => {
+        b.onclick = () => { tabActiva = b.getAttribute('data-t'); pintar(); };
       });
 
-      document.getElementById('csv-b').onclick = () => {
-        const csv = "Institucion,Plataforma,Especialidad,Nota_Porcentaje,Aciertos,Total_Respondidas,XP_Acumulado\nCTP Mercedes Norte,pracTICAtecnica.com," + filtro + "," + notaActual + "%," + aciertos + "," + respondidas + "," + xp + "\n";
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = "calificaciones_reac_2026.csv";
-        a.click();
-      };
-
-      document.querySelectorAll('.opt-b').forEach(b => {
-        b.onclick = () => {
-          const s = parseInt(b.getAttribute('data-i'), 10);
-          const fb = document.getElementById('fb-b');
-          respondidas++;
-          localStorage.setItem('bds_qa_total', String(respondidas));
-          if (s === it.ans) {
-            aciertos++;
-            xp += 25;
-            localStorage.setItem('bds_qa_aciertos', String(aciertos));
-            localStorage.setItem('bds_xp_points', String(xp));
-            fb.innerHTML = `<div style="background:#064e3b;border:1px solid #10b981;padding:10px;border-radius:8px;color:#ecfdf5;">✅ <b>¡Correcto (+25 XP • Nivel 3 Avanzado)!</b> ${it.exp}</div>`;
-          } else {
-            fb.innerHTML = `<div style="background:#450a0a;border:1px solid #ef4444;padding:10px;border-radius:8px;color:#fecaca;">❌ <b>Fundamentación Técnica:</b> ${it.exp}</div>`;
-          }
-          const nuevaNota = Math.round((aciertos / respondidas) * 100);
-          document.getElementById('xp-b').innerText = `⚡ ${xp} XP | Nota: ${nuevaNota}% (${aciertos}/${respondidas})`;
+      // Lógica Módulo 1: Prácticas y Temporizador Manual
+      if (tabActiva === 'practicas') {
+        document.getElementById('sel-materia-estricta').onchange = (e) => {
+          materiaSel = e.target.value;
+          listaActual = barajarOpciones(BANCOS_POR_MATERIA[materiaSel]);
+          idx = 0;
+          pintar();
         };
-      });
+        document.getElementById('btn-rebarajar').onclick = () => {
+          listaActual = barajarOpciones(BANCOS_POR_MATERIA[materiaSel]);
+          pintar();
+        };
+        document.getElementById('btn-toggle-timer').onclick = () => {
+          timerCorriendo = !timerCorriendo;
+          if (timerCorriendo) {
+            intervaloTimer = setInterval(() => {
+              segundos++;
+              const lbl = document.getElementById('lbl-timer');
+              if (lbl) lbl.innerText = `Tiempo: ${formatearTiempo(segundos)} (Activo)`;
+            }, 1000);
+          } else if (intervaloTimer) {
+            clearInterval(intervaloTimer);
+          }
+          pintar();
+        };
 
-      document.getElementById('s-dec').oninput = (e) => {
-        const val = parseInt(e.target.value, 10);
-        if (isNaN(val) || val < 0 || val > 65535) {
-          document.getElementById('o-dec').innerHTML = `<span style="color:#f87171;">⚠️ Rango válido: 0 a 65535</span>`;
-          return;
+        document.getElementById('qa-prev').onclick = () => { idx = (idx - 1 + listaActual.length) % listaActual.length; pintar(); };
+        document.getElementById('qa-next').onclick = () => { idx = (idx + 1) % listaActual.length; pintar(); };
+
+        document.querySelectorAll('.btn-opt-qa').forEach(btn => {
+          btn.onclick = () => {
+            const sel = parseInt(btn.getAttribute('data-i'), 10);
+            const fb = document.getElementById('qa-feedback');
+            totalResp++;
+            if (sel === item.ansBarajada) {
+              aciertos++;
+              fb.innerHTML = `<div style="background:#064e3b;border:1px solid #059669;padding:10px;border-radius:6px;color:#ecfdf5;"><b>Respuesta Correcta (${String.fromCharCode(65 + sel)}):</b> ${item.exp}</div>`;
+            } else {
+              const letraCorrecta = String.fromCharCode(65 + item.ansBarajada);
+              fb.innerHTML = `<div style="background:#450a0a;border:1px solid #dc2626;padding:10px;border-radius:6px;color:#fecaca;"><b>Incorrecto. La opción correcta en este intento aleatorio era la ${letraCorrecta}):</b> ${item.exp}</div>`;
+            }
+          };
+        });
+
+        document.getElementById('calc-dec').oninput = (e) => {
+          const n = Math.max(0, Math.min(65535, parseInt(e.target.value || '0', 10)));
+          document.getElementById('calc-dec-out').innerHTML = `Bin: <b>${n.toString(2).padStart(8,'0')}</b> | Oct: <b>${n.toString(8)}</b> | Hex: <b>0x${n.toString(16).toUpperCase()}</b>`;
+        };
+        document.getElementById('calc-cidr').oninput = (e) => {
+          const c = parseInt(e.target.value, 10);
+          const h = Math.pow(2, 32 - c) - 2, o = 256 - Math.pow(2, 32 - c);
+          document.getElementById('calc-cidr-out').innerHTML = `Prefijo: <b>/${c}</b> (.${o}) | Salto: <b>${256-o}</b> | Útiles: <b>${h}</b>`;
+        };
+        document.getElementById('calc-v6').oninput = (e) => {
+          const comp = e.target.value.trim().split(':').map(x => x.replace(/^0+/, '') || '0').join(':').replace(/(?:^|:)0(?::0)+(?::|$)/, '::');
+          document.getElementById('calc-v6-out').innerHTML = `<b>${comp}</b>`;
+        };
+      }
+
+      // Lógica Módulo 2: Rotonda de Costa Rica (Sentido Antihorario Correcto: angle -= speed)
+      if (tabActiva === 'rotonda_cr') {
+        const cvs = document.getElementById('canvas-rotonda-cr');
+        if (cvs) {
+          const ctx = cvs.getContext('2d');
+          const cx = 260, cy = 160, radioRotonda = 82;
+          let player = { x: 260, y: 295 };
+          // En Costa Rica se entra por la derecha y se gira en sentido ANTIHORARIO (en Canvas Y hacia abajo, restar ángulo gira antihorario)
+          let npcAngles = [0, 2.1, 4.2];
+
+          const moverJugador = (dir) => {
+            if (dir === 'up') player.y = Math.max(15, player.y - 12);
+            if (dir === 'down') player.y = Math.min(305, player.y + 12);
+            if (dir === 'left') player.x = Math.max(15, player.x - 12);
+            if (dir === 'right') player.x = Math.min(505, player.x + 12);
+          };
+
+          window.onkeydown = (ev) => {
+            if (tabActiva !== 'rotonda_cr') return;
+            if (ev.key === 'ArrowUp' || ev.key === 'w') moverJugador('up');
+            if (ev.key === 'ArrowDown' || ev.key === 's') moverJugador('down');
+            if (ev.key === 'ArrowLeft' || ev.key === 'a') moverJugador('left');
+            if (ev.key === 'ArrowRight' || ev.key === 'd') moverJugador('right');
+          };
+
+          document.querySelectorAll('.btn-car-move').forEach(b => {
+            b.onclick = () => moverJugador(b.getAttribute('data-dir'));
+          });
+
+          function loopRotonda() {
+            ctx.clearRect(0, 0, cvs.width, cvs.height);
+            // Calles de acceso
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(cx - 28, 0, 56, cvs.height);
+            ctx.fillRect(0, cy - 28, cvs.width, 56);
+
+            // Anillo de la rotonda
+            ctx.beginPath();
+            ctx.arc(cx, cy, radioRotonda + 24, 0, Math.PI * 2);
+            ctx.fillStyle = '#1e293b';
+            ctx.fill();
+
+            // Isla central verde
+            ctx.beginPath();
+            ctx.arc(cx, cy, radioRotonda - 22, 0, Math.PI * 2);
+            ctx.fillStyle = '#065f46';
+            ctx.fill();
+            ctx.strokeStyle = '#fbbf24';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.fillStyle = '#f8fafc';
+            ctx.font = 'bold 11px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('ROTONDA CR', cx, cy - 4);
+            ctx.fillText('↺ Antihorario', cx, cy + 12);
+
+            // Vehículos dentro de la rotonda girando en sentido ANTIHORARIO (Ley de Tránsito CR)
+            npcAngles = npcAngles.map(ang => ang - 0.018);
+            npcAngles.forEach(ang => {
+              const vx = cx + Math.cos(ang) * radioRotonda;
+              const vy = cy + Math.sin(ang) * radioRotonda;
+              ctx.beginPath();
+              ctx.arc(vx, vy, 9, 0, Math.PI * 2);
+              ctx.fillStyle = '#f59e0b';
+              ctx.fill();
+            });
+
+            // Vehículo del estudiante
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, 10, 0, Math.PI * 2);
+            ctx.fillStyle = '#0ea5e9';
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.stroke();
+
+            animRotonda = requestAnimationFrame(loopRotonda);
+          }
+          loopRotonda();
         }
-        document.getElementById('o-dec').innerHTML = `Bin: <b style="color:#22d3ee;">${val.toString(2).padStart(8,'0')}</b><br/>Oct: <b style="color:#fbbf24;">${val.toString(8)}</b> | Hex: <b style="color:#34d399;">0x${val.toString(16).toUpperCase()}</b>`;
-      };
+      }
 
-      document.getElementById('s-cidr').oninput = (e) => {
-        const c = parseInt(e.target.value, 10);
-        const h = Math.pow(2, 32 - c) - 2;
-        const o = 256 - Math.pow(2, 32 - c);
-        document.getElementById('o-cidr').innerHTML = `Prefijo: <b>/${c}</b> (.${o})<br/>Salto: <b>${256-o}</b> | Hosts Útiles: <b style="color:#34d399;">${h}</b>`;
-      };
+      // Lógica Módulo 3: Ajedrez Lógico
+      if (tabActiva === 'ajedrez') {
+        const estadoInicial = [
+          ['♜','♞','♝','♛','♚','♝','♞','♜'],
+          ['♟','♟','♟','♟','♟','♟','♟','♟'],
+          ['','','','','','','',''],
+          ['','','','','','','',''],
+          ['','','','','','','',''],
+          ['','','','','','','',''],
+          ['♙','♙','♙','♙','♙','♙','♙','♙'],
+          ['♖','♘','♗','♕','♔','♗','♘','♖']
+        ];
+        let tablero = JSON.parse(JSON.stringify(estadoInicial));
+        let sel = null;
+        let turnoBlancas = true;
 
-      document.getElementById('s-v6').oninput = (e) => {
-        const raw = e.target.value.trim();
-        const grupos = raw.split(':');
-        if (grupos.length < 3 || grupos.length > 8 || !/^[0-9a-fA-F:]+$/.test(raw)) {
-          document.getElementById('o-v6').innerHTML = `<span style="color:#f87171;">⚠️ Formato hexadecimal IPv6 inválido</span>`;
-          return;
+        function dibujarAjedrez() {
+          const box = document.getElementById('chess-board-box');
+          if (!box) return;
+          box.innerHTML = '';
+          for (let r = 0; r < 8; r++) {
+            for (let c = 0; c < 8; c++) {
+              const oscura = (r + c) % 2 === 1;
+              const esSel = sel && sel.r === r && sel.c === c;
+              const btn = document.createElement('button');
+              btn.style.cssText = `height:44px;border:none;font-size:24px;cursor:pointer;background:${esSel ? '#0284c7' : (oscura ? '#1e293b' : '#475569')};color:#fff;display:flex;align-items:center;justify-content:center;`;
+              btn.innerText = tablero[r][c];
+              btn.onclick = () => {
+                if (!sel) {
+                  if (tablero[r][c] !== '') { sel = { r, c }; dibujarAjedrez(); }
+                } else {
+                  if (sel.r !== r || sel.c !== c) {
+                    tablero[r][c] = tablero[sel.r][sel.c];
+                    tablero[sel.r][sel.c] = '';
+                    turnoBlancas = !turnoBlancas;
+                    const lbl = document.getElementById('chess-turn-lbl');
+                    if (lbl) lbl.innerText = turnoBlancas ? 'Blancas' : 'Negras';
+                  }
+                  sel = null;
+                  dibujarAjedrez();
+                }
+              };
+              box.appendChild(btn);
+            }
+          }
         }
-        const comp = grupos.map(x => x.replace(/^0+/, '') || '0').join(':').replace(/(?:^|:)0(?::0)+(?::|$)/, '::');
-        document.getElementById('o-v6').innerHTML = `<b>${comp}</b>`;
-      };
+        dibujarAjedrez();
+        document.getElementById('chess-reset').onclick = () => {
+          tablero = JSON.parse(JSON.stringify(estadoInicial));
+          sel = null;
+          turnoBlancas = true;
+          dibujarAjedrez();
+        };
+      }
 
-      const validarExcel = () => {
-        const n = parseFloat(document.getElementById('s-nota').value);
-        const a = parseFloat(document.getElementById('s-asis').value);
-        const out = document.getElementById('o-excel');
-        if (isNaN(n) || isNaN(a) || n < 0 || n > 100 || a < 0 || a > 100) {
-          out.innerHTML = `<span style="color:#f87171;">⚠️ Rango válido: 0 a 100%</span>`;
-          return;
-        }
-        if (n >= 70 && a >= 80) out.innerHTML = `<b style="color:#34d399;">APROBADO (Nivel 3 REAC)</b>`;
-        else if (n >= 60 && a >= 80) out.innerHTML = `<b style="color:#fbbf24;">AMPLIACIÓN (Nivel 2 REAC)</b>`;
-        else out.innerHTML = `<b style="color:#f87171;">REPROBADO / PENDIENTE</b>`;
-      };
-      document.getElementById('s-nota').oninput = validarExcel;
-      document.getElementById('s-asis').oninput = validarExcel;
+      // Lógica Módulo 4: Canales de Chat por Sección
+      if (tabActiva === 'chats') {
+        document.querySelectorAll('.ch-btn').forEach(b => {
+          b.onclick = () => {
+            document.querySelectorAll('.ch-btn').forEach(x => { x.style.background = '#111c2d'; x.style.color = '#cbd5e1'; });
+            b.style.background = '#0284c7';
+            b.style.color = '#fff';
+            document.getElementById('ch-title').innerText = 'Canal Activo: # ' + b.getAttribute('data-ch');
+          };
+        });
+        document.getElementById('ch-form').onsubmit = (e) => {
+          e.preventDefault();
+          const inp = document.getElementById('ch-inp');
+          const txt = inp.value.trim();
+          if (!txt) return;
+          const div = document.createElement('div');
+          div.style.cssText = 'background:#0284c7;color:#fff;padding:8px 12px;border-radius:8px;';
+          div.innerHTML = `<b>Tú (${new Date().toTimeString().slice(0,5)}):</b> ${txt}`;
+          const box = document.getElementById('ch-msgs');
+          box.appendChild(div);
+          box.scrollTop = box.scrollHeight;
+          inp.value = '';
+        };
+      }
     }
 
     document.body.appendChild(wrap);

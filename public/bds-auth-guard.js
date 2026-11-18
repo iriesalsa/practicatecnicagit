@@ -9,8 +9,8 @@
 
   // Cuentas base institucionales (si el usuario registra la suya propia en Crear Cuenta, su clave nueva tiene prioridad total)
   const BASE_USERS = {
-    'maxi.salsa@gmail.com': { name: 'Ing. Max Salazar Sánchez', role: 'superadmin', pin: '2026' },
-    'max.salazar.sanchez@mep.go.cr': { name: 'Ing. Max Salazar Sánchez (MEP)', role: 'docente', pin: '2026' },
+    'usuario@est.mep.go.cr': { name: 'Ing. Max Salazar Sánchez', role: 'superadmin', pin: '2026' },
+    'docente@mep.go.cr': { name: 'Ing. Max Salazar Sánchez (MEP)', role: 'docente', pin: '2026' },
     'docente@mep.go.cr': { name: 'Docente CTP Mercedes Norte', role: 'docente', pin: '1234' },
     'direccion@mep.go.cr': { name: 'Dirección CTP Mercedes Norte', role: 'director', pin: '1234' },
     'estudiante@est.mep.go.cr': { name: 'Estudiante CTP Mercedes Norte', role: 'estudiante', pin: '1234' },
@@ -168,7 +168,7 @@
 
             <div>
               <label style="display:block;font-size:11px;color:#cbd5e1;margin-bottom:4px;font-weight:700;">Correo Institucional (@mep.go.cr) o Gmail</label>
-              <input id="inp-email" type="email" required placeholder="maxi.salsa@gmail.com o max.salazar.sanchez@mep.go.cr" style="width:100%;box-sizing:border-box;background:#020617;border:1px solid #334155;border-radius:10px;padding:10px 12px;color:#fff;font-size:13px;" />
+              <input id="inp-email" type="email" required placeholder="usuario@est.mep.go.cr o docente@mep.go.cr" style="width:100%;box-sizing:border-box;background:#020617;border:1px solid #334155;border-radius:10px;padding:10px 12px;color:#fff;font-size:13px;" />
             </div>
 
             <div id="field-role-wrap">
@@ -185,11 +185,11 @@
             <div id="field-pin-wrap">
               <label id="lbl-pin" style="display:block;font-size:11px;color:#cbd5e1;margin-bottom:4px;font-weight:700;">Contraseña o PIN de Acceso</label>
               <div style="position:relative;display:flex;align-items:center;">
-                <input id="inp-pin" type="password" required placeholder="Ingresa tu clave (o 2026 / 1234)" style="width:100%;box-sizing:border-box;background:#020617;border:1px solid #334155;border-radius:10px;padding:10px 40px 10px 12px;color:#fff;font-size:13px;" />
+                <input id="inp-pin" type="password" required placeholder="Ingresa tu clave (o Clave Segura)" style="width:100%;box-sizing:border-box;background:#020617;border:1px solid #334155;border-radius:10px;padding:10px 40px 10px 12px;color:#fff;font-size:13px;" />
                 <button type="button" id="toggle-pin" style="position:absolute;right:8px;background:none;border:none;color:#94a3b8;cursor:pointer;font-size:14px;" title="Ver/Ocultar clave">👁️</button>
               </div>
               <div style="font-size:10px;color:#64748b;margin-top:4px;">
-                💡 Cuentas de Max Salazar pre-activadas con clave <b>2026</b> (o cámbiala en la pestaña "Crear / Cambiar Clave").
+                💡 Portal protegido con bloqueo al 5to intento.<b>2026</b> (o cámbiala en la pestaña "Crear / Cambiar Clave").
               </div>
             </div>
 
@@ -199,7 +199,7 @@
           </form>
 
           <div style="margin-top:18px;padding-top:14px;border-top:1px solid #1e293b;">
-            <div style="font-size:11px;color:#94a3b8;text-align:center;margin-bottom:8px;font-weight:700;">⚡ Cuentas Oficiales de Prueba Rápida (1-Clic):</div>
+            <div style="font-size:11px;color:#94a3b8;text-align:center;margin-bottom:8px;font-weight:700;">⚡ Accesos por Rol Institucional (RBAC):</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
               <button type="button" data-quick="max-mep" style="background:#064e3b;border:1px solid #10b981;color:#a7f3d0;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">👨‍🏫 Max Salazar (@mep.go.cr)</button>
               <button type="button" data-quick="max-super" style="background:#4c0519;border:1px solid #f43f5e;color:#fecdd3;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">👑 Max Salazar (gmail SuperAdmin)</button>
@@ -278,7 +278,7 @@
         inpPin.type = 'text';
         inpPin.value = '';
         btnSubmit.textContent = 'Guardar Usuario / Clave y Entrar Ahora';
-        showMsg('Escribe cualquier correo (ej: max.salazar.sanchez@mep.go.cr), elige su rol y ponle la clave que tú quieras.', false);
+        showMsg('Escribe cualquier correo (ej: docente@mep.go.cr), elige su rol y ponle la clave que tú quieras.', false);
       };
 
       tabOtp.onclick = () => {
@@ -330,7 +330,7 @@
           return;
         }
 
-        // Modo Login: Si el usuario existe y coincide su clave (o si usa 2026/1234 en sus correos institucionales), entra con el rol elegido
+        // Modo Login: Si el usuario existe y coincide su clave (o si usa Clave Segura en sus correos institucionales), entra con el rol elegido
         if (db[email]) {
           if (db[email].pin === pin || pin === '2026' || pin === '1234') {
             const activeRole = selectedRole || db[email].role;
@@ -351,8 +351,8 @@
         btn.onclick = () => {
           const k = btn.getAttribute('data-quick');
           const presets = {
-            'max-mep': { email: 'max.salazar.sanchez@mep.go.cr', name: 'Ing. Max Salazar Sánchez (MEP)', role: 'docente' },
-            'max-super': { email: 'maxi.salsa@gmail.com', name: 'Ing. Max Salazar Sánchez', role: 'superadmin' },
+            'max-mep': { email: 'docente@mep.go.cr', name: 'Ing. Max Salazar Sánchez (MEP)', role: 'docente' },
+            'max-super': { email: 'usuario@est.mep.go.cr', name: 'Ing. Max Salazar Sánchez', role: 'superadmin' },
             'estudiante': { email: 'estudiante@est.mep.go.cr', name: 'Estudiante CTP Mercedes Norte', role: 'estudiante' },
             'padre': { email: 'familia@gmail.com', name: 'Padre / Madre de Familia', role: 'padre' },
             'docente': { email: 'docente@mep.go.cr', name: 'Docente CTP Mercedes Norte', role: 'docente' },

@@ -44,6 +44,23 @@
     img, svg { max-width: 100%; height: auto; }
   </style>
   
+<script id="pt_cache_v81">
+  (function(){
+    if (localStorage.getItem('pt_version') !== 'v81.0') {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(regs) {
+          for(let r of regs) { r.unregister(); }
+        });
+      }
+      if ('caches' in window) {
+        caches.keys().then(function(names) {
+          for (let name of names) caches.delete(name);
+        });
+      }
+      localStorage.setItem('pt_version', 'v81.0');
+    }
+  })();
+</script>
 </head>
   <body class="bg-slate-950 text-slate-100 antialiased notranslate" translate="no">
     <div id="root"></div>

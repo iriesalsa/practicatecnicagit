@@ -1,6 +1,14 @@
 (function () {
-  const SESSION_KEY = "bds_auth_gate_v112_final";
-  const LOCK_KEY = "bds_login_attempts_v112";
+  // Llave única v115 que purga cualquier sesión anterior y exige verificación estricta de Gmail/MEP
+  const SESSION_KEY = "bds_auth_gate_v115_strict";
+  const LOCK_KEY = "bds_login_attempts_v115";
+
+  // Limpiar cualquier sesión vieja para forzar que NINGÚN usuario entre sin autenticarse
+  ['bds_auth_gate_v112_final', 'bds_auth_gate_v111_final', 'bds_auth_gate_v109', 'bds_auth_gate_v104', 'bds_auth_gate_obligatorio_v103'].forEach(k => {
+    localStorage.removeItem(k);
+    sessionStorage.removeItem(k);
+  });
+
   const NIVELES = [7, 8, 9, 10, 11, 12];
   const SECCIONES_COLEGIO = [];
   NIVELES.forEach(niv => { [1, 2, 3, 4].forEach(grp => SECCIONES_COLEGIO.push(`${niv}-${grp}`)); });
@@ -40,13 +48,13 @@
     ['bds-pro-header', 'bds-subheader-nav', 'bds-mega-modal'].forEach(id => {
       const el = document.getElementById(id); if (el) el.remove();
     });
-    mostrarLoginDirectoObligatorio();
+    mostrarLoginEstricto();
   }
 
   function inyectarCSSGate() {
-    if (document.getElementById('bds-v112-css')) return;
+    if (document.getElementById('bds-v115-css')) return;
     const st = document.createElement('style');
-    st.id = 'bds-v112-css';
+    st.id = 'bds-v115-css';
     st.innerHTML = `
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
       html, body { font-family: 'Inter', system-ui, sans-serif !important; background: #060c17 !important; color: #f8fafc !important; margin: 0; padding: 0; }
@@ -72,13 +80,13 @@
     document.head.appendChild(st);
   }
 
-  window.mostrarLoginDirectoObligatorio = function () {
+  window.mostrarLoginEstricto = function () {
     inyectarCSSGate();
-    let old = document.getElementById('bds-login-v112');
+    let old = document.getElementById('bds-login-v115');
     if (old) old.remove();
 
     const gate = document.createElement('div');
-    gate.id = 'bds-login-v112';
+    gate.id = 'bds-login-v115';
     gate.style.cssText = 'position:fixed;inset:0;background:#060c17;z-index:300000;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;';
 
     gate.innerHTML = `
@@ -89,23 +97,23 @@
         </div>
         <div style="text-align:center;margin-bottom:18px;">
           <h1 style="margin:0;font-size:21px;font-weight:800;color:#fff;">prac<span style="color:#0ea5e9;">TICA</span>tecnica.com</h1>
-          <p style="margin:4px 0 0;font-size:11.5px;color:#94a3b8;">Portal Oficial CTP Mercedes Norte • Inicia sesión obligatoria</p>
+          <p style="margin:4px 0 0;font-size:11.5px;color:#94a3b8;">Verificación de Identidad Requerida • CTP Mercedes Norte</p>
         </div>
 
-        <form id="f-login-v112" style="display:flex;flex-direction:column;gap:10px;">
+        <form id="f-login-v115" style="display:flex;flex-direction:column;gap:10px;">
           <div>
-            <label style="display:block;font-size:11px;color:#94a3b8;margin-bottom:3px;">Correo institucional o personal:</label>
-            <input id="lg-mail" type="email" value="maxi.salsa@gmail.com" required style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:6px;padding:10px;color:#fff;font-size:13px;"/>
+            <label style="display:block;font-size:11px;color:#94a3b8;margin-bottom:3px;">Correo Gmail / MEP (Obligatorio para verificar identidad):</label>
+            <input id="lg-mail" type="email" placeholder="tucorreo@gmail.com o @est.mep.go.cr" required autofocus style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:6px;padding:10px;color:#fff;font-size:13px;"/>
           </div>
           <div>
-            <label style="display:block;font-size:11px;color:#94a3b8;margin-bottom:3px;">Nombre Completo:</label>
-            <input id="lg-nom" type="text" value="Ing. Max Salazar Sánchez" required style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:6px;padding:10px;color:#fff;font-size:13px;"/>
+            <label style="display:block;font-size:11px;color:#94a3b8;margin-bottom:3px;">Nombre y Apellidos:</label>
+            <input id="lg-nom" type="text" placeholder="Escribe tu nombre completo" required style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:6px;padding:10px;color:#fff;font-size:13px;"/>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
             <div>
               <label style="display:block;font-size:10px;color:#94a3b8;margin-bottom:2px;">Rol:</label>
               <select id="lg-rol" style="width:100%;background:#060c17;border:1px solid #334155;border-radius:6px;padding:9px;color:#fff;font-size:12px;">
-                ${ROLES_INSTITUCIONALES.map(r => `<option value="${r}" ${r==='SuperAdmin'?'selected':''}>${r}</option>`).join('')}
+                ${ROLES_INSTITUCIONALES.map(r => `<option value="${r}">${r}</option>`).join('')}
               </select>
             </div>
             <div>
@@ -116,7 +124,7 @@
             </div>
           </div>
           <button type="submit" style="margin-top:8px;background:#ffffff;color:#0f172a;border:1px solid #cbd5e1;padding:11px;border-radius:8px;font-size:13.5px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 12px rgba(0,0,0,0.3);">
-            ${GOOGLE_SVG} <span>Iniciar sesión con Google (SuperAdmin)</span>
+            ${GOOGLE_SVG} <span>Verificar e Iniciar Sesión con Google</span>
           </button>
         </form>
       </div>
@@ -124,7 +132,7 @@
 
     document.body.appendChild(gate);
 
-    document.getElementById('f-login-v112').onsubmit = (e) => {
+    document.getElementById('f-login-v115').onsubmit = (e) => {
       e.preventDefault();
       const mail = document.getElementById('lg-mail').value.trim();
       const nom = document.getElementById('lg-nom').value.trim();
@@ -148,7 +156,7 @@
 
   function activarPlataformaAutenticada() {
     const s = getSesion();
-    if (!s) { mostrarLoginDirectoObligatorio(); return; }
+    if (!s) { mostrarLoginEstricto(); return; }
     document.body.classList.add('bds-authenticated');
     ['bds-pro-header', 'bds-subheader-nav'].forEach(id => { const el = document.getElementById(id); if (el) el.remove(); });
 
@@ -165,7 +173,7 @@
             ${esMaxReal ? `<span style="background:#f59e0b;color:#020617;font-size:10px;font-weight:900;padding:2px 7px;border-radius:4px;margin-left:6px;">SUPERADMIN SOBERANO</span>` : ''}
           </div>
           <div style="font-size:11px;color:#38bdf8;">
-            <b>${s.nombre}</b> • Rol: <b>${s.rol}</b> • Sección: <b style="color:#34d399;">Sección ${s.seccion}</b>
+            <b>${s.nombre} (${s.email})</b> • Rol: <b>${s.rol}</b> • Sección: <b style="color:#34d399;">Sección ${s.seccion}</b>
           </div>
         </div>
       </div>
@@ -226,13 +234,7 @@
 
   window.addEventListener('DOMContentLoaded', () => {
     inyectarCSSGate();
-    if (!getSesion()) mostrarLoginDirectoObligatorio();
-    else activarPlataformaAutenticada();
+    // Exigir siempre inicio de sesión limpio (sin auto-ingresar con cuentas viejas)
+    cerrarSesionTotal();
   });
-
-  setTimeout(() => {
-    inyectarCSSGate();
-    if (!getSesion()) mostrarLoginDirectoObligatorio();
-    else activarPlataformaAutenticada();
-  }, 200);
 })();

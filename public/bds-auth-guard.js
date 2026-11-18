@@ -1,5 +1,5 @@
 (function () {
-  const SESSION_KEY = "bds_auth_gate_v140_final_arcade";
+  const SESSION_KEY = "bds_auth_gate_v141_kaizen";
   const NIVELES = [7, 8, 9, 10, 11, 12];
   const SECCIONES_COLEGIO = [];
   NIVELES.forEach(niv => { [1, 2, 3, 4].forEach(grp => SECCIONES_COLEGIO.push(`${niv}-${grp}`)); });
@@ -49,9 +49,9 @@
   }
 
   function inyectarCSSGate() {
-    if (document.getElementById('bds-v140-css')) return;
+    if (document.getElementById('bds-v141-css')) return;
     const st = document.createElement('style');
-    st.id = 'bds-v140-css';
+    st.id = 'bds-v141-css';
     st.innerHTML = `
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
       html, body { font-family: 'Inter', system-ui, sans-serif !important; background: #060c17 !important; color: #f8fafc !important; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -79,11 +79,11 @@
 
   window.mostrarLoginEstricto = function () {
     inyectarCSSGate();
-    let old = document.getElementById('bds-login-v140');
+    let old = document.getElementById('bds-login-v141');
     if (old) old.remove();
 
     const gate = document.createElement('div');
-    gate.id = 'bds-login-v140';
+    gate.id = 'bds-login-v141';
     gate.style.cssText = 'position:fixed;inset:0;background:#060c17;z-index:300000;display:flex;align-items:center;justify-content:center;padding:14px;overflow-y:auto;';
 
     gate.innerHTML = `
@@ -94,12 +94,12 @@
         </div>
         <div style="text-align:center;margin-bottom:16px;">
           <h1 style="margin:0;font-size:20px;font-weight:800;color:#fff;">prac<span style="color:#0ea5e9;">TICA</span>tecnica.com</h1>
-          <p style="margin:4px 0 0;font-size:11px;color:#94a3b8;">Acceso Soberano • CTP Mercedes Norte</p>
+          <p style="margin:4px 0 0;font-size:11px;color:#94a3b8;">Acceso Kaizen • CTP Mercedes Norte</p>
         </div>
 
         <div id="auth-error-msg" style="display:none;background:#450a0a;color:#fca5a5;padding:8px;border-radius:6px;font-size:11px;margin-bottom:10px;text-align:center;font-weight:700;"></div>
 
-        <form id="f-login-v140" style="display:flex;flex-direction:column;gap:9px;">
+        <form id="f-login-v141" style="display:flex;flex-direction:column;gap:9px;">
           <div>
             <label style="display:block;font-size:10.5px;color:#94a3b8;margin-bottom:2px;">Correo Institucional / Gmail (maxi.salsa@gmail.com):</label>
             <input id="lg-mail" type="email" value="maxi.salsa@gmail.com" required autofocus style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:6px;padding:9px;color:#fff;font-size:12.5px;"/>
@@ -154,7 +154,7 @@
     };
     actualizarVisibilidadSeccion();
 
-    document.getElementById('f-login-v140').onsubmit = (e) => {
+    document.getElementById('f-login-v141').onsubmit = (e) => {
       e.preventDefault();
       const mail = mailInput.value.trim();
       const nom = document.getElementById('lg-nom').value.trim();
@@ -214,7 +214,7 @@
         <div style="max-width:1160px;margin:0 auto;background:#0b1322;border:1.5px solid #7c3aed;border-radius:14px;padding:18px;box-sizing:border-box;box-shadow:0 20px 60px rgba(0,0,0,0.9);">
           <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1e293b;padding-bottom:10px;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
             <div style="display:flex;align-items:center;gap:10px;">
-              <span style="background:#7c3aed;color:#fff;font-size:11px;font-weight:900;padding:4px 10px;border-radius:6px;">ARCADE PRO v140</span>
+              <span style="background:#7c3aed;color:#fff;font-size:11px;font-weight:900;padding:4px 10px;border-radius:6px;">KAIZEN PRO v141</span>
               <h2 style="margin:0;font-size:16px;color:#fff;">Sala de Arcadias y Lógica (CTP Mercedes Norte)</h2>
             </div>
             <button id="arc-close" style="background:#7f1d1d;color:#fecaca;border:none;padding:7px 12px;border-radius:6px;font-size:11.5px;font-weight:800;cursor:pointer;">Cerrar ✕</button>
@@ -238,7 +238,6 @@
 
       const stg = document.getElementById('arc-stage');
 
-      // 1. AJEDREZ FIDE
       if (jSel === 'ajedrez') {
         let tb = [
           ['♜','♞','♝','♛','♚','♝','♞','♜'],
@@ -366,8 +365,6 @@
         }
         drawC();
       }
-
-      // 7. MEMORIA TÉCNICA 4X4 PRO
       else if (jSel === 'memoria') {
         const terminos = ['HTML','CSS','JS','React','IP','TCP','VLAN','Subnet','HTML','CSS','JS','React','IP','TCP','VLAN','Subnet'].sort(() => Math.random() - 0.5);
         let barajas = terminos.map((t, idx) => ({ id: idx, val: t, volteada: false, encontrada: false }));
@@ -414,8 +411,6 @@
         }
         drawMemoria();
       }
-
-      // 10. QUIZ ALEATORIO COSEVI & TÉCNICO
       else if (jSel === 'cosevi') {
         const bancoQuiz = [
           { p: "¿Cuál es la velocidad máxima permitida en zonas escolares en Costa Rica?", opts: ["25 km/h", "40 km/h", "60 km/h"], r: 0 },

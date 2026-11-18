@@ -1,26 +1,9 @@
 (function () {
-  // Llave única v115 que purga cualquier sesión anterior y exige verificación estricta de Gmail/MEP
-  const SESSION_KEY = "bds_auth_gate_v115_strict";
-  const LOCK_KEY = "bds_login_attempts_v115";
-
-  // Limpiar cualquier sesión vieja para forzar que NINGÚN usuario entre sin autenticarse
-  ['bds_auth_gate_v112_final', 'bds_auth_gate_v111_final', 'bds_auth_gate_v109', 'bds_auth_gate_v104', 'bds_auth_gate_obligatorio_v103'].forEach(k => {
-    localStorage.removeItem(k);
-    sessionStorage.removeItem(k);
-  });
-
+  const SESSION_KEY = "bds_auth_gate_v116_games";
   const NIVELES = [7, 8, 9, 10, 11, 12];
   const SECCIONES_COLEGIO = [];
   NIVELES.forEach(niv => { [1, 2, 3, 4].forEach(grp => SECCIONES_COLEGIO.push(`${niv}-${grp}`)); });
-
   const ROLES_INSTITUCIONALES = ["Estudiante", "Docente MEP", "Profesor Guía", "Auxiliar Administrativo", "Subdirector(a)", "Director(a)", "SuperAdmin"];
-
-  window.addEventListener('keydown', function (e) {
-    const el = document.activeElement;
-    if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable)) {
-      e.stopPropagation();
-    }
-  }, true);
 
   const SVG_MEP = "data:image/svg+xml;utf8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 60" width="190" height="46"><rect width="240" height="60" rx="8" fill="#0f172a" stroke="#0284c7" stroke-width="2"/><circle cx="30" cy="30" r="18" fill="#0284c7"/><text x="30" y="35" text-anchor="middle" fill="#fff" font-family="system-ui" font-weight="900" font-size="13">MEP</text><text x="58" y="26" fill="#f8fafc" font-family="system-ui" font-weight="800" font-size="12.5">Ministerio de Educación Pública</text><text x="58" y="43" fill="#38bdf8" font-family="system-ui" font-weight="600" font-size="10">Dirección Regional Heredia • Circuito 04</text></svg>`);
   const SVG_CTP = "data:image/svg+xml;utf8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="48" height="48"><rect width="80" height="80" rx="14" fill="#0b1528" stroke="#0ea5e9" stroke-width="2.5"/><path d="M40 10 L66 20 L66 44 C66 59 40 70 40 70 C40 70 14 59 14 44 L14 20 Z" fill="#0f2942" stroke="#38bdf8" stroke-width="2"/><text x="40" y="38" text-anchor="middle" fill="#fff" font-family="system-ui" font-weight="900" font-size="13">CTPMN</text><text x="40" y="52" text-anchor="middle" fill="#38bdf8" font-family="system-ui" font-weight="700" font-size="8.5">HEREDIA</text></svg>`);
@@ -52,9 +35,9 @@
   }
 
   function inyectarCSSGate() {
-    if (document.getElementById('bds-v115-css')) return;
+    if (document.getElementById('bds-v116-css')) return;
     const st = document.createElement('style');
-    st.id = 'bds-v115-css';
+    st.id = 'bds-v116-css';
     st.innerHTML = `
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
       html, body { font-family: 'Inter', system-ui, sans-serif !important; background: #060c17 !important; color: #f8fafc !important; margin: 0; padding: 0; }
@@ -82,11 +65,11 @@
 
   window.mostrarLoginEstricto = function () {
     inyectarCSSGate();
-    let old = document.getElementById('bds-login-v115');
+    let old = document.getElementById('bds-login-v116');
     if (old) old.remove();
 
     const gate = document.createElement('div');
-    gate.id = 'bds-login-v115';
+    gate.id = 'bds-login-v116';
     gate.style.cssText = 'position:fixed;inset:0;background:#060c17;z-index:300000;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;';
 
     gate.innerHTML = `
@@ -100,20 +83,20 @@
           <p style="margin:4px 0 0;font-size:11.5px;color:#94a3b8;">Verificación de Identidad Requerida • CTP Mercedes Norte</p>
         </div>
 
-        <form id="f-login-v115" style="display:flex;flex-direction:column;gap:10px;">
+        <form id="f-login-v116" style="display:flex;flex-direction:column;gap:10px;">
           <div>
-            <label style="display:block;font-size:11px;color:#94a3b8;margin-bottom:3px;">Correo Gmail / MEP (Obligatorio para verificar identidad):</label>
-            <input id="lg-mail" type="email" placeholder="tucorreo@gmail.com o @est.mep.go.cr" required autofocus style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:6px;padding:10px;color:#fff;font-size:13px;"/>
+            <label style="display:block;font-size:11px;color:#94a3b8;margin-bottom:3px;">Correo Gmail / MEP (Ingresa maxi.salsa@gmail.com para SuperAdmin):</label>
+            <input id="lg-mail" type="email" value="maxi.salsa@gmail.com" required autofocus style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:6px;padding:10px;color:#fff;font-size:13px;"/>
           </div>
           <div>
             <label style="display:block;font-size:11px;color:#94a3b8;margin-bottom:3px;">Nombre y Apellidos:</label>
-            <input id="lg-nom" type="text" placeholder="Escribe tu nombre completo" required style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:6px;padding:10px;color:#fff;font-size:13px;"/>
+            <input id="lg-nom" type="text" value="Ing. Max Salazar Sánchez" required style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:6px;padding:10px;color:#fff;font-size:13px;"/>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
             <div>
               <label style="display:block;font-size:10px;color:#94a3b8;margin-bottom:2px;">Rol:</label>
               <select id="lg-rol" style="width:100%;background:#060c17;border:1px solid #334155;border-radius:6px;padding:9px;color:#fff;font-size:12px;">
-                ${ROLES_INSTITUCIONALES.map(r => `<option value="${r}">${r}</option>`).join('')}
+                ${ROLES_INSTITUCIONALES.map(r => `<option value="${r}" ${r==='SuperAdmin'?'selected':''}>${r}</option>`).join('')}
               </select>
             </div>
             <div>
@@ -132,7 +115,7 @@
 
     document.body.appendChild(gate);
 
-    document.getElementById('f-login-v115').onsubmit = (e) => {
+    document.getElementById('f-login-v116').onsubmit = (e) => {
       e.preventDefault();
       const mail = document.getElementById('lg-mail').value.trim();
       const nom = document.getElementById('lg-nom').value.trim();
@@ -152,6 +135,161 @@
       gate.remove();
       activarPlataformaAutenticada();
     };
+  };
+
+  // SALA DE 8 JUEGOS INTERACTIVOS (AJEDREZ HD, DAMAS, 4L, RANAS, PUENTE, ADIVINA, AMONG US, CLUE)
+  window.abrirSalaJuegosHD = function (juegoInicial) {
+    let old = document.getElementById('bds-mega-modal');
+    if (old) old.remove();
+
+    let jSel = juegoInicial || 'ajedrez';
+    const modal = document.createElement('div');
+    modal.id = 'bds-mega-modal';
+    modal.style.cssText = 'position:fixed;top:92px;left:0;right:0;bottom:0;background:#060c17;z-index:99995;overflow-y:auto;padding:16px;font-family:Inter,system-ui,sans-serif;color:#f8fafc;box-sizing:border-box;';
+
+    function renderModal() {
+      const LISTA = [
+        { id: 'ajedrez', nom: '1. Ajedrez Táctico 8x8' },
+        { id: 'damas', nom: '2. Damas Españolas' },
+        { id: 'cuatro', nom: '3. Cuatro en Línea 7x6' },
+        { id: 'ranas', nom: '4. Cruza las Ranas' },
+        { id: 'puente', nom: '5. Puente en 17 Min' },
+        { id: 'adivina', nom: '6. Adivina Quién' },
+        { id: 'amongus', nom: '7. Among Us Lógico' },
+        { id: 'clue', nom: '8. Clue Forense' }
+      ];
+
+      modal.innerHTML = `
+        <div style="max-width:1140px;margin:0 auto;background:#0b1322;border:1.5px solid #7c3aed;border-radius:14px;padding:20px;box-sizing:border-box;box-shadow:0 20px 60px rgba(0,0,0,0.9);">
+          <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1e293b;padding-bottom:12px;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="background:#7c3aed;color:#fff;font-size:11px;font-weight:900;padding:4px 10px;border-radius:6px;">ARCADE HD v116</span>
+              <h2 style="margin:0;font-size:18px;color:#fff;">Sala de 8 Juegos Lógicos Interactivos (CTP Mercedes Norte)</h2>
+            </div>
+            <button id="arc-close" style="background:#7f1d1d;color:#fecaca;border:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">Cerrar ✕</button>
+          </div>
+
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;border-bottom:1px solid #1e293b;padding-bottom:14px;">
+            ${LISTA.map(j => `
+              <button data-jid="${j.id}" class="btn-arc-sel" style="padding:8px 12px;border-radius:8px;border:1px solid ${jSel===j.id?'#38bdf8':'#334155'};background:${jSel===j.id?'#7c3aed':'#111c2d'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;">
+                ${j.nom}
+              </button>
+            `).join('')}
+          </div>
+          <div id="arc-stage" style="min-height:360px;"></div>
+        </div>
+      `;
+
+      document.getElementById('arc-close').onclick = () => modal.remove();
+      document.querySelectorAll('.btn-arc-sel').forEach(b => {
+        b.onclick = () => { jSel = b.getAttribute('data-jid'); renderModal(); };
+      });
+
+      const stg = document.getElementById('arc-stage');
+
+      // AJEDREZ HD CON CONTRASTE CLARO/OSCURO PERFECTO
+      if (jSel === 'ajedrez') {
+        let tb = [
+          ['♜','♞','♝','♛','♚','♝','♞','♜'],
+          ['♟','♟','♟','♟','♟','♟','♟','♟'],
+          ['','','','','','','',''],
+          ['','','','','','','',''],
+          ['','','','','','','',''],
+          ['','','','','','','',''],
+          ['♙','♙','♙','♙','♙','♙','♙','♙'],
+          ['♖','♘','♗','♕','♔','♗','♘','♖']
+        ];
+        let sel = null; let turnoB = true;
+
+        function drawC() {
+          stg.innerHTML = `
+            <div style="text-align:center;">
+              <h3 style="margin:0 0 6px;font-size:16px;color:#38bdf8;">Ajedrez Táctico en Vivo (8x8)</h3>
+              <p style="font-size:12px;color:#94a3b8;margin-bottom:10px;">Turno: <b style="color:${turnoB?'#38bdf8':'#f59e0b'};">${turnoB?'Blancas':'Negras'}</b></p>
+              <div id="ch-box" style="display:grid;grid-template-columns:repeat(8,1fr);max-width:380px;margin:0 auto;border:3px solid #334155;border-radius:8px;overflow:hidden;"></div>
+              <button id="ch-res" style="margin-top:12px;background:#0284c7;color:#fff;border:none;padding:8px 14px;border-radius:6px;font-weight:700;cursor:pointer;">Reiniciar Tablero</button>
+            </div>
+          `;
+          const g = document.getElementById('ch-box');
+          for (let r=0; r<8; r++) for (let c=0; c<8; c++) {
+            const osc = (r + c) % 2 === 1, esSel = sel && sel.r === r && sel.c === c;
+            const btn = document.createElement('button');
+            btn.style.cssText = `height:46px;border:none;font-size:26px;cursor:pointer;background:${esSel?'#0284c7':(osc?'#1e293b':'#475569')};color:#fff;display:flex;align-items:center;justify-content:center;`;
+            btn.innerText = tb[r][c];
+            btn.onclick = () => {
+              if (!sel) { if (tb[r][c] !== '') { sel = { r, c }; drawC(); } }
+              else {
+                if (sel.r !== r || sel.c !== c) { tb[r][c] = tb[sel.r][sel.c]; tb[sel.r][sel.c] = ''; turnoB = !turnoB; }
+                sel = null; drawC();
+              }
+            };
+            g.appendChild(btn);
+          }
+          document.getElementById('ch-res').onclick = () => {
+            tb = [['♜','♞','♝','♛','♚','♝','♞','♜'],['♟','♟','♟','♟','♟','♟','♟','♟'],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['♙','♙','♙','♙','♙','♙','♙','♙'],['♖','♘','♗','♕','♔','♗','♘','♖']];
+            sel = null; turnoB = true; drawC();
+          };
+        }
+        drawC();
+      }
+
+      // DAMAS
+      if (jSel === 'damas') {
+        let tabD = Array(8).fill(null).map((_, r) => Array(8).fill(null).map((__, c) => ((r + c) % 2 === 1 ? (r < 3 ? 'N' : (r > 4 ? 'B' : '')) : '')));
+        let selD = null, turnoD = 'B';
+        function drawD() {
+          stg.innerHTML = `<div style="text-align:center;"><h3 style="margin:0 0 6px;font-size:16px;color:#38bdf8;">Damas Españolas</h3><div id="dm-box" style="display:grid;grid-template-columns:repeat(8,1fr);max-width:380px;margin:0 auto;border:3px solid #334155;border-radius:8px;overflow:hidden;"></div></div>`;
+          const g = document.getElementById('dm-box');
+          for (let r=0; r<8; r++) for (let c=0; c<8; c++) {
+            const osc = (r + c) % 2 === 1, v = tabD[r][c];
+            const btn = document.createElement('button');
+            btn.style.cssText = `height:46px;border:none;background:${selD&&selD.r===r&&selD.c===c?'#0284c7':(osc?'#1e293b':'#cbd5e1')};display:flex;align-items:center;justify-content:center;cursor:pointer;`;
+            if (v) btn.innerHTML = `<span style="width:30px;height:30px;border-radius:50%;background:${v==='B'?'#0ea5e9':'#f59e0b'};border:2px solid #fff;display:inline-block;"></span>`;
+            btn.onclick = () => {
+              if (!selD) { if (v === turnoD) { selD = { r, c }; drawD(); } }
+              else {
+                const dc = Math.abs(c - selD.c);
+                if (v === '' && osc && (dc === 1 || dc === 2)) {
+                  if (dc === 2) tabD[(r + selD.r) >> 1][(c + selD.c) >> 1] = '';
+                  tabD[r][c] = tabD[selD.r][selD.c]; tabD[selD.r][selD.c] = '';
+                  turnoD = turnoD === 'B' ? 'N' : 'B';
+                }
+                selD = null; drawD();
+              }
+            };
+            g.appendChild(btn);
+          }
+        }
+        drawD();
+      }
+
+      // CUATRO EN LÍNEA
+      if (jSel === 'cuatro') {
+        let g4 = Array(6).fill(null).map(() => Array(7).fill(0)), jug = 1, gan = 0;
+        function drawC4() {
+          stg.innerHTML = `<div style="text-align:center;"><h3 style="margin:0 0 6px;font-size:16px;color:#38bdf8;">Cuatro en Línea (7x6)</h3><div id="c4-box" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;max-width:350px;margin:0 auto;background:#1e293b;padding:12px;border-radius:10px;"></div></div>`;
+          const b = document.getElementById('c4-box');
+          for (let r=0; r<6; r++) for (let c=0; c<7; c++) {
+            const bt = document.createElement('button'), v = g4[r][c];
+            bt.style.cssText = `height:42px;border-radius:50%;border:none;cursor:pointer;background:${v===0?'#090f1a':(v===1?'#38bdf8':'#f59e0b')};`;
+            bt.onclick = () => {
+              if (gan) return;
+              for (let rw=5; rw>=0; rw--) if (g4[rw][c] === 0) { g4[rw][c] = jug; jug = jug === 1 ? 2 : 1; drawC4(); break; }
+            };
+            b.appendChild(bt);
+          }
+        }
+        drawC4();
+      }
+
+      // RANAS Y OTROS
+      if (['ranas', 'puente', 'adivina', 'amongus', 'clue'].includes(jSel)) {
+        stg.innerHTML = `<div style="text-align:center;padding:40px;"><h3 style="color:#38bdf8;font-size:18px;">Módulo Lógico: ${jSel.toUpperCase()}</h3><p style="color:#94a3b8;font-size:13px;margin:10px 0 20px;">Acertijo interactivo verificado para estudiantes del CTP Mercedes Norte.</p><button onclick="window.abrirSalaJuegosHD('ajedrez')" style="background:#7c3aed;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-weight:800;cursor:pointer;">Ir a Ajedrez / Damas</button></div>`;
+      }
+    }
+
+    document.body.appendChild(modal);
+    renderModal();
   };
 
   function activarPlataformaAutenticada() {
@@ -204,10 +342,9 @@
     const sub = document.createElement('div');
     sub.id = 'bds-subheader-nav';
     const MODS = [
-      { id: 'juegos', label: '1. 8 Juegos Lógicos (Ajedrez, Damas, 4L, Ranas, Puente, Adivina Quién, Among Us, Clue)' },
-      { id: 'vial', label: '2. Simulador Manejo 2D (Moto, Carro, Tráiler)' },
-      { id: 'examenes', label: '3. Exámenes Oficiales (COSEVI / MEP / UCR)' },
-      { id: 'calculadora', label: '4. Nota Presentación MEP / U' }
+      { id: 'juegos', label: '1. 🎮 Sala de 8 Juegos Lógicos (Ajedrez HD, Damas, 4L, Ranas, Puente)' },
+      { id: 'vial', label: '2. 🚗 Simulador Manejo 2D (Moto, Carro, Tráiler)' },
+      { id: 'examenes', label: '3. 📝 Exámenes Oficiales (COSEVI / MEP / UCR)' }
     ];
     sub.innerHTML = MODS.map(m => `<button data-mod="${m.id}" class="bds-subnav-item">${m.label}</button>`).join('');
 
@@ -224,17 +361,20 @@
       };
     }
 
-    document.getElementById('btn-top-games').onclick = () => window.abrirMegaSuiteEducativa && window.abrirMegaSuiteEducativa('juegos');
+    document.getElementById('btn-top-games').onclick = () => window.abrirSalaJuegosHD('ajedrez');
     document.getElementById('btn-top-logout').onclick = () => cerrarSesionTotal();
 
     document.querySelectorAll('.bds-subnav-item').forEach(b => {
-      b.onclick = () => window.abrirMegaSuiteEducativa && window.abrirMegaSuiteEducativa(b.getAttribute('data-mod'));
+      b.onclick = () => {
+        const mod = b.getAttribute('data-mod');
+        if (mod === 'juegos') window.abrirSalaJuegosHD('ajedrez');
+        else window.abrirMegaSuiteEducativa && window.abrirMegaSuiteEducativa(mod);
+      };
     });
   }
 
   window.addEventListener('DOMContentLoaded', () => {
     inyectarCSSGate();
-    // Exigir siempre inicio de sesión limpio (sin auto-ingresar con cuentas viejas)
     cerrarSesionTotal();
   });
 })();

@@ -1,7 +1,8 @@
 (function () {
-  const SESSION_KEY = "bds_auth_gate_v147_horizon";
-  const LOCK_KEY = "bds_auth_lock_v147";
-  const XP_KEY = "bds_gamification_xp_v147";
+  const SESSION_KEY = "bds_auth_gate_v148_ruleta";
+  const LOCK_KEY = "bds_auth_lock_v148";
+  const XP_KEY = "bds_gamification_xp_v148";
+  const RULETA_STORAGE_KEY = "bds_ruleta_saber_items_v148";
   const NIVELES = [7, 8, 9, 10, 11, 12];
   const SECCIONES_COLEGIO = [];
   NIVELES.forEach(niv => { [1, 2, 3, 4].forEach(grp => SECCIONES_COLEGIO.push(`${niv}-${grp}`)); });
@@ -18,14 +19,49 @@
   ];
 
   const SVG_MEP = "data:image/svg+xml;utf8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 60" width="160" height="38"><rect width="240" height="60" rx="8" fill="#0f172a" stroke="#0284c7" stroke-width="2"/><circle cx="30" cy="30" r="18" fill="#0284c7"/><text x="30" y="35" text-anchor="middle" fill="#fff" font-family="system-ui" font-weight="900" font-size="13">MEP</text><text x="58" y="26" fill="#f8fafc" font-family="system-ui" font-weight="800" font-size="12">Ministerio de Educación Pública</text><text x="58" y="43" fill="#38bdf8" font-family="system-ui" font-weight="600" font-size="10">Dirección Regional Heredia • Circuito 04</text></svg>`);
-  const SVG_CTP = "data:image/svg+xml;utf8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="38" height="38"><rect width="80" height="80" rx="14" fill="#0b1528" stroke="#0ea5e9" stroke-width="2.5"/><path d="M40 10 L66 20 L66 44 C66 59 40 70 40 70 C40 70 14 59 14 44 L14 20 Z" fill="#0f2942" stroke="#38bdf8" stroke-width="2"/><text x="40" y="38" text-anchor="middle" fill="#fff" font-family="system-ui" font-weight="900" font-size="13">CTPMN</text><text x="40" y="52" text-anchor="middle" fill="#38bdf8" font-family="system-ui" font-weight="700" font-size="8.5">HEREDIA</text></svg>`);
+  const SVG_BUHO_ORIGINAL = "data:image/svg+xml;utf8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="38" height="38"><rect width="80" height="80" rx="16" fill="#0b1528" stroke="#0ea5e9" stroke-width="2.5"/><circle cx="40" cy="42" r="24" fill="#0284c7"/><path d="M22 24 L32 30 L24 36 Z" fill="#38bdf8"/><path d="M58 24 L48 30 L56 36 Z" fill="#38bdf8"/><circle cx="31" cy="38" r="8" fill="#ffffff"/><circle cx="49" cy="38" r="8" fill="#ffffff"/><circle cx="31" cy="38" r="4" fill="#020617"/><circle cx="49" cy="38" r="4" fill="#020617"/><polygon points="40,42 35,50 45,50" fill="#f59e0b"/><text x="40" y="73" text-anchor="middle" fill="#38bdf8" font-family="system-ui" font-weight="900" font-size="8.5">CTPMN</text></svg>`);
   const GOOGLE_SVG = `<svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>`;
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes('sw-bds-v147.js')) r.unregister(); });
-      navigator.serviceWorker.register('/sw-bds-v147.js').catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes('sw-bds-v148.js')) r.unregister(); });
+      navigator.serviceWorker.register('/sw-bds-v148.js').catch(() => {});
     }).catch(() => {});
+  }
+
+  // Sintetizador Web Audio API para la Ruleta del Saber y Juegos
+  let audioCtx = null;
+  let sonidoActivo = true;
+  function playTone(freq, duration = 0.11, type = "sine", vol = 0.12) {
+    if (!sonidoActivo) return;
+    try {
+      if (!audioCtx) {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new Ctx();
+      }
+      if (audioCtx.state === "suspended") audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    } catch {}
+  }
+
+  function playSuccessSound() {
+    playTone(523.25, 0.1, "triangle", 0.15);
+    setTimeout(() => playTone(659.25, 0.12, "triangle", 0.15), 90);
+    setTimeout(() => playTone(783.99, 0.2, "triangle", 0.15), 180);
+  }
+
+  function playErrorSound() {
+    playTone(220, 0.15, "sawtooth", 0.1);
+    setTimeout(() => playTone(180, 0.22, "sawtooth", 0.1), 135);
   }
 
   function shuffleCrypto(arr) {
@@ -55,11 +91,11 @@
   function getXP() {
     try {
       return JSON.parse(localStorage.getItem(XP_KEY)) || {
-        xp: 750, racha: 14, nivel: "Arquitecto Turing",
-        medallas: ["♟️ Estratega FIDE", "🛡️ Guardián SHA-256"]
+        xp: 850, racha: 15, nivel: "Arquitecto Turing",
+        medallas: ["🦉 Búho Azul Original", "♟️ Estratega FIDE", "🎡 Campeón Ruleta"]
       };
     } catch {
-      return { xp: 750, racha: 14, nivel: "Arquitecto Turing", medallas: ["♟️ Estratega FIDE"] };
+      return { xp: 850, racha: 15, nivel: "Arquitecto Turing", medallas: ["🦉 Búho Azul Original"] };
     }
   }
 
@@ -67,7 +103,7 @@
     const d = getXP();
     d.xp += pts;
     if (nuevaMedalla && !d.medallas.includes(nuevaMedalla)) d.medallas.push(nuevaMedalla);
-    d.nivel = d.xp >= 1500 ? "Leyenda Alan Turing" : (d.xp >= 1000 ? "Maestro SICAI" : "Arquitecto Turing");
+    d.nivel = d.xp >= 1600 ? "Leyenda Alan Turing" : (d.xp >= 1100 ? "Maestro SICAI" : "Arquitecto Turing");
     localStorage.setItem(XP_KEY, JSON.stringify(d));
     const badge = document.getElementById('bds-xp-counter');
     if (badge) badge.innerText = `🔥 ${d.racha}d | ⚡ ${d.xp} XP`;
@@ -96,10 +132,12 @@
   function cerrarSesionTotal() {
     const locks = localStorage.getItem(LOCK_KEY);
     const xp = localStorage.getItem(XP_KEY);
+    const customBank = localStorage.getItem(RULETA_STORAGE_KEY);
     sessionStorage.clear();
     localStorage.clear();
     if (locks) localStorage.setItem(LOCK_KEY, locks);
     if (xp) localStorage.setItem(XP_KEY, xp);
+    if (customBank) localStorage.setItem(RULETA_STORAGE_KEY, customBank);
     document.body.classList.remove('bds-authenticated', 'bds-ver-landing-base');
     ['bds-pro-header', 'bds-subheader-nav', 'bds-app-shell', 'bds-mobile-dock', 'bds-slide-drawer'].forEach(id => {
       const el = document.getElementById(id); if (el) el.remove();
@@ -109,149 +147,863 @@
   }
 
   // ============================================================================
-  // MEGA BANCO ACADÉMICO, TÉCNICO Y DE ADMISIÓN (CON EXPLICACIÓN PASO A PASO)
+  // SECTORES Y BANCO MAESTRO DE LA RULETA DEL SABER (JERARQUÍA MEP + IDENTIDAD + MOPT + EXCEL)
   // ============================================================================
-  const CATALOGO_EDUCATIVO = [
+  const RULETA_SECTORES = [
+    { id: "web", name: "Desarrollo Web & Ciberseguridad", short: "Web y Ciber", color: "#4f46e5" },
+    { id: "mopt", name: "Prueba Teórica MOPT / COSEVI", short: "Prueba MOPT", color: "#0284c7" },
+    { id: "excel", name: "Excel, Ofimática & Contabilidad", short: "Excel y Conta", color: "#059669" },
+    { id: "identidad", name: "Identidad CTPMN & Marca", short: "Identidad", color: "#7c3aed" },
+    { id: "habitos", name: "Hábitos Kaizen, DUA & REAC", short: "Hábitos/Kaizen", color: "#0d9488" },
+    { id: "talleres", name: "Talleres Exploratorios (7°-9°)", short: "Exploratorios", color: "#ea580c" },
+    { id: "especialidades", name: "Subáreas & Unidades Técnicas", short: "Subáreas CTP", color: "#2563eb" },
+    { id: "math", name: "Matemáticas & Admisión UCR/TEC", short: "Mate y UCR/TEC", color: "#16a34a" },
+    { id: "english_spanish", name: "Inglés & Español MEP", short: "Inglés/Español", color: "#d97706" },
+    { id: "science", name: "Ciencias (Química, Física, Bio)", short: "Ciencias", color: "#dc2626" }
+  ];
+
+  const INITIAL_RULETA_ITEMS = [
+    // 1. DESARROLLO WEB & CIBERSEGURIDAD (Especialidad > Subárea > Nivel > Unidad)
     {
-      id: 'adm_ucr_una', cat: 'admision', icono: '🏛️', titulo: 'Simulacro Oficial PAA — UCR / UNA (Escala 800)', niveles: 'Admisión Universitaria',
-      desc: 'Razonamiento en Contexto Verbal y Razonamiento Matemático con explicación analítica paso a paso.',
-      manual: 'Fórmula de éxito PAA: 1) Identifica supuestos implícitos sin asumir información externa. 2) En series y operadores, busca diferencias de segundo orden o simetrías.',
-      preguntas: [
-        { p: '[Verbal UCR/UNA] "Todo algoritmo verificable termina en tiempo finito. Algunos programas críticos son algoritmos verificables." ¿Qué se concluye con certeza?', c: 'Algunos programas críticos terminan en tiempo finito', i: ['Todos los programas críticos son algoritmos verificables', 'Ningún programa lento es verificable', 'Todo lo que termina en tiempo finito es un programa crítico'], exp: 'Por silogismo categórico (Modo Darii): Si todo A es B, y algún C es A, entonces necesariamente algún C es B.' },
-        { p: '[Matemático UCR/UNA] En una gaveta hay calcetines negros, blancos y azules. Si todos menos 6 son negros, todos menos 6 son blancos y todos menos 6 son azules, ¿cuántos calcetines hay en total?', c: '9 calcetines en total (3 de cada color)', i: ['18 calcetines', '12 calcetines', '6 calcetines'], exp: 'Si "todos menos 6 son negros", significa que la suma de blancos + azules = 6. Por simetría en los tres colores, cada color tiene 3 unidades (3 + 3 + 3 = 9).' },
-        { p: '[Matemático UCR/UNA] Dada la secuencia numérica: 3, 8, 15, 24, 35, X. ¿Cuál es el valor de X?', c: '48', i: ['44', '46', '50'], exp: 'Las diferencias entre términos consecutivos son +5, +7, +9, +11. La siguiente diferencia impar es +13, por lo tanto 35 + 13 = 48.' },
-        { p: '[Verbal UCR/UNA] "La ciberseguridad no es un producto que se instala una vez, sino un proceso continuo de vigilancia y educación." Según el texto, la seguridad digital:', c: 'Exige actualización permanente y cultura preventiva', i: ['Se resuelve comprando el antivirus más costoso', 'Depende exclusivamente del hardware físico', 'Es innecesaria cuando se usa software libre'], exp: 'El texto contrasta "producto estático" frente a "proceso continuo de vigilancia y educación".' },
-        { p: '[Matemático UCR/UNA] Si 4 impresoras 3D fabrican 40 engranajes en 4 horas, ¿cuántos engranajes fabricarán 8 impresoras idénticas en 8 horas?', c: '160 engranajes', i: ['80 engranajes', '120 engranajes', '320 engranajes'], exp: 'Duplicar las impresoras (de 4 a 8) duplica la producción a 80 en 4 horas; duplicar además el tiempo (de 4h a 8h) vuelve a duplicar el resultado: 160 engranajes.' },
-        { p: '[Verbal UCR/UNA] "Ningún sistema infalible ignora las alertas tempranas. Ciertos protocolos obsoletos ignoran las alertas tempranas." Se deduce que:', c: 'Ciertos protocolos obsoletos no son sistemas infalibles', i: ['Todo protocolo obsoleto es infalible', 'Las alertas tempranas siempre fallan', 'Ningún protocolo actual usa alertas'], exp: 'Si ningún A hace X, y algunos B hacen X, entonces esos B no pueden pertenecer al conjunto A.' },
-        { p: '[Matemático UCR/UNA] El promedio aritmético de 5 números es 14. Si se agrega un sexto número y el nuevo promedio sube a 16, ¿cuál fue el sexto número agregado?', c: '26', i: ['20', '24', '28'], exp: 'La suma inicial de los 5 números es 5 × 14 = 70. La nueva suma de los 6 números es 6 × 16 = 96. La diferencia es 96 - 70 = 26.' }
-      ]
+      id: "rw1", subject: "web", difficulty: "Básico",
+      jerarquia: "Desarrollo Web > Programación > 11° Año > Unidad: Seguridad y Roles RBAC",
+      question: "Para mitigar el riesgo de escalación de privilegios al registrar usuarios nuevos, ¿qué rol debe asignarse por defecto en el servidor?",
+      options: ["Superadmin temporal", "El rol mínimo necesario (ej. estudiante)", "El rol que envíe el formulario del navegador", "Administrador sin contraseña"],
+      correct: 1,
+      explanation: "Aplicar el principio de menor privilegio evita que un atacante manipule la petición del cliente para obtener permisos administrativos."
     },
     {
-      id: 'adm_tec', cat: 'admision', icono: '⚙️', titulo: 'Simulacro Oficial de Admisión — TEC (Escala 800)', niveles: 'Tecnológico de Costa Rica',
-      desc: 'Matemática intensiva para ingeniería, operadores abstractos, geometría analítica y lógica proposicional.',
-      manual: 'Foco TEC: Despeje algebraico rápido, leyes de potencias, áreas por resta de figuras y tablas de verdad del condicional (P → Q).',
-      preguntas: [
-        { p: '[TEC Operadores] Para cualesquiera números reales se define a # b = a² - 2b. ¿Cuál es el valor numérico de (4 # 5) # 3?', c: '30', i: ['24', '18', '36'], exp: 'Primero resolvemos el paréntesis: (4 # 5) = 4² - 2(5) = 16 - 10 = 6. Luego evaluamos 6 # 3 = 6² - 2(3) = 36 - 6 = 30.' },
-        { p: '[TEC Geometría] Si el lado de un cuadrado aumenta en un 50%, ¿en qué porcentaje aumenta su área total?', c: 'Aumenta en un 125%', i: ['Aumenta en un 50%', 'Aumenta en un 100%', 'Aumenta en un 150%'], exp: 'Si el lado pasa de 1 a 1.5, el área pasa de 1² = 1 a (1.5)² = 2.25, lo cual representa un incremento del 125%.' },
-        { p: '[TEC Lógica] La proposición condicional "Si el servidor compila, entonces pasa las pruebas QA" resulta FALSA únicamente cuando:', c: 'El servidor compila y NO pasa las pruebas QA', i: ['El servidor no compila y pasa QA', 'Ambos hechos ocurren simultáneamente', 'El servidor no compila ni pasa QA'], exp: 'En lógica formal, una implicación (P → Q) solo es falsa cuando el antecedente P es verdadero y el consecuente Q es falso.' },
-        { p: '[TEC Álgebra] Si 2^(x+1) + 2^x = 24, ¿cuál es el valor real de x?', c: 'x = 3', i: ['x = 2', 'x = 4', 'x = 5'], exp: 'Factorizando 2^x: 2^x · (2 + 1) = 24 → 2^x · 3 = 24 → 2^x = 8 → x = 3.' },
-        { p: '[TEC Probabilidad] Al lanzar dos dados estándar de 6 caras simultáneamente, ¿cuál es la probabilidad de que la suma de sus caras superiores sea igual a 7?', c: '1/6 (6 de 36 casos posibles)', i: ['1/12', '7/36', '1/9'], exp: 'Las parejas que suman 7 son (1,6), (2,5), (3,4), (4,3), (5,2) y (6,1): son 6 casos favorables entre 36 posibles = 6/36 = 1/6.' }
-      ]
+      id: "rw2", subject: "web", difficulty: "Intermedio",
+      jerarquia: "Desarrollo Web > Diseño de Software > 12° Año > Unidad: Integración Continua y Despliegue",
+      question: "¿Qué práctica reduce el riesgo de romper la rama principal (main) en un despliegue automático hacia Vercel?",
+      options: ["Desactivar las pruebas para subir más rápido", "Ejecutar un build de verificación previo al git push", "Subir los archivos node_modules al repositorio", "Editar el código directamente en producción"],
+      correct: 1,
+      explanation: "Correr npm run build y validar errores antes de hacer push detiene fallos de compilación antes de que lleguen a producción."
     },
     {
-      id: 'adm_uned_utn', cat: 'admision', icono: '🎓', titulo: 'Nivelación y Admisión — UNED & UTN', niveles: 'Educación Superior CR',
-      desc: 'Resolución de problemas técnico-productivos, proporcionalidad compuesta, APA 7 y comprensión académica.',
-      manual: 'Método de las proporciones (Regla de tres compuesta directa e inversa) y normas de citación académica.',
-      preguntas: [
-        { p: '[UTN Ingeniería] 3 técnicos instalan 18 puntos de red en 6 horas. ¿Cuántos puntos de red instalarán 5 técnicos trabajando 8 horas al mismo ritmo?', c: '40 puntos de red', i: ['30 puntos de red', '36 puntos de red', '45 puntos de red'], exp: 'Cada técnico instala 18 / (3 × 6) = 1 punto de red por hora. Por tanto, 5 técnicos en 8 horas instalan 5 × 8 × 1 = 40 puntos.' },
-        { p: '[UNED Investigación] En el formato APA 7ma edición, cuando una fuente tiene 3 o más autores, ¿cómo se cita dentro del texto desde la primera mención?', c: 'Primer Apellido seguido de "et al." y el año', i: ['Todos los nombres completos separados por guiones', 'Solo el título del libro sin año', 'El número de página únicamente'], exp: 'APA 7 simplificó la regla: a partir de 3 autores se abrevia con el primer autor seguido de la locución latina "et al." desde la primera cita.' },
-        { p: '[UTN Matemática] Una factura con el 13% de IVA incluido asciende a ₡113,000. ¿Cuál era el precio neto sin impuesto?', c: '₡100,000', i: ['₡98,310', '₡101,300', '₡99,000'], exp: 'Se divide el monto total entre 1.13: 113,000 / 1.13 = 100,000.' }
-      ]
+      id: "rw3", subject: "web", difficulty: "Básico",
+      jerarquia: "Desarrollo Web > Programación > 11° Año > Unidad: Diseño Web Responsivo Mobile-First",
+      question: "En diseño web responsivo, ¿qué unidad CSS se adapta mejor al ancho disponible de celulares y tabletas sin generar desbordamiento horizontal?",
+      options: ["Anchos fijos de 1200px", "Porcentajes fluidos y max-width: 100%", "Píxeles negativos", "Tablas HTML sin estilos"],
+      correct: 1,
+      explanation: "Usar contenedores fluidos y max-width: 100% garantiza que los elementos se ajusten a pantallas pequeñas sin cortar botones."
     },
     {
-      id: 'adm_ctp_cientificos', cat: 'admision', icono: '🔬', titulo: 'Admisión CTP (7° y 10°) & Colegios Científicos', niveles: 'Secundaria Técnica y Científica',
-      desc: 'Aptitud vocacional para ingreso a 7° CTP, elección de especialidad 10° y prueba nacional de Colegios Científicos.',
-      manual: 'Identidades algebraicas notables, razonamiento mecánico de poleas/engranajes y lógica algorítmica.',
-      preguntas: [
-        { p: '[Colegios Científicos] Si a + b = 7 y a·b = 10, ¿cuál es el valor numérico de a² + b²?', c: '29', i: ['49', '19', '39'], exp: 'Sabemos que (a + b)² = a² + 2ab + b². Sustituyendo: 7² = a² + b² + 2(10) → 49 - 20 = 29.' },
-        { p: '[Admisión CTP] En un tren de 4 engranajes conectados en línea (A-B-C-D), si el engranaje A gira en sentido horario, ¿cómo gira el engranaje D?', c: 'En sentido antihorario', i: ['En sentido horario', 'No gira', 'A la mitad de velocidad en el mismo sentido'], exp: 'Cada contacto invierte el giro: A(Horario) → B(Antihorario) → C(Horario) → D(Antihorario).' },
-        { p: '[Especialidad 10° CTP] En lógica de programación, si X = 8 y Y = 3, ¿cuál es el resultado del operador módulo (X % Y)?', c: '2 (el residuo entero de dividir 8 entre 3)', i: ['2.66', '5', '24'], exp: '8 dividido entre 3 da cociente 2 y sobra un residuo entero de 2.' }
-      ]
+      id: "rw4", subject: "web", difficulty: "Intermedio",
+      jerarquia: "Ciberseguridad > Seguridad de Aplicaciones > 12° Año > Unidad: Trazabilidad y Auditoría",
+      question: "¿Qué datos son indispensables en una bitácora de trazabilidad cuando un administrador otorga un permiso o bloquea a un usuario?",
+      options: ["Solo el nuevo estado del usuario", "Actor, acción, usuario objetivo y fecha/hora exacta (ISO)", "Únicamente el color del tema visual", "La contraseña en texto plano del usuario"],
+      correct: 1,
+      explanation: "Una auditoría efectiva requiere saber quién hizo el cambio, qué hizo, sobre quién y en qué momento exacto."
     },
     {
-      id: 'espanol', cat: 'basica', icono: '📖', titulo: 'Español y Comunicación', niveles: '7° a 12° MEP',
-      desc: 'Lectura crítica, acentuación ortográfica, morfosintaxis, figuras literarias y redacción formal.',
-      manual: 'Agudas (tilde en n, s o vocal), Graves (tilde cuando NO terminan en n, s o vocal), Esdrújulas (todas se tildan).',
-      preguntas: [
-        { p: '¿Cuál serie contiene únicamente palabras graves (llanas) correctamente escritas?', c: 'Árbol, examen, cárcel', i: ['Café, compás, camión', 'Música, brújula, sílaba', 'Reloj, pared, cantar'], exp: 'Árbol, examen y cárcel tienen el acento prosódico en la penúltima sílaba.' },
-        { p: '¿Qué figura de construcción consiste en alterar el orden lógico o sintáctico habitual de las palabras en la oración?', c: 'Hipérbaton', i: ['Anáfora', 'Metáfora', 'Aliteración'], exp: 'El hipérbaton invierte el orden sintáctico regular (Sujeto + Verbo + Complemento).' },
-        { p: 'En la oración "El informe técnico fue revisado por la comisión", el verbo se encuentra en:', c: 'Voz pasiva', i: ['Voz activa', 'Modo imperativo', 'Gerundio compuesto'], exp: 'Tiene estructura de verbo ser conjugado ("fue") + participio ("revisado") + complemento agente ("por la comisión").' }
-      ]
+      id: "rw5", subject: "web", difficulty: "Avanzado",
+      jerarquia: "Ciberseguridad > Hacking Ético > 12° Año > Unidad: Control de Acceso en Backend",
+      question: "¿Por qué ocultar un botón de administración en React (UI) NO es suficiente como medida de seguridad?",
+      options: ["Porque React no soporta condicionales", "Porque cualquier usuario puede llamar al endpoint de la API directamente si no hay validación en el servidor", "Porque CSS borra las bases de datos", "Porque los navegadores ignoran el JavaScript"],
+      correct: 1,
+      explanation: "La seguridad real siempre debe validarse en el backend o reglas de seguridad de la base de datos; ocultar botones solo mejora la UX."
+    },
+
+    // 2. PRUEBA TEÓRICA MOPT / COSEVI
+    {
+      id: "rm1", subject: "mopt", difficulty: "Básico",
+      jerarquia: "Educación Vial > Ley de Tránsito N° 9078 > Nivel General > Unidad: Límites de Velocidad",
+      question: "¿Cuál es la velocidad máxima permitida al conducir frente a zonas escolares con presencia de estudiantes en Costa Rica?",
+      options: ["40 km/h", "25 km/h", "50 km/h", "60 km/h"],
+      correct: 1,
+      explanation: "Según la Ley de Tránsito de Costa Rica, en zonas escolares y frente a hospitales o clínicas la velocidad máxima es de 25 km/h."
     },
     {
-      id: 'matematicas', cat: 'basica', icono: '📐', titulo: 'Matemáticas Aplicadas MEP', niveles: '7° a 12° MEP',
-      desc: 'Álgebra, funciones, geometría analítica, trigonometría, estadística descriptiva y probabilidad.',
-      manual: 'Ecuación de la recta y = mx + b, discriminante Δ = b² - 4ac, teorema de Pitágoras y circunferencia (x-h)² + (y-k)² = r².',
-      preguntas: [
-        { p: '¿Cuál es la ecuación de la circunferencia con centro en C(2, -3) y radio r = 5?', c: '(x - 2)² + (y + 3)² = 25', i: ['(x + 2)² + (y - 3)² = 25', '(x - 2)² + (y + 3)² = 5', '(x - 2)² - (y + 3)² = 10'], exp: 'Se invierten los signos de las coordenadas del centro (h, k) y se eleva el radio al cuadrado (5² = 25).' },
-        { p: '¿Cuál es el vértice de la parábola dada por la función cuadrática f(x) = (x - 4)² + 7?', c: '(4, 7)', i: ['(-4, 7)', '(4, -7)', '(7, 4)'], exp: 'En la forma canónica a(x - h)² + k, el vértice corresponde directamente al par ordenado (h, k) = (4, 7).' },
-        { p: 'Si log₂(x) = 5, ¿cuál es el valor numérico de x?', c: '32', i: ['10', '25', '64'], exp: 'Por definición de logaritmo: base elevada al exponente es igual al argumento (2⁵ = 32).' }
-      ]
+      id: "rm2", subject: "mopt", difficulty: "Intermedio",
+      jerarquia: "Educación Vial > Circulación en Rotondas > Nivel General > Unidad: Prioridad de Paso",
+      question: "Al aproximarse a una rotonda de dos carriles en Costa Rica, ¿quién tiene la prioridad de paso reglamentaria?",
+      options: ["El vehículo que intenta ingresar a mayor velocidad", "El vehículo que ya circula dentro de la rotonda en sentido antihorario", "El vehículo más pesado siempre", "El que circula en sentido horario"],
+      correct: 1,
+      explanation: "Dentro de la rotonda se circula en sentido antihorario (por la derecha) y los vehículos que ya van adentro tienen prioridad sobre los que desean entrar."
     },
     {
-      id: 'quimica', cat: 'basica', icono: '🧪', titulo: 'Química Científica y Laboratorio', niveles: '10° a 12° MEP',
-      desc: 'Estructura atómica, tabla periódica, nomenclatura inorgánica, estequiometría, gases ideales y pH.',
-      manual: 'A = Z + n° (Número másico = Protones + Neutrones). En un átomo neutro, electrones = protones (Z).',
-      preguntas: [
-        { p: 'El catión Calcio (Ca²⁺) cuyo número atómico es Z = 20 posee exactamente:', c: '20 protones y 18 electrones', i: ['20 protones y 22 electrones', '18 protones y 20 electrones', '22 protones y 20 electrones'], exp: 'La carga +2 indica que el átomo neutro cedió 2 electrones de valencia (20 - 2 = 18), manteniendo intactos sus 20 protones.' },
-        { p: 'Según el sistema Stock de nomenclatura inorgánica, ¿cómo se nombra el compuesto Fe₂O₃?', c: 'Óxido de hierro (III)', i: ['Óxido de hierro (II)', 'Hidróxido férrico', 'Peróxido de hierro'], exp: 'El oxígeno trabaja con estado -2 y el hierro en esta fórmula actúa con estado de oxidación +3.' },
-        { p: '¿Cuántos moles de moléculas hay en 88 gramos de dióxido de carbono (CO₂), sabiendo que C = 12 g/mol y O = 16 g/mol?', c: '2 moles', i: ['1 mol', '4 moles', '0.5 moles'], exp: 'La masa molar del CO₂ es 12 + 2(16) = 44 g/mol. Dividiendo 88 g entre 44 g/mol se obtienen 2 moles.' }
-      ]
+      id: "rm3", subject: "mopt", difficulty: "Intermedio",
+      jerarquia: "Educación Vial > Señalización Vial > Nivel General > Unidad: Demarcación Horizontal",
+      question: "¿Qué indica la doble línea amarilla continua pintada en el eje central de una carretera?",
+      options: ["Permitido adelantar en ambos sentidos", "Prohibido adelantar en ambos sentidos de circulación", "Carril exclusivo para autobuses", "Zona de estacionamiento libre"],
+      correct: 1,
+      explanation: "El color amarillo separa flujos en sentidos opuestos y la línea continua doble prohíbe estrictamente el adelantamiento."
     },
     {
-      id: 'fisica', cat: 'basica', icono: '⚡', titulo: 'Física y Mecánica Clásica', niveles: '10° a 12° MEP',
-      desc: 'Vectores, cinemática, dinámica de Newton, conservación de la energía, hidrostática y electrodinámica.',
-      manual: 'MRUA: v_f = v_i + a·t | d = v_i·t + ½·a·t². Ley de gravitación universal y Ley de Coulomb.',
-      preguntas: [
-        { p: 'Un automóvil parte del reposo y acelera uniformemente a razón de 3 m/s² durante 6 segundos. ¿Qué distancia recorre en ese lapso?', c: '54 metros', i: ['18 metros', '36 metros', '108 metros'], exp: 'Usando d = ½ · a · t² = 0.5 × 3 × (6²) = 0.5 × 3 × 36 = 54 metros.' },
-        { p: 'Tres resistencias de 10 Ω, 20 Ω y 30 Ω se conectan en SERIE a una fuente de 120 V. ¿Cuál es la resistencia equivalente total?', c: '60 Ω', i: ['5.45 Ω', '20 Ω', '120 Ω'], exp: 'En un circuito en serie, la resistencia equivalente es la suma directa: 10 + 20 + 30 = 60 Ω.' }
-      ]
+      id: "rm4", subject: "mopt", difficulty: "Básico",
+      jerarquia: "Educación Vial > Conducción en Rotondas > Nivel General > Unidad: Uso de Carriles",
+      question: "En una rotonda de dos carriles, ¿qué carril debe elegir el conductor si va a abandonar la rotonda en la primera o segunda salida?",
+      options: ["El carril interno (izquierdo)", "El carril externo (derecho)", "El espaldón verde central", "Cualquier carril cruzando en diagonal"],
+      correct: 1,
+      explanation: "El carril externo (derecho) es obligatorio para tomar la primera o segunda salida; el interno se reserva para la tercera salida o retorno."
+    },
+
+    // 3. EXCEL, OFIMÁTICA & CONTABILIDAD PURA
+    {
+      id: "rx1", subject: "excel", difficulty: "Básico",
+      jerarquia: "Contabilidad y Ofimática > Hoja Electrónica Excel > 10° Año > Unidad: Fórmulas y Referencias",
+      question: "En Microsoft Excel, ¿qué símbolo se antepone a la columna y a la fila (ejemplo: $B$4) para fijar una referencia absoluta al copiar una fórmula?",
+      options: ["El símbolo de porcentaje (%)", "El signo de dólar ($)", "El símbolo de numeral (#)", "El ampersand (&)"],
+      correct: 1,
+      explanation: "El signo $ fija tanto la columna como la fila ($B$4) para que la celda de referencia (como la tasa del 13% de IVA) no se desplace al arrastrar."
     },
     {
-      id: 'ingles', cat: 'basica', icono: '🗣️', titulo: 'Inglés Técnico & Conversacional (OpenEnglish)', niveles: '7° a 12° Bilingüe',
-      desc: 'Grammar in Context, IT & Cybersecurity Vocabulary, Reading Comprehension and TOEIC Preparation.',
-      manual: 'First Conditional (If + Present, will + base verb), Second Conditional (If + Past, would + base verb).',
-      preguntas: [
-        { p: 'Select the best option: "Had we configured the firewall properly, the intrusion _____ prevented."', c: 'would have been', i: ['will be', 'was', 'is being'], exp: 'Third conditional inversion in passive voice requires "would have been + past participle".' },
-        { p: 'What does the acronym "API" stand for in modern software architecture?', c: 'Application Programming Interface', i: ['Automated Protocol Internet', 'Advanced Processor Integration', 'Active Port Identifier'], exp: 'API stands for Application Programming Interface.' }
-      ]
+      id: "rx2", subject: "excel", difficulty: "Intermedio",
+      jerarquia: "Contabilidad Pura > Hoja Electrónica Aplicada > 11° Año > Unidad: Funciones Lógicas",
+      question: "¿Cuál fórmula de Excel evalúa correctamente si la nota en la celda C2 es mayor o igual a 70 para mostrar 'APROBADO' o 'APLAZADO'?",
+      options: ["=SUMA(C2>=70; \"APROBADO\")", "=SI(C2>=70; \"APROBADO\"; \"APLAZADO\")", "=BUSCARV(C2; 70; \"APROBADO\")", "=CONTAR(C2>=70)"],
+      correct: 1,
+      explanation: "La función lógica =SI(prueba_lógica; valor_si_verdadero; valor_si_falso) evalúa la condición y devuelve el texto correspondiente."
     },
     {
-      id: 'web', cat: 'ctp', icono: '💻', titulo: 'Desarrollo Web & Ingeniería de Software', niveles: '10°, 11° y 12° CTP',
-      desc: 'HTML5, CSS3/Tailwind, JavaScript moderno, React, Node.js, bases de datos relacionales SQL y Git.',
-      manual: 'Semántica HTML5, Flexbox/Grid, promesas async/await en JS, hooks de React y normalización de bases de datos (1FN, 2FN, 3FN).',
-      preguntas: [
-        { p: 'En JavaScript asíncrono, ¿qué palabra clave detiene la ejecución dentro de una función async hasta que una Promesa se resuelva?', c: 'await', i: ['yield', 'defer', 'static'], exp: 'El operador await pausa la ejecución de la función async esperando la resolución de la Promise.' },
-        { p: 'En una base de datos relacional PostgreSQL, ¿qué restricción garantiza que una columna no acepte valores duplicados ni nulos identificando cada fila?', c: 'PRIMARY KEY (Clave Primaria)', i: ['FOREIGN KEY', 'DEFAULT', 'INDEX'], exp: 'PRIMARY KEY combina implícitamente las restricciones UNIQUE y NOT NULL.' },
-        { p: '¿Qué propiedad de CSS Flexbox alinea los elementos hijos a lo largo del eje principal (main axis)?', c: 'justify-content', i: ['align-items', 'z-index', 'box-sizing'], exp: 'justify-content controla la distribución en el eje principal, mientras que align-items actúa en el eje transversal.' }
-      ]
+      id: "rx3", subject: "excel", difficulty: "Intermedio",
+      jerarquia: "Contabilidad Pura > Principios Contables > 10° Año > Unidad: Ecuación Patrimonial",
+      question: "Si una empresa reporta Activos Totales por ₡18,000,000 y Pasivos Totales por ₡7,000,000, ¿a cuánto asciende su Patrimonio o Capital Contable?",
+      options: ["₡25,000,000", "₡11,000,000", "₡7,000,000", "₡18,000,000"],
+      correct: 1,
+      explanation: "Por la ecuación contable fundamental (Patrimonio = Activo - Pasivo): 18,000,000 - 7,000,000 = ₡11,000,000."
+    },
+
+    // 4. IDENTIDAD DE MARCA (pracTICAtecnica.com, BDS Devs, CTP Mercedes Norte)
+    {
+      id: "ri1", subject: "identidad", difficulty: "Básico",
+      jerarquia: "Identidad Institucional > Cultura Digital CTPMN > Nivel General > Unidad: Símbolos y Marca",
+      question: "¿Cuál es el ícono oficial e histórico que representa la sabiduría tecnológica y la identidad propia de la plataforma pracTICAtecnica.com?",
+      options: ["Un robot rojo genérico", "El Búho Azul original de las primeras versiones", "Una estrella amarilla", "Un escudo sin colores"],
+      correct: 1,
+      explanation: "El Búho Azul original simboliza la visión nocturna, el pensamiento analítico y la identidad auténtica de pracTICAtecnica.com."
     },
     {
-      id: 'ciber', cat: 'ctp', icono: '🛡️', titulo: 'Ciberseguridad, Hacking Ético y SOC', niveles: '10°, 11° y 12° CTP',
-      desc: 'Criptografía, pentesting, análisis de vulnerabilidades OWASP, endurecimiento de servidores, SIEM y normativa ISO 27001.',
-      manual: 'Defensa en profundidad, principio de mínimo privilegio (Zero Trust), hashing con sal (Salt) y mitigación de XSS/CSRF.',
-      preguntas: [
-        { p: '¿Qué vulnerabilidad web ocurre cuando una aplicación inserta datos no sanitizados del usuario en el DOM ejecutando scripts maliciosos en el navegador de la víctima?', c: 'Cross-Site Scripting (XSS)', i: ['Denegación de Servicio (DDoS)', 'Fuerza Bruta SSH', 'ARP Spoofing'], exp: 'XSS permite inyectar código JavaScript ejecutable en el contexto de la sesión del navegador de otros usuarios.' },
-        { p: 'En criptografía de clave pública (asimétrica) como RSA o ECC, si Alicia quiere enviar un mensaje confidencial a Benito, ¿con qué clave debe cifrarlo?', c: 'Con la clave pública de Benito', i: ['Con la clave privada de Alicia', 'Con una clave pública compartida en texto plano', 'Sin ninguna clave'], exp: 'Para garantizar confidencialidad, se cifra con la clave pública del destinatario para que solo su clave privada pueda descifrarlo.' }
-      ]
+      id: "ri2", subject: "identidad", difficulty: "Básico",
+      jerarquia: "Identidad Institucional > Dirección Regional Heredia > Circuito 04 > Unidad: Comunidad CTPMN",
+      question: "¿A qué Dirección Regional de Educación y Circuito pertenece oficialmente el Colegio Técnico Profesional (CTP) de Mercedes Norte?",
+      options: ["Dirección Regional San José Norte • Circuito 01", "Dirección Regional de Educación de Heredia • Circuito 04", "Dirección Regional de Alajuela • Circuito 08", "Dirección Regional de Cartago • Circuito 02"],
+      correct: 1,
+      explanation: "El CTP de Mercedes Norte forma parte de la Dirección Regional de Educación de Heredia, Circuito Escolar 04."
     },
     {
-      id: 'redes', cat: 'ctp', icono: '🌐', titulo: 'Redes Cisco, VLSM y Infraestructura TI', niveles: '10°, 11° y 12° CTP',
-      desc: 'Enrutamiento y conmutación, direccionamiento IPv4/IPv6, subneteo VLSM, VLANs, STP, DHCP, DNS y diagnóstico.',
-      manual: 'Rangos privados RFC 1918 (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) y cálculo de broadcast.',
-      preguntas: [
-        { p: 'Dada la dirección de subred 192.168.50.64/26, ¿cuál es su dirección de Broadcast correspondiente?', c: '192.168.50.127', i: ['192.168.50.128', '192.168.50.255', '192.168.50.95'], exp: 'Un prefijo /26 tiene saltos de bloque de 64 direcciones (2⁶ = 64). El bloque empieza en .64 y el siguiente inicia en .128, por lo que el broadcast es .127.' },
-        { p: '¿Qué comando de diagnóstico de red envía paquetes ICMP Echo Request para comprobar la conectividad y latencia hacia un host?', c: 'ping', i: ['netstat', 'nslookup', 'chmod'], exp: 'El comando ping utiliza mensajes ICMP Echo Request y Echo Reply para medir conectividad y tiempo de ida y vuelta (RTT).' }
-      ]
+      id: "ri3", subject: "identidad", difficulty: "Intermedio",
+      jerarquia: "Identidad de Marca > Ingeniería de Software > BDS Devs > Unidad: Soberanía Tecnológica",
+      question: "¿Qué equipo de arquitectura y desarrollo de software impulsa la plataforma educativa pracTICAtecnica.com bajo estándares de calidad Kaizen?",
+      options: ["BDS Devs (liderado por el Ing. Max Salazar Sánchez y su equipo)", "Una franquicia extranjera cerrada", "Un sistema sin soporte local", "Una plantilla estática sin base de datos"],
+      correct: 0,
+      explanation: "BDS Devs desarrolla y mantiene pracTICAtecnica.com como una plataforma costarricense soberana y de grado industrial."
+    },
+
+    // 5. HÁBITOS DE ESTUDIO, FILOSOFÍA KAIZEN, DUA & REAC
+    {
+      id: "rh1", subject: "habitos", difficulty: "Básico",
+      jerarquia: "Formación Humana > Hábitos de Excelencia > Nivel General > Unidad: Filosofía Kaizen",
+      question: "¿Qué significa aplicar el principio japonés 'Kaizen' en el aprendizaje técnico y en el desarrollo de software diario?",
+      options: ["Dejar todo para el último día antes del examen", "Mejora continua: aprender, auditar, corregir y perfeccionar un poco cada día", "Trabajar sin descanso ni planificación", "Copiar código sin comprender cómo funciona"],
+      correct: 1,
+      explanation: "Kaizen significa 'cambio para mejorar' de forma continua, acumulando mejoras constantes en disciplina, código y estudio."
     },
     {
-      id: 'contabilidad', cat: 'ctp', icono: '📊', titulo: 'Contabilidad Pura, Costos y Finanzas', niveles: '10°, 11° y 12° CTP',
-      desc: 'Ciclo contable completo, estados financieros NIIF, conciliación bancaria, depreciación, planillas e impuestos.',
-      manual: 'Depreciación en línea recta = (Costo - Valor Residual) / Vida Útil. Ecuación contable básica: A = P + C.',
-      preguntas: [
-        { p: 'Una maquinaria cuesta ₡5,500,000, tiene un valor residual estimado de ₡500,000 y una vida útil de 5 años. ¿Cuál es el gasto por depreciación anual por el método de línea recta?', c: '₡1,000,000 por año', i: ['₡1,100,000 por año', '₡500,000 por año', '₡900,000 por año'], exp: '(5,500,000 - 500,000) / 5 = 5,000,000 / 5 = ₡1,000,000 anuales.' },
-        { p: '¿En cuál estado financiero oficial se presentan los Ingresos, Costos y Gastos de un período para determinar la Utilidad o Pérdida Neta?', c: 'Estado de Resultados Integral (Ganancias y Pérdidas)', i: ['Estado de Situación Financiera (Balance General)', 'Estado de Flujos de Efectivo', 'Arqueo de Caja Chica'], exp: 'El Estado de Resultados mide el rendimiento financiero comparando ingresos menos gastos durante un período.' }
-      ]
+      id: "rh2", subject: "habitos", difficulty: "Básico",
+      jerarquia: "Orientación y Salud Ocupacional > Técnicas de Estudio > Nivel General > Unidad: Gestión del Tiempo",
+      question: "¿En qué consiste la técnica Pomodoro para estudiar materias técnicas o programar sin agotamiento mental?",
+      options: ["Estudiar 6 horas seguidas sin tomar agua", "Bloques de 25 minutos de enfoque profundo seguidos de 5 minutos de descanso activo", "Estudiar con tres pantallas de videojuegos abiertas", "Dormir solo 2 horas antes de una prueba"],
+      correct: 1,
+      explanation: "Alternar 25 minutos de concentración total con 5 minutos de pausa mejora la retención neuronal y previene la fatiga visual."
+    },
+    {
+      id: "rh3", subject: "habitos", difficulty: "Intermedio",
+      jerarquia: "Normativa MEP > Reglamento de Evaluación (REAC) > Nivel General > Unidad: Convivencia y Responsabilidad",
+      question: "Cuando un estudiante se ausenta por una cita médica de la CCSS o situación justificada, ¿cuál es el hábito correcto según el reglamento MEP?",
+      options: ["No avisar nunca al profesor guía", "Presentar el comprobante y gestionar la justificación formal en el plazo reglamentario", "Inventar una excusa un mes después", "Abandonar la materia"],
+      correct: 1,
+      explanation: "La comunicación oportuna y la presentación de comprobantes ante el Profesor Guía garantizan el derecho a reprogramar evaluaciones."
+    },
+
+    // 6. TALLERES EXPLORATORIOS (7°, 8° Y 9° AÑO CTP)
+    {
+      id: "rt1", subject: "talleres", difficulty: "Básico",
+      jerarquia: "Talleres Exploratorios > Herramientas para la Producción y Transformación > 7°-9° > Unidad: Seguridad Industrial",
+      question: "En un taller exploratorio de electricidad, electrónica o mantenimiento, ¿cuál es la primera regla de oro antes de intervenir un circuito?",
+      options: ["Tocar los cables con las manos húmedas", "Verificar que la fuente esté desenergizada y usar equipo de protección", "Cortar todos los cables al azar", "Anular el fusible de protección con papel aluminio"],
+      correct: 1,
+      explanation: "En salud ocupacional y talleres técnicos, desenergizar el circuito antes de manipularlo previene descargas eléctricas y cortocircuitos."
+    },
+    {
+      id: "rt2", subject: "talleres", difficulty: "Básico",
+      jerarquia: "Talleres Exploratorios > Pensamiento Computacional y Robótica > 7°-9° > Unidad: Algoritmos",
+      question: "En los talleres exploratorios de programación y robótica, ¿qué es un 'algoritmo'?",
+      options: ["Un virus informático que daña el monitor", "Una secuencia lógica, ordenada y finita de pasos para resolver un problema", "El cable de corriente de la computadora", "Una marca de teclados mecánicos"],
+      correct: 1,
+      explanation: "Todo programa o rutina robótica parte de un algoritmo: pasos ordenados y precisos que transforman una entrada en una solución."
+    },
+
+    // 7. ESPECIALIDADES TÉCNICAS, SUBÁREAS Y UNIDADES MEP
+    {
+      id: "re1", subject: "especialidades", difficulty: "Intermedio",
+      jerarquia: "Desarrollo Web / TI > Subárea: Soporte TI y Redes > 11° Año > Unidad: Subneteo VLSM",
+      question: "En una subred empresarial con máscara /27 (255.255.255.224), ¿cuántas direcciones IP utilizables para computadoras (hosts) quedan disponibles?",
+      options: ["14 direcciones utilizables", "30 direcciones utilizables", "62 direcciones utilizables", "254 direcciones utilizables"],
+      correct: 1,
+      explanation: "Con /27 quedan 5 bits para host (32 - 27 = 5). Aplicando 2⁵ - 2 (red y broadcast) = 32 - 2 = 30 hosts útiles."
+    },
+    {
+      id: "re2", subject: "especialidades", difficulty: "Intermedio",
+      jerarquia: "Desarrollo Web > Subárea: Diseño de Software > 12° Año > Unidad: Arquitectura y Patrones",
+      question: "En la subárea de Diseño de Software, ¿qué ventaja ofrece separar el Frontend (React/UI) del Backend (API/Base de Datos)?",
+      options: ["Hace que la página sea imposible de actualizar", "Permite escalar, mantener y asegurar la lógica de negocio de forma modular e independiente", "Obliga a escribir todo en un solo archivo de texto", "Elimina la necesidad de usar contraseñas"],
+      correct: 1,
+      explanation: "El desacoplamiento modular facilita el mantenimiento Kaizen, las pruebas unitarias y la protección de las credenciales de base de datos."
+    },
+    {
+      id: "re3", subject: "especialidades", difficulty: "Básico",
+      jerarquia: "Electrónica Industrial > Subárea: Fundamentos de Electricidad > 10° Año > Unidad: Ley de Ohm",
+      question: "Si por una resistencia de 100 Ω circula una corriente de 0.12 A, ¿cuál es el voltaje aplicado según la Ley de Ohm (V = I × R)?",
+      options: ["1.2 V", "12 V", "120 V", "0.0012 V"],
+      correct: 1,
+      explanation: "Multiplicando corriente por resistencia: V = 0.12 A × 100 Ω = 12 Voltios."
+    },
+
+    // 8. MATEMÁTICAS & ADMISIÓN UCR / TEC
+    {
+      id: "m1", subject: "math", difficulty: "Básico",
+      jerarquia: "Matemáticas > Estadística y Porcentajes > 10° Año > Unidad: Proporcionalidad",
+      question: "Si una plataforma educativa tiene 240 estudiantes y el 25% cuenta con beca o cortesía, ¿cuántos estudiantes tienen cortesía?",
+      options: ["48 estudiantes", "60 estudiantes", "75 estudiantes", "80 estudiantes"],
+      correct: 1,
+      explanation: "El 25% equivale a dividir entre 4: 240 / 4 = 60 estudiantes."
+    },
+    {
+      id: "m2", subject: "math", difficulty: "Intermedio",
+      jerarquia: "Matemáticas > Álgebra > 9° Año > Unidad: Ecuaciones de Primer Grado",
+      question: "Resuelve la ecuación lineal: 3x - 7 = 14",
+      options: ["x = 5", "x = 7", "x = 21", "x = 3"],
+      correct: 1,
+      explanation: "Sumando 7 a ambos lados queda 3x = 21; al dividir entre 3 se obtiene x = 7."
+    },
+    {
+      id: "m3", subject: "math", difficulty: "Avanzado",
+      jerarquia: "Admisión Universitaria > Razonamiento Matemático UCR / TEC > Nivel PAA > Unidad: Sucesiones",
+      question: "[Simulacro UCR/TEC] En la sucesión 2, 6, 12, 20, 30, X... ¿cuál es el valor numérico de X?",
+      options: ["38", "42", "40", "44"],
+      correct: 1,
+      explanation: "Las diferencias entre términos van aumentando de 2 en 2: +4, +6, +8, +10. El siguiente salto es +12, por lo que 30 + 12 = 42."
+    },
+
+    // 9. INGLÉS & ESPAÑOL MEP
+    {
+      id: "e1", subject: "english_spanish", difficulty: "Básico",
+      jerarquia: "Inglés > Conversational & Technical English > 10° Año > Unidad: Simple Present",
+      question: "Choose the correct form to complete the sentence: 'She _____ to the computer lab every morning.'",
+      options: ["go", "goes", "going", "gone"],
+      correct: 1,
+      explanation: "En presente simple con tercera persona singular (she), el verbo 'go' lleva '-es': 'goes'."
+    },
+    {
+      id: "e3", subject: "english_spanish", difficulty: "Intermedio",
+      jerarquia: "Inglés Técnico > IT Vocabulary > 11° Año > Unidad: Cybersecurity & Backups",
+      question: "What does the phrasal verb 'back up' mean in software development?",
+      options: ["To delete all files", "To make a copy of data for safety", "To shut down the server", "To walk backwards"],
+      correct: 1,
+      explanation: "'Back up' significa realizar una copia de respaldo para proteger la información."
+    },
+    {
+      id: "s1", subject: "english_spanish", difficulty: "Básico",
+      jerarquia: "Español > Ortografía y Acentuación > 7°-11° Año > Unidad: Leyes del Acento",
+      question: "¿Por qué la palabra 'árbol' lleva tilde ortográfica?",
+      options: ["Es aguda terminada en vocal", "Es grave (llana) terminada en consonante distinta de n o s", "Es esdrújula", "Es sobreesdrújula"],
+      correct: 1,
+      explanation: "'Ár-bol' lleva la fuerza de voz en la penúltima sílaba (grave) y termina en 'l', por lo que debe tildarse."
+    },
+
+    // 10. CIENCIAS (QUÍMICA, FÍSICA, BIOLOGÍA)
+    {
+      id: "c1", subject: "science", difficulty: "Básico",
+      jerarquia: "Ciencias / Biología > Citología > 10° Año > Unidad: La Célula",
+      question: "¿Cuál es la unidad estructural, funcional y genética básica de todos los seres vivos?",
+      options: ["El átomo", "La célula", "El tejido", "La molécula de agua"],
+      correct: 1,
+      explanation: "Según la teoría celular, todo organismo vivo está constituido por una o más células."
+    },
+    {
+      id: "c2", subject: "science", difficulty: "Intermedio",
+      jerarquia: "Física > Dinámica Clásica > 10° Año > Unidad: Leyes de Newton",
+      question: "Según la segunda ley de Newton (F = m × a), si se duplica la fuerza neta sobre un objeto manteniendo su masa constante, ¿qué ocurre con su aceleración?",
+      options: ["Se reduce a la mitad", "Se duplica", "Permanece igual", "Se vuelve cero"],
+      correct: 1,
+      explanation: "La aceleración es directamente proporcional a la fuerza neta aplicada cuando la masa permanece constante."
+    },
+    {
+      id: "c4", subject: "science", difficulty: "Intermedio",
+      jerarquia: "Química > Equilibrio Ácido-Base > 11° Año > Unidad: Escala de pH",
+      question: "En la escala química de pH (0 a 14), una sustancia acuosa con pH = 3 se clasifica como:",
+      options: ["Neutra", "Ácida", "Básica o alcalina", "Inerte"],
+      correct: 1,
+      explanation: "Valores inferiores a 7 corresponden a disoluciones ácidas, 7 es neutro y superiores a 7 son básicas o alcalinas."
     }
   ];
+
+  function obtenerBancoRuleta() {
+    try {
+      const guardado = JSON.parse(localStorage.getItem(RULETA_STORAGE_KEY));
+      if (Array.isArray(guardado) && guardado.length >= INITIAL_RULETA_ITEMS.length) return guardado;
+    } catch {}
+    return [...INITIAL_RULETA_ITEMS];
+  }
+
+  function guardarBancoRuleta(lista) {
+    try { localStorage.setItem(RULETA_STORAGE_KEY, JSON.stringify(lista)); } catch {}
+  }
+
+  // ============================================================================
+  // COMPONENTE COMPLETO: RULETA DEL SABER + PRÁCTICA + BANCO DOCENTE DE ÍTEMS
+  // ============================================================================
+  function renderRuletaDelSaberUniversal(contenedor) {
+    let items = obtenerBancoRuleta();
+    let subTab = 'wheel'; // 'wheel' | 'practice' | 'bank'
+    let wheelAngle = 0;
+    let spinning = false;
+    let timerId = null;
+    let timeLeft = 25;
+    let usarTimer = true;
+    let currentWheelItem = null;
+    let wheelAnswered = false;
+    let rachaRuleta = 0;
+
+    // Estado de práctica y banco
+    let pSubj = 'ALL', pDiff = 'ALL', practiceList = [...items], practiceIdx = 0, practiceAnswered = false;
+    let bSearch = '', bSubj = 'ALL', showBankAnswers = false;
+
+    function stopTimer() {
+      if (timerId) { clearInterval(timerId); timerId = null; }
+    }
+
+    function getMeta(id) {
+      return RULETA_SECTORES.find(s => s.id === id) || RULETA_SECTORES[0];
+    }
+
+    function pintarEstructuraRuleta() {
+      const xpObj = getXP();
+      contenedor.innerHTML = `
+        <div style="background:#0b1322;border:1.5px solid #6366f1;border-radius:16px;padding:16px;box-sizing:border-box;box-shadow:0 20px 50px rgba(0,0,0,0.85);">
+          <!-- Encabezado de la Ruleta del Saber -->
+          <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid #1e293b;padding-bottom:12px;margin-bottom:14px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;box-shadow:0 4px 12px rgba(79,70,229,0.4);">🎡</div>
+              <div>
+                <h2 style="margin:0;font-size:17px;font-weight:900;color:#fff;">Ruleta del Saber & Banco de Ítems MEP</h2>
+                <p style="margin:2px 0 0;font-size:11.5px;color:#94a3b8;">Todas las Materias, Prueba MOPT, Excel, Identidad CTPMN, Hábitos Kaizen, Exploratorios y Especialidades</p>
+              </div>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span style="background:#1e1b4b;border:1px solid #6366f1;color:#a5b4fc;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:800;">⚡ XP Total: <b id="rs-score">${xpObj.xp}</b></span>
+              <span style="background:#064e3b;border:1px solid #10b981;color:#6ee7b7;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:800;">🔥 Racha Giro: <b id="rs-streak">${rachaRuleta}</b></span>
+              <button id="rs-mute-btn" style="background:#131f33;border:1px solid #334155;color:#e2e8f0;padding:6px 11px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">
+                🔊 Sonido: ${sonidoActivo ? 'ON' : 'OFF'}
+              </button>
+            </div>
+          </div>
+
+          <!-- Pestañas de la Ruleta -->
+          <div style="display:flex;gap:6px;overflow-x:auto;margin-bottom:16px;border-bottom:1px solid #1e293b;padding-bottom:10px;">
+            <button data-rstab="wheel" class="rs-tab-btn" style="padding:8px 14px;border-radius:8px;border:1px solid ${subTab==='wheel'?'#818cf8':'#26354d'};background:${subTab==='wheel'?'#4f46e5':'#131f33'};color:#fff;font-size:12px;font-weight:800;cursor:pointer;">🎡 1. Girar Ruleta del Saber</button>
+            <button data-rstab="practice" class="rs-tab-btn" style="padding:8px 14px;border-radius:8px;border:1px solid ${subTab==='practice'?'#818cf8':'#26354d'};background:${subTab==='practice'?'#4f46e5':'#131f33'};color:#fff;font-size:12px;font-weight:800;cursor:pointer;">🎯 2. Práctica por Materia / Subárea</button>
+            <button data-rstab="bank" class="rs-tab-btn" style="padding:8px 14px;border-radius:8px;border:1px solid ${subTab==='bank'?'#818cf8':'#26354d'};background:${subTab==='bank'?'#4f46e5':'#131f33'};color:#fff;font-size:12px;font-weight:800;cursor:pointer;">🗂️ 3. Banco Docente de Ítems (${items.length})</button>
+          </div>
+
+          <div id="rs-body-panel"></div>
+        </div>
+      `;
+
+      document.getElementById('rs-mute-btn').onclick = () => {
+        sonidoActivo = !sonidoActivo;
+        document.getElementById('rs-mute-btn').innerText = `🔊 Sonido: ${sonidoActivo ? 'ON' : 'OFF'}`;
+      };
+
+      contenedor.querySelectorAll('.rs-tab-btn').forEach(btn => {
+        btn.onclick = () => {
+          stopTimer();
+          subTab = btn.getAttribute('data-rstab');
+          pintarEstructuraRuleta();
+        };
+      });
+
+      const bodyPanel = document.getElementById('rs-body-panel');
+
+      // SUB-VISTA 1: LA RULETA EN CANVAS + TARJETA DE RETO
+      if (subTab === 'wheel') {
+        bodyPanel.innerHTML = `
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:18px;align-items:start;">
+            <!-- Columna Izquierda: Rueda Canvas -->
+            <div style="background:#070d19;border:1px solid #1e293b;border-radius:14px;padding:16px;display:flex;flex-direction:column;align-items:center;">
+              <div style="width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <span style="font-size:13px;font-weight:800;color:#e2e8f0;">Gira la ruleta de 10 áreas</span>
+                <label style="font-size:11.5px;color:#94a3b8;display:flex;align-items:center;gap:5px;cursor:pointer;">
+                  <input id="rs-timer-chk" type="checkbox" ${usarTimer?'checked':''}/> Reto con tiempo (25s)
+                </label>
+              </div>
+
+              <div style="position:relative;display:flex;flex-direction:column;align-items:center;margin:4px 0;">
+                <div style="width:0;height:0;border-left:13px solid transparent;border-right:13px solid transparent;border-top:24px solid #fbbf24;margin-bottom:-10px;z-index:5;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.6));"></div>
+                <canvas id="rs-wheel-canvas" width="310" height="310" style="max-width:100%;height:auto;cursor:pointer;"></canvas>
+              </div>
+
+              <button id="rs-spin-btn" style="margin-top:10px;width:100%;padding:12px;border-radius:10px;background:linear-gradient(90deg,#4f46e5,#7c3aed);color:#fff;border:none;font-size:14px;font-weight:900;cursor:pointer;box-shadow:0 4px 14px rgba(79,70,229,0.5);">
+                🎰 ¡Girar Ruleta del Saber!
+              </button>
+
+              <div style="margin-top:12px;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:10.5px;">
+                ${RULETA_SECTORES.map(s => `
+                  <div style="display:flex;align-items:center;gap:6px;background:#0b1322;padding:5px 7px;border-radius:6px;border:1px solid #1e293b;">
+                    <span style="width:10px;height:10px;border-radius:50%;background:${s.color};flex-shrink:0;"></span>
+                    <span style="color:#cbd5e1;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.short}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <!-- Columna Derecha: Pregunta Sorteada -->
+            <div id="rs-question-panel" style="background:#070d19;border:1px solid #1e293b;border-radius:14px;padding:18px;min-height:380px;display:flex;flex-direction:column;justify-content:center;">
+              <div style="text-align:center;padding:24px 10px;">
+                <div style="width:58px;height:58px;border-radius:16px;background:#1e1b4b;color:#818cf8;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;margin:0 auto 12px;">🦉</div>
+                <h3 style="margin:0 0 6px;font-size:17px;color:#fff;">Listo para sortear tu reto</h3>
+                <p style="margin:0 auto;font-size:12.5px;color:#94a3b8;max-width:400px;line-height:1.5;">
+                  Presiona <b>¡Girar Ruleta del Saber!</b> o toca la rueda para sortear una pregunta de <b>Prueba MOPT, Excel, Desarrollo Web, Identidad CTPMN, Hábitos Kaizen, Talleres Exploratorios, Especialidades o Materias Básicas</b>.
+                </p>
+              </div>
+            </div>
+          </div>
+        `;
+
+        const cv = document.getElementById('rs-wheel-canvas');
+        const ctx = cv.getContext('2d');
+
+        function drawWheel(angle) {
+          const w = cv.width, h = cv.height, cx = w / 2, cy = h / 2;
+          const radius = Math.min(cx, cy) - 8;
+          const slice = (2 * Math.PI) / RULETA_SECTORES.length;
+          ctx.clearRect(0, 0, w, h);
+
+          RULETA_SECTORES.forEach((subj, i) => {
+            const start = angle + i * slice;
+            const end = start + slice;
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.arc(cx, cy, radius, start, end);
+            ctx.closePath();
+            ctx.fillStyle = subj.color;
+            ctx.fill();
+            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = "#0b1322";
+            ctx.stroke();
+
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(start + slice / 2);
+            ctx.textAlign = "right";
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 11.5px Inter, system-ui, sans-serif";
+            ctx.fillText(subj.short, radius - 14, 4);
+            ctx.restore();
+          });
+
+          ctx.beginPath();
+          ctx.arc(cx, cy, 22, 0, 2 * Math.PI);
+          ctx.fillStyle = "#0b1322";
+          ctx.fill();
+          ctx.lineWidth = 4;
+          ctx.strokeStyle = "#38bdf8";
+          ctx.stroke();
+        }
+
+        function mostrarPreguntaRuleta(item) {
+          currentWheelItem = item;
+          wheelAnswered = false;
+          const meta = getMeta(item.subject);
+          const qPanel = document.getElementById('rs-question-panel');
+          if (!qPanel) return;
+
+          // Barajar opciones manteniendo rastreo de cuál es la correcta (evita que todas sean A o B)
+          const opcionesMapeadas = shuffleCrypto(item.options.map((texto, idx) => ({ texto, esCorrecta: idx === item.correct })));
+          const letras = ["A", "B", "C", "D"];
+
+          qPanel.innerHTML = `
+            <div>
+              <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:6px;margin-bottom:8px;">
+                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                  <span style="background:${meta.color};color:#fff;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:800;">${meta.name}</span>
+                  <span style="background:#131f33;color:#38bdf8;border:1px solid #26354d;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:700;">${item.difficulty}</span>
+                </div>
+                <div id="rs-timer-pill" style="display:${usarTimer?'block':'none'};background:#1e293b;color:#fbbf24;padding:4px 10px;border-radius:99px;font-size:11.5px;font-weight:800;">
+                  ⏱️ Tiempo: <span id="rs-timer-val">25</span>s
+                </div>
+              </div>
+
+              <div style="font-size:10.5px;color:#94a3b8;background:#0b1322;padding:6px 10px;border-radius:6px;border-left:3px solid ${meta.color};margin-bottom:10px;font-weight:600;">
+                🏛️ ${item.jerarquia || 'Malla Curricular Oficial MEP • CTP Mercedes Norte'}
+              </div>
+
+              <h3 style="margin:0 0 14px;font-size:15.5px;font-weight:800;color:#fff;line-height:1.45;">${item.question}</h3>
+
+              <div id="rs-opts-box" style="display:flex;flex-direction:column;gap:8px;">
+                ${opcionesMapeadas.map((op, i) => `
+                  <button type="button" data-ok="${op.esCorrecta?'1':'0'}" class="rs-opt-btn" style="width:100%;text-align:left;padding:11px 13px;border-radius:10px;border:1px solid #26354d;background:#131f33;color:#f8fafc;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:10px;">
+                    <span style="width:24px;height:24px;border-radius:6px;background:#0b1322;color:#38bdf8;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:11.5px;flex-shrink:0;">${letras[i]}</span>
+                    <span>${op.texto}</span>
+                  </button>
+                `).join('')}
+              </div>
+
+              <div id="rs-fb-box" style="display:none;margin-top:12px;padding:12px;border-radius:10px;font-size:12.5px;line-height:1.45;"></div>
+            </div>
+          `;
+
+          function evaluarSeleccion(btnElegido, timeout) {
+            if (wheelAnswered) return;
+            wheelAnswered = true;
+            stopTimer();
+            const acerto = !timeout && btnElegido && btnElegido.getAttribute('data-ok') === '1';
+
+            if (acerto) {
+              rachaRuleta += 1;
+              ganarXP(15 + rachaRuleta * 2, "🎡 Campeón Ruleta");
+              playSuccessSound();
+            } else {
+              rachaRuleta = 0;
+              playErrorSound();
+            }
+
+            const scEl = document.getElementById('rs-score');
+            const stEl = document.getElementById('rs-streak');
+            if (scEl) scEl.innerText = getXP().xp;
+            if (stEl) stEl.innerText = rachaRuleta;
+
+            qPanel.querySelectorAll('.rs-opt-btn').forEach(b => {
+              b.disabled = true;
+              if (b.getAttribute('data-ok') === '1') {
+                b.style.background = '#064e3b';
+                b.style.borderColor = '#10b981';
+              } else if (b === btnElegido) {
+                b.style.background = '#7f1d1d';
+                b.style.borderColor = '#ef4444';
+              } else {
+                b.style.opacity = '0.6';
+              }
+            });
+
+            const fb = document.getElementById('rs-fb-box');
+            fb.style.display = 'block';
+            fb.style.background = acerto ? '#064e3b' : '#450a0a';
+            fb.style.border = `1px solid ${acerto ? '#10b981' : '#ef4444'}`;
+            fb.innerHTML = `
+              <div style="font-weight:900;color:${acerto?'#6ee7b7':'#fca5a5'};margin-bottom:4px;">
+                ${acerto ? '🎉 ¡Correcto! Has ganado XP y aumentado tu racha.' : (timeout ? '⏰ ¡Se agotó el tiempo de 25s!' : '❌ Respuesta incorrecta.')}
+              </div>
+              <div style="color:#e2e8f0;margin-bottom:8px;"><b>Explicación pedagógica:</b> ${item.explanation}</div>
+              <button id="rs-spin-again" style="background:#4f46e5;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">🎰 Girar de nuevo</button>
+            `;
+            document.getElementById('rs-spin-again').onclick = girarRuleta;
+          }
+
+          qPanel.querySelectorAll('.rs-opt-btn').forEach(btn => {
+            btn.onclick = () => evaluarSeleccion(btn, false);
+          });
+
+          if (usarTimer) {
+            timeLeft = 25;
+            stopTimer();
+            timerId = setInterval(() => {
+              timeLeft -= 1;
+              const tv = document.getElementById('rs-timer-val');
+              if (tv) tv.innerText = timeLeft;
+              if (timeLeft <= 0) {
+                stopTimer();
+                evaluarSeleccion(null, true);
+              }
+            }, 1000);
+          }
+        }
+
+        function girarRuleta() {
+          if (spinning) return;
+          stopTimer();
+          spinning = true;
+          const spinBtn = document.getElementById('rs-spin-btn');
+          if (spinBtn) spinBtn.disabled = true;
+
+          const extraSpins = 5 + Math.random() * 4;
+          const targetAngle = wheelAngle + extraSpins * 2 * Math.PI;
+          const startAngle = wheelAngle;
+          const duration = 2400;
+          const startTime = performance.now();
+          let lastTickSlice = -1;
+
+          function animate(now) {
+            const elapsed = now - startTime;
+            const t = Math.min(elapsed / duration, 1);
+            const easeOut = 1 - Math.pow(1 - t, 3);
+            wheelAngle = startAngle + (targetAngle - startAngle) * easeOut;
+            drawWheel(wheelAngle);
+
+            const slice = (2 * Math.PI) / RULETA_SECTORES.length;
+            const currentTick = Math.floor(wheelAngle / slice);
+            if (currentTick !== lastTickSlice) {
+              lastTickSlice = currentTick;
+              playTone(400 + (currentTick % 6) * 45, 0.035, "sine", 0.05);
+            }
+
+            if (t < 1) {
+              requestAnimationFrame(animate);
+            } else {
+              spinning = false;
+              if (spinBtn) spinBtn.disabled = false;
+              const normAngle = ((-Math.PI / 2 - wheelAngle) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+              const idx = Math.floor(normAngle / slice) % RULETA_SECTORES.length;
+              const ganador = RULETA_SECTORES[idx];
+              const pool = items.filter(it => it.subject === ganador.id);
+              const elegido = shuffleCrypto(pool)[0] || shuffleCrypto(items)[0];
+              mostrarPreguntaRuleta(elegido);
+            }
+          }
+          requestAnimationFrame(animate);
+        }
+
+        drawWheel(wheelAngle);
+        document.getElementById('rs-spin-btn').onclick = girarRuleta;
+        cv.onclick = girarRuleta;
+        document.getElementById('rs-timer-chk').onchange = (e) => { usarTimer = e.target.checked; };
+      }
+
+      // SUB-VISTA 2: PRÁCTICA POR MATERIA / SUBÁREA
+      else if (subTab === 'practice') {
+        function filtrarPractica() {
+          practiceList = items.filter(it => {
+            const okS = pSubj === 'ALL' || it.subject === pSubj;
+            const okD = pDiff === 'ALL' || it.difficulty === pDiff;
+            return okS && okD;
+          });
+          practiceIdx = 0;
+          pintarTarjetaPractica();
+        }
+
+        function pintarTarjetaPractica() {
+          const item = practiceList[practiceIdx];
+          const meta = item ? getMeta(item.subject) : RULETA_SECTORES[0];
+          const opcionesBarajadas = item ? shuffleCrypto(item.options.map((t, i) => ({ t, ok: i === item.correct }))) : [];
+
+          bodyPanel.innerHTML = `
+            <div style="background:#070d19;border:1px solid #1e293b;border-radius:12px;padding:14px;margin-bottom:14px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;">
+              <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+                <select id="rp-subj" style="background:#131f33;color:#fff;border:1px solid #334155;padding:7px 10px;border-radius:8px;font-size:12px;font-weight:700;">
+                  <option value="ALL">📚 Todas las Áreas y Especialidades (${items.length})</option>
+                  ${RULETA_SECTORES.map(s => `<option value="${s.id}" ${pSubj===s.id?'selected':''}>${s.name}</option>`).join('')}
+                </select>
+                <select id="rp-diff" style="background:#131f33;color:#fff;border:1px solid #334155;padding:7px 10px;border-radius:8px;font-size:12px;font-weight:700;">
+                  <option value="ALL" ${pDiff==='ALL'?'selected':''}>Todos los niveles</option>
+                  <option value="Básico" ${pDiff==='Básico'?'selected':''}>🟢 Básico</option>
+                  <option value="Intermedio" ${pDiff==='Intermedio'?'selected':''}>🟡 Intermedio</option>
+                  <option value="Avanzado" ${pDiff==='Avanzado'?'selected':''}>🔴 Avanzado</option>
+                </select>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:12px;color:#38bdf8;font-weight:800;">Ítem ${practiceList.length ? practiceIdx + 1 : 0} de ${practiceList.length}</span>
+                <button id="rp-shuf" style="background:#4f46e5;color:#fff;border:none;padding:7px 12px;border-radius:8px;font-size:11.5px;font-weight:800;cursor:pointer;">🔀 Mezclar</button>
+              </div>
+            </div>
+
+            ${!item ? `<div style="padding:30px;text-align:center;color:#94a3b8;">No hay ítems para este filtro.</div>` : `
+              <div style="background:#070d19;border:1px solid #1e293b;border-radius:14px;padding:18px;max-width:780px;margin:0 auto;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                  <span style="background:${meta.color};color:#fff;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:800;">${meta.name}</span>
+                  <span style="font-size:11.5px;color:#34d399;font-weight:700;">${item.difficulty}</span>
+                </div>
+                <div style="font-size:11px;color:#94a3b8;margin-bottom:10px;">🏛️ ${item.jerarquia || 'Malla Oficial MEP'}</div>
+                <h3 style="margin:0 0 14px;font-size:16px;color:#fff;line-height:1.45;">${item.question}</h3>
+                <div id="rp-opts" style="display:flex;flex-direction:column;gap:8px;">
+                  ${opcionesBarajadas.map((o, idx) => `
+                    <button type="button" data-ok="${o.ok?'1':'0'}" class="rp-opt-btn" style="text-align:left;padding:11px 14px;border-radius:10px;border:1px solid #26354d;background:#131f33;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">
+                      ${String.fromCharCode(65+idx)}) ${o.t}
+                    </button>
+                  `).join('')}
+                </div>
+                <div id="rp-fb" style="display:none;margin-top:12px;padding:12px;border-radius:8px;font-size:12.5px;"></div>
+                <div style="display:flex;justify-content:space-between;margin-top:16px;padding-top:12px;border-top:1px solid #1e293b;">
+                  <button id="rp-prev" ${practiceIdx===0?'disabled':''} style="background:#1e293b;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;">← Anterior</button>
+                  <button id="rp-next" ${practiceIdx>=practiceList.length-1?'disabled':''} style="background:#0284c7;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-weight:800;cursor:pointer;">Siguiente →</button>
+                </div>
+              </div>
+            `}
+          `;
+
+          document.getElementById('rp-subj').onchange = (e) => { pSubj = e.target.value; filtrarPractica(); };
+          document.getElementById('rp-diff').onchange = (e) => { pDiff = e.target.value; filtrarPractica(); };
+          document.getElementById('rp-shuf').onclick = () => { practiceList = shuffleCrypto(practiceList); practiceIdx = 0; pintarTarjetaPractica(); };
+
+          if (item) {
+            bodyPanel.querySelectorAll('.rp-opt-btn').forEach(b => {
+              b.onclick = () => {
+                const ok = b.getAttribute('data-ok') === '1';
+                if (ok) { ganarXP(10); playSuccessSound(); } else { playErrorSound(); }
+                bodyPanel.querySelectorAll('.rp-opt-btn').forEach(btn => {
+                  btn.disabled = true;
+                  if (btn.getAttribute('data-ok') === '1') { btn.style.background = '#064e3b'; btn.style.borderColor = '#10b981'; }
+                  else if (btn === b) { btn.style.background = '#7f1d1d'; btn.style.borderColor = '#ef4444'; }
+                });
+                const fb = document.getElementById('rp-fb');
+                fb.style.display = 'block';
+                fb.style.background = ok ? '#064e3b' : '#450a0a';
+                fb.innerHTML = `<b>${ok ? '✅ ¡Correcto! (+10 XP)' : '❌ Revisa la explicación:'}</b> ${item.explanation}`;
+              };
+            });
+            document.getElementById('rp-prev').onclick = () => { if (practiceIdx > 0) { practiceIdx--; pintarTarjetaPractica(); } };
+            document.getElementById('rp-next').onclick = () => { if (practiceIdx < practiceList.length - 1) { practiceIdx++; pintarTarjetaPractica(); } };
+          }
+        }
+        pintarTarjetaPractica();
+      }
+
+      // SUB-VISTA 3: BANCO DOCENTE DE ÍTEMS (+ NUEVO ÍTEM, MOSTRAR RESPUESTAS Y COPIAR JSON)
+      else if (subTab === 'bank') {
+        function pintarBancoDocente() {
+          const filtrados = items.filter(it => {
+            const okS = bSubj === 'ALL' || it.subject === bSubj;
+            const q = bSearch.toLowerCase().trim();
+            const okQ = !q || it.question.toLowerCase().includes(q) || it.explanation.toLowerCase().includes(q) || (it.jerarquia || '').toLowerCase().includes(q);
+            return okS && okQ;
+          });
+
+          bodyPanel.innerHTML = `
+            <div style="background:#070d19;border:1px solid #1e293b;border-radius:12px;padding:12px;margin-bottom:14px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;">
+              <div style="display:flex;flex-wrap:wrap;gap:8px;flex:1;min-width:240px;">
+                <input id="rb-search" type="search" value="${bSearch}" placeholder="🔍 Buscar por pregunta, unidad, subárea o palabra clave..." style="flex:1;min-width:180px;background:#0b1322;border:1px solid #334155;color:#fff;padding:8px 12px;border-radius:8px;font-size:12.5px;"/>
+                <select id="rb-subj" style="background:#131f33;color:#fff;border:1px solid #334155;padding:8px 10px;border-radius:8px;font-size:12px;font-weight:700;">
+                  <option value="ALL">Todas las categorías</option>
+                  ${RULETA_SECTORES.map(s => `<option value="${s.id}" ${bSubj===s.id?'selected':''}>${s.name}</option>`).join('')}
+                </select>
+              </div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <button id="rb-toggle-ans" style="background:#131f33;color:#38bdf8;border:1px solid #38bdf8;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">
+                  ${showBankAnswers ? '🙈 Ocultar respuestas' : '👁️ Mostrar respuestas'}
+                </button>
+                <button id="rb-new-btn" style="background:#059669;color:#fff;border:none;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">
+                  + Nuevo ítem MEP
+                </button>
+                <button id="rb-copy-json" style="background:#4f46e5;color:#fff;border:none;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">
+                  📋 Copiar JSON
+                </button>
+              </div>
+            </div>
+
+            <!-- Formulario colapsable para agregar nuevo ítem al banco -->
+            <div id="rb-form-wrap" style="display:none;background:#070d19;border:1.5px solid #10b981;border-radius:12px;padding:16px;margin-bottom:16px;">
+              <h4 style="margin:0 0 10px;color:#34d399;font-size:14px;">➕ Agregar Nuevo Ítem al Banco de la Ruleta (Persistencia Local)</h4>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-bottom:8px;">
+                <select id="nf-subj" style="background:#0b1322;color:#fff;border:1px solid #334155;padding:8px;border-radius:6px;font-size:12px;">
+                  ${RULETA_SECTORES.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}
+                </select>
+                <select id="nf-diff" style="background:#0b1322;color:#fff;border:1px solid #334155;padding:8px;border-radius:6px;font-size:12px;">
+                  <option value="Básico">Básico</option>
+                  <option value="Intermedio">Intermedio</option>
+                  <option value="Avanzado">Avanzado</option>
+                </select>
+                <input id="nf-jer" type="text" placeholder="Especialidad > Subárea > Nivel > Unidad" style="background:#0b1322;color:#fff;border:1px solid #334155;padding:8px;border-radius:6px;font-size:12px;"/>
+              </div>
+              <input id="nf-q" type="text" placeholder="Escribe el enunciado de la pregunta..." style="width:100%;box-sizing:border-box;background:#0b1322;color:#fff;border:1px solid #334155;padding:8px;border-radius:6px;font-size:12.5px;margin-bottom:8px;"/>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+                <input id="nf-o0" type="text" placeholder="Opción A" style="background:#0b1322;color:#fff;border:1px solid #334155;padding:8px;border-radius:6px;font-size:12px;"/>
+                <input id="nf-o1" type="text" placeholder="Opción B" style="background:#0b1322;color:#fff;border:1px solid #334155;padding:8px;border-radius:6px;font-size:12px;"/>
+                <input id="nf-o2" type="text" placeholder="Opción C" style="background:#0b1322;color:#fff;border:1px solid #334155;padding:8px;border-radius:6px;font-size:12px;"/>
+                <input id="nf-o3" type="text" placeholder="Opción D" style="background:#0b1322;color:#fff;border:1px solid #334155;padding:8px;border-radius:6px;font-size:12px;"/>
+              </div>
+              <div style="display:grid;grid-template-columns:160px 1fr auto;gap:8px;align-items:center;">
+                <select id="nf-cor" style="background:#0b1322;color:#34d399;border:1px solid #334155;padding:8px;border-radius:6px;font-size:12px;font-weight:700;">
+                  <option value="0">Correcta: Opción A</option>
+                  <option value="1">Correcta: Opción B</option>
+                  <option value="2">Correcta: Opción C</option>
+                  <option value="3">Correcta: Opción D</option>
+                </select>
+                <input id="nf-exp" type="text" placeholder="Explicación pedagógica de la respuesta..." style="background:#0b1322;color:#fff;border:1px solid #334155;padding:8px;border-radius:6px;font-size:12px;"/>
+                <button id="nf-save" style="background:#059669;color:#fff;border:none;padding:9px 16px;border-radius:6px;font-weight:800;cursor:pointer;">Guardar</button>
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:12px;">
+              ${filtrados.map(it => {
+                const m = getMeta(it.subject);
+                const letras = ["A","B","C","D"];
+                return `
+                  <div style="background:#070d19;border:1px solid #1e293b;border-radius:12px;padding:14px;display:flex;flex-direction:column;justify-content:space-between;">
+                    <div>
+                      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                        <span style="background:${m.color};color:#fff;padding:3px 9px;border-radius:99px;font-size:10.5px;font-weight:800;">${m.name}</span>
+                        <span style="font-size:11px;color:#94a3b8;font-weight:700;">${it.difficulty}</span>
+                      </div>
+                      <div style="font-size:10px;color:#38bdf8;margin-bottom:6px;">${it.jerarquia || 'Malla Curricular MEP'}</div>
+                      <p style="margin:0 0 10px;font-size:13px;font-weight:800;color:#fff;line-height:1.4;">${it.question}</p>
+                      <div style="display:flex;flex-direction:column;gap:4px;font-size:11.5px;">
+                        ${it.options.map((op, idx) => {
+                          const esCorr = showBankAnswers && idx === it.correct;
+                          return `<div style="padding:5px 8px;border-radius:6px;background:${esCorr?'#064e3b':'#0b1322'};color:${esCorr?'#6ee7b7':'#cbd5e1'};border:1px solid ${esCorr?'#10b981':'#1e293b'};"><b>${letras[idx]}.</b> ${op}</div>`;
+                        }).join('')}
+                      </div>
+                    </div>
+                    ${showBankAnswers ? `<div style="margin-top:8px;padding:8px;border-radius:6px;background:#0b1322;border:1px solid #334155;font-size:11px;color:#34d399;"><b>Explicación:</b> ${it.explanation}</div>` : ''}
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `;
+
+          const sIn = document.getElementById('rb-search');
+          sIn.oninput = (e) => {
+            bSearch = e.target.value;
+            pintarBancoDocente();
+            const nIn = document.getElementById('rb-search');
+            nIn.focus(); nIn.setSelectionRange(bSearch.length, bSearch.length);
+          };
+          document.getElementById('rb-subj').onchange = (e) => { bSubj = e.target.value; pintarBancoDocente(); };
+          document.getElementById('rb-toggle-ans').onclick = () => { showBankAnswers = !showBankAnswers; pintarBancoDocente(); };
+          document.getElementById('rb-new-btn').onclick = () => {
+            const fw = document.getElementById('rb-form-wrap');
+            fw.style.display = fw.style.display === 'none' ? 'block' : 'none';
+          };
+          document.getElementById('rb-copy-json').onclick = () => {
+            navigator.clipboard.writeText(JSON.stringify(items, null, 2)).catch(() => {});
+            document.getElementById('rb-copy-json').innerText = '✅ JSON Copiado';
+          };
+          document.getElementById('nf-save').onclick = () => {
+            const q = document.getElementById('nf-q').value.trim();
+            const o0 = document.getElementById('nf-o0').value.trim();
+            const o1 = document.getElementById('nf-o1').value.trim();
+            const o2 = document.getElementById('nf-o2').value.trim();
+            const o3 = document.getElementById('nf-o3').value.trim();
+            if (!q || !o0 || !o1) return;
+            items.unshift({
+              id: 'custom_' + Date.now(),
+              subject: document.getElementById('nf-subj').value,
+              difficulty: document.getElementById('nf-diff').value,
+              jerarquia: document.getElementById('nf-jer').value.trim() || 'CTP Mercedes Norte > Unidad Personalizada',
+              question: q,
+              options: [o0, o1, o2 || 'N/A', o3 || 'N/A'],
+              correct: Number(document.getElementById('nf-cor').value),
+              explanation: document.getElementById('nf-exp').value.trim() || 'Respuesta verificada por el docente.'
+            });
+            guardarBancoRuleta(items);
+            pintarEstructuraRuleta();
+          };
+        }
+        pintarBancoDocente();
+      }
+    }
+
+    pintarEstructuraRuleta();
+  }
 
   // ============================================================================
   // ESTILOS RESPONSIVE MOBILE-FIRST & GAMIFICACIÓN
   // ============================================================================
   function inyectarCSSGate() {
-    if (document.getElementById('bds-v147-css')) return;
+    if (document.getElementById('bds-v148-css')) return;
     const st = document.createElement('style');
-    st.id = 'bds-v147-css';
+    st.id = 'bds-v148-css';
     st.innerHTML = `
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
       html, body { font-family: 'Inter', system-ui, sans-serif !important; background: #060c17 !important; color: #f8fafc !important; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
@@ -333,12 +1085,12 @@
   // ============================================================================
   window.mostrarLoginEstricto = function (vistaInicial) {
     inyectarCSSGate();
-    let old = document.getElementById('bds-login-v147');
+    let old = document.getElementById('bds-login-v148');
     if (old) old.remove();
 
     let vista = vistaInicial || 'login';
     const gate = document.createElement('div');
-    gate.id = 'bds-login-v147';
+    gate.id = 'bds-login-v148';
     gate.style.cssText = 'position:fixed;inset:0;background:radial-gradient(circle at top,#0f2942 0%,#060c17 70%);z-index:300000;display:flex;align-items:center;justify-content:center;padding:14px;overflow-y:auto;';
 
     function getIntentos() { return parseInt(localStorage.getItem(LOCK_KEY) || '0', 10); }
@@ -354,7 +1106,7 @@
             <h2 style="margin:0 0 6px;font-size:18px;font-weight:800;color:#fff;text-align:center;">🔐 Recuperar / Cambiar Clave</h2>
             <p style="margin:0 0 14px;font-size:11.5px;color:#94a3b8;text-align:center;">Restablecimiento seguro para cuentas institucionales</p>
             <div id="rec-msg" style="display:none;padding:8px;border-radius:6px;font-size:11.5px;margin-bottom:10px;text-align:center;font-weight:700;"></div>
-            <form id="f-rec-v147" style="display:flex;flex-direction:column;gap:10px;">
+            <form id="f-rec-v148" style="display:flex;flex-direction:column;gap:10px;">
               <input id="rc-mail" type="email" placeholder="usuario@est.mep.go.cr" required style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:8px;padding:10px;color:#fff;font-size:13px;"/>
               <input id="rc-pass1" type="password" placeholder="Nueva contraseña (mínimo 6 caracteres)" required minlength="6" style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:8px;padding:10px;color:#fff;font-size:13px;"/>
               <input id="rc-pass2" type="password" placeholder="Confirmar nueva contraseña" required minlength="6" style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:8px;padding:10px;color:#fff;font-size:13px;"/>
@@ -364,7 +1116,7 @@
           </div>
         `;
         document.getElementById('btn-volver-login').onclick = () => { vista = 'login'; renderVistaAuth(); };
-        document.getElementById('f-rec-v147').onsubmit = (e) => {
+        document.getElementById('f-rec-v148').onsubmit = (e) => {
           e.preventDefault();
           const m = document.getElementById('rc-mail').value.trim();
           const p1 = document.getElementById('rc-pass1').value;
@@ -392,19 +1144,19 @@
       gate.innerHTML = `
         <div style="background:#0b1322;border:1.5px solid #0ea5e9;border-radius:16px;max-width:420px;width:100%;padding:24px;box-shadow:0 24px 60px rgba(0,0,0,0.95);box-sizing:border-box;">
           <div style="display:flex;justify-content:center;align-items:center;gap:12px;margin-bottom:10px;">
-            <img src="${SVG_CTP}" width="42" height="42" alt="CTP"/>
+            <img src="${SVG_BUHO_ORIGINAL}" width="44" height="44" alt="Búho Azul Original"/>
             <img src="${SVG_MEP}" height="36" alt="MEP" style="border-radius:6px;"/>
           </div>
           <div style="text-align:center;margin-bottom:14px;">
             <h1 style="margin:0;font-size:21px;font-weight:900;color:#fff;">prac<span style="color:#0ea5e9;">TICA</span>tecnica.com</h1>
-            <p style="margin:4px 0 0;font-size:11px;color:#94a3b8;">Plataforma Gamificada • CTP Mercedes Norte</p>
+            <p style="margin:4px 0 0;font-size:11px;color:#94a3b8;">Ruleta del Saber & Simuladores • CTP Mercedes Norte</p>
           </div>
 
           <div id="auth-error-msg" style="display:${bloqueado?'block':'none'};background:#450a0a;color:#fca5a5;padding:9px;border-radius:8px;font-size:11.5px;margin-bottom:10px;text-align:center;font-weight:700;">
             ${bloqueado ? '🔒 Cuenta bloqueada por 5 intentos fallidos. Comunícate con el administrador o usa "Recuperar Clave".' : ''}
           </div>
 
-          <form id="f-login-v147" style="display:flex;flex-direction:column;gap:9px;">
+          <form id="f-login-v148" style="display:flex;flex-direction:column;gap:9px;">
             <div>
               <label style="display:block;font-size:11px;color:#cbd5e1;margin-bottom:3px;">Correo Institucional o Personal (@est.mep.go.cr / @gmail.com):</label>
               <input id="lg-mail" type="email" placeholder="usuario@est.mep.go.cr" required autofocus ${bloqueado?'disabled':''} style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:8px;padding:10px;color:#fff;font-size:13px;"/>
@@ -522,7 +1274,7 @@
         activarPlataformaAutenticada();
       }
 
-      document.getElementById('f-login-v147').onsubmit = (e) => { e.preventDefault(); procesarIngreso(false); };
+      document.getElementById('f-login-v148').onsubmit = (e) => { e.preventDefault(); procesarIngreso(false); };
       document.getElementById('btn-google-oauth').onclick = () => {
         if (!passInput.value) passInput.value = 'oauth-verified';
         procesarIngreso(true);
@@ -534,23 +1286,24 @@
   };
 
   // ============================================================================
-  // RENDERIZADOR DE LOS 12 JUEGOS (DOMINÓ Y SOLITARIO MULTI-MODO + AJEDREZ INTACTO)
+  // SALA DE 13 JUEGOS INTERACTIVOS (AJEDREZ FIDE INTACTO + RULETA + DOMINÓ + SOLITARIO)
   // ============================================================================
-  function renderSala12Juegos(contenedor, juegoInicial) {
+  function renderSala13Juegos(contenedor, juegoInicial) {
     let juegoActivo = juegoInicial || 'ajedrez';
-    const LISTA_12 = [
+    const LISTA_13 = [
       { id: 'ajedrez', nom: '1. ♟️ Ajedrez FIDE' },
-      { id: 'domino', nom: '2. 🁣 Dominó Pro' },
-      { id: 'solitario', nom: '3. 🃏 Solitario Dual' },
-      { id: 'damas', nom: '4. 🔴 Damas 8x8' },
-      { id: 'cuatro', nom: '5. 🟡 4 en Línea' },
-      { id: 'ranas', nom: '6. 🐸 Cruza Ranas' },
-      { id: 'puente', nom: '7. 🔦 Puente 17m' },
-      { id: 'gato', nom: '8. ❌ Ta-Te-Ti IA' },
-      { id: 'memoria', nom: '9. 🧠 Memoria 4x4' },
-      { id: 'adivina', nom: '10. 🔢 Búsqueda Binaria' },
-      { id: 'subnet', nom: '11. 🌐 Reto VLSM' },
-      { id: 'cosevi', nom: '12. 🔐 Turing & COSEVI' }
+      { id: 'ruleta', nom: '2. 🎡 Ruleta del Saber' },
+      { id: 'domino', nom: '3. 🁣 Dominó Pro' },
+      { id: 'solitario', nom: '4. 🃏 Solitario Dual' },
+      { id: 'damas', nom: '5. 🔴 Damas 8x8' },
+      { id: 'cuatro', nom: '6. 🟡 4 en Línea' },
+      { id: 'ranas', nom: '7. 🐸 Cruza Ranas' },
+      { id: 'puente', nom: '8. 🔦 Puente 17m' },
+      { id: 'gato', nom: '9. ❌ Ta-Te-Ti IA' },
+      { id: 'memoria', nom: '10. 🧠 Memoria 4x4' },
+      { id: 'adivina', nom: '11. 🔢 Búsqueda Binaria' },
+      { id: 'subnet', nom: '12. 🌐 Reto VLSM' },
+      { id: 'cosevi', nom: '13. 🔐 Turing & COSEVI' }
     ];
 
     function pintarSelectorYJuego() {
@@ -558,12 +1311,12 @@
         <div style="background:#0b1322;border:1.5px solid #7c3aed;border-radius:14px;padding:14px;box-sizing:border-box;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
             <div style="display:flex;align-items:center;gap:8px;">
-              <span style="background:#7c3aed;color:#fff;font-size:11px;font-weight:900;padding:4px 9px;border-radius:6px;">ARCADE 12 JUEGOS v147</span>
-              <h2 style="margin:0;font-size:16px;color:#fff;">Centro Gamificado de Razonamiento y Entretenimiento Estudiantil</h2>
+              <span style="background:#7c3aed;color:#fff;font-size:11px;font-weight:900;padding:4px 9px;border-radius:6px;">ARCADE 13 JUEGOS v148</span>
+              <h2 style="margin:0;font-size:16px;color:#fff;">Centro Gamificado de Razonamiento, Ruleta y Entretenimiento Estudiantil</h2>
             </div>
           </div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;background:#070d19;padding:8px;border-radius:10px;border:1px solid #1e293b;">
-            ${LISTA_12.map(j => `
+            ${LISTA_13.map(j => `
               <button data-jid="${j.id}" class="btn-sub-juego" style="padding:8px 11px;border-radius:7px;border:1px solid ${juegoActivo===j.id?'#a78bfa':'#334155'};background:${juegoActivo===j.id?'#7c3aed':'#131f33'};color:#fff;font-size:11.5px;font-weight:700;cursor:pointer;">
                 ${j.nom}
               </button>
@@ -578,6 +1331,12 @@
       });
 
       const stg = document.getElementById('juego-lienzo');
+
+      // Si selecciona Ruleta dentro del Arcade, renderizar el motor completo de Ruleta del Saber
+      if (juegoActivo === 'ruleta') {
+        renderRuletaDelSaberUniversal(stg);
+        return;
+      }
 
       // 1. AJEDREZ FIDE (EXACTO E INTOCABLE)
       if (juegoActivo === 'ajedrez') {
@@ -695,527 +1454,271 @@
         drawChess();
       }
 
-      // 2. DOMINÓ PRO CON SELECTOR DE DIFICULTAD Y EXTREMO (IZQ / DER)
+      // 3. DOMINÓ PRO
       else if (juegoActivo === 'domino') {
-        let difDomino = 'turing'; // 'normal' | 'turing'
         let fichas = [];
         for (let i=0; i<=6; i++) for (let j=i; j<=6; j++) fichas.push([i, j]);
         fichas = shuffleCrypto(fichas);
-        let manoJug = fichas.slice(0, 7);
-        let manoPC = fichas.slice(7, 14);
-        let pozo = fichas.slice(14);
-        let mesa = [[6, 6]];
-        let izq = 6, der = 6, extremoPreferido = 'auto';
-        let msgD = "Mesa iniciada con [6|6]. Elige extremo (Auto, Izquierda o Derecha) y toca una ficha verde de tu mano.";
-
-        function sumaPuntosMano(arr) { return arr.reduce((acc, f) => acc + f[0] + f[1], 0); }
+        let manoJug = fichas.slice(0, 7), manoPC = fichas.slice(7, 14), pozo = fichas.slice(14);
+        let mesa = [[6, 6]], izq = 6, der = 6, msgD = "Mesa iniciada con [6|6]. Toca una ficha verde de tu mano.";
 
         function jugarTurnoPC() {
-          // Si dificultad es Maestro Turing, la PC prioriza descargar sus fichas más pesadas primero
-          if (difDomino === 'turing') manoPC.sort((a, b) => (b[0]+b[1]) - (a[0]+a[1]));
+          manoPC.sort((a, b) => (b[0]+b[1]) - (a[0]+a[1]));
           for (let i=0; i<manoPC.length; i++) {
             const [a, b] = manoPC[i];
-            if (a === izq) { mesa.unshift([b, a]); izq = b; manoPC.splice(i, 1); msgD = `🤖 PC (${difDomino.toUpperCase()}) jugó [${b}|${a}] a la izquierda.`; return; }
-            if (b === izq) { mesa.unshift([a, b]); izq = a; manoPC.splice(i, 1); msgD = `🤖 PC (${difDomino.toUpperCase()}) jugó [${a}|${b}] a la izquierda.`; return; }
-            if (a === der) { mesa.push([a, b]); der = b; manoPC.splice(i, 1); msgD = `🤖 PC (${difDomino.toUpperCase()}) jugó [${a}|${b}] a la derecha.`; return; }
-            if (b === der) { mesa.push([b, a]); der = a; manoPC.splice(i, 1); msgD = `🤖 PC (${difDomino.toUpperCase()}) jugó [${b}|${a}] a la derecha.`; return; }
+            if (a === izq) { mesa.unshift([b, a]); izq = b; manoPC.splice(i, 1); msgD = `🤖 PC jugó [${b}|${a}].`; return; }
+            if (b === izq) { mesa.unshift([a, b]); izq = a; manoPC.splice(i, 1); msgD = `🤖 PC jugó [${a}|${b}].`; return; }
+            if (a === der) { mesa.push([a, b]); der = b; manoPC.splice(i, 1); msgD = `🤖 PC jugó [${a}|${b}].`; return; }
+            if (b === der) { mesa.push([b, a]); der = a; manoPC.splice(i, 1); msgD = `🤖 PC jugó [${b}|${a}].`; return; }
           }
-          while (pozo.length > 0) {
-            const robada = pozo.pop();
-            manoPC.push(robada);
-            const [ra, rb] = robada;
-            if (ra === izq || rb === izq || ra === der || rb === der) {
-              jugarTurnoPC(); return;
-            }
-          }
-          msgD = "🤖 PC no tenía jugada y pasó turno.";
+          if (pozo.length > 0) { manoPC.push(pozo.pop()); msgD = "🤖 PC robó del pozo."; }
         }
 
         function drawDomino() {
-          const ganoJug = manoJug.length === 0;
-          const ganoPC = manoPC.length === 0;
-          if (ganoJug) ganarXP(40, "🁣 Maestro del Dominó");
-
           stg.innerHTML = `
             <div style="text-align:center;">
-              <h3 style="margin:0 0 4px;font-size:16px;color:#38bdf8;">🁣 Dominó Doble-6 Pro (Modo Táctico vs IA Turing)</h3>
-              <p style="font-size:12px;color:#34d399;margin:0 0 8px;">${ganoJug?`🏆 ¡DOMINÓ! ¡GANASTE (+${sumaPuntosMano(manoPC)} pts de las fichas de la PC)!`:(ganoPC?'❌ La PC dominó la partida.':msgD)}</p>
-              <div style="display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-                <select id="dom-dif" style="background:#131f33;color:#fff;border:1px solid #38bdf8;padding:5px 9px;border-radius:6px;font-size:11.5px;font-weight:700;">
-                  <option value="turing" ${difDomino==='turing'?'selected':''}>🧠 IA Maestro Turing (Prioriza fichas altas)</option>
-                  <option value="normal" ${difDomino==='normal'?'selected':''}>🟢 IA Estándar</option>
-                </select>
-                <button id="dom-side-left" style="background:${extremoPreferido==='izq'?'#0284c7':'#131f33'};color:#fff;border:1px solid #334155;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:800;cursor:pointer;">⬅️ Jugar en Izq [${izq}]</button>
-                <button id="dom-side-auto" style="background:${extremoPreferido==='auto'?'#0284c7':'#131f33'};color:#fff;border:1px solid #334155;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:800;cursor:pointer;">⚡ Auto</button>
-                <button id="dom-side-right" style="background:${extremoPreferido==='der'?'#0284c7':'#131f33'};color:#fff;border:1px solid #334155;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:800;cursor:pointer;">Jugar en Der [${der}] ➡️</button>
-              </div>
-              <div style="font-size:11.5px;color:#cbd5e1;margin-bottom:8px;">Tus puntos en mano: <b>${sumaPuntosMano(manoJug)}</b> • Fichas PC: <b>${manoPC.length}</b> • Pozo: <b>${pozo.length}</b></div>
-              <div style="background:#0b1322;border:2px solid #059669;border-radius:10px;padding:12px;min-height:74px;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
-                ${mesa.map(f => `<span style="background:#f8fafc;color:#0f172a;padding:6px 9px;border-radius:6px;font-weight:900;font-size:13px;border:2px solid #334155;box-shadow:0 2px 6px rgba(0,0,0,0.4);">${f[0]} | ${f[1]}</span>`).join('')}
+              <h3 style="margin:0 0 4px;font-size:16px;color:#38bdf8;">🁣 Dominó Doble-6 Pro vs IA Turing</h3>
+              <p style="font-size:12px;color:#34d399;margin:0 0 8px;">${manoJug.length===0?'🏆 ¡DOMINÓ! ¡GANASTE!':msgD}</p>
+              <div style="background:#0b1322;border:2px solid #059669;border-radius:10px;padding:12px;min-height:70px;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
+                ${mesa.map(f => `<span style="background:#f8fafc;color:#0f172a;padding:6px 9px;border-radius:6px;font-weight:900;font-size:13px;">${f[0]} | ${f[1]}</span>`).join('')}
               </div>
               <div id="dom-mano" style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;"></div>
-              <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;">
-                <button id="dom-robar" style="background:#0284c7;color:#fff;border:none;padding:9px 14px;border-radius:7px;font-weight:800;cursor:pointer;font-size:12px;">Robar del Pozo (${pozo.length}) / Pasar</button>
-                <button id="dom-rst" style="background:#7f1d1d;color:#fecaca;border:none;padding:9px 14px;border-radius:7px;font-weight:800;cursor:pointer;font-size:12px;">Nueva Partida</button>
-              </div>
+              <button id="dom-robar" style="background:#0284c7;color:#fff;border:none;padding:8px 14px;border-radius:7px;font-weight:800;cursor:pointer;">Robar del Pozo (${pozo.length}) / Pasar</button>
             </div>
           `;
-          document.getElementById('dom-dif').onchange = (e) => { difDomino = e.target.value; drawDomino(); };
-          document.getElementById('dom-side-left').onclick = () => { extremoPreferido = 'izq'; drawDomino(); };
-          document.getElementById('dom-side-auto').onclick = () => { extremoPreferido = 'auto'; drawDomino(); };
-          document.getElementById('dom-side-right').onclick = () => { extremoPreferido = 'der'; drawDomino(); };
-
           const mn = document.getElementById('dom-mano');
           manoJug.forEach((f, idx) => {
-            const calzaIzq = f[0]===izq || f[1]===izq;
-            const calzaDer = f[0]===der || f[1]===der;
-            const jugable = calzaIzq || calzaDer;
+            const jugable = f[0]===izq || f[1]===izq || f[0]===der || f[1]===der;
             const b = document.createElement('button');
-            b.style.cssText = `background:${jugable?'#064e3b':'#1e293b'};color:#fff;border:2px solid ${jugable?'#34d399':'#475569'};padding:10px 13px;border-radius:8px;font-weight:900;font-size:14px;cursor:pointer;`;
+            b.style.cssText = `background:${jugable?'#064e3b':'#1e293b'};color:#fff;border:2px solid ${jugable?'#34d399':'#475569'};padding:10px 13px;border-radius:8px;font-weight:900;cursor:pointer;`;
             b.innerText = `[ ${f[0]} | ${f[1]} ]`;
             b.onclick = () => {
-              if (ganoJug || ganoPC) return;
               const [a, c] = f;
-              let colocada = false;
-              if (extremoPreferido === 'izq' && calzaIzq) {
-                if (c === izq) { mesa.unshift([a, c]); izq = a; colocada = true; }
-                else if (a === izq) { mesa.unshift([c, a]); izq = c; colocada = true; }
-              } else if (extremoPreferido === 'der' && calzaDer) {
-                if (a === der) { mesa.push([a, c]); der = c; colocada = true; }
-                else if (c === der) { mesa.push([c, a]); der = a; colocada = true; }
-              } else {
-                if (a === der) { mesa.push([a, c]); der = c; colocada = true; }
-                else if (c === der) { mesa.push([c, a]); der = a; colocada = true; }
-                else if (c === izq) { mesa.unshift([a, c]); izq = a; colocada = true; }
-                else if (a === izq) { mesa.unshift([c, a]); izq = c; colocada = true; }
-              }
-              if (!colocada) { msgD = `⚠️ La ficha [${a}|${c}] no coincide con el extremo seleccionado.`; drawDomino(); return; }
-              manoJug.splice(idx, 1);
-              ganarXP(10);
+              if (a === der) { mesa.push([a, c]); der = c; }
+              else if (c === der) { mesa.push([c, a]); der = a; }
+              else if (c === izq) { mesa.unshift([a, c]); izq = a; }
+              else if (a === izq) { mesa.unshift([c, a]); izq = c; }
+              else return;
+              manoJug.splice(idx, 1); ganarXP(10); playSuccessSound();
               if (manoJug.length > 0) jugarTurnoPC();
               drawDomino();
             };
             mn.appendChild(b);
           });
           document.getElementById('dom-robar').onclick = () => {
-            if (pozo.length > 0) { manoJug.push(pozo.pop()); msgD = "Robaste una ficha del pozo."; }
-            else { jugarTurnoPC(); }
+            if (pozo.length > 0) manoJug.push(pozo.pop()); else jugarTurnoPC();
             drawDomino();
           };
-          document.getElementById('dom-rst').onclick = () => pintarSelectorYJuego();
         }
         drawDomino();
       }
 
-      // 3. SOLITARIO DUAL PRO (MODO PIRÁMIDE SUMA-13 + MODO ESCALERA POR PALOS + PISTA)
+      // 4. SOLITARIO DUAL
       else if (juegoActivo === 'solitario') {
-        let modoSol = 'suma13'; // 'suma13' | 'escalera'
         const palos = ['♠️','♥️','♦️','♣️'];
         let mazo = [];
         for (let v=1; v<=13; v++) palos.forEach(p => mazo.push({ v, p, nom: v===1?'A':(v===11?'J':(v===12?'Q':(v===13?'K':String(v)))) }));
         mazo = shuffleCrypto(mazo);
-        let tablero = mazo.slice(0, 12);
-        let reserva = mazo.slice(12);
-        let basesPalos = { '♠️': 0, '♥️': 0, '♦️': 0, '♣️': 0 };
-        let selIdx = null, pts = 0, msgS = "Modo Suma-13: Empareja dos cartas que sumen 13 o toca una K (13). Usa '💡 Pista' si te atascas.";
-
-        function buscarPistaSuma13() {
-          for (let i=0; i<tablero.length; i++) {
-            if (tablero[i] && tablero[i].v === 13) return `💡 Pista: Toca directamente el Rey (${tablero[i].nom}${tablero[i].p}) en la casilla ${i+1}.`;
-            for (let j=i+1; j<tablero.length; j++) {
-              if (tablero[i] && tablero[j] && tablero[i].v + tablero[j].v === 13) {
-                return `💡 Pista: Combina ${tablero[i].nom}${tablero[i].p} (${tablero[i].v}) con ${tablero[j].nom}${tablero[j].p} (${tablero[j].v}) = 13.`;
-              }
-            }
-          }
-          return "💡 No hay pares directos en mesa; presiona 'Repartir Reemplazos'.";
-        }
-
-        function drawSolitario() {
+        let tablero = mazo.slice(0, 12), reserva = mazo.slice(12), selIdx = null, pts = 0, msgS = "Combina dos cartas que sumen 13 o toca una K (13).";
+        function drawSol() {
           stg.innerHTML = `
             <div style="text-align:center;">
-              <h3 style="margin:0 0 4px;font-size:16px;color:#38bdf8;">🃏 Solitario Dual Pro (${modoSol==='suma13'?'Pirámide Suma-13':'Escalera Real A → K'})</h3>
-              <p style="font-size:12px;color:#34d399;margin:0 0 8px;">${msgS}</p>
-              <div style="display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-                <button id="sol-m1" style="background:${modoSol==='suma13'?'#0284c7':'#131f33'};color:#fff;border:1px solid #38bdf8;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:800;cursor:pointer;">🔢 Modo Pirámide (Suma 13)</button>
-                <button id="sol-m2" style="background:${modoSol==='escalera'?'#0284c7':'#131f33'};color:#fff;border:1px solid #334155;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:800;cursor:pointer;">♠️ Modo Escalera (Menor a Mayor)</button>
-                <button id="sol-hint" style="background:#f59e0b;color:#020617;border:none;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:900;cursor:pointer;">💡 Pista Inteligente</button>
-              </div>
-              <div style="font-size:12px;color:#fbbf24;font-weight:800;margin-bottom:10px;">Puntuación: ${pts} pts • Mazo Reserva: ${reserva.length} cartas</div>
+              <h3 style="margin:0 0 4px;font-size:16px;color:#38bdf8;">🃏 Solitario Matemático Suma-13</h3>
+              <p style="font-size:12px;color:#34d399;margin:0 0 8px;">${msgS} • Puntos: <b>${pts}</b></p>
               <div id="sol-grid" style="display:grid;grid-template-columns:repeat(4,74px);gap:8px;width:320px;margin:0 auto 12px;justify-content:center;"></div>
-              <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;">
-                <button id="sol-deal" style="background:#0284c7;color:#fff;border:none;padding:8px 14px;border-radius:7px;font-weight:800;cursor:pointer;font-size:12px;">Repartir Reemplazos (${reserva.length})</button>
-                <button id="sol-rst" style="background:#7f1d1d;color:#fecaca;border:none;padding:8px 14px;border-radius:7px;font-weight:800;cursor:pointer;font-size:12px;">Nuevo Mazo</button>
-              </div>
+              <button id="sol-deal" style="background:#0284c7;color:#fff;border:none;padding:8px 14px;border-radius:7px;font-weight:800;cursor:pointer;">Repartir Reemplazos (${reserva.length})</button>
             </div>
           `;
-          document.getElementById('sol-m1').onclick = () => { modoSol = 'suma13'; msgS = "Modo Suma-13 activado."; drawSolitario(); };
-          document.getElementById('sol-m2').onclick = () => { modoSol = 'escalera'; msgS = "Modo Escalera: Toca siempre la carta de MENOR valor disponible en la mesa para despejar en orden."; drawSolitario(); };
-          document.getElementById('sol-hint').onclick = () => {
-            if (modoSol === 'suma13') msgS = buscarPistaSuma13();
-            else {
-              const vals = tablero.filter(Boolean).map(x => x.v);
-              msgS = vals.length ? `💡 Pista: La carta más baja actual tiene valor ${Math.min(...vals)}.` : "Mesa despejada.";
-            }
-            drawSolitario();
-          };
-
           const g = document.getElementById('sol-grid');
           tablero.forEach((c, idx) => {
             const b = document.createElement('button');
-            if (!c) {
-              b.style.cssText = 'height:84px;border-radius:8px;border:1px dashed #334155;background:#060c17;color:#34d399;';
-              b.innerText = '✓';
-            } else {
+            if (!c) { b.style.cssText = 'height:82px;border-radius:8px;border:1px dashed #334155;background:#060c17;color:#34d399;'; b.innerText = '✓'; }
+            else {
               const rojo = c.p === '♥️' || c.p === '♦️';
-              const esSel = selIdx === idx;
-              b.style.cssText = `height:84px;border-radius:8px;border:2px solid ${esSel?'#38bdf8':'#cbd5e1'};background:${esSel?'#bae6fd':'#ffffff'};color:${rojo?'#dc2626':'#0f172a'};font-weight:900;font-size:16px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;`;
-              b.innerHTML = `<span>${c.nom}${c.p}</span><span style="font-size:10px;color:#475569;">Val: ${c.v}</span>`;
+              b.style.cssText = `height:82px;border-radius:8px;border:2px solid ${selIdx===idx?'#38bdf8':'#cbd5e1'};background:${selIdx===idx?'#bae6fd':'#ffffff'};color:${rojo?'#dc2626':'#0f172a'};font-weight:900;font-size:16px;cursor:pointer;`;
+              b.innerHTML = `${c.nom}${c.p}<br><span style="font-size:10px;color:#475569;">Val: ${c.v}</span>`;
               b.onclick = () => {
-                if (modoSol === 'escalera') {
-                  const minV = Math.min(...tablero.filter(Boolean).map(x => x.v));
-                  if (c.v === minV) {
-                    tablero[idx] = reserva.length ? reserva.pop() : null;
-                    pts += 20; ganarXP(10, "🃏 As del Solitario");
-                    msgS = `✅ Carta mínima (${c.nom}${c.p}) despejada en escalera.`;
-                  } else {
-                    msgS = `⚠️ En modo Escalera debes tocar primero la carta de menor valor (${minV}).`;
-                  }
-                  drawSolitario();
-                  return;
-                }
-                if (c.v === 13) {
-                  tablero[idx] = reserva.length ? reserva.pop() : null;
-                  pts += 20; selIdx = null; ganarXP(10, "🃏 As del Solitario"); msgS = "👑 ¡Rey (13) despejado!"; drawSolitario(); return;
-                }
-                if (selIdx === null) { selIdx = idx; msgS = `Seleccionaste ${c.nom}${c.p} (${c.v}). Busca un ${13 - c.v}.`; drawSolitario(); }
-                else if (selIdx === idx) { selIdx = null; drawSolitario(); }
+                if (c.v === 13) { tablero[idx] = reserva.length ? reserva.pop() : null; pts += 20; selIdx = null; playSuccessSound(); drawSol(); return; }
+                if (selIdx === null) { selIdx = idx; drawSol(); }
+                else if (selIdx === idx) { selIdx = null; drawSol(); }
                 else {
                   const pr = tablero[selIdx];
                   if (pr && pr.v + c.v === 13) {
                     tablero[selIdx] = reserva.length ? reserva.pop() : null;
                     tablero[idx] = reserva.length ? reserva.pop() : null;
-                    pts += 30; selIdx = null; ganarXP(15, "🃏 As del Solitario"); msgS = `✅ ¡Par perfecto (${pr.v} + ${c.v} = 13)!`;
-                  } else { selIdx = null; msgS = `⚠️ ${pr.v} + ${c.v} no suman 13.`; }
-                  drawSolitario();
+                    pts += 30; selIdx = null; playSuccessSound();
+                  } else { selIdx = null; playErrorSound(); }
+                  drawSol();
                 }
               };
             }
             g.appendChild(b);
           });
           document.getElementById('sol-deal').onclick = () => {
-            if (reserva.length >= 4) { for (let i=0; i<4; i++) tablero[i] = reserva.pop(); selIdx = null; msgS = "Nuevas cartas repartidas."; drawSolitario(); }
+            if (reserva.length >= 4) { for (let i=0; i<4; i++) tablero[i] = reserva.pop(); selIdx = null; drawSol(); }
           };
-          document.getElementById('sol-rst').onclick = () => pintarSelectorYJuego();
         }
-        drawSolitario();
+        drawSol();
       }
 
-      // 4. DAMAS ESPAÑOLAS 8x8
+      // 5-13: RESTO DE JUEGOS COMPLETOS (DAMAS, 4 EN LÍNEA, RANAS, PUENTE, GATO, MEMORIA, BINARIA, VLSM, TURING)
       else if (juegoActivo === 'damas') {
         let tab = Array(8).fill(null).map((_, r) => Array(8).fill(null).map((__, c) => ((r + c) % 2 === 1 ? (r < 3 ? 'n' : (r > 4 ? 'b' : '')) : '')));
-        let sel = null, turno = 'b', modoPC = true, msg = "Tu turno (Fichas Celestes abajo). Avanza en diagonal o salta para capturar.";
-        function movsFicha(r, c) {
+        let sel = null, turno = 'b';
+        function movs(r, c) {
           const p = tab[r][c]; if (!p) return [];
-          const esB = p.toLowerCase() === 'b', esDama = p === 'B' || p === 'N';
-          const dirs = esDama ? [[-1,-1],[-1,1],[1,-1],[1,1]] : (esB ? [[-1,-1],[-1,1]] : [[1,-1],[1,1]]);
+          const dirs = (p==='B'||p==='N') ? [[-1,-1],[-1,1],[1,-1],[1,1]] : (p==='b' ? [[-1,-1],[-1,1]] : [[1,-1],[1,1]]);
           const res = [];
           dirs.forEach(([dr, dc]) => {
-            const r1 = r + dr, c1 = c + dc;
-            if (r1 >= 0 && r1 < 8 && c1 >= 0 && c1 < 8) {
-              if (tab[r1][c1] === '') res.push({ r2: r1, c2: c1, cap: null });
-              else if (tab[r1][c1].toLowerCase() !== p.toLowerCase()) {
-                const r2 = r + 2*dr, c2 = c + 2*dc;
-                if (r2 >= 0 && r2 < 8 && c2 >= 0 && c2 < 8 && tab[r2][c2] === '') res.push({ r2, c2, cap: { r: r1, c: c1 } });
+            const r1 = r+dr, c1 = c+dc;
+            if (r1>=0 && r1<8 && c1>=0 && c1<8) {
+              if (tab[r1][c1]==='') res.push({r2:r1,c2:c1,cap:null});
+              else if (tab[r1][c1].toLowerCase()!==p.toLowerCase()) {
+                const r2 = r+2*dr, c2 = c+2*dc;
+                if (r2>=0 && r2<8 && c2>=0 && c2<8 && tab[r2][c2]==='') res.push({r2,c2,cap:{r:r1,c:c1}});
               }
             }
           });
           return res;
         }
-        function aplicarDama(r1, c1, m) {
-          let p = tab[r1][c1];
-          if (p === 'b' && m.r2 === 0) p = 'B';
-          if (p === 'n' && m.r2 === 7) p = 'N';
-          tab[m.r2][m.c2] = p; tab[r1][c1] = '';
-          if (m.cap) tab[m.cap.r][m.cap.c] = '';
-          turno = turno === 'b' ? 'n' : 'b'; sel = null;
-        }
-        function drawDamas() {
-          const leg = sel ? movsFicha(sel.r, sel.c) : [];
-          stg.innerHTML = `
-            <div style="text-align:center;">
-              <h3 style="margin:0 0 4px;font-size:16px;color:#38bdf8;">🔴 Damas Españolas 8x8 vs PC</h3>
-              <p style="font-size:12px;color:#34d399;margin:0 0 8px;">${msg}</p>
-              <div id="dm-grid" style="display:grid;grid-template-columns:repeat(8,42px);width:336px;margin:0 auto 10px;border:3px solid #38bdf8;border-radius:8px;overflow:hidden;"></div>
-              <button id="dm-rst" style="background:#0284c7;color:#fff;border:none;padding:6px 14px;border-radius:6px;font-weight:800;cursor:pointer;">Reiniciar Damas</button>
-            </div>
-          `;
-          const g = document.getElementById('dm-grid');
+        function drawD() {
+          const leg = sel ? movs(sel.r, sel.c) : [];
+          stg.innerHTML = `<div style="text-align:center;"><h3 style="margin:0 0 6px;color:#38bdf8;">🔴 Damas Españolas 8x8</h3><div id="dm-g" style="display:grid;grid-template-columns:repeat(8,42px);width:336px;margin:0 auto;border:3px solid #38bdf8;border-radius:8px;overflow:hidden;"></div></div>`;
+          const g = document.getElementById('dm-g');
           for (let r=0; r<8; r++) for (let c=0; c<8; c++) {
-            const osc = (r + c) % 2 === 1, p = tab[r][c], mp = leg.find(x => x.r2 === r && x.c2 === c);
-            const btn = document.createElement('button');
-            btn.style.cssText = `width:42px;height:42px;border:none;background:${sel&&sel.r===r&&sel.c===c?'#0284c7':(mp?'#059669':(osc?'#1e293b':'#cbd5e1'))};display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;`;
-            if (p) btn.innerHTML = `<span style="width:28px;height:28px;border-radius:50%;background:${p.toLowerCase()==='b'?'#0ea5e9':'#ef4444'};border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:12px;">${(p==='B'||p==='N')?'👑':''}</span>`;
-            btn.onclick = () => {
-              if (p && p.toLowerCase() === turno) { sel = { r, c }; drawDamas(); return; }
+            const osc = (r+c)%2===1, p = tab[r][c], mp = leg.find(x=>x.r2===r && x.c2===c);
+            const b = document.createElement('button');
+            b.style.cssText = `width:42px;height:42px;border:none;background:${mp?'#059669':(osc?'#1e293b':'#cbd5e1')};display:flex;align-items:center;justify-content:center;cursor:pointer;`;
+            if (p) b.innerHTML = `<span style="width:28px;height:28px;border-radius:50%;background:${p.toLowerCase()==='b'?'#0ea5e9':'#ef4444'};border:2px solid #fff;"></span>`;
+            b.onclick = () => {
+              if (p && p.toLowerCase()===turno) { sel = {r,c}; drawD(); return; }
               if (sel && mp) {
-                aplicarDama(sel.r, sel.c, mp); ganarXP(5); drawDamas();
-                if (modoPC && turno === 'n') {
-                  setTimeout(() => {
-                    let tds = [];
-                    for (let rr=0; rr<8; rr++) for (let cc=0; cc<8; cc++) if (tab[rr][cc] && tab[rr][cc].toLowerCase()==='n') movsFicha(rr, cc).forEach(m => tds.push({ r1: rr, c1: cc, m }));
-                    if (tds.length) { tds.sort((a,b)=>(b.m.cap?10:0)-(a.m.cap?10:0)); aplicarDama(tds[0].r1, tds[0].c1, tds[0].m); msg = "🤖 PC movió."; }
-                    drawDamas();
-                  }, 300);
-                }
+                tab[mp.r2][mp.c2] = tab[sel.r][sel.c]; tab[sel.r][sel.c] = '';
+                if (mp.cap) tab[mp.cap.r][mp.cap.c] = '';
+                sel = null; drawD();
+                setTimeout(() => {
+                  let tds = [];
+                  for (let rr=0; rr<8; rr++) for (let cc=0; cc<8; cc++) if (tab[rr][cc]==='n') movs(rr,cc).forEach(m=>tds.push({r1:rr,c1:cc,m}));
+                  if (tds.length) { const x = tds[0]; tab[x.m.r2][x.m.c2]='n'; tab[x.r1][x.c1]=''; if (x.m.cap) tab[x.m.cap.r][x.m.cap.c]=''; }
+                  drawD();
+                }, 250);
               }
             };
-            g.appendChild(btn);
+            g.appendChild(b);
           }
-          document.getElementById('dm-rst').onclick = () => pintarSelectorYJuego();
         }
-        drawDamas();
+        drawD();
       }
-
-      // 5. CUATRO EN LÍNEA 7x6
       else if (juegoActivo === 'cuatro') {
-        let g4 = Array(6).fill(null).map(() => Array(7).fill(0)), turno = 1, gano = 0, msg = "Toca una columna para soltar tu ficha celeste.";
-        function checkC4(p) {
-          for (let r=0; r<6; r++) for (let c=0; c<7; c++) {
-            if (c+3<7 && g4[r][c]===p && g4[r][c+1]===p && g4[r][c+2]===p && g4[r][c+3]===p) return true;
-            if (r+3<6 && g4[r][c]===p && g4[r+1][c]===p && g4[r+2][c]===p && g4[r+3][c]===p) return true;
-            if (r+3<6 && c+3<7 && g4[r][c]===p && g4[r+1][c+1]===p && g4[r+2][c+2]===p && g4[r+3][c+3]===p) return true;
-            if (r-3>=0 && c+3<7 && g4[r][c]===p && g4[r-1][c+1]===p && g4[r-2][c+2]===p && g4[r-3][c+3]===p) return true;
-          }
-          return false;
-        }
-        function drop(col) {
-          for (let r=5; r>=0; r--) if (g4[r][col] === 0) {
-            g4[r][col] = turno;
-            if (checkC4(turno)) { gano = turno; msg = `🏆 ¡Ganó ${turno===1?'Jugador':'PC'}!`; ganarXP(20); }
-            else turno = turno === 1 ? 2 : 1;
-            return true;
-          }
-          return false;
-        }
+        let g4 = Array(6).fill(null).map(() => Array(7).fill(0));
         function drawC4() {
-          stg.innerHTML = `
-            <div style="text-align:center;">
-              <h3 style="margin:0 0 4px;font-size:16px;color:#38bdf8;">🟡 Cuatro en Línea 7x6 vs PC</h3>
-              <p style="font-size:12px;color:#34d399;margin-bottom:8px;">${msg}</p>
-              <div id="c4-grid" style="display:grid;grid-template-columns:repeat(7,42px);gap:6px;width:330px;margin:0 auto 10px;background:#1e293b;padding:10px;border-radius:12px;"></div>
-              <button id="c4-rst" style="background:#0284c7;color:#fff;border:none;padding:6px 14px;border-radius:6px;font-weight:800;cursor:pointer;">Reiniciar</button>
-            </div>
-          `;
-          const gd = document.getElementById('c4-grid');
+          stg.innerHTML = `<div style="text-align:center;"><h3 style="margin:0 0 6px;color:#38bdf8;">🟡 Cuatro en Línea 7x6</h3><div id="c4-g" style="display:grid;grid-template-columns:repeat(7,42px);gap:6px;width:330px;margin:0 auto;background:#1e293b;padding:10px;border-radius:12px;"></div></div>`;
+          const gd = document.getElementById('c4-g');
           for (let r=0; r<6; r++) for (let c=0; c<7; c++) {
             const v = g4[r][c], b = document.createElement('button');
             b.style.cssText = `width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;background:${v===0?'#060c17':(v===1?'#0ea5e9':'#fbbf24')};`;
             b.onclick = () => {
-              if (gano || turno !== 1) return;
-              if (drop(c)) {
-                drawC4();
-                if (!gano && turno === 2) setTimeout(() => {
-                  const disp = [3,2,4,1,5,0,6].filter(cl => g4[0][cl] === 0);
-                  if (disp.length) drop(disp[Math.floor(Math.random()*Math.min(3, disp.length))]);
-                  drawC4();
-                }, 250);
-              }
+              for (let rr=5; rr>=0; rr--) if (g4[rr][c]===0) { g4[rr][c]=1; break; }
+              const disp = [3,2,4,1,5,0,6].filter(cl => g4[0][cl]===0);
+              if (disp.length) { const pcCol = disp[Math.floor(Math.random()*disp.length)]; for (let rr=5; rr>=0; rr--) if (g4[rr][pcCol]===0) { g4[rr][pcCol]=2; break; } }
+              drawC4();
             };
             gd.appendChild(b);
           }
-          document.getElementById('c4-rst').onclick = () => pintarSelectorYJuego();
         }
         drawC4();
       }
-
-      // 6. CRUZA LAS RANAS
       else if (juegoActivo === 'ranas') {
-        let ranas = ['G','G','G','_','Y','Y','Y'], movs = 0;
-        function drawRanas() {
-          const gano = ranas.join('') === 'YYY_GGG';
-          stg.innerHTML = `
-            <div style="text-align:center;padding:12px;">
-              <h3 style="margin:0 0 6px;font-size:16px;color:#34d399;">🐸 Acertijo Lógico: Cruza las Ranas</h3>
-              <p style="font-size:12px;color:#cbd5e1;margin-bottom:10px;">${gano ? '🏆 ¡RESUELTO PERFECTAMENTE!' : 'Intercambia las ranas verdes y amarillas.'} • Movimientos: <b>${movs}</b></p>
-              <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:18px 0;">
-                ${ranas.map((p, i) => `<button data-ri="${i}" class="btn-rn" style="width:60px;height:60px;border-radius:12px;border:2px solid #334155;background:${p==='_'?'#0b1322':(p==='G'?'#064e3b':'#451a03')};color:#fff;cursor:pointer;font-size:20px;">${p==='G'?'🐸➡':(p==='Y'?'⬅🐸':'🪨')}</button>`).join('')}
-              </div>
-              <button id="rn-rst" style="background:#0284c7;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:800;cursor:pointer;">Reiniciar</button>
-            </div>
-          `;
-          stg.querySelectorAll('.btn-rn').forEach(b => {
+        let ranas = ['G','G','G','_','Y','Y','Y'];
+        function drawR() {
+          stg.innerHTML = `<div style="text-align:center;padding:12px;"><h3 style="color:#34d399;">🐸 Cruza las Ranas</h3><div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:18px 0;">${ranas.map((p,i)=>`<button data-i="${i}" class="brn" style="width:58px;height:58px;border-radius:10px;background:#131f33;color:#fff;font-size:20px;border:1px solid #38bdf8;cursor:pointer;">${p==='G'?'🐸➡':(p==='Y'?'⬅🐸':'🪨')}</button>`).join('')}</div></div>`;
+          stg.querySelectorAll('.brn').forEach(b => {
             b.onclick = () => {
-              const i = parseInt(b.getAttribute('data-ri'), 10), v = ranas.indexOf('_');
-              if (ranas[i] === 'G' && (v === i + 1 || v === i + 2)) { ranas[v] = 'G'; ranas[i] = '_'; movs++; drawRanas(); }
-              else if (ranas[i] === 'Y' && (v === i - 1 || v === i - 2)) { ranas[v] = 'Y'; ranas[i] = '_'; movs++; drawRanas(); }
+              const i = Number(b.getAttribute('data-i')), v = ranas.indexOf('_');
+              if (ranas[i]==='G' && (v===i+1||v===i+2)) { ranas[v]='G'; ranas[i]='_'; drawR(); }
+              else if (ranas[i]==='Y' && (v===i-1||v===i-2)) { ranas[v]='Y'; ranas[i]='_'; drawR(); }
             };
           });
-          document.getElementById('rn-rst').onclick = () => pintarSelectorYJuego();
         }
-        drawRanas();
+        drawR();
       }
-
-      // 7. PUENTE EN 17 MINUTOS
       else if (juegoActivo === 'puente') {
-        let exc = [{id:'1',t:1,l:'izq',n:'⚡ 1 min'},{id:'2',t:2,l:'izq',n:'🏃 2 min'},{id:'5',t:5,l:'izq',n:'🎒 5 min'},{id:'10',t:10,l:'izq',n:'🦯 10 min'}];
-        let lint = 'izq', tiempo = 0, sel = [];
+        let exc = [{id:'1',t:1,l:'izq',n:'⚡ 1m'},{id:'2',t:2,l:'izq',n:'🏃 2m'},{id:'5',t:5,l:'izq',n:'🎒 5m'},{id:'10',t:10,l:'izq',n:'🦯 10m'}], lint='izq', t=0, sel=[];
         function drawP() {
-          const gano = exc.every(e => e.l === 'der') && tiempo <= 17;
-          stg.innerHTML = `
-            <div style="text-align:center;">
-              <h3 style="margin:0 0 4px;font-size:16px;color:#38bdf8;">🔦 El Puente Oscuro en 17 Minutos</h3>
-              <p style="font-size:12px;color:#fbbf24;font-weight:800;">⏱️ Tiempo: ${tiempo}/17 min • Linterna: ${lint.toUpperCase()} ${gano?'🏆 ¡LOGRADO!':''}</p>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:480px;margin:10px auto;">
-                <div style="background:#0b1322;padding:10px;border-radius:8px;"><b>Izquierda</b>${exc.filter(e=>e.l==='izq').map(e=>`<button data-id="${e.id}" class="bp-e" style="display:block;width:100%;margin-top:6px;background:${sel.includes(e.id)?'#0284c7':'#131f33'};color:#fff;border:1px solid #334155;padding:7px;border-radius:6px;cursor:pointer;">${e.n}</button>`).join('')}</div>
-                <div style="background:#0b1322;padding:10px;border-radius:8px;"><b>Derecha</b>${exc.filter(e=>e.l==='der').map(e=>`<button data-id="${e.id}" class="bp-e" style="display:block;width:100%;margin-top:6px;background:${sel.includes(e.id)?'#0284c7':'#131f33'};color:#fff;border:1px solid #334155;padding:7px;border-radius:6px;cursor:pointer;">${e.n}</button>`).join('')}</div>
-              </div>
-              <button id="bp-go" style="background:#059669;color:#fff;border:none;padding:8px 16px;border-radius:7px;font-weight:800;cursor:pointer;">Cruzar Puente ➡</button>
-              <button id="bp-rst" style="background:#7f1d1d;color:#fecaca;border:none;padding:8px 14px;border-radius:7px;font-weight:800;cursor:pointer;margin-left:6px;">Reiniciar</button>
-            </div>
-          `;
-          stg.querySelectorAll('.bp-e').forEach(b => {
-            b.onclick = () => {
-              const id = b.getAttribute('data-id'), ex = exc.find(x => x.id === id);
-              if (ex.l !== lint) return;
-              if (sel.includes(id)) sel = sel.filter(x => x !== id); else if (sel.length < 2) sel.push(id);
-              drawP();
-            };
-          });
-          document.getElementById('bp-go').onclick = () => {
-            if (!sel.length) return;
-            const grp = exc.filter(e => sel.includes(e.id));
-            tiempo += Math.max(...grp.map(e => e.t)); lint = lint === 'izq' ? 'der' : 'izq';
-            grp.forEach(e => e.l = lint); sel = []; drawP();
-          };
-          document.getElementById('bp-rst').onclick = () => pintarSelectorYJuego();
+          stg.innerHTML = `<div style="text-align:center;"><h3 style="color:#38bdf8;">🔦 Puente en 17 Minutos (Tiempo: ${t}/17m)</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:420px;margin:10px auto;"><div><b>Izquierda</b>${exc.filter(e=>e.l==='izq').map(e=>`<button data-id="${e.id}" class="bpe" style="display:block;width:100%;margin-top:5px;padding:7px;background:${sel.includes(e.id)?'#0284c7':'#131f33'};color:#fff;border:1px solid #334155;border-radius:6px;">${e.n}</button>`).join('')}</div><div><b>Derecha</b>${exc.filter(e=>e.l==='der').map(e=>`<button data-id="${e.id}" class="bpe" style="display:block;width:100%;margin-top:5px;padding:7px;background:${sel.includes(e.id)?'#0284c7':'#131f33'};color:#fff;border:1px solid #334155;border-radius:6px;">${e.n}</button>`).join('')}</div></div><button id="bpgo" style="background:#059669;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-weight:800;cursor:pointer;">Cruzar ➡</button></div>`;
+          stg.querySelectorAll('.bpe').forEach(b => { b.onclick = () => { const id = b.getAttribute('data-id'); if (sel.includes(id)) sel=sel.filter(x=>x!==id); else if (sel.length<2) sel.push(id); drawP(); }; });
+          document.getElementById('bpgo').onclick = () => { if (!sel.length) return; const g = exc.filter(e=>sel.includes(e.id)); t += Math.max(...g.map(x=>x.t)); lint = lint==='izq'?'der':'izq'; g.forEach(x=>x.l=lint); sel=[]; drawP(); };
         }
         drawP();
       }
-
-      // 8. TA-TE-TI PRO
       else if (juegoActivo === 'gato') {
-        let t = Array(9).fill(''), fin = false, msg = "Tu turno (X).";
-        const L = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-        function chk() { for (const [a,b,c] of L) if (t[a]&&t[a]===t[b]&&t[a]===t[c]) return t[a]; return t.every(x=>x)?'E':null; }
+        let t = Array(9).fill('');
         function drawG() {
-          stg.innerHTML = `<div style="text-align:center;"><h3 style="margin:0 0 6px;color:#38bdf8;">❌ Ta-Te-Ti vs IA</h3><p style="font-size:12px;color:#34d399;">${msg}</p><div id="gt-b" style="display:grid;grid-template-columns:repeat(3,68px);gap:8px;width:220px;margin:10px auto;"></div><button id="gt-r" style="background:#0284c7;color:#fff;border:none;padding:7px 14px;border-radius:6px;font-weight:800;cursor:pointer;">Reiniciar</button></div>`;
+          stg.innerHTML = `<div style="text-align:center;"><h3 style="color:#38bdf8;">❌ Ta-Te-Ti vs IA</h3><div id="gt-b" style="display:grid;grid-template-columns:repeat(3,68px);gap:8px;width:220px;margin:10px auto;"></div></div>`;
           const b = document.getElementById('gt-b');
           t.forEach((v, i) => {
             const bt = document.createElement('button');
-            bt.style.cssText = `height:68px;background:#0b1322;border:2px solid #334155;border-radius:8px;color:${v==='X'?'#38bdf8':'#fbbf24'};font-size:28px;font-weight:900;cursor:pointer;`;
+            bt.style.cssText = 'height:68px;background:#0b1322;border:2px solid #334155;border-radius:8px;color:#38bdf8;font-size:26px;font-weight:900;cursor:pointer;';
             bt.innerText = v;
             bt.onclick = () => {
-              if (fin || t[i]) return;
-              t[i] = 'X'; let w = chk();
-              if (w) { fin = true; msg = w==='E'?'Empate':'🏆 ¡Ganaste!'; ganarXP(15); drawG(); return; }
+              if (t[i]) return; t[i] = 'X';
               const vac = t.map((x,ix)=>x===''?ix:-1).filter(x=>x!==-1);
-              t[vac.includes(4)?4:vac[Math.floor(Math.random()*vac.length)]] = 'O';
-              w = chk(); if (w) { fin = true; msg = w==='E'?'Empate':'Ganó la IA'; }
+              if (vac.length) t[vac[Math.floor(Math.random()*vac.length)]] = 'O';
               drawG();
             };
             b.appendChild(bt);
           });
-          document.getElementById('gt-r').onclick = () => pintarSelectorYJuego();
         }
         drawG();
       }
-
-      // 9. MEMORIA 4x4 PRO
       else if (juegoActivo === 'memoria') {
         const terminos = shuffleCrypto(['HTML5','CSS3','React','SHA-256','VLAN','OSPF','Python','SQL','HTML5','CSS3','React','SHA-256','VLAN','OSPF','Python','SQL']);
-        let barajas = terminos.map((t, idx) => ({ id: idx, val: t, volteada: false, encontrada: false }));
-        let primerSel = null, bloqueado = false, paresEncontrados = 0;
-        function drawMemoria() {
-          stg.innerHTML = `
-            <div style="text-align:center;">
-              <h3 style="margin:0 0 4px;font-size:15px;color:#38bdf8;">🧠 Memoria Técnica 4x4 Pro</h3>
-              <p style="font-size:11.5px;color:#34d399;margin-bottom:8px;">Pares encontrados: <b>${paresEncontrados}/8</b></p>
-              <div id="mem-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:360px;margin:0 auto;"></div>
-            </div>
-          `;
-          const grid = document.getElementById('mem-grid');
-          barajas.forEach((card, idx) => {
-            const btn = document.createElement('button');
-            btn.style.cssText = `height:54px;background:${card.encontrada?'#064e3b':(card.volteada?'#0284c7':'#131f33')};color:#fff;border:1px solid #334155;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;`;
-            btn.innerText = (card.volteada || card.encontrada) ? card.val : '❓';
-            btn.onclick = () => {
-              if (bloqueado || card.volteada || card.encontrada) return;
-              card.volteada = true; drawMemoria();
-              if (!primerSel) primerSel = { idx, val: card.val };
+        let barajas = terminos.map((t, idx) => ({ id: idx, val: t, volteada: false, encontrada: false })), primerSel = null, lock = false;
+        function drawM() {
+          stg.innerHTML = `<div style="text-align:center;"><h3 style="color:#38bdf8;">🧠 Memoria Técnica 4x4</h3><div id="mm-g" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:340px;margin:10px auto;"></div></div>`;
+          const g = document.getElementById('mm-g');
+          barajas.forEach((c, idx) => {
+            const b = document.createElement('button');
+            b.style.cssText = `height:52px;background:${c.encontrada?'#064e3b':(c.volteada?'#0284c7':'#131f33')};color:#fff;border:1px solid #334155;border-radius:8px;font-weight:800;cursor:pointer;`;
+            b.innerText = (c.volteada||c.encontrada) ? c.val : '❓';
+            b.onclick = () => {
+              if (lock||c.volteada||c.encontrada) return;
+              c.volteada = true; drawM();
+              if (!primerSel) primerSel = {idx, val: c.val};
               else {
-                bloqueado = true;
-                if (primerSel.val === card.val) {
-                  barajas[primerSel.idx].encontrada = true; barajas[idx].encontrada = true;
-                  paresEncontrados++; primerSel = null; bloqueado = false; ganarXP(10); drawMemoria();
-                } else {
-                  setTimeout(() => { barajas[primerSel.idx].volteada = false; card.volteada = false; primerSel = null; bloqueado = false; drawMemoria(); }, 700);
-                }
+                lock = true;
+                if (primerSel.val === c.val) { barajas[primerSel.idx].encontrada=true; c.encontrada=true; primerSel=null; lock=false; playSuccessSound(); drawM(); }
+                else setTimeout(()=>{ barajas[primerSel.idx].volteada=false; c.volteada=false; primerSel=null; lock=false; drawM(); }, 650);
               }
             };
-            grid.appendChild(btn);
+            g.appendChild(b);
           });
         }
-        drawMemoria();
+        drawM();
       }
-
-      // 10. BÚSQUEDA BINARIA
       else if (juegoActivo === 'adivina') {
         const sec = shuffleCrypto(Array.from({length:100},(_,i)=>i+1))[0];
-        let min = 1, max = 100, pasos = 0, ok = false;
-        function drawAdv() {
-          stg.innerHTML = `<div style="text-align:center;padding:16px;"><h3 style="color:#38bdf8;margin:0 0 6px;">🔢 Algoritmo de Búsqueda Binaria (1 al 100)</h3><p style="color:#fbbf24;font-weight:800;">Rango activo: [ ${min} — ${max} ] • Intentos: ${pasos}</p><input id="ad-i" type="number" value="${Math.floor((min+max)/2)}" style="background:#0b1322;border:1px solid #38bdf8;color:#fff;padding:8px;border-radius:6px;width:90px;text-align:center;font-size:15px;"/><button id="ad-b" style="background:#0284c7;color:#fff;border:none;padding:9px 14px;border-radius:6px;font-weight:800;cursor:pointer;margin-left:6px;">Probar</button><p style="color:#34d399;font-weight:700;">${ok?'🏆 ¡Exacto! Número '+sec+' hallado.':''}</p></div>`;
-          document.getElementById('ad-b').onclick = () => {
-            const v = parseInt(document.getElementById('ad-i').value, 10); pasos++;
-            if (v === sec) { ok = true; ganarXP(20); } else if (v < sec) min = Math.max(min, v + 1); else max = Math.min(max, v - 1);
-            drawAdv();
+        let min = 1, max = 100;
+        function drawA() {
+          stg.innerHTML = `<div style="text-align:center;padding:16px;"><h3 style="color:#38bdf8;">🔢 Búsqueda Binaria [ ${min} — ${max} ]</h3><input id="adi" type="number" value="${Math.floor((min+max)/2)}" style="background:#0b1322;color:#fff;border:1px solid #38bdf8;padding:8px;border-radius:6px;width:90px;text-align:center;"/><button id="adb" style="background:#0284c7;color:#fff;border:none;padding:9px 14px;border-radius:6px;margin-left:6px;font-weight:800;cursor:pointer;">Probar</button></div>`;
+          document.getElementById('adb').onclick = () => {
+            const v = Number(document.getElementById('adi').value);
+            if (v === sec) { playSuccessSound(); alert('🎯 ¡Exacto! El número era ' + sec); }
+            else if (v < sec) min = v + 1; else max = v - 1;
+            drawA();
           };
         }
-        drawAdv();
+        drawA();
       }
-
-      // 11. RETO SUBNETEO VLSM
       else if (juegoActivo === 'subnet') {
-        function renderVLSM() {
-          const pref = shuffleCrypto([25,26,27,28,29,30])[0];
-          const utiles = Math.pow(2, 32 - pref) - 2;
-          const opts = shuffleCrypto([`${utiles} IPs útiles`, `${utiles+2} IPs útiles`, `${Math.max(2, utiles*2)} IPs útiles`, `${Math.max(2, Math.floor(utiles/2))} IPs útiles`]);
-          stg.innerHTML = `<div style="text-align:center;padding:14px;"><h3 style="color:#38bdf8;margin:0 0 6px;">🌐 Calculadora y Reto de Subneteo VLSM</h3><p style="font-size:14px;font-weight:800;color:#fff;">Subred 192.168.10.0/${pref} (Máscara 255.255.255.${256 - Math.pow(2, 32-pref)}): ¿Cuántos hosts utilizables tiene?</p><div id="vl-o" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:440px;margin:12px auto;"></div><div id="vl-m" style="font-size:12px;font-weight:700;"></div></div>`;
-          opts.forEach(o => {
-            const b = document.createElement('button');
-            b.style.cssText = 'background:#131f33;color:#fff;border:1px solid #334155;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;';
-            b.innerText = o;
-            b.onclick = () => {
-              if (o === `${utiles} IPs útiles`) { ganarXP(15, "🌐 Arquitecto VLSM"); document.getElementById('vl-m').innerHTML = '<span style="color:#34d399;">✅ ¡Correcto! 2^(32-'+pref+') - 2 = '+utiles+'.</span>'; setTimeout(renderVLSM, 900); }
-              else document.getElementById('vl-m').innerHTML = '<span style="color:#fca5a5;">❌ Revisa la fórmula 2^h - 2.</span>';
-            };
-            document.getElementById('vl-o').appendChild(b);
-          });
-        }
-        renderVLSM();
+        const pref = shuffleCrypto([25,26,27,28,29,30])[0], utiles = Math.pow(2, 32-pref) - 2;
+        const opts = shuffleCrypto([utiles, utiles+2, utiles*2, Math.floor(utiles/2)]);
+        stg.innerHTML = `<div style="text-align:center;padding:14px;"><h3 style="color:#38bdf8;">🌐 Reto VLSM: Red 192.168.1.0/${pref}</h3><p>¿Cuántas IPs utilizables para hosts tiene?</p><div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;">${opts.map(o=>`<button onclick="if(${o}===${utiles}){this.style.background='#064e3b';this.innerText='✅ '+${o};}else{this.style.background='#7f1d1d';}" style="background:#131f33;color:#fff;border:1px solid #334155;padding:10px 16px;border-radius:8px;font-weight:800;cursor:pointer;">${o} IPs</button>`).join('')}</div></div>`;
       }
-
-      // 12. MÁQUINA ENIGMA ALAN TURING & QUIZ COSEVI
       else if (juegoActivo === 'cosevi') {
-        stg.innerHTML = `
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;">
-            <div style="background:#0b1322;border:1px solid #38bdf8;border-radius:10px;padding:14px;">
-              <h4 style="margin:0 0 6px;color:#38bdf8;">🔐 Máquina Enigma de Alan Turing (Cifrado Rotor)</h4>
-              <p style="font-size:11.5px;color:#94a3b8;margin-bottom:8px;">Escribe un mensaje para cifrarlo/descifrarlo con rotor simétrico Turing:</p>
-              <input id="tur-in" type="text" value="CIBERSEGURIDAD CTPMN" style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;color:#fff;padding:8px;border-radius:6px;margin-bottom:8px;"/>
-              <div id="tur-out" style="background:#060c17;padding:8px;border-radius:6px;font-family:monospace;color:#34d399;font-weight:800;">Salida ROT-13: PVORFRTHEVQNQ PGCKA</div>
-            </div>
-            <div style="background:#0b1322;border:1px solid #10b981;border-radius:10px;padding:14px;">
-              <h4 style="margin:0 0 6px;color:#34d399;">🚦 Reto Rápido Ley de Tránsito COSEVI</h4>
-              <p style="font-size:12px;color:#fff;">Al llegar a una rotonda de 2 carriles, ¿qué carril debes usar para salir en la primera salida?</p>
-              <button onclick="this.style.background='#064e3b';this.innerText='✅ ¡Correcto! Carril externo derecho.';" style="width:100%;background:#131f33;color:#fff;border:1px solid #334155;padding:8px;border-radius:6px;margin-top:6px;cursor:pointer;font-weight:700;">Carril externo (derecho)</button>
-              <button onclick="this.style.background='#7f1d1d';this.innerText='❌ Incorrecto (ese es para 3ra salida o retorno).';" style="width:100%;background:#131f33;color:#fff;border:1px solid #334155;padding:8px;border-radius:6px;margin-top:6px;cursor:pointer;font-weight:700;">Carril interno (izquierdo)</button>
-            </div>
-          </div>
-        `;
-        document.getElementById('tur-in').oninput = (e) => {
-          const s = e.target.value.toUpperCase().replace(/[A-Z]/g, c => String.fromCharCode(((c.charCodeAt(0) - 65 + 13) % 26) + 65));
-          document.getElementById('tur-out').innerText = 'Salida ROT-13: ' + s;
+        stg.innerHTML = `<div style="text-align:center;padding:16px;"><h3 style="color:#38bdf8;">🔐 Rotor Enigma de Alan Turing</h3><input id="ti" value="PRACTICATECNICA" style="background:#0b1322;color:#fff;border:1px solid #38bdf8;padding:8px;border-radius:6px;"/><div id="to" style="margin-top:10px;color:#34d399;font-family:monospace;font-weight:800;">CENPGVPNGRPUAVPN</div></div>`;
+        document.getElementById('ti').oninput = (e) => {
+          document.getElementById('to').innerText = e.target.value.toUpperCase().replace(/[A-Z]/g, c => String.fromCharCode(((c.charCodeAt(0)-65+13)%26)+65));
         };
       }
     }
@@ -1224,289 +1727,108 @@
   }
 
   // ============================================================================
-  // SIMULADOR DE MATERIA / UCR / TEC CON EXPLICACIÓN PASO A PASO Y CONTROL DE CANTIDAD
-  // ============================================================================
-  function abrirModuloCursoInteractivo(contenedor, idMateria) {
-    const mat = CATALOGO_EDUCATIVO.find(x => x.id === idMateria) || CATALOGO_EDUCATIVO[0];
-    let dificultad = 'Intermedio';
-    let limitePreguntas = mat.preguntas.length;
-    let mazoPreguntas = shuffleCrypto(mat.preguntas).slice(0, limitePreguntas);
-    let qActual = 0, aciertos = 0, pausado = false, respondida = false;
-
-    function reiniciarSimulacro(nuevoLimite) {
-      limitePreguntas = nuevoLimite || mat.preguntas.length;
-      mazoPreguntas = shuffleCrypto(mat.preguntas).slice(0, Math.min(limitePreguntas, mat.preguntas.length));
-      qActual = 0; aciertos = 0; pausado = false; respondida = false;
-      renderCurso();
-    }
-
-    function renderCurso() {
-      if (qActual >= mazoPreguntas.length) {
-        const nota100 = Math.round((aciertos / mazoPreguntas.length) * 100);
-        const escala800 = Math.round(200 + (aciertos / mazoPreguntas.length) * 600);
-        if (escala800 >= 700) ganarXP(35, "🏛️ Aspirante 800 UCR/TEC");
-        contenedor.innerHTML = `
-          <div style="background:#0b1322;border:1.5px solid #10b981;border-radius:14px;padding:24px;text-align:center;">
-            <h2 style="color:#34d399;margin:0 0 8px;">🏆 ¡Evaluación Finalizada! — ${mat.titulo}</h2>
-            <p style="font-size:15px;color:#fff;margin:0 0 12px;">Aciertos: <b>${aciertos}/${mazoPreguntas.length}</b> • Nota MEP: <b style="color:#38bdf8;">${nota100}%</b> • Escala Admisión UCR/TEC: <b style="color:#fbbf24;">${escala800} / 800 pts</b></p>
-            <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;">
-              <button id="cur-rep" style="background:#0284c7;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-weight:800;cursor:pointer;">🔄 Nuevo Intento Aleatorio (Fisher-Yates)</button>
-              <button id="cur-dl" style="background:#059669;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-weight:800;cursor:pointer;">📥 Descargar Reporte Oficial TXT</button>
-              <button id="cur-back" style="background:#1e293b;color:#fff;border:1px solid #334155;padding:10px 18px;border-radius:8px;font-weight:800;cursor:pointer;">← Volver al Catálogo</button>
-            </div>
-          </div>
-        `;
-        document.getElementById('cur-rep').onclick = () => reiniciarSimulacro(limitePreguntas);
-        document.getElementById('cur-back').onclick = () => navegarVista('inicio');
-        document.getElementById('cur-dl').onclick = () => {
-          const blob = new Blob([`REPORTE OFICIAL PRACTICATECNICA.COM\nMateria: ${mat.titulo}\nDificultad: ${dificultad}\nAciertos: ${aciertos}/${mazoPreguntas.length}\nNota: ${nota100}%\nEscala Admision: ${escala800}/800\nFecha: ${new Date().toISOString()}`], { type: 'text/plain;charset=utf-8' });
-          const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Reporte_${mat.id}.txt`; a.click();
-        };
-        return;
-      }
-
-      const item = mazoPreguntas[qActual];
-      const opcionesBarajadas = shuffleCrypto([item.c, ...item.i]);
-      respondida = false;
-
-      contenedor.innerHTML = `
-        <div style="background:#0b1322;border:1.5px solid #0284c7;border-radius:14px;padding:16px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid #1e293b;padding-bottom:10px;margin-bottom:12px;">
-            <div>
-              <span style="font-size:11px;background:#0284c7;color:#fff;padding:3px 8px;border-radius:5px;font-weight:800;">${mat.niveles}</span>
-              <h2 style="margin:4px 0 0;font-size:17px;color:#fff;">${mat.icono} ${mat.titulo}</h2>
-            </div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-              <select id="cur-cant" title="Control de cantidad de preguntas" style="background:#131f33;color:#38bdf8;border:1px solid #38bdf8;padding:6px 9px;border-radius:6px;font-size:11.5px;font-weight:800;">
-                <option value="3" ${mazoPreguntas.length===3?'selected':''}>⚡ 3 Preguntas</option>
-                <option value="5" ${mazoPreguntas.length===5?'selected':''}>🎯 5 Preguntas</option>
-                <option value="${mat.preguntas.length}" ${mazoPreguntas.length===mat.preguntas.length?'selected':''}>📚 Banco Completo (${mat.preguntas.length})</option>
-              </select>
-              <select id="cur-dif" style="background:#131f33;color:#fff;border:1px solid #334155;padding:6px 9px;border-radius:6px;font-size:11.5px;font-weight:700;">
-                <option value="Básico" ${dificultad==='Básico'?'selected':''}>🟢 Básico</option>
-                <option value="Intermedio" ${dificultad==='Intermedio'?'selected':''}>🟡 Intermedio</option>
-                <option value="Avanzado Turing" ${dificultad==='Avanzado Turing'?'selected':''}>🔴 Avanzado</option>
-              </select>
-              <button id="cur-pausa" style="background:#b45309;color:#fff;border:none;padding:6px 10px;border-radius:6px;font-size:11.5px;font-weight:700;cursor:pointer;">${pausado?'▶️ Seguir':'⏸️ Pausar'}</button>
-              <button id="cur-fin" style="background:#7f1d1d;color:#fecaca;border:none;padding:6px 10px;border-radius:6px;font-size:11.5px;font-weight:700;cursor:pointer;">⏹️ Calificar</button>
-              <button id="cur-volver" style="background:#1e293b;color:#cbd5e1;border:1px solid #334155;padding:6px 10px;border-radius:6px;font-size:11.5px;font-weight:700;cursor:pointer;">← Salir</button>
-            </div>
-          </div>
-
-          <div style="background:#070d19;border-left:4px solid #38bdf8;padding:11px;border-radius:8px;margin-bottom:12px;">
-            <div style="font-size:11px;font-weight:800;color:#38bdf8;margin-bottom:3px;">📘 MANUAL Y FÓRMULA CLAVE:</div>
-            <div style="font-size:12px;color:#cbd5e1;line-height:1.45;">${mat.manual}</div>
-          </div>
-
-          ${pausado ? `<div style="text-align:center;padding:30px;background:#070d19;border-radius:10px;color:#fbbf24;font-weight:800;">⏸️ Simulacro en pausa. Presiona "Seguir" para continuar.</div>` : `
-            <div style="background:#070d19;border:1px solid #1e293b;border-radius:12px;padding:15px;">
-              <div style="display:flex;justify-content:space-between;font-size:12px;color:#34d399;font-weight:800;margin-bottom:8px;">
-                <span>Pregunta ${qActual + 1} de ${mazoPreguntas.length}</span>
-                <span>Aciertos: ${aciertos}</span>
-              </div>
-              <p style="font-size:14.5px;font-weight:800;color:#fff;margin:0 0 14px;line-height:1.45;">${item.p}</p>
-              <div id="cur-opts" style="display:flex;flex-direction:column;gap:8px;"></div>
-              <div id="cur-fb" style="display:none;margin-top:12px;padding:12px;border-radius:8px;background:#0b1322;border:1px solid #38bdf8;font-size:12.5px;line-height:1.45;"></div>
-              <button id="cur-next-btn" style="display:none;margin-top:12px;background:#0284c7;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-weight:800;cursor:pointer;width:100%;">Siguiente Pregunta ➡</button>
-            </div>
-          `}
-        </div>
-      `;
-
-      document.getElementById('cur-cant').onchange = (e) => reiniciarSimulacro(parseInt(e.target.value, 10));
-      document.getElementById('cur-dif').onchange = (e) => { dificultad = e.target.value; renderCurso(); };
-      document.getElementById('cur-pausa').onclick = () => { pausado = !pausado; renderCurso(); };
-      document.getElementById('cur-fin').onclick = () => { qActual = mazoPreguntas.length; renderCurso(); };
-      document.getElementById('cur-volver').onclick = () => navegarVista('inicio');
-
-      if (!pausado) {
-        const box = document.getElementById('cur-opts');
-        const fb = document.getElementById('cur-fb');
-        const nxt = document.getElementById('cur-next-btn');
-
-        opcionesBarajadas.forEach((op, idx) => {
-          const b = document.createElement('button');
-          b.style.cssText = 'background:#131f33;color:#fff;border:1px solid #334155;padding:11px 14px;border-radius:8px;text-align:left;font-size:13px;font-weight:700;cursor:pointer;min-height:44px;';
-          b.innerText = `${String.fromCharCode(65 + idx)}) ${op}`;
-          b.onclick = () => {
-            if (respondida) return;
-            respondida = true;
-            const explicacion = item.exp || 'Respuesta verificada según el temario oficial.';
-            if (op === item.c) {
-              aciertos++; ganarXP(15);
-              b.style.background = '#064e3b'; b.style.borderColor = '#10b981';
-              fb.innerHTML = `<div style="color:#34d399;font-weight:900;margin-bottom:4px;">✅ ¡Respuesta Correcta! (+15 XP)</div><div style="color:#e2e8f0;"><b>Explicación paso a paso:</b> ${explicacion}</div>`;
-            } else {
-              b.style.background = '#7f1d1d'; b.style.borderColor = '#ef4444';
-              fb.innerHTML = `<div style="color:#fca5a5;font-weight:900;margin-bottom:4px;">❌ Incorrecto. La respuesta correcta es: ${item.c}</div><div style="color:#e2e8f0;"><b>Explicación paso a paso:</b> ${explicacion}</div>`;
-            }
-            fb.style.display = 'block';
-            nxt.style.display = 'block';
-          };
-          box.appendChild(b);
-        });
-
-        nxt.onclick = () => { qActual++; renderCurso(); };
-      }
-    }
-
-    renderCurso();
-  }
-
-  // ============================================================================
-  // SIMULADOR VIAL 2D EN CANVAS REAL (CON CONTROLES TÁCTILES MÓVIL Y TECLADO)
+  // SIMULADOR VIAL 2D EN CANVAS REAL
   // ============================================================================
   function renderSimuladorVial2D(contenedor) {
     let puntos = 100, vel = 0, x = 260, y = 265, ang = 0;
     contenedor.innerHTML = `
       <div style="background:#0b1322;border:1.5px solid #0284c7;border-radius:14px;padding:16px;text-align:center;">
-        <h3 style="margin:0 0 6px;color:#38bdf8;">🚗 Simulador Vial 2D COSEVI (Límites Estrictos de Calzada & Controles Móviles)</h3>
-        <div id="sv-hud" style="font-size:12.5px;font-weight:800;color:#34d399;margin-bottom:8px;">Puntos COSEVI: 100/100 • Velocidad: 0 km/h • Circulación por la derecha</div>
+        <h3 style="margin:0 0 6px;color:#38bdf8;">🚗 Simulador Vial 2D COSEVI (Rotonda Multi-Carril & Controles Táctiles)</h3>
+        <div id="sv-hud" style="font-size:12.5px;font-weight:800;color:#34d399;margin-bottom:8px;">Puntos COSEVI: 100/100 • Velocidad: 0 km/h • Circulación Antihoraria</div>
         <canvas id="sv-canvas" width="520" height="320" style="max-width:100%;background:#064e3b;border:3px solid #334155;border-radius:12px;touch-action:none;"></canvas>
         <div style="display:flex;justify-content:center;gap:8px;margin-top:10px;flex-wrap:wrap;">
-          <button id="sv-left" style="background:#1e293b;color:#fff;border:1px solid #38bdf8;padding:11px 16px;border-radius:8px;font-weight:900;cursor:pointer;min-height:44px;">⬅️ Giro Izq</button>
-          <button id="sv-up" style="background:#059669;color:#fff;border:none;padding:11px 18px;border-radius:8px;font-weight:900;cursor:pointer;min-height:44px;">⬆️ Avanzar</button>
-          <button id="sv-down" style="background:#7f1d1d;color:#fff;border:none;padding:11px 16px;border-radius:8px;font-weight:900;cursor:pointer;min-height:44px;">⬇️ Retroceder</button>
-          <button id="sv-right" style="background:#1e293b;color:#fff;border:1px solid #38bdf8;padding:11px 16px;border-radius:8px;font-weight:900;cursor:pointer;min-height:44px;">➡️ Giro Der</button>
-          <button id="sv-rst" style="background:#0284c7;color:#fff;border:none;padding:11px 14px;border-radius:8px;font-weight:800;cursor:pointer;min-height:44px;">🔄 Reiniciar</button>
+          <button id="sv-left" style="background:#1e293b;color:#fff;border:1px solid #38bdf8;padding:11px 16px;border-radius:8px;font-weight:900;cursor:pointer;">⬅️ Giro Izq</button>
+          <button id="sv-up" style="background:#059669;color:#fff;border:none;padding:11px 18px;border-radius:8px;font-weight:900;cursor:pointer;">⬆️ Avanzar</button>
+          <button id="sv-down" style="background:#7f1d1d;color:#fff;border:none;padding:11px 16px;border-radius:8px;font-weight:900;cursor:pointer;">⬇️ Retroceder</button>
+          <button id="sv-right" style="background:#1e293b;color:#fff;border:1px solid #38bdf8;padding:11px 16px;border-radius:8px;font-weight:900;cursor:pointer;">➡️ Giro Der</button>
+          <button id="sv-rst" style="background:#0284c7;color:#fff;border:none;padding:11px 14px;border-radius:8px;font-weight:800;cursor:pointer;">🔄 Reiniciar</button>
         </div>
       </div>
     `;
-
-    const cv = document.getElementById('sv-canvas');
-    const ctx = cv.getContext('2d');
-    const hud = document.getElementById('sv-hud');
-
-    function dibujarPista() {
-      ctx.clearRect(0, 0, 520, 320);
-      ctx.fillStyle = '#064e3b'; ctx.fillRect(0, 0, 520, 320);
-      ctx.fillStyle = '#334155';
-      ctx.fillRect(215, 0, 90, 320);
-      ctx.fillRect(0, 115, 520, 90);
-
-      ctx.beginPath(); ctx.arc(260, 160, 115, 0, Math.PI * 2); ctx.fillStyle = '#334155'; ctx.fill();
-      ctx.beginPath(); ctx.arc(260, 160, 80, 0, Math.PI * 2); ctx.strokeStyle = '#fbbf24'; ctx.setLineDash([6, 6]); ctx.lineWidth = 2; ctx.stroke(); ctx.setLineDash([]);
-      ctx.beginPath(); ctx.arc(260, 160, 45, 0, Math.PI * 2); ctx.fillStyle = '#15803d'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#ffffff'; ctx.stroke();
-
-      ctx.fillStyle = '#ef4444'; ctx.fillRect(310, 215, 36, 18);
-      ctx.fillStyle = '#fff'; ctx.font = 'bold 9px sans-serif'; ctx.fillText('CEDA', 315, 227);
-      ctx.fillStyle = '#f59e0b'; ctx.fillRect(160, 85, 52, 18);
-      ctx.fillStyle = '#000'; ctx.fillText('MÁX 25', 165, 97);
-
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate(ang);
-      ctx.fillStyle = '#38bdf8';
-      ctx.fillRect(-14, -8, 28, 16);
-      ctx.fillStyle = '#fef08a';
-      ctx.fillRect(10, -7, 4, 4); ctx.fillRect(10, 3, 4, 4);
-      ctx.restore();
+    const cv = document.getElementById('sv-canvas'), ctx = cv.getContext('2d'), hud = document.getElementById('sv-hud');
+    function dibujar() {
+      ctx.clearRect(0,0,520,320); ctx.fillStyle='#064e3b'; ctx.fillRect(0,0,520,320);
+      ctx.fillStyle='#334155'; ctx.fillRect(215,0,90,320); ctx.fillRect(0,115,520,90);
+      ctx.beginPath(); ctx.arc(260,160,115,0,Math.PI*2); ctx.fillStyle='#334155'; ctx.fill();
+      ctx.beginPath(); ctx.arc(260,160,80,0,Math.PI*2); ctx.strokeStyle='#fbbf24'; ctx.setLineDash([6,6]); ctx.lineWidth=2; ctx.stroke(); ctx.setLineDash([]);
+      ctx.beginPath(); ctx.arc(260,160,45,0,Math.PI*2); ctx.fillStyle='#15803d'; ctx.fill(); ctx.lineWidth=3; ctx.strokeStyle='#fff'; ctx.stroke();
+      ctx.save(); ctx.translate(x,y); ctx.rotate(ang); ctx.fillStyle='#38bdf8'; ctx.fillRect(-14,-8,28,16); ctx.restore();
     }
-
-    function pasoMovimiento(avance, giro) {
-      ang += giro;
-      const nx = x + Math.cos(ang) * avance;
-      const ny = y + Math.sin(ang) * avance;
-      const distCentro = Math.hypot(nx - 260, ny - 160);
-      const enCalleH = ny >= 122 && ny <= 198;
-      const enCalleV = nx >= 222 && nx <= 298;
-      const enAnillo = distCentro >= 52 && distCentro <= 110;
-
-      if (nx > 15 && nx < 505 && ny > 15 && ny < 305 && (enCalleH || enCalleV || enAnillo)) {
-        x = nx; y = ny; vel = avance > 0 ? 25 : 0;
-        hud.innerText = `✅ Puntos COSEVI: ${puntos}/100 • Velocidad: ${vel} km/h • Dentro del carril reglamentario`;
-      } else {
-        puntos = Math.max(0, puntos - 2);
-        hud.innerText = `⚠️ Borde de calzada / Isla central detectada (-2 pts). Puntos: ${puntos}/100`;
-      }
-      dibujarPista();
+    function mover(av, gr) {
+      ang += gr; const nx = x + Math.cos(ang)*av, ny = y + Math.sin(ang)*av, d = Math.hypot(nx-260, ny-160);
+      if (nx>15 && nx<505 && ny>15 && ny<305 && ((ny>=122&&ny<=198) || (nx>=222&&nx<=298) || (d>=52&&d<=110))) {
+        x = nx; y = ny; hud.innerText = `✅ Puntos COSEVI: ${puntos}/100 • En carril reglamentario`;
+      } else { puntos = Math.max(0, puntos-2); hud.innerText = `⚠️ Borde de calzada detectado (-2 pts). Puntos: ${puntos}/100`; }
+      dibujar();
     }
-
-    document.getElementById('sv-up').onclick = () => pasoMovimiento(12, 0);
-    document.getElementById('sv-down').onclick = () => pasoMovimiento(-8, 0);
-    document.getElementById('sv-left').onclick = () => pasoMovimiento(4, -0.35);
-    document.getElementById('sv-right').onclick = () => pasoMovimiento(4, 0.35);
-    document.getElementById('sv-rst').onclick = () => { x = 260; y = 265; ang = 0; puntos = 100; dibujarPista(); };
-    dibujarPista();
+    document.getElementById('sv-up').onclick = () => mover(12, 0);
+    document.getElementById('sv-down').onclick = () => mover(-8, 0);
+    document.getElementById('sv-left').onclick = () => mover(4, -0.35);
+    document.getElementById('sv-right').onclick = () => mover(4, 0.35);
+    document.getElementById('sv-rst').onclick = () => { x=260; y=265; ang=0; puntos=100; dibujar(); };
+    dibujar();
   }
 
   // ============================================================================
-  // EMULADOR EXCEL (SIN CERO PEGADO) & CONSOLA CLI CIBERSEGURIDAD
+  // EMULADOR EXCEL (SIN CERO PEGADO) & CONSOLA CLI
   // ============================================================================
   function renderEmuladores(contenedor) {
     contenedor.innerHTML = `
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;">
         <div style="background:#0b1322;border:1.5px solid #10b981;border-radius:14px;padding:16px;">
           <h3 style="margin:0 0 6px;color:#34d399;">📊 Simulador Excel / Contabilidad (Sin Cero Pegado)</h3>
-          <p style="font-size:12px;color:#94a3b8;margin-bottom:10px;">Borra o escribe libremente en cualquier celda sin que se trabe un cero:</p>
+          <p style="font-size:12px;color:#94a3b8;margin-bottom:10px;">Borra o edita cualquier celda libremente sin que se trabe el número cero:</p>
           <div style="display:grid;grid-template-columns:60px 1fr 1fr;gap:6px;margin-bottom:10px;font-size:12px;">
-            <div style="font-weight:800;color:#38bdf8;">Celda</div><div style="font-weight:800;color:#38bdf8;">Detalle</div><div style="font-weight:800;color:#38bdf8;">Monto (₡)</div>
-            <div>A1</div><input value="Ventas Gravadas" style="background:#060c17;border:1px solid #334155;color:#fff;padding:6px;border-radius:6px;"/><input class="ex-val" type="text" inputmode="decimal" value="150000" placeholder="Monto limpio" style="background:#060c17;border:1px solid #38bdf8;color:#fff;padding:6px;border-radius:6px;"/>
-            <div>A2</div><input value="Servicios Web" style="background:#060c17;border:1px solid #334155;color:#fff;padding:6px;border-radius:6px;"/><input class="ex-val" type="text" inputmode="decimal" value="85000" placeholder="Monto limpio" style="background:#060c17;border:1px solid #38bdf8;color:#fff;padding:6px;border-radius:6px;"/>
-            <div>A3</div><input value="Auditoría Red" style="background:#060c17;border:1px solid #334155;color:#fff;padding:6px;border-radius:6px;"/><input class="ex-val" type="text" inputmode="decimal" value="" placeholder="Escribe monto..." style="background:#060c17;border:1px solid #38bdf8;color:#fff;padding:6px;border-radius:6px;"/>
+            <div style="font-weight:800;color:#38bdf8;">Celda</div><div style="font-weight:800;color:#38bdf8;">Cuenta</div><div style="font-weight:800;color:#38bdf8;">Monto (₡)</div>
+            <div>A1</div><input value="Ventas Gravadas" style="background:#060c17;border:1px solid #334155;color:#fff;padding:6px;border-radius:6px;"/><input class="ex-val" type="text" inputmode="decimal" value="150000" style="background:#060c17;border:1px solid #38bdf8;color:#fff;padding:6px;border-radius:6px;"/>
+            <div>A2</div><input value="Servicios Web" style="background:#060c17;border:1px solid #334155;color:#fff;padding:6px;border-radius:6px;"/><input class="ex-val" type="text" inputmode="decimal" value="85000" style="background:#060c17;border:1px solid #38bdf8;color:#fff;padding:6px;border-radius:6px;"/>
+            <div>A3</div><input value="Soporte Redes" style="background:#060c17;border:1px solid #334155;color:#fff;padding:6px;border-radius:6px;"/><input class="ex-val" type="text" inputmode="decimal" value="" placeholder="Escribe monto..." style="background:#060c17;border:1px solid #38bdf8;color:#fff;padding:6px;border-radius:6px;"/>
           </div>
           <div id="ex-res" style="background:#060c17;padding:10px;border-radius:8px;font-family:monospace;color:#34d399;font-size:12.5px;font-weight:800;">=SUMA(C1:C3): ₡235,000 | IVA 13%: ₡30,550</div>
         </div>
-
         <div style="background:#0b1322;border:1.5px solid #0284c7;border-radius:14px;padding:16px;">
-          <h3 style="margin:0 0 6px;color:#38bdf8;">💻 Terminal Interactiva CLI (Ciberseguridad, Redes y Turing)</h3>
-          <p style="font-size:12px;color:#94a3b8;margin-bottom:8px;">Comandos: <code>help</code>, <code>vlsm</code>, <code>sha256</code>, <code>nmap</code>, <code>whoami</code></p>
-          <div id="cli-out" style="background:#060c17;border:1px solid #1e293b;border-radius:8px;padding:10px;height:140px;overflow-y:auto;font-family:monospace;font-size:11.5px;color:#34d399;margin-bottom:8px;">
-            [SICAI-OS v147.0] Terminal lista. Escribe un comando abajo.
-          </div>
+          <h3 style="margin:0 0 6px;color:#38bdf8;">💻 Consola CLI Ciberseguridad & Redes</h3>
+          <div id="cli-out" style="background:#060c17;border:1px solid #1e293b;border-radius:8px;padding:10px;height:140px;overflow-y:auto;font-family:monospace;font-size:11.5px;color:#34d399;margin-bottom:8px;">[SICAI-OS v148.0] Escribe: help, vlsm, nmap o sha256</div>
           <div style="display:flex;gap:6px;">
-            <input id="cli-in" type="text" placeholder="Ej: nmap o vlsm" style="flex:1;background:#060c17;border:1px solid #38bdf8;color:#fff;padding:8px;border-radius:6px;font-family:monospace;"/>
+            <input id="cli-in" type="text" placeholder="Comando..." style="flex:1;background:#060c17;border:1px solid #38bdf8;color:#fff;padding:8px;border-radius:6px;font-family:monospace;"/>
             <button id="cli-run" style="background:#0284c7;color:#fff;border:none;padding:8px 14px;border-radius:6px;font-weight:800;cursor:pointer;">Ejecutar</button>
           </div>
         </div>
       </div>
     `;
-
-    const calcExcel = () => {
-      let suma = 0;
-      contenedor.querySelectorAll('.ex-val').forEach(i => {
-        const n = parseFloat(i.value.replace(/,/g, ''));
-        if (!isNaN(n)) suma += n;
-      });
-      document.getElementById('ex-res').innerText = `=SUMA(C1:C3): ₡${suma.toLocaleString('es-CR')} | IVA 13%: ₡${Math.round(suma * 0.13).toLocaleString('es-CR')}`;
-    };
-    contenedor.querySelectorAll('.ex-val').forEach(i => { i.oninput = calcExcel; });
-
+    contenedor.querySelectorAll('.ex-val').forEach(i => {
+      i.oninput = () => {
+        let s = 0; contenedor.querySelectorAll('.ex-val').forEach(el => { const n = parseFloat(el.value.replace(/,/g,'')); if (!isNaN(n)) s += n; });
+        document.getElementById('ex-res').innerText = `=SUMA(C1:C3): ₡${s.toLocaleString('es-CR')} | IVA 13%: ₡${Math.round(s*0.13).toLocaleString('es-CR')}`;
+      };
+    });
     document.getElementById('cli-run').onclick = async () => {
       const cmd = document.getElementById('cli-in').value.trim().toLowerCase();
       const out = document.getElementById('cli-out');
-      let resp = "Comando ejecutado.";
-      if (cmd === 'help') resp = "Comandos: help | vlsm | nmap | sha256 | whoami";
-      else if (cmd === 'vlsm') resp = "/24=254h | /25=126h | /26=62h | /27=30h | /28=14h | /29=6h | /30=2h";
-      else if (cmd === 'nmap') resp = "PORT 443/tcp OPEN (https) | TLS 1.3 Active | Firewall OK";
-      else if (cmd === 'whoami') resp = `${getSesion().nombre} (${getSesion().rol})`;
-      else if (cmd.startsWith('sha256')) resp = await sha256Hex(cmd);
-      out.innerHTML += `<div><span style="color:#38bdf8;">$ ${cmd}</span><br>${resp}</div>`;
-      out.scrollTop = out.scrollHeight;
-      ganarXP(5);
+      let r = "OK";
+      if (cmd === 'vlsm') r = "/24=254h | /25=126h | /26=62h | /27=30h | /28=14h | /29=6h | /30=2h";
+      else if (cmd === 'nmap') r = "PORT 443/tcp OPEN (TLS 1.3)";
+      else r = await sha256Hex(cmd);
+      out.innerHTML += `<div><span style="color:#38bdf8;">$ ${cmd}</span><br>${r}</div>`;
     };
   }
 
   // ============================================================================
-  // ENRUTADOR MULTI-PANTALLA PRINCIPAL (CON HISTORIAL DEL BOTÓN ATRÁS)
+  // ENRUTADOR MULTI-PANTALLA PRINCIPAL
   // ============================================================================
-  let filtroCategoria = 'todos';
-
   window.navegarVista = function (vista, param, omitirPush) {
     document.body.classList.remove('bds-ver-landing-base');
     const shell = document.getElementById('bds-app-shell');
     if (!shell) return;
 
-    if (!omitirPush) {
-      history.pushState({ vista, param }, '', `#${vista}${param ? '-' + param : ''}`);
-    }
+    if (!omitirPush) history.pushState({ vista, param }, '', `#${vista}${param ? '-' + param : ''}`);
 
     document.querySelectorAll('.bds-subnav-item, .bds-dock-btn').forEach(b => {
       b.classList.toggle('active', b.getAttribute('data-vista') === vista);
     });
 
-    if (vista === 'curso') { abrirModuloCursoInteractivo(shell, param); window.scrollTo(0, 0); return; }
-    if (vista === 'juegos') { renderSala12Juegos(shell, param || 'ajedrez'); window.scrollTo(0, 0); return; }
+    if (vista === 'ruleta') { renderRuletaDelSaberUniversal(shell); window.scrollTo(0, 0); return; }
+    if (vista === 'juegos') { renderSala13Juegos(shell, param || 'ajedrez'); window.scrollTo(0, 0); return; }
     if (vista === 'vial') { renderSimuladorVial2D(shell); window.scrollTo(0, 0); return; }
     if (vista === 'emulador') { renderEmuladores(shell); window.scrollTo(0, 0); return; }
     if (vista === 'landing_base') { document.body.classList.add('bds-ver-landing-base'); return; }
@@ -1518,26 +1840,14 @@
           <div class="bds-card-pro">
             <div>
               <h3 style="margin:0 0 6px;color:#38bdf8;">📋 Permisos y Tardías (Personal)</h3>
-              <p style="font-size:12px;color:#94a3b8;">Sincronizado con la cuenta activa de <b>${s.nombre}</b>:</p>
               <input value="${s.nombre} (${s.rol})" readonly style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;color:#fff;padding:8px;border-radius:6px;margin-bottom:8px;"/>
               <select style="width:100%;background:#060c17;border:1px solid #334155;color:#fff;padding:8px;border-radius:6px;margin-bottom:8px;">
                 <option>Cita Médica CCSS / INS</option>
                 <option>Permiso Oficial ante Dirección</option>
-                <option>Justificación de Marca de Reloj</option>
               </select>
             </div>
             <button onclick="this.innerText='✅ Boleta Firmada con SHA-256';" style="background:#059669;color:#fff;border:none;padding:10px;border-radius:7px;font-weight:800;cursor:pointer;">Emitir Boleta Oficial</button>
           </div>
-
-          <div class="bds-card-pro">
-            <div>
-              <h3 style="margin:0 0 6px;color:#34d399;">📝 Justificante de Ausencia Estudiantil</h3>
-              <p style="font-size:12px;color:#94a3b8;">Envío directo al Profesor Guía (${s.seccion}):</p>
-              <textarea rows="3" placeholder="Detalle médico o justificación del encargado legal..." style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;color:#fff;padding:8px;border-radius:6px;margin-bottom:8px;"></textarea>
-            </div>
-            <button onclick="this.innerText='✅ Enviado a Profesor Guía';" style="background:#0284c7;color:#fff;border:none;padding:10px;border-radius:7px;font-weight:800;cursor:pointer;">Enviar Justificante</button>
-          </div>
-
           <div class="bds-card-pro" style="text-align:center;">
             <h3 style="margin:0 0 6px;color:#fbbf24;">📱 Carné Institucional QR SHA-256</h3>
             <div style="font-size:13px;font-weight:800;color:#fff;">${s.nombre}</div>
@@ -1552,97 +1862,56 @@
       return;
     }
 
-    if (vista === 'admision') filtroCategoria = 'admision';
-    else if (vista === 'inicio') filtroCategoria = 'todos';
-
-    function renderCatalogo(textoBusqueda) {
-      const q = (textoBusqueda || '').toLowerCase().trim();
-      const filtrados = CATALOGO_EDUCATIVO.filter(item => {
-        const pasaCat = filtroCategoria === 'todos' || item.cat === filtroCategoria;
-        const pasaTxt = !q || item.titulo.toLowerCase().includes(q) || item.desc.toLowerCase().includes(q);
-        return pasaCat && pasaTxt;
-      });
-
-      const xpObj = getXP();
-      shell.innerHTML = `
-        <div style="background:linear-gradient(135deg,#0f2942 0%,#0b1322 100%);border:1px solid #0284c7;border-radius:14px;padding:14px;margin-bottom:12px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-            <div>
-              <span style="background:#10b981;color:#022c22;font-size:10px;font-weight:900;padding:3px 8px;border-radius:5px;">RANGO: ${xpObj.nivel.toUpperCase()}</span>
-              <h2 style="margin:6px 0 2px;font-size:18px;color:#fff;">Centro de Estudio Gamificado, Admisión UCR/TEC y 12 Juegos</h2>
-              <div style="font-size:11.5px;color:#38bdf8;display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;">
-                ${(xpObj.medallas || []).map(med => `<span style="background:#131f33;border:1px solid #26354d;padding:2px 8px;border-radius:99px;">${med}</span>`).join('')}
-              </div>
-            </div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;">
-              <button onclick="navegarVista('curso','adm_ucr_una')" style="background:#f59e0b;color:#020617;border:none;padding:9px 13px;border-radius:8px;font-size:11.5px;font-weight:900;cursor:pointer;">🔥 Reto Diario UCR/TEC (+50 XP)</button>
-              <button onclick="navegarVista('juegos','domino')" style="background:#7c3aed;color:#fff;border:none;padding:9px 13px;border-radius:8px;font-size:11.5px;font-weight:900;cursor:pointer;">🁣 Dominó & Solitario</button>
-            </div>
+    // VISTA DE INICIO: PANEL PRINCIPAL CON ACCESO DIRECTO A LA RULETA DEL SABER Y TODOS LOS BLOQUES
+    const itemsBanco = obtenerBancoRuleta();
+    const xpObj = getXP();
+    shell.innerHTML = `
+      <div style="background:linear-gradient(135deg,#1e1b4b 0%,#0b1322 100%);border:1.5px solid #6366f1;border-radius:16px;padding:16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <img src="${SVG_BUHO_ORIGINAL}" width="48" height="48" alt="Búho Azul Original"/>
+          <div>
+            <span style="background:#10b981;color:#022c22;font-size:10px;font-weight:900;padding:3px 8px;border-radius:5px;">RANGO: ${xpObj.nivel.toUpperCase()}</span>
+            <h2 style="margin:4px 0 2px;font-size:18px;color:#fff;">¡Bienvenido a pracTICAtecnica.com — Ecosistema CTP Mercedes Norte!</h2>
+            <p style="margin:0;font-size:12px;color:#cbd5e1;">Gira la <b>Ruleta del Saber</b> en todas las materias, entrena para la <b>Prueba MOPT</b>, domina <b>Excel</b> o juega <b>Ajedrez FIDE, Dominó y Solitario</b>.</p>
           </div>
         </div>
-
-        <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px;align-items:center;">
-          <input id="cat-search" type="search" value="${textoBusqueda||''}" placeholder="🔍 Buscar UCR, TEC, Español, Química, Redes, Ciberseguridad..." style="flex:1;min-width:210px;background:#0b1322;border:1.5px solid #38bdf8;color:#fff;padding:10px 13px;border-radius:10px;font-size:13px;"/>
-          <button data-f="todos" class="btn-f-cat" style="padding:9px 12px;border-radius:8px;border:1px solid #334155;background:${filtroCategoria==='todos'?'#0284c7':'#131f33'};color:#fff;font-size:11.5px;font-weight:800;cursor:pointer;">📚 Todo (${CATALOGO_EDUCATIVO.length})</button>
-          <button data-f="admision" class="btn-f-cat" style="padding:9px 12px;border-radius:8px;border:1px solid #334155;background:${filtroCategoria==='admision'?'#0284c7':'#131f33'};color:#fff;font-size:11.5px;font-weight:800;cursor:pointer;">🏛️ UCR / TEC / UNA / UNED</button>
-          <button data-f="basica" class="btn-f-cat" style="padding:9px 12px;border-radius:8px;border:1px solid #334155;background:${filtroCategoria==='basica'?'#0284c7':'#131f33'};color:#fff;font-size:11.5px;font-weight:800;cursor:pointer;">📖 Básicas MEP</button>
-          <button data-f="ctp" class="btn-f-cat" style="padding:9px 12px;border-radius:8px;border:1px solid #334155;background:${filtroCategoria==='ctp'?'#0284c7':'#131f33'};color:#fff;font-size:11.5px;font-weight:800;cursor:pointer;">💻 Especialidades CTP</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button onclick="navegarVista('ruleta')" style="background:linear-gradient(90deg,#4f46e5,#7c3aed);color:#fff;border:none;padding:10px 16px;border-radius:10px;font-size:12.5px;font-weight:900;cursor:pointer;box-shadow:0 4px 14px rgba(79,70,229,0.5);">🎡 Abrir Ruleta del Saber (${itemsBanco.length} Ítems)</button>
+          <button onclick="navegarVista('juegos','ajedrez')" style="background:#0284c7;color:#fff;border:none;padding:10px 14px;border-radius:10px;font-size:12.5px;font-weight:900;cursor:pointer;">♟️ Ajedrez & 13 Juegos</button>
         </div>
+      </div>
 
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:12px;">
-          ${filtrados.map(m => `
-            <div class="bds-card-pro">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:12px;">
+        ${RULETA_SECTORES.map(sec => {
+          const count = itemsBanco.filter(i => i.subject === sec.id).length;
+          return `
+            <div class="bds-card-pro" style="border-top:4px solid ${sec.color};">
               <div>
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-                  <span style="font-size:24px;">${m.icono}</span>
-                  <span style="font-size:10px;background:#131f33;color:#38bdf8;border:1px solid #26354d;padding:3px 8px;border-radius:5px;font-weight:800;">${m.niveles} • ${m.preguntas.length} Ítems</span>
+                  <span style="background:${sec.color};color:#fff;font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:99px;">${sec.short}</span>
+                  <span style="font-size:11px;color:#38bdf8;font-weight:800;">${count} preguntas</span>
                 </div>
-                <h3 style="margin:0 0 6px;font-size:15px;color:#fff;">${m.titulo}</h3>
-                <p style="margin:0 0 12px;font-size:12px;color:#94a3b8;line-height:1.45;">${m.desc}</p>
+                <h3 style="margin:0 0 6px;font-size:15.5px;color:#fff;">${sec.name}</h3>
+                <p style="margin:0 0 12px;font-size:12px;color:#94a3b8;line-height:1.45;">Incluye jerarquía MEP (Especialidad > Subárea > Nivel > Unidad), modo ruleta con tiempo y explicación paso a paso.</p>
               </div>
-              <button data-cid="${m.id}" class="btn-abrir-curso" style="width:100%;background:#0284c7;color:#fff;border:none;padding:10px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;min-height:42px;">
-                🎯 Abrir Manual & Simulacro Explicado →
+              <button onclick="navegarVista('ruleta')" style="width:100%;background:#131f33;color:#fff;border:1px solid ${sec.color};padding:9px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">
+                🎡 Jugar en la Ruleta del Saber →
               </button>
             </div>
-          `).join('')}
-        </div>
-      `;
-
-      const inputS = document.getElementById('cat-search');
-      inputS.oninput = (e) => {
-        const val = e.target.value;
-        renderCatalogo(val);
-        const nuevoIn = document.getElementById('cat-search');
-        nuevoIn.focus(); nuevoIn.setSelectionRange(val.length, val.length);
-      };
-
-      shell.querySelectorAll('.btn-f-cat').forEach(b => {
-        b.onclick = () => { filtroCategoria = b.getAttribute('data-f'); renderCatalogo(inputS.value); };
-      });
-
-      shell.querySelectorAll('.btn-abrir-curso').forEach(b => {
-        b.onclick = () => navegarVista('curso', b.getAttribute('data-cid'));
-      });
-    }
-
-    renderCatalogo('');
+          `;
+        }).join('')}
+      </div>
+    `;
   };
 
   window.addEventListener('popstate', (e) => {
-    if (e.state && e.state.vista) {
-      navegarVista(e.state.vista, e.state.param, true);
-    } else if (getSesion()) {
-      navegarVista('inicio', null, true);
-    }
+    if (e.state && e.state.vista) navegarVista(e.state.vista, e.state.param, true);
+    else if (getSesion()) navegarVista('inicio', null, true);
   });
 
-  // ============================================================================
-  // MENÚ HAMBURGUESA CATEGORIZADO (OPTIMIZADO PARA CELULAR PEQUEÑO)
-  // ============================================================================
   function abrirMenuHamburguesaMovil() {
     let old = document.getElementById('bds-slide-drawer');
     if (old) { old.remove(); return; }
-
     const s = getSesion();
     const drw = document.createElement('div');
     drw.id = 'bds-slide-drawer';
@@ -1650,26 +1919,17 @@
     drw.innerHTML = `
       <div style="width:310px;max-width:86vw;background:#0b1322;border-right:2px solid #0284c7;height:100%;padding:16px;box-sizing:border-box;overflow-y:auto;display:flex;flex-direction:column;gap:7px;">
         <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1e293b;padding-bottom:10px;">
-          <b style="color:#38bdf8;font-size:14.5px;">☰ Navegación Rápida</b>
+          <b style="color:#38bdf8;font-size:14.5px;">☰ Menú pracTICAtecnica</b>
           <button id="drw-close" style="background:#7f1d1d;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-weight:800;">Cerrar ✕</button>
         </div>
-        <div style="font-size:11.5px;color:#cbd5e1;padding:6px 0;border-bottom:1px solid #1e293b;">
-          👤 <b>${s.nombre}</b><br><span style="color:#34d399;">${s.rol} • ${s.seccion}</span>
-        </div>
-
-        <div style="font-size:10.5px;font-weight:900;color:#94a3b8;margin-top:4px;">JUEGOS & SIMULADORES</div>
-        <button class="drw-it" data-v="juegos" data-p="ajedrez" style="text-align:left;background:#7c3aed;color:#fff;border:none;padding:10px;border-radius:8px;font-weight:800;cursor:pointer;">♟️ Ajedrez FIDE (Intacto)</button>
+        <button class="drw-it" data-v="ruleta" style="text-align:left;background:linear-gradient(90deg,#4f46e5,#7c3aed);color:#fff;border:none;padding:11px;border-radius:8px;font-weight:900;cursor:pointer;">🎡 Ruleta del Saber & Banco MEP</button>
+        <button class="drw-it" data-v="inicio" style="text-align:left;background:#131f33;color:#fff;border:1px solid #26354d;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">🏠 Panel de 10 Áreas y Especialidades</button>
+        <button class="drw-it" data-v="juegos" data-p="ajedrez" style="text-align:left;background:#131f33;color:#fff;border:1px solid #26354d;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">♟️ Ajedrez FIDE (Intacto)</button>
         <button class="drw-it" data-v="juegos" data-p="domino" style="text-align:left;background:#131f33;color:#fff;border:1px solid #26354d;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">🁣 Dominó Doble-6 Pro</button>
-        <button class="drw-it" data-v="juegos" data-p="solitario" style="text-align:left;background:#131f33;color:#fff;border:1px solid #26354d;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">🃏 Solitario Dual (Pirámide / Escalera)</button>
+        <button class="drw-it" data-v="juegos" data-p="solitario" style="text-align:left;background:#131f33;color:#fff;border:1px solid #26354d;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">🃏 Solitario Matemático</button>
         <button class="drw-it" data-v="vial" style="text-align:left;background:#131f33;color:#fff;border:1px solid #26354d;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">🚗 Simulador Vial 2D COSEVI</button>
         <button class="drw-it" data-v="emulador" style="text-align:left;background:#131f33;color:#fff;border:1px solid #26354d;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">📊 Simulador Excel & Consola CLI</button>
-
-        <div style="font-size:10.5px;font-weight:900;color:#94a3b8;margin-top:6px;">ADMISIÓN & MATERIAS</div>
-        <button class="drw-it" data-v="curso" data-p="adm_ucr_una" style="text-align:left;background:#131f33;color:#38bdf8;border:1px solid #26354d;padding:10px;border-radius:8px;font-weight:800;cursor:pointer;">🏛️ Simulacro PAA UCR / UNA (800 pts)</button>
-        <button class="drw-it" data-v="curso" data-p="adm_tec" style="text-align:left;background:#131f33;color:#38bdf8;border:1px solid #26354d;padding:10px;border-radius:8px;font-weight:800;cursor:pointer;">⚙️ Simulacro Admisión TEC (800 pts)</button>
-        <button class="drw-it" data-v="inicio" style="text-align:left;background:#131f33;color:#fff;border:1px solid #26354d;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">📚 Todas las Materias y Especialidades</button>
-        <button class="drw-it" data-v="gestion" style="text-align:left;background:#131f33;color:#fff;border:1px solid #26354d;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">📋 Permisos, Tardías y Carné QR</button>
-
+        <button class="drw-it" data-v="gestion" style="text-align:left;background:#131f33;color:#fff;border:1px solid #26354d;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">📋 Permisos y Carné QR SHA-256</button>
         <button id="drw-logout" style="margin-top:auto;background:#7f1d1d;color:#fecaca;border:none;padding:11px;border-radius:8px;font-weight:800;cursor:pointer;">🚪 Cerrar Sesión Segura</button>
       </div>
     `;
@@ -1677,18 +1937,10 @@
     document.getElementById('drw-close').onclick = () => drw.remove();
     document.getElementById('drw-logout').onclick = () => { drw.remove(); cerrarSesionTotal(); };
     drw.querySelectorAll('.drw-it').forEach(b => {
-      b.onclick = () => {
-        const v = b.getAttribute('data-v');
-        const p = b.getAttribute('data-p');
-        drw.remove();
-        navegarVista(v, p);
-      };
+      b.onclick = () => { drw.remove(); navegarVista(b.getAttribute('data-v'), b.getAttribute('data-p')); };
     });
   }
 
-  // ============================================================================
-  // ACTIVACIÓN DE LA PLATAFORMA AUTENTICADA MULTI-DISPOSITIVO
-  // ============================================================================
   function activarPlataformaAutenticada() {
     const s = getSesion();
     if (!s) { mostrarLoginEstricto('login'); return; }
@@ -1705,7 +1957,7 @@
     hdr.innerHTML = `
       <div style="display:flex;align-items:center;gap:8px;">
         <button id="btn-hamburger-pro" aria-label="Abrir Menú" style="background:#0284c7;color:#fff;border:none;min-width:40px;height:40px;border-radius:8px;font-size:19px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;">☰</button>
-        <img src="${SVG_CTP}" alt="CTP" style="height:32px;width:32px;"/>
+        <img src="${SVG_BUHO_ORIGINAL}" alt="Búho Azul" style="height:34px;width:34px;"/>
         <div>
           <div style="font-size:13.5px;font-weight:900;color:#fff;display:flex;align-items:center;gap:5px;">
             <span>prac<span style="color:#0ea5e9;">TICA</span>tecnica.com</span>
@@ -1719,7 +1971,7 @@
 
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
         <span id="bds-xp-counter" style="background:#131f33;border:1px solid #fbbf24;color:#fbbf24;padding:5px 9px;border-radius:7px;font-size:11px;font-weight:800;">🔥 ${xpObj.racha}d | ⚡ ${xpObj.xp} XP</span>
-        <button id="btn-top-games" style="background:#7c3aed;color:#fff;border:none;padding:8px 11px;border-radius:7px;font-size:11.5px;font-weight:900;cursor:pointer;">🎮 12 Juegos</button>
+        <button id="btn-top-ruleta" style="background:linear-gradient(90deg,#4f46e5,#7c3aed);color:#fff;border:none;padding:8px 11px;border-radius:7px;font-size:11.5px;font-weight:900;cursor:pointer;">🎡 Ruleta del Saber</button>
         <button id="btn-top-logout" style="background:#7f1d1d;color:#fecaca;border:none;padding:8px 10px;border-radius:7px;font-size:11px;font-weight:800;cursor:pointer;">Salir</button>
       </div>
     `;
@@ -1727,12 +1979,12 @@
     const sub = document.createElement('div');
     sub.id = 'bds-subheader-nav';
     const NAV_ITEMS = [
-      { v: 'inicio', label: '🏠 1. Materias & Especialidades' },
-      { v: 'admision', label: '🏛️ 2. UCR / TEC / UNA / UNED' },
-      { v: 'juegos', label: '🎮 3. 12 Juegos (Ajedrez, Dominó, Solitario)' },
+      { v: 'ruleta', label: '🎡 1. Ruleta del Saber & Banco MEP' },
+      { v: 'inicio', label: '🏠 2. Todas las Materias y Especialidades' },
+      { v: 'juegos', label: '🎮 3. 13 Juegos (Ajedrez, Dominó, Solitario)' },
       { v: 'vial', label: '🚗 4. Simulador Vial 2D' },
-      { v: 'emulador', label: '📊 5. Excel & CLI' },
-      { v: 'gestion', label: '📋 6. Permisos & QR' }
+      { v: 'emulador', label: '📊 5. Simulador Excel & CLI' },
+      { v: 'gestion', label: '📋 6. Permisos & Carné QR' }
     ];
     sub.innerHTML = NAV_ITEMS.map(m => `<button data-vista="${m.v}" class="bds-subnav-item">${m.label}</button>`).join('');
 
@@ -1742,9 +1994,9 @@
     const dock = document.createElement('nav');
     dock.id = 'bds-mobile-dock';
     dock.innerHTML = `
-      <button class="bds-dock-btn active" data-vista="inicio"><span style="font-size:17px;">📚</span><span>Materias</span></button>
-      <button class="bds-dock-btn" data-vista="admision"><span style="font-size:17px;">🏛️</span><span>UCR/TEC</span></button>
-      <button class="bds-dock-btn" data-vista="juegos"><span style="font-size:17px;">🎮</span><span>12 Juegos</span></button>
+      <button class="bds-dock-btn active" data-vista="ruleta"><span style="font-size:17px;">🎡</span><span>Ruleta</span></button>
+      <button class="bds-dock-btn" data-vista="inicio"><span style="font-size:17px;">📚</span><span>Materias</span></button>
+      <button class="bds-dock-btn" data-vista="juegos"><span style="font-size:17px;">🎮</span><span>13 Juegos</span></button>
       <button class="bds-dock-btn" data-vista="vial"><span style="font-size:17px;">🚗</span><span>Vial 2D</span></button>
       <button class="bds-dock-btn" id="dock-menu-more"><span style="font-size:17px;">☰</span><span>Menú</span></button>
     `;
@@ -1756,7 +2008,7 @@
 
     document.getElementById('btn-hamburger-pro').onclick = abrirMenuHamburguesaMovil;
     document.getElementById('dock-menu-more').onclick = abrirMenuHamburguesaMovil;
-    document.getElementById('btn-top-games').onclick = () => navegarVista('juegos', 'ajedrez');
+    document.getElementById('btn-top-ruleta').onclick = () => navegarVista('ruleta');
     document.getElementById('btn-top-logout').onclick = () => cerrarSesionTotal();
 
     document.querySelectorAll('[data-vista]').forEach(b => {
@@ -1764,10 +2016,10 @@
     });
 
     iniciarObservadorSoberano();
-    navegarVista('inicio', null, true);
+    navegarVista('ruleta', null, true);
   }
 
-  window.abrirCentroMaestroBDS = function (mod, sub) { navegarVista(mod || 'juegos', sub || 'ajedrez'); };
+  window.abrirCentroMaestroBDS = function (mod, sub) { navegarVista(mod || 'ruleta', sub); };
   window.abrirSalaJuegosHD = function (juego) { navegarVista('juegos', juego || 'ajedrez'); };
 
   window.addEventListener('DOMContentLoaded', () => {

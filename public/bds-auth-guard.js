@@ -1,5 +1,5 @@
 (function () {
-  const SESSION_KEY = "bds_auth_gate_v136_final";
+  const SESSION_KEY = "bds_auth_gate_v137_mobile_sync";
   const NIVELES = [7, 8, 9, 10, 11, 12];
   const SECCIONES_COLEGIO = [];
   NIVELES.forEach(niv => { [1, 2, 3, 4].forEach(grp => SECCIONES_COLEGIO.push(`${niv}-${grp}`)); });
@@ -40,81 +40,85 @@
   }
 
   function inyectarCSSGate() {
-    if (document.getElementById('bds-v136-css')) return;
+    if (document.getElementById('bds-v137-css')) return;
     const st = document.createElement('style');
-    st.id = 'bds-v136-css';
+    st.id = 'bds-v137-css';
     st.innerHTML = `
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-      html, body { font-family: 'Inter', system-ui, sans-serif !important; background: #060c17 !important; color: #f8fafc !important; margin: 0; padding: 0; }
+      html, body { font-family: 'Inter', system-ui, sans-serif !important; background: #060c17 !important; color: #f8fafc !important; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
       body:not(.bds-authenticated) #root { display: none !important; }
       #bds-soberana-bar, #bds-top-dock, #bds-fab-launcher, #bds-drawer-panel { display: none !important; }
       #bds-pro-header {
         position: sticky; top: 0; left: 0; right: 0; z-index: 99990;
         background: #0b1322; border-bottom: 1px solid #1e293b;
-        padding: 10px 18px; display: flex; align-items: center; justify-content: space-between;
-        flex-wrap: wrap; gap: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+        padding: 8px 12px; display: flex; align-items: center; justify-content: space-between;
+        flex-wrap: wrap; gap: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.6);
       }
       #bds-subheader-nav {
         background: #0f172a; border-bottom: 1px solid #1e293b;
-        padding: 8px 16px; display: flex; align-items: center; gap: 8px;
-        overflow-x: auto; white-space: nowrap;
+        padding: 6px 12px; display: flex; align-items: center; gap: 6px;
+        overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch;
       }
       .bds-subnav-item {
         background: #131f33; border: 1px solid #1e293b; color: #cbd5e1;
-        padding: 7px 13px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;
+        padding: 6px 11px; border-radius: 6px; font-size: 11.5px; font-weight: 600; cursor: pointer; flex-shrink: 0;
       }
       .bds-subnav-item:hover { background: #0284c7; border-color: #0284c7; color: #fff; }
+      @media (max-width: 768px) {
+        #bds-pro-header { padding: 6px 10px; font-size: 12px; }
+        .bds-subnav-item { padding: 5px 9px; font-size: 11px; }
+      }
     `;
     document.head.appendChild(st);
   }
 
   window.mostrarLoginEstricto = function () {
     inyectarCSSGate();
-    let old = document.getElementById('bds-login-v136');
+    let old = document.getElementById('bds-login-v137');
     if (old) old.remove();
 
     const gate = document.createElement('div');
-    gate.id = 'bds-login-v136';
-    gate.style.cssText = 'position:fixed;inset:0;background:#060c17;z-index:300000;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;';
+    gate.id = 'bds-login-v137';
+    gate.style.cssText = 'position:fixed;inset:0;background:#060c17;z-index:300000;display:flex;align-items:center;justify-content:center;padding:14px;overflow-y:auto;';
 
     gate.innerHTML = `
-      <div style="background:#0b1322;border:1.5px solid #0ea5e9;border-radius:14px;max-width:420px;width:100%;padding:28px;box-shadow:0 24px 60px rgba(0,0,0,0.95);box-sizing:border-box;">
-        <div style="display:flex;justify-content:center;align-items:center;gap:12px;margin-bottom:14px;">
-          <img src="${SVG_CTP}" width="48" height="48" alt="CTP"/>
-          <img src="${SVG_MEP}" height="42" alt="MEP" style="border-radius:6px;"/>
+      <div style="background:#0b1322;border:1.5px solid #0ea5e9;border-radius:14px;max-width:400px;width:100%;padding:24px;box-shadow:0 24px 60px rgba(0,0,0,0.95);box-sizing:border-box;">
+        <div style="display:flex;justify-content:center;align-items:center;gap:12px;margin-bottom:12px;">
+          <img src="${SVG_CTP}" width="44" height="44" alt="CTP"/>
+          <img src="${SVG_MEP}" height="38" alt="MEP" style="border-radius:6px;"/>
         </div>
-        <div style="text-align:center;margin-bottom:18px;">
-          <h1 style="margin:0;font-size:21px;font-weight:800;color:#fff;">prac<span style="color:#0ea5e9;">TICA</span>tecnica.com</h1>
-          <p style="margin:4px 0 0;font-size:11.5px;color:#94a3b8;">Calidad Total Industrial • CTP Mercedes Norte</p>
+        <div style="text-align:center;margin-bottom:16px;">
+          <h1 style="margin:0;font-size:20px;font-weight:800;color:#fff;">prac<span style="color:#0ea5e9;">TICA</span>tecnica.com</h1>
+          <p style="margin:4px 0 0;font-size:11px;color:#94a3b8;">Sincronización Móvil & Calidad Total • CTP Mercedes Norte</p>
         </div>
 
-        <div id="auth-error-msg" style="display:none;background:#450a0a;color:#fca5a5;padding:8px;border-radius:6px;font-size:11.5px;margin-bottom:10px;text-align:center;font-weight:700;"></div>
+        <div id="auth-error-msg" style="display:none;background:#450a0a;color:#fca5a5;padding:8px;border-radius:6px;font-size:11px;margin-bottom:10px;text-align:center;font-weight:700;"></div>
 
-        <form id="f-login-v136" style="display:flex;flex-direction:column;gap:10px;">
+        <form id="f-login-v137" style="display:flex;flex-direction:column;gap:9px;">
           <div>
-            <label style="display:block;font-size:11px;color:#94a3b8;margin-bottom:3px;">Correo Gmail / MEP:</label>
-            <input id="lg-mail" type="email" placeholder="tucorreo@gmail.com o @est.mep.go.cr" required autofocus style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:6px;padding:10px;color:#fff;font-size:13px;"/>
+            <label style="display:block;font-size:10.5px;color:#94a3b8;margin-bottom:2px;">Correo Gmail / MEP:</label>
+            <input id="lg-mail" type="email" placeholder="tucorreo@gmail.com o @est.mep.go.cr" required autofocus style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:6px;padding:9px;color:#fff;font-size:12.5px;"/>
           </div>
           <div>
-            <label style="display:block;font-size:11px;color:#94a3b8;margin-bottom:3px;">Nombre y Apellidos:</label>
-            <input id="lg-nom" type="text" placeholder="Escribe tu nombre completo" required style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:6px;padding:10px;color:#fff;font-size:13px;"/>
+            <label style="display:block;font-size:10.5px;color:#94a3b8;margin-bottom:2px;">Nombre y Apellidos:</label>
+            <input id="lg-nom" type="text" placeholder="Escribe tu nombre completo" required style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:6px;padding:9px;color:#fff;font-size:12.5px;"/>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">
             <div>
-              <label style="display:block;font-size:10px;color:#94a3b8;margin-bottom:2px;">Rol Institucional:</label>
-              <select id="lg-rol" style="width:100%;background:#060c17;border:1px solid #334155;border-radius:6px;padding:9px;color:#fff;font-size:12px;">
+              <label style="display:block;font-size:10px;color:#94a3b8;margin-bottom:2px;">Rol:</label>
+              <select id="lg-rol" style="width:100%;background:#060c17;border:1px solid #334155;border-radius:6px;padding:8px;color:#fff;font-size:11.5px;">
                 ${ROLES_INSTITUCIONALES.map(r => `<option value="${r}">${r}</option>`).join('')}
               </select>
             </div>
             <div>
-              <label style="display:block;font-size:10px;color:#94a3b8;margin-bottom:2px;">Sección (7-1 a 12-4):</label>
-              <select id="lg-sec" style="width:100%;background:#060c17;border:1px solid #334155;border-radius:6px;padding:9px;color:#fff;font-size:12px;">
+              <label style="display:block;font-size:10px;color:#94a3b8;margin-bottom:2px;">Sección:</label>
+              <select id="lg-sec" style="width:100%;background:#060c17;border:1px solid #334155;border-radius:6px;padding:8px;color:#fff;font-size:11.5px;">
                 ${SECCIONES_COLEGIO.map(sc => `<option value="${sc}" ${sc==='11-1'?'selected':''}>Sección ${sc}</option>`).join('')}
               </select>
             </div>
           </div>
-          <button type="submit" style="margin-top:8px;background:#ffffff;color:#0f172a;border:1px solid #cbd5e1;padding:11px;border-radius:8px;font-size:13.5px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 12px rgba(0,0,0,0.3);">
-            ${GOOGLE_SVG} <span>Autenticar con Google Auth</span>
+          <button type="submit" style="margin-top:6px;background:#ffffff;color:#0f172a;border:1px solid #cbd5e1;padding:10px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 12px rgba(0,0,0,0.3);">
+            ${GOOGLE_SVG} <span>Iniciar Sesión Sincronizada</span>
           </button>
         </form>
       </div>
@@ -122,7 +126,7 @@
 
     document.body.appendChild(gate);
 
-    document.getElementById('f-login-v136').onsubmit = (e) => {
+    document.getElementById('f-login-v137').onsubmit = (e) => {
       e.preventDefault();
       const mail = document.getElementById('lg-mail').value.trim();
       const nom = document.getElementById('lg-nom').value.trim();
@@ -140,10 +144,11 @@
       
       if (!esMax && mail.toLowerCase().includes('max')) {
         errBox.style.display = 'block';
-        errBox.innerText = "🚫 Acceso denegado: Intento de suplantación de SuperAdmin.";
+        errBox.innerText = "🚫 Acceso denegado: Intento de suplantación.";
         return;
       }
 
+      // Sincronización automática de datos del usuario activo para formularios
       setSesion({
         id: esMax ? 'SUPERADMIN-MAX' : ('ID-' + secSel),
         nombre: esMax ? 'Ing. Max Salazar Sánchez' : (nom || 'Usuario'),
@@ -164,8 +169,8 @@
     let jSel = juegoInicial || 'ajedrez';
     const modal = document.createElement('div');
     modal.id = 'bds-mega-modal';
-    modal.style.cssText = 'position:fixed;top:92px;left:0;right:0;bottom:0;background:#060c17;z-index:99995;overflow-y:auto;padding:16px;font-family:Inter,system-ui,sans-serif;color:#f8fafc;box-sizing:border-box;';
-    modal.innerHTML = `<div style="max-width:1160px;margin:0 auto;background:#0b1322;border:1.5px solid #7c3aed;border-radius:14px;padding:20px;"><button onclick="document.getElementById('bds-mega-modal').remove()" style="background:#7f1d1d;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;float:right;">Cerrar</button><h2 style="color:#fff;margin:0;">Sala de Arcadias Calidad Total</h2></div>`;
+    modal.style.cssText = 'position:fixed;top:84px;left:0;right:0;bottom:0;background:#060c17;z-index:99995;overflow-y:auto;padding:12px;font-family:Inter,system-ui,sans-serif;color:#f8fafc;box-sizing:border-box;';
+    modal.innerHTML = `<div style="max-width:1100px;margin:0 auto;background:#0b1322;border:1.5px solid #7c3aed;border-radius:12px;padding:16px;"><button onclick="document.getElementById('bds-mega-modal').remove()" style="background:#7f1d1d;color:#fff;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;float:right;font-size:11px;">Cerrar ✕</button><h3 style="color:#fff;margin:0 0 12px;font-size:16px;">Sala de Arcadias y Simuladores • CTPMN</h3><p style="color:#94a3b8;font-size:12px;">Módulos interactivos sincronizados para dispositivos móviles y escritorio.</p></div>`;
     document.body.appendChild(modal);
   };
 
@@ -179,26 +184,26 @@
     const hdr = document.createElement('div');
     hdr.id = 'bds-pro-header';
     hdr.innerHTML = `
-      <div style="display:flex;align-items:center;gap:10px;">
-        <img src="${SVG_MEP}" alt="MEP" style="height:36px;width:auto;border-radius:6px;"/>
-        <img src="${SVG_CTP}" alt="CTP" style="height:36px;width:36px;"/>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <img src="${SVG_MEP}" alt="MEP" style="height:32px;width:auto;border-radius:5px;"/>
+        <img src="${SVG_CTP}" alt="CTP" style="height:32px;width:32px;"/>
         <div>
-          <div style="font-size:14.5px;font-weight:800;color:#fff;">
+          <div style="font-size:13.5px;font-weight:800;color:#fff;">
             prac<span style="color:#0ea5e9;">TICA</span>tecnica.com
-            ${esMaxReal ? `<span style="background:#f59e0b;color:#020617;font-size:10px;font-weight:900;padding:2px 7px;border-radius:4px;margin-left:6px;">SUPERADMIN SOBERANO</span>` : ''}
+            ${esMaxReal ? `<span style="background:#f59e0b;color:#020617;font-size:9.5px;font-weight:900;padding:2px 5px;border-radius:3px;margin-left:5px;">SUPERADMIN</span>` : ''}
           </div>
-          <div style="font-size:11px;color:#38bdf8;">
-            <b>${s.nombre} (${s.email})</b> • Rol: <b>${s.rol}</b> • Sección: <b style="color:#34d399;">Sección ${s.seccion}</b>
+          <div style="font-size:10px;color:#38bdf8;">
+            <b>${s.nombre} (${s.email})</b> • <b>${s.rol}</b> • <b style="color:#34d399;">Sección ${s.seccion}</b>
           </div>
         </div>
       </div>
 
-      <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
-        <button id="btn-top-games" style="background:#7c3aed;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:12.5px;font-weight:900;cursor:pointer;box-shadow:0 0 12px rgba(124,58,237,0.5);">
-          🎮 Sala de 10 Juegos Pro
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+        <button id="btn-top-games" style="background:#7c3aed;color:#fff;border:none;padding:7px 11px;border-radius:7px;font-size:11.5px;font-weight:900;cursor:pointer;">
+          🎮 Juegos
         </button>
-        <button id="btn-top-logout" style="background:#7f1d1d;color:#fecaca;border:none;padding:8px 11px;border-radius:8px;font-size:11.5px;font-weight:700;cursor:pointer;">
-          Cerrar sesión
+        <button id="btn-top-logout" style="background:#7f1d1d;color:#fecaca;border:none;padding:7px 10px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;">
+          Salir
         </button>
       </div>
     `;
@@ -206,8 +211,8 @@
     const sub = document.createElement('div');
     sub.id = 'bds-subheader-nav';
     const MODS = [
-      { id: 'juegos', label: '1. 🎮 Sala de 10 Juegos' },
-      { id: 'vial', label: '2. 🚗 Simulador Manejo 2D' }
+      { id: 'juegos', label: '1. 🎮 Sala de Juegos Pro' },
+      { id: 'vial', label: '2. 🚗 Simulador Vial 2D' }
     ];
     sub.innerHTML = MODS.map(m => `<button data-mod="${m.id}" class="bds-subnav-item">${m.label}</button>`).join('');
 

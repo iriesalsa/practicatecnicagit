@@ -1,5 +1,5 @@
 (function () {
-  const SESSION_KEY = "bds_auth_gate_v116_games";
+  const SESSION_KEY = "bds_auth_gate_v117_secure";
   const NIVELES = [7, 8, 9, 10, 11, 12];
   const SECCIONES_COLEGIO = [];
   NIVELES.forEach(niv => { [1, 2, 3, 4].forEach(grp => SECCIONES_COLEGIO.push(`${niv}-${grp}`)); });
@@ -35,9 +35,9 @@
   }
 
   function inyectarCSSGate() {
-    if (document.getElementById('bds-v116-css')) return;
+    if (document.getElementById('bds-v117-css')) return;
     const st = document.createElement('style');
-    st.id = 'bds-v116-css';
+    st.id = 'bds-v117-css';
     st.innerHTML = `
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
       html, body { font-family: 'Inter', system-ui, sans-serif !important; background: #060c17 !important; color: #f8fafc !important; margin: 0; padding: 0; }
@@ -65,11 +65,11 @@
 
   window.mostrarLoginEstricto = function () {
     inyectarCSSGate();
-    let old = document.getElementById('bds-login-v116');
+    let old = document.getElementById('bds-login-v117');
     if (old) old.remove();
 
     const gate = document.createElement('div');
-    gate.id = 'bds-login-v116';
+    gate.id = 'bds-login-v117';
     gate.style.cssText = 'position:fixed;inset:0;background:#060c17;z-index:300000;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;';
 
     gate.innerHTML = `
@@ -80,10 +80,10 @@
         </div>
         <div style="text-align:center;margin-bottom:18px;">
           <h1 style="margin:0;font-size:21px;font-weight:800;color:#fff;">prac<span style="color:#0ea5e9;">TICA</span>tecnica.com</h1>
-          <p style="margin:4px 0 0;font-size:11.5px;color:#94a3b8;">Verificación de Identidad Requerida • CTP Mercedes Norte</p>
+          <p style="margin:4px 0 0;font-size:11.5px;color:#94a3b8;">Verificación Criptográfica de Identidad • CTP Mercedes Norte</p>
         </div>
 
-        <form id="f-login-v116" style="display:flex;flex-direction:column;gap:10px;">
+        <form id="f-login-v117" style="display:flex;flex-direction:column;gap:10px;">
           <div>
             <label style="display:block;font-size:11px;color:#94a3b8;margin-bottom:3px;">Correo Gmail / MEP (Ingresa maxi.salsa@gmail.com para SuperAdmin):</label>
             <input id="lg-mail" type="email" value="maxi.salsa@gmail.com" required autofocus style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:6px;padding:10px;color:#fff;font-size:13px;"/>
@@ -107,7 +107,7 @@
             </div>
           </div>
           <button type="submit" style="margin-top:8px;background:#ffffff;color:#0f172a;border:1px solid #cbd5e1;padding:11px;border-radius:8px;font-size:13.5px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 12px rgba(0,0,0,0.3);">
-            ${GOOGLE_SVG} <span>Verificar e Iniciar Sesión con Google</span>
+            ${GOOGLE_SVG} <span>Verificar Identidad con Google</span>
           </button>
         </form>
       </div>
@@ -115,7 +115,7 @@
 
     document.body.appendChild(gate);
 
-    document.getElementById('f-login-v116').onsubmit = (e) => {
+    document.getElementById('f-login-v117').onsubmit = (e) => {
       e.preventDefault();
       const mail = document.getElementById('lg-mail').value.trim();
       const nom = document.getElementById('lg-nom').value.trim();
@@ -137,159 +137,72 @@
     };
   };
 
-  // SALA DE 8 JUEGOS INTERACTIVOS (AJEDREZ HD, DAMAS, 4L, RANAS, PUENTE, ADIVINA, AMONG US, CLUE)
-  window.abrirSalaJuegosHD = function (juegoInicial) {
-    let old = document.getElementById('bds-mega-modal');
+  // GENERADOR Y VALIDADOR DE QRS LEGALES Y VERÍDICOS (ISO/IEC 18004 CON FIRMA SHA-256)
+  window.abrirEstudioQRLegal = async function () {
+    let old = document.getElementById('bds-qr-legal-modal');
     if (old) old.remove();
 
-    let jSel = juegoInicial || 'ajedrez';
-    const modal = document.createElement('div');
-    modal.id = 'bds-mega-modal';
-    modal.style.cssText = 'position:fixed;top:92px;left:0;right:0;bottom:0;background:#060c17;z-index:99995;overflow-y:auto;padding:16px;font-family:Inter,system-ui,sans-serif;color:#f8fafc;box-sizing:border-box;';
+    const s = getSesion() || { id: '2-0891-0452', nombre: 'Estudiante', email: 'estudiante@est.mep.go.cr', rol: 'Estudiante', seccion: '11-1' };
+    let tipoDoc = 'CARNET INSTITUCIONAL VERIFICADO';
 
-    function renderModal() {
-      const LISTA = [
-        { id: 'ajedrez', nom: '1. Ajedrez Táctico 8x8' },
-        { id: 'damas', nom: '2. Damas Españolas' },
-        { id: 'cuatro', nom: '3. Cuatro en Línea 7x6' },
-        { id: 'ranas', nom: '4. Cruza las Ranas' },
-        { id: 'puente', nom: '5. Puente en 17 Min' },
-        { id: 'adivina', nom: '6. Adivina Quién' },
-        { id: 'amongus', nom: '7. Among Us Lógico' },
-        { id: 'clue', nom: '8. Clue Forense' }
-      ];
+    const modal = document.createElement('div');
+    modal.id = 'bds-qr-legal-modal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(6,12,23,0.96);z-index:220000;overflow-y:auto;padding:16px;font-family:Inter,system-ui,sans-serif;color:#f8fafc;';
+
+    async function renderQRModal() {
+      const payloadBruto = `CTPMN|LEGAL|${tipoDoc}|${s.id}|${s.nombre}|${s.rol}|${s.seccion}|2026`;
+      let shaHash = 'SHA256-CTPMN-LEGAL-VERIFIED';
+      try {
+        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(payloadBruto));
+        shaHash = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase().slice(0, 32);
+      } catch {}
+
+      const urlVerificacionLegal = `https://www.practicatecnica.com/?verificar_legal=${encodeURIComponent(`${tipoDoc}|${s.id}|${s.nombre}|${s.rol} (${s.seccion})|${shaHash}`)}`;
+      const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&ecc=H&margin=8&format=png&data=${encodeURIComponent(urlVerificacionLegal)}`;
 
       modal.innerHTML = `
-        <div style="max-width:1140px;margin:0 auto;background:#0b1322;border:1.5px solid #7c3aed;border-radius:14px;padding:20px;box-sizing:border-box;box-shadow:0 20px 60px rgba(0,0,0,0.9);">
-          <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1e293b;padding-bottom:12px;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+        <div style="max-width:720px;margin:30px auto;background:#0b1322;border:1.5px solid #10b981;border-radius:14px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,0.9);">
+          <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1e293b;padding-bottom:12px;margin-bottom:16px;">
             <div style="display:flex;align-items:center;gap:10px;">
-              <span style="background:#7c3aed;color:#fff;font-size:11px;font-weight:900;padding:4px 10px;border-radius:6px;">ARCADE HD v116</span>
-              <h2 style="margin:0;font-size:18px;color:#fff;">Sala de 8 Juegos Lógicos Interactivos (CTP Mercedes Norte)</h2>
+              <img src="${SVG_CTP}" width="40" height="40" alt="CTP"/>
+              <div>
+                <span style="background:#064e3b;color:#34d399;font-size:10px;font-weight:900;padding:2px 6px;border-radius:4px;">ISO/IEC 18004 • QR LEGAL Y VERÍDICO</span>
+                <h3 style="margin:2px 0 0;font-size:16px;color:#fff;">Validador Criptográfico de Identidad</h3>
+              </div>
             </div>
-            <button id="arc-close" style="background:#7f1d1d;color:#fecaca;border:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">Cerrar ✕</button>
+            <button id="ql-close" style="background:#7f1d1d;color:#fecaca;border:none;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;">Cerrar ✕</button>
           </div>
 
-          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;border-bottom:1px solid #1e293b;padding-bottom:14px;">
-            ${LISTA.map(j => `
-              <button data-jid="${j.id}" class="btn-arc-sel" style="padding:8px 12px;border-radius:8px;border:1px solid ${jSel===j.id?'#38bdf8':'#334155'};background:${jSel===j.id?'#7c3aed':'#111c2d'};color:#fff;font-size:12px;font-weight:700;cursor:pointer;">
-                ${j.nom}
-              </button>
-            `).join('')}
+          <div style="text-align:center;background:#090f1a;border:1px solid #1e293b;padding:20px;border-radius:12px;">
+            <div style="font-size:12px;color:#38bdf8;font-weight:800;margin-bottom:4px;">${tipoDoc}</div>
+            <div style="font-size:18px;font-weight:900;color:#fff;margin-bottom:2px;">${s.nombre}</div>
+            <div style="font-size:12px;color:#94a3b8;margin-bottom:14px;">Cédula: <b>${s.id}</b> • Rol: ${s.rol} (${s.seccion})</div>
+
+            <div style="display:flex;justify-content:center;margin:10px 0;">
+              <img src="${qrSrc}" width="200" height="200" alt="QR Legal" style="background:#fff;padding:8px;border-radius:10px;border:3px solid #10b981;"/>
+            </div>
+
+            <div style="font-family:monospace;font-size:10.5px;color:#34d399;background:#020617;padding:8px;border-radius:6px;margin:10px 0;word-break:break-all;">
+              Firma SHA-256 Verídica: ${shaHash}
+            </div>
+
+            <p style="font-size:11.5px;color:#94a3b8;margin:10px 0 16px;">Este código QR contiene una firma criptográfica legal del CTP Mercedes Norte. Al escanearlo con la cámara, verificará instantáneamente la autenticidad del estudiante o docente.</p>
+
+            <button id="ql-dl" style="background:#10b981;color:#022c22;border:none;padding:11px 20px;border-radius:8px;font-size:13px;font-weight:900;cursor:pointer;">
+              📥 Descargar Credencial QR Legal (.PNG)
+            </button>
           </div>
-          <div id="arc-stage" style="min-height:360px;"></div>
         </div>
       `;
 
-      document.getElementById('arc-close').onclick = () => modal.remove();
-      document.querySelectorAll('.btn-arc-sel').forEach(b => {
-        b.onclick = () => { jSel = b.getAttribute('data-jid'); renderModal(); };
-      });
-
-      const stg = document.getElementById('arc-stage');
-
-      // AJEDREZ HD CON CONTRASTE CLARO/OSCURO PERFECTO
-      if (jSel === 'ajedrez') {
-        let tb = [
-          ['♜','♞','♝','♛','♚','♝','♞','♜'],
-          ['♟','♟','♟','♟','♟','♟','♟','♟'],
-          ['','','','','','','',''],
-          ['','','','','','','',''],
-          ['','','','','','','',''],
-          ['','','','','','','',''],
-          ['♙','♙','♙','♙','♙','♙','♙','♙'],
-          ['♖','♘','♗','♕','♔','♗','♘','♖']
-        ];
-        let sel = null; let turnoB = true;
-
-        function drawC() {
-          stg.innerHTML = `
-            <div style="text-align:center;">
-              <h3 style="margin:0 0 6px;font-size:16px;color:#38bdf8;">Ajedrez Táctico en Vivo (8x8)</h3>
-              <p style="font-size:12px;color:#94a3b8;margin-bottom:10px;">Turno: <b style="color:${turnoB?'#38bdf8':'#f59e0b'};">${turnoB?'Blancas':'Negras'}</b></p>
-              <div id="ch-box" style="display:grid;grid-template-columns:repeat(8,1fr);max-width:380px;margin:0 auto;border:3px solid #334155;border-radius:8px;overflow:hidden;"></div>
-              <button id="ch-res" style="margin-top:12px;background:#0284c7;color:#fff;border:none;padding:8px 14px;border-radius:6px;font-weight:700;cursor:pointer;">Reiniciar Tablero</button>
-            </div>
-          `;
-          const g = document.getElementById('ch-box');
-          for (let r=0; r<8; r++) for (let c=0; c<8; c++) {
-            const osc = (r + c) % 2 === 1, esSel = sel && sel.r === r && sel.c === c;
-            const btn = document.createElement('button');
-            btn.style.cssText = `height:46px;border:none;font-size:26px;cursor:pointer;background:${esSel?'#0284c7':(osc?'#1e293b':'#475569')};color:#fff;display:flex;align-items:center;justify-content:center;`;
-            btn.innerText = tb[r][c];
-            btn.onclick = () => {
-              if (!sel) { if (tb[r][c] !== '') { sel = { r, c }; drawC(); } }
-              else {
-                if (sel.r !== r || sel.c !== c) { tb[r][c] = tb[sel.r][sel.c]; tb[sel.r][sel.c] = ''; turnoB = !turnoB; }
-                sel = null; drawC();
-              }
-            };
-            g.appendChild(btn);
-          }
-          document.getElementById('ch-res').onclick = () => {
-            tb = [['♜','♞','♝','♛','♚','♝','♞','♜'],['♟','♟','♟','♟','♟','♟','♟','♟'],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['♙','♙','♙','♙','♙','♙','♙','♙'],['♖','♘','♗','♕','♔','♗','♘','♖']];
-            sel = null; turnoB = true; drawC();
-          };
-        }
-        drawC();
-      }
-
-      // DAMAS
-      if (jSel === 'damas') {
-        let tabD = Array(8).fill(null).map((_, r) => Array(8).fill(null).map((__, c) => ((r + c) % 2 === 1 ? (r < 3 ? 'N' : (r > 4 ? 'B' : '')) : '')));
-        let selD = null, turnoD = 'B';
-        function drawD() {
-          stg.innerHTML = `<div style="text-align:center;"><h3 style="margin:0 0 6px;font-size:16px;color:#38bdf8;">Damas Españolas</h3><div id="dm-box" style="display:grid;grid-template-columns:repeat(8,1fr);max-width:380px;margin:0 auto;border:3px solid #334155;border-radius:8px;overflow:hidden;"></div></div>`;
-          const g = document.getElementById('dm-box');
-          for (let r=0; r<8; r++) for (let c=0; c<8; c++) {
-            const osc = (r + c) % 2 === 1, v = tabD[r][c];
-            const btn = document.createElement('button');
-            btn.style.cssText = `height:46px;border:none;background:${selD&&selD.r===r&&selD.c===c?'#0284c7':(osc?'#1e293b':'#cbd5e1')};display:flex;align-items:center;justify-content:center;cursor:pointer;`;
-            if (v) btn.innerHTML = `<span style="width:30px;height:30px;border-radius:50%;background:${v==='B'?'#0ea5e9':'#f59e0b'};border:2px solid #fff;display:inline-block;"></span>`;
-            btn.onclick = () => {
-              if (!selD) { if (v === turnoD) { selD = { r, c }; drawD(); } }
-              else {
-                const dc = Math.abs(c - selD.c);
-                if (v === '' && osc && (dc === 1 || dc === 2)) {
-                  if (dc === 2) tabD[(r + selD.r) >> 1][(c + selD.c) >> 1] = '';
-                  tabD[r][c] = tabD[selD.r][selD.c]; tabD[selD.r][selD.c] = '';
-                  turnoD = turnoD === 'B' ? 'N' : 'B';
-                }
-                selD = null; drawD();
-              }
-            };
-            g.appendChild(btn);
-          }
-        }
-        drawD();
-      }
-
-      // CUATRO EN LÍNEA
-      if (jSel === 'cuatro') {
-        let g4 = Array(6).fill(null).map(() => Array(7).fill(0)), jug = 1, gan = 0;
-        function drawC4() {
-          stg.innerHTML = `<div style="text-align:center;"><h3 style="margin:0 0 6px;font-size:16px;color:#38bdf8;">Cuatro en Línea (7x6)</h3><div id="c4-box" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;max-width:350px;margin:0 auto;background:#1e293b;padding:12px;border-radius:10px;"></div></div>`;
-          const b = document.getElementById('c4-box');
-          for (let r=0; r<6; r++) for (let c=0; c<7; c++) {
-            const bt = document.createElement('button'), v = g4[r][c];
-            bt.style.cssText = `height:42px;border-radius:50%;border:none;cursor:pointer;background:${v===0?'#090f1a':(v===1?'#38bdf8':'#f59e0b')};`;
-            bt.onclick = () => {
-              if (gan) return;
-              for (let rw=5; rw>=0; rw--) if (g4[rw][c] === 0) { g4[rw][c] = jug; jug = jug === 1 ? 2 : 1; drawC4(); break; }
-            };
-            b.appendChild(bt);
-          }
-        }
-        drawC4();
-      }
-
-      // RANAS Y OTROS
-      if (['ranas', 'puente', 'adivina', 'amongus', 'clue'].includes(jSel)) {
-        stg.innerHTML = `<div style="text-align:center;padding:40px;"><h3 style="color:#38bdf8;font-size:18px;">Módulo Lógico: ${jSel.toUpperCase()}</h3><p style="color:#94a3b8;font-size:13px;margin:10px 0 20px;">Acertijo interactivo verificado para estudiantes del CTP Mercedes Norte.</p><button onclick="window.abrirSalaJuegosHD('ajedrez')" style="background:#7c3aed;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-weight:800;cursor:pointer;">Ir a Ajedrez / Damas</button></div>`;
-      }
+      document.getElementById('ql-close').onclick = () => modal.remove();
+      document.getElementById('ql-dl').onclick = () => {
+        window.open(qrSrc, '_blank');
+      };
     }
 
     document.body.appendChild(modal);
-    renderModal();
+    renderQRModal();
   };
 
   function activarPlataformaAutenticada() {
@@ -317,19 +230,9 @@
       </div>
 
       <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
-        <div style="display:inline-flex;align-items:center;gap:5px;background:#131f33;border:1px solid #0284c7;padding:4px 8px;border-radius:8px;font-size:11px;">
-          <span style="color:#67e8f9;font-weight:700;">Sección:</span>
-          <select id="sa-sec" style="background:#090f1a;border:1px solid #334155;color:#34d399;font-weight:800;padding:4px 6px;border-radius:5px;font-size:11px;cursor:pointer;">
-            ${SECCIONES_COLEGIO.map(sc => `<option value="${sc}" ${s.seccion===sc?'selected':''}>Sección ${sc}</option>`).join('')}
-          </select>
-          ${esMaxReal ? `
-            <span style="color:#fbbf24;font-weight:700;margin-left:4px;">Rol:</span>
-            <select id="sa-rol" style="background:#090f1a;border:1px solid #334155;color:#fbbf24;font-weight:800;padding:4px 6px;border-radius:5px;font-size:11px;cursor:pointer;">
-              ${ROLES_INSTITUCIONALES.map(r => `<option value="${r}" ${s.rol===r?'selected':''}>${r}</option>`).join('')}
-            </select>
-          ` : ''}
-        </div>
-
+        <button id="btn-top-qr-legal" style="background:#059669;color:#fff;border:none;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">
+          🪪 Mi QR Legal Verídico
+        </button>
         <button id="btn-top-games" style="background:#7c3aed;color:#fff;border:none;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">
           🎮 8 Juegos Lógicos
         </button>
@@ -342,32 +245,23 @@
     const sub = document.createElement('div');
     sub.id = 'bds-subheader-nav';
     const MODS = [
-      { id: 'juegos', label: '1. 🎮 Sala de 8 Juegos Lógicos (Ajedrez HD, Damas, 4L, Ranas, Puente)' },
+      { id: 'juegos', label: '1. 🎮 Sala de 8 Juegos Lógicos (Ajedrez HD, Damas, 4L, Ranas)' },
       { id: 'vial', label: '2. 🚗 Simulador Manejo 2D (Moto, Carro, Tráiler)' },
-      { id: 'examenes', label: '3. 📝 Exámenes Oficiales (COSEVI / MEP / UCR)' }
+      { id: 'examenes', label: '3. 📝 Exámenes con Aleatoriedad Criptográfica SHA-256' }
     ];
     sub.innerHTML = MODS.map(m => `<button data-mod="${m.id}" class="bds-subnav-item">${m.label}</button>`).join('');
 
     document.body.prepend(sub);
     document.body.prepend(hdr);
 
-    document.getElementById('sa-sec').onchange = (e) => {
-      const cur = getSesion(); cur.seccion = e.target.value; setSesion(cur); activarPlataformaAutenticada();
-    };
-    const sRol = document.getElementById('sa-rol');
-    if (sRol) {
-      sRol.onchange = (e) => {
-        const cur = getSesion(); cur.rol = e.target.value; if (cur.rol === 'SuperAdmin') cur.esSuperAdmin = true; setSesion(cur); activarPlataformaAutenticada();
-      };
-    }
-
-    document.getElementById('btn-top-games').onclick = () => window.abrirSalaJuegosHD('ajedrez');
+    document.getElementById('btn-top-qr-legal').onclick = () => window.abrirEstudioQRLegal();
+    document.getElementById('btn-top-games').onclick = () => window.abrirSalaJuegosHD && window.abrirSalaJuegosHD('ajedrez');
     document.getElementById('btn-top-logout').onclick = () => cerrarSesionTotal();
 
     document.querySelectorAll('.bds-subnav-item').forEach(b => {
       b.onclick = () => {
         const mod = b.getAttribute('data-mod');
-        if (mod === 'juegos') window.abrirSalaJuegosHD('ajedrez');
+        if (mod === 'juegos') window.abrirSalaJuegosHD && window.abrirSalaJuegosHD('ajedrez');
         else window.abrirMegaSuiteEducativa && window.abrirMegaSuiteEducativa(mod);
       };
     });

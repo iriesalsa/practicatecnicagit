@@ -1,7 +1,7 @@
 (function () {
-  const SESSION_KEY = "bds_auth_gate_v146_turing";
-  const LOCK_KEY = "bds_auth_lock_v146";
-  const XP_KEY = "bds_gamification_xp_v146";
+  const SESSION_KEY = "bds_auth_gate_v147_horizon";
+  const LOCK_KEY = "bds_auth_lock_v147";
+  const XP_KEY = "bds_gamification_xp_v147";
   const NIVELES = [7, 8, 9, 10, 11, 12];
   const SECCIONES_COLEGIO = [];
   NIVELES.forEach(niv => { [1, 2, 3, 4].forEach(grp => SECCIONES_COLEGIO.push(`${niv}-${grp}`)); });
@@ -21,9 +21,11 @@
   const SVG_CTP = "data:image/svg+xml;utf8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="38" height="38"><rect width="80" height="80" rx="14" fill="#0b1528" stroke="#0ea5e9" stroke-width="2.5"/><path d="M40 10 L66 20 L66 44 C66 59 40 70 40 70 C40 70 14 59 14 44 L14 20 Z" fill="#0f2942" stroke="#38bdf8" stroke-width="2"/><text x="40" y="38" text-anchor="middle" fill="#fff" font-family="system-ui" font-weight="900" font-size="13">CTPMN</text><text x="40" y="52" text-anchor="middle" fill="#38bdf8" font-family="system-ui" font-weight="700" font-size="8.5">HEREDIA</text></svg>`);
   const GOOGLE_SVG = `<svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>`;
 
-  // Registrar Service Worker Offline-First
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw-bds-v146.js').catch(() => {});
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes('sw-bds-v147.js')) r.unregister(); });
+      navigator.serviceWorker.register('/sw-bds-v147.js').catch(() => {});
+    }).catch(() => {});
   }
 
   function shuffleCrypto(arr) {
@@ -51,14 +53,21 @@
   }
 
   function getXP() {
-    try { return JSON.parse(localStorage.getItem(XP_KEY)) || { xp: 650, racha: 12, nivel: "Alan Turing II" }; }
-    catch { return { xp: 650, racha: 12, nivel: "Alan Turing II" }; }
+    try {
+      return JSON.parse(localStorage.getItem(XP_KEY)) || {
+        xp: 750, racha: 14, nivel: "Arquitecto Turing",
+        medallas: ["♟️ Estratega FIDE", "🛡️ Guardián SHA-256"]
+      };
+    } catch {
+      return { xp: 750, racha: 14, nivel: "Arquitecto Turing", medallas: ["♟️ Estratega FIDE"] };
+    }
   }
 
-  function ganarXP(pts) {
+  function ganarXP(pts, nuevaMedalla) {
     const d = getXP();
     d.xp += pts;
-    d.nivel = d.xp >= 1200 ? "Maestro Turing Supremo" : (d.xp >= 800 ? "Arquitecto SICAI" : "Alan Turing II");
+    if (nuevaMedalla && !d.medallas.includes(nuevaMedalla)) d.medallas.push(nuevaMedalla);
+    d.nivel = d.xp >= 1500 ? "Leyenda Alan Turing" : (d.xp >= 1000 ? "Maestro SICAI" : "Arquitecto Turing");
     localStorage.setItem(XP_KEY, JSON.stringify(d));
     const badge = document.getElementById('bds-xp-counter');
     if (badge) badge.innerText = `🔥 ${d.racha}d | ⚡ ${d.xp} XP`;
@@ -100,222 +109,181 @@
   }
 
   // ============================================================================
-  // BASE DE DATOS ENCICLOPÉDICA: MATERIAS BÁSICAS, ESPECIALIDADES CTP Y ADMISIÓN
+  // MEGA BANCO ACADÉMICO, TÉCNICO Y DE ADMISIÓN (CON EXPLICACIÓN PASO A PASO)
   // ============================================================================
   const CATALOGO_EDUCATIVO = [
-    // MATERIAS BÁSICAS / ACADÉMICAS MEP
-    {
-      id: 'espanol', cat: 'basica', icono: '📖', titulo: 'Español y Literatura', niveles: '7° a 12° MEP',
-      desc: 'Comprensión lectora, análisis literario, ortografía, gramática, vicios del lenguaje y redacción oficial.',
-      manual: 'Reglas de acentuación (agudas, graves, esdrújulas), análisis de silogismos en lectura crítica y estructura de ensayo argumentativo.',
-      preguntas: [
-        { p: '¿Cuál de las siguientes palabras es esdrújula y lleva tilde ortográfica obligatoria?', c: 'Brújula', i: ['Camino', 'Canción', 'Reloj'] },
-        { p: 'En la oración "Las hojas caían lentamente como lágrimas de otoño", ¿qué figura literaria predomina?', c: 'Símil o comparación', i: ['Hipérbole', 'Prosopopeya', 'Epíteto'] },
-        { p: '¿Cuál es el núcleo del sujeto en "Los estudiantes dedicados del CTP ganaron el torneo nacional"?', c: 'estudiantes', i: ['dedicados', 'torneo', 'CTP'] },
-        { p: '¿Qué conector lógico introduce una relación de oposición o contraste?', c: 'Sin embargo', i: ['Por consiguiente', 'Además', 'Asimismo'] },
-        { p: '¿Cuál opción presenta uso correcto de las letras B y V?', c: 'Anduvieron buscando una solución viable', i: ['Andubieron buscando una solución biable', 'Estubo revisando la caveza del motor', 'Hiba caminando hacia el lavoratorio'] }
-      ]
-    },
-    {
-      id: 'matematicas', cat: 'basica', icono: '📐', titulo: 'Matemáticas y Lógica Turing', niveles: '7° a 12° MEP',
-      desc: 'Álgebra, funciones lineales y cuadráticas, geometría analítica, estadística, probabilidad y trigonometría.',
-      manual: 'Fórmula general cuadrática, Teorema de Pitágoras (a² + b² = c²), funciones exponenciales/logarítmicas y combinatoria.',
-      preguntas: [
-        { p: 'Si f(x) = 3x² - 2x + 5, ¿cuál es el valor numérico exacto de f(2)?', c: '13', i: ['9', '15', '11'] },
-        { p: 'En un triángulo rectángulo cuyos catetos miden 6 cm y 8 cm, ¿cuánto mide la hipotenusa?', c: '10 cm', i: ['12 cm', '14 cm', '9 cm'] },
-        { p: '¿Cuál es el conjunto solución de la ecuación cuadrática x² - 5x + 6 = 0?', c: '{2, 3}', i: '{-2, -3}', '{1, 6}', '{-1, 5}' },
-        { p: 'Si el 20% de una cantidad X es igual a 45, ¿cuál es el valor total de X?', c: '225', i: ['180', '250', '90'] },
-        { p: '¿Cuál es la pendiente (m) de la recta que pasa por los puntos A(1, 2) y B(3, 8)?', c: 'm = 3', i: ['m = 2', 'm = 4', 'm = -3'] }
-      ]
-    },
-    {
-      id: 'quimica', cat: 'basica', icono: '🧪', titulo: 'Química General e Inorgánica', niveles: '10° a 12° MEP',
-      desc: 'Tabla periódica, configuración electrónica, enlaces químicos, estequiometría, pH y disoluciones.',
-      manual: 'Número atómico (Z = protones), masa molar (g/mol), balanceo por tanteo y ley de conservación de la materia de Lavoisier.',
-      preguntas: [
-        { p: 'Si un átomo neutro tiene número atómico Z = 11 y número másico A = 23 (Sodio), ¿cuántos neutrones posee en su núcleo?', c: '12 neutrones', i: ['11 neutrones', '23 neutrones', '34 neutrones'] },
-        { p: '¿Qué tipo de enlace químico se forma por la transferencia de electrones entre un metal alcalino (Na) y un no metal halógeno (Cl)?', c: 'Enlace iónico', i: ['Enlace covalente no polar', 'Enlace metálico', 'Puente de hidrógeno'] },
-        { p: 'Una disolución acuosa con un valor de pH = 2.0 se clasifica químicamente como:', c: 'Fuertemente ácida', i: ['Neutra', 'Ligeramente básica', 'Fuertemente alcalina'] },
-        { p: '¿Cuál es la masa molar aproximada del agua (H₂O) sabiendo que H = 1 g/mol y O = 16 g/mol?', c: '18 g/mol', i: ['17 g/mol', '32 g/mol', '20 g/mol'] },
-        { p: '¿Cuál es el símbolo químico oficial del elemento Potasio en la tabla periódica?', c: 'K', i: ['P', 'Po', 'Pt'] }
-      ]
-    },
-    {
-      id: 'fisica', cat: 'basica', icono: '⚡', titulo: 'Física Matemática', niveles: '10° a 12° MEP',
-      desc: 'Cinemática (MRU / MRUA), Leyes de Newton, Trabajo y Energía, Ley de Ohm y Electromagnetismo.',
-      manual: 'Segunda Ley de Newton (F = m·a), Energía Cinética (Ec = ½·m·v²) y Ley de gravitación universal.',
-      preguntas: [
-        { p: 'Según la Segunda Ley de Newton, ¿qué fuerza neta se requiere para acelerar una masa de 15 kg a razón de 4 m/s²?', c: '60 N', i: ['19 N', '3.75 N', '120 N'] },
-        { p: 'Un móvil viaja con velocidad constante de 20 m/s durante 15 segundos. ¿Qué distancia recorre?', c: '300 metros', i: ['150 metros', '35 metros', '450 metros'] },
-        { p: '¿Cuál es la energía cinética de un cuerpo de 4 kg que se desplaza a una velocidad de 5 m/s?', c: '50 Julios (J)', i: ['20 Julios (J)', '100 Julios (J)', '10 Julios (J)'] },
-        { p: 'En el Sistema Internacional de Unidades (SI), la potencia mecánica y eléctrica se mide en:', c: 'Vatios (Watts)', i: ['Julios (Joules)', 'Pascales (Pa)', 'Newtons (N)'] }
-      ]
-    },
-    {
-      id: 'biologia', cat: 'basica', icono: '🧬', titulo: 'Biología y Ecología', niveles: '10° a 12° MEP',
-      desc: 'Biología celular, genética mendeliana, ADN/ARN, síntesis de proteínas, evolución y biodiversidad.',
-      manual: 'Leyes de Mendel, cruce monohíbrido, organelas celulares (mitocondria, cloroplasto, ribosoma) y cadena trófica.',
-      preguntas: [
-        { p: '¿Cuál organela citoplasmática es responsable de la respiración celular y la producción de ATP en células eucariotas?', c: 'La mitocondria', i: ['El aparato de Golgi', 'El lisosoma', 'El retículo endoplasmático liso'] },
-        { p: 'En la molécula de ARN mensajero (ARNm), ¿qué base nitrogenada sustituye a la Timina (T) presente en el ADN?', c: 'Uracilo (U)', i: ['Adenina (A)', 'Citosina (C)', 'Guanina (G)'] },
-        { p: 'Si se cruzan dos individuos heterocigotos (Aa x Aa) con dominancia completa, ¿cuál es la probabilidad de obtener descendencia homocigota recesiva (aa)?', c: '25% (1/4)', i: ['50% (2/4)', '75% (3/4)', '0%'] }
-      ]
-    },
-    {
-      id: 'ingles', cat: 'basica', icono: '🗣️', titulo: 'Inglés Técnico & Conversacional (OpenEnglish Mode)', niveles: '7° a 12° Bilíngüe',
-      desc: 'Listening comprehension, Technical IT Vocabulary, Phrasal Verbs, Conditionals &TOEIC/CEFR B2-C1.',
-      manual: 'Zero, First & Second Conditionals, Passive Voice in Technical Documentation, and Agile Software Engineering terminology.',
-      preguntas: [
-        { p: 'Choose the correct form: "If the server _____ down, the backup system will automatically take over."', c: 'goes', i: ['went', 'will go', 'going'] },
-        { p: 'In cybersecurity, what does the term "Phishing" refer to?', c: 'Fraudulent attempts to obtain sensitive credentials via disguised emails or sites', i: ['Upgrading the RAM memory of a server', 'Compiling source code into binary', 'Routing packets across a VLAN'] },
-        { p: 'Complete the sentence (Passive Voice): "The database _____ encrypted using SHA-256 yesterday."', c: 'was', i: ['were', 'has', 'is'] },
-        { p: 'Which phrasal verb means "to investigate or examine a technical issue"?', c: 'Look into', i: ['Give up', 'Turn off', 'Put away'] }
-      ]
-    },
-    {
-      id: 'sociales', cat: 'basica', icono: '🌎', titulo: 'Estudios Sociales y Educación Cívica', niveles: '7° a 12° MEP',
-      desc: 'Historia de Costa Rica, Geografía, Garantías Sociales, Constitución Política y Régimen Municipal.',
-      manual: 'Reforma Social de 1940 (CCSS, UCR, Código de Trabajo), abolición del ejército (1948) y división de poderes de la República.',
-      preguntas: [
-        { p: '¿En qué década se promulgaron las Garantías Sociales, el Código de Trabajo y la creación de la CCSS y la UCR en Costa Rica?', c: 'En la década de 1940', i: ['En la década de 1880', 'En la década de 1990', 'En la década de 1910'] },
-        { p: '¿Cuál poder de la República de Costa Rica tiene la potestad constitucional de aprobar o improbar los presupuestos ordinarios y extraordinarios?', c: 'La Asamblea Legislativa (Poder Legislativo)', i: ['La Corte Suprema de Justicia', 'El Tribunal Supremo de Elecciones', 'El Consejo de Gobierno'] }
-      ]
-    },
-
-    // ESPECIALIDADES TÉCNICAS CTP
-    {
-      id: 'web', cat: 'ctp', icono: '💻', titulo: 'Desarrollo Web Full-Stack', niveles: '10°, 11° y 12° CTP',
-      desc: 'HTML5 Semántico, CSS3/Tailwind, JavaScript ES6+, React, APIs REST, Node.js y Bases de Datos SQL/PostgreSQL.',
-      manual: 'Arquitectura Cliente-Servidor, manipulación del DOM, estados en React (useState/useEffect), consultas JOIN en SQL y despliegue en Vercel.',
-      preguntas: [
-        { p: 'En JavaScript ES6+, ¿qué método de arreglos crea un nuevo arreglo transformando cada elemento sin mutar el original?', c: 'Array.prototype.map()', i: ['Array.prototype.forEach()', 'Array.prototype.pop()', 'Array.prototype.shift()'] },
-        { p: '¿Qué código de estado HTTP indica que una petición GET se procesó con éxito ("OK")?', c: '200 OK', i: ['404 Not Found', '500 Internal Server Error', '301 Moved Permanently'] },
-        { p: 'En SQL, ¿qué cláusula se utiliza para filtrar registros después de aplicar una agrupación con GROUP BY?', c: 'HAVING', i: ['WHERE', 'ORDER BY', 'LIMIT'] },
-        { p: 'En React, ¿cuál regla es obligatoria al renderizar una lista dinámica de elementos con .map()?', c: 'Asignar una propiedad "key" única y estable a cada elemento', i: ['Usar siempre variables globales var', 'Recargar toda la página con window.location', 'Declarar estilos únicamente en archivos externos'] }
-      ]
-    },
-    {
-      id: 'ciber', cat: 'ctp', icono: '🛡️', titulo: 'Ciberseguridad & Criptografía Turing', niveles: '10°, 11° y 12° CTP',
-      desc: 'Hacking Ético, Criptografía SHA-256/AES, Firewalls, OWASP Top 10, Respuesta a Incidentes SOC e ISO 27001.',
-      manual: 'Tríada CIA (Confidencialidad, Integridad y Disponibilidad), prevención de Inyección SQL ( consultas parametrizadas), MFA y Ley 8968 de Protección de Datos.',
-      preguntas: [
-        { p: '¿Cuál es la defensa principal y más efectiva en el código contra ataques de Inyección SQL (SQLi)?', c: 'El uso de consultas parametrizadas (Prepared Statements)', i: ['Ocultar el botón de envío con CSS', 'Cambiar el puerto 80 por el 8080', 'Comprimir las imágenes del servidor'] },
-        { p: '¿Qué propiedad de la tríada de la seguridad de la información garantiza que los datos no han sido alterados de forma no autorizada?', c: 'Integridad', i: ['Disponibilidad', 'Confidencialidad', 'Redundancia'] },
-        { p: '¿Cuál de los siguientes algoritmos corresponde a una función hash criptográfica unidireccional de 256 bits?', c: 'SHA-256', i: ['Base64', 'ROT13', 'ASCII'] },
-        { p: 'En la Ley N° 8968 de Costa Rica, ¿qué principio exige el consentimiento expreso e informado del titular para tratar sus datos personales?', c: 'Autodeterminación informativa y consentimiento informado', i: ['Libre tránsito aduanero', 'Neutralidad tecnológica de red', 'Dominio público irrestricto'] }
-      ]
-    },
-    {
-      id: 'redes', cat: 'ctp', icono: '🌐', titulo: 'Redes, Subneteo VLSM y Telecomunicaciones', niveles: '10°, 11° y 12° CTP',
-      desc: 'Modelo OSI y TCP/IP, Direccionamiento IPv4/IPv6, Cálculo VLSM, VLANs 802.1Q, Enrutamiento OSPF y Seguridad de Switch.',
-      manual: 'Fórmula de hosts útiles: 2^(32 - prefijo) - 2. Capas del modelo OSI (Física, Enlace, Red, Transporte, Sesión, Presentación, Aplicación).',
-      preguntas: [
-        { p: 'En una subred IPv4 con prefijo /27 (máscara 255.255.255.224), ¿cuántas direcciones IP utilizables para hosts existen?', c: '30 direcciones utilizables', i: ['32 direcciones utilizables', '14 direcciones utilizables', '62 direcciones utilizables'] },
-        { p: '¿En qué capa del Modelo OSI operan los enrutadores (routers) y el direccionamiento lógico IP?', c: 'Capa 3 (Capa de Red)', i: ['Capa 2 (Enlace de Datos)', 'Capa 4 (Transporte)', 'Capa 1 (Física)'] },
-        { p: '¿Qué protocolo estándar IEEE permite etiquetar tramas para transportar múltiples VLANs a través de un enlace troncal (Trunk)?', c: 'IEEE 802.1Q', i: ['IEEE 802.11ac', 'DHCPv6', 'ICMP'] }
-      ]
-    },
-    {
-      id: 'contabilidad', cat: 'ctp', icono: '📊', titulo: 'Contabilidad Pura, Finanzas y Costos', niveles: '10°, 11° y 12° CTP',
-      desc: 'Ecuación contable, Asientos de Diario, Mayorización, Balance de Comprobación, IVA 13%, Planillas CCSS y NIIF.',
-      manual: 'Ecuación patrimonial: Activo = Pasivo + Patrimonio. Partida doble: todo débito (Debe) tiene su crédito (Haber) equivalente.',
-      preguntas: [
-        { p: 'Si una empresa tiene Activos Totales por ₡15,000,000 y Pasivos Totales por ₡6,000,000, ¿cuál es su Patrimonio Neto?', c: '₡9,000,000', i: ['₡21,000,000', '₡6,000,000', '₡15,000,000'] },
-        { p: 'En Costa Rica, si se vende mercadería gravada por ₡100,000 más el 13% de IVA al contado, ¿por cuánto se acredita la cuenta de IVA por Pagar?', c: '₡13,000', i: ['₡113,000', '₡10,000', '₡87,000'] },
-        { p: '¿Cuál es la naturaleza contable normal de las cuentas de Activo y de Gastos?', c: 'Saldo deudor (aumentan al Debe y disminuyen al Haber)', i: ['Saldo acreedor (aumentan al Haber)', 'Saldo neutro sin partida doble', 'Pasivo circulante'] }
-      ]
-    },
-    {
-      id: 'electronica', cat: 'ctp', icono: '🔌', titulo: 'Electrónica, Circuitos y Soporte TI', niveles: '10°, 11° y 12° CTP',
-      desc: 'Ley de Ohm, Leyes de Kirchhoff, Compuertas Lógicas Digitales (AND, OR, NOT, XOR), Microcontroladores y Mantenimiento.',
-      manual: 'Ley de Ohm: V = I · R (Voltaje = Corriente × Resistencia). Resistencia equivalente en serie (R1 + R2) y en paralelo.',
-      preguntas: [
-        { p: 'Por una resistencia de 220 Ω circula una corriente eléctrica de 0.05 A (50 mA). Según la Ley de Ohm, ¿cuál es la caída de tensión (Voltaje)?', c: '11 V', i: ['4.4 V', '22 V', '110 V'] },
-        { p: '¿Qué compuerta lógica digital entrega una salida igual a 1 únicamente cuando TODAS sus entradas son iguales a 1?', c: 'Compuerta AND', i: ['Compuerta OR', 'Compuerta XOR', 'Compuerta NOT'] }
-      ]
-    },
-
-    // ADMISIÓN UNIVERSITARIA Y COLEGIOS (UCR, TEC, UNA, UNED, UTN, CTP, CIENTÍFICOS)
     {
       id: 'adm_ucr_una', cat: 'admision', icono: '🏛️', titulo: 'Simulacro Oficial PAA — UCR / UNA (Escala 800)', niveles: 'Admisión Universitaria',
-      desc: 'Prueba de Aptitud Académica (Razonamiento en Contexto Verbal y Razonamiento Matemático con escala oficial de 200 a 800 puntos).',
-      manual: 'Estrategia PAA UCR/UNA: Identificación de premisas implícitas, contradicciones lógicas, suficiencia de datos y patrones numéricos.',
+      desc: 'Razonamiento en Contexto Verbal y Razonamiento Matemático con explicación analítica paso a paso.',
+      manual: 'Fórmula de éxito PAA: 1) Identifica supuestos implícitos sin asumir información externa. 2) En series y operadores, busca diferencias de segundo orden o simetrías.',
       preguntas: [
-        { p: '[Verbal UCR/UNA] "Todo ingeniero riguroso verifica sus algoritmos. Algunos músicos son ingenieros rigurosos." De lo anterior se deduce con certeza absoluta que:', c: 'Algunos músicos verifican sus algoritmos', i: ['Todos los músicos son ingenieros', 'Ningún ingeniero escucha música', 'Todos los que verifican algoritmos son músicos'] },
-        { p: '[Matemático UCR/UNA] En una caja hay bolas rojas, azules y verdes. Si todas menos 4 son rojas, todas menos 4 son azules y todas menos 4 son verdes, ¿cuántas bolas hay en total en la caja?', c: '6 bolas en total (2 de cada color)', i: ['12 bolas en total', '8 bolas en total', '4 bolas en total'] },
-        { p: '[Matemático UCR/UNA] Considere la sucesión: 2, 6, 12, 20, 30, X. ¿Cuál es el valor numérico de X?', c: '42', i: ['38', '40', '44'] },
-        { p: '[Verbal UCR/UNA] "El conocimiento sin práctica es estéril, pero la práctica sin método es ciega." El autor sostiene centralmente que:', c: 'La excelencia requiere articular la fundamentación teórica con la ejecución metódica', i: ['La teoría es superior a cualquier experiencia práctica', 'Basta con practicar al azar sin estudiar teoría', 'El método impide la creatividad humana'] }
+        { p: '[Verbal UCR/UNA] "Todo algoritmo verificable termina en tiempo finito. Algunos programas críticos son algoritmos verificables." ¿Qué se concluye con certeza?', c: 'Algunos programas críticos terminan en tiempo finito', i: ['Todos los programas críticos son algoritmos verificables', 'Ningún programa lento es verificable', 'Todo lo que termina en tiempo finito es un programa crítico'], exp: 'Por silogismo categórico (Modo Darii): Si todo A es B, y algún C es A, entonces necesariamente algún C es B.' },
+        { p: '[Matemático UCR/UNA] En una gaveta hay calcetines negros, blancos y azules. Si todos menos 6 son negros, todos menos 6 son blancos y todos menos 6 son azules, ¿cuántos calcetines hay en total?', c: '9 calcetines en total (3 de cada color)', i: ['18 calcetines', '12 calcetines', '6 calcetines'], exp: 'Si "todos menos 6 son negros", significa que la suma de blancos + azules = 6. Por simetría en los tres colores, cada color tiene 3 unidades (3 + 3 + 3 = 9).' },
+        { p: '[Matemático UCR/UNA] Dada la secuencia numérica: 3, 8, 15, 24, 35, X. ¿Cuál es el valor de X?', c: '48', i: ['44', '46', '50'], exp: 'Las diferencias entre términos consecutivos son +5, +7, +9, +11. La siguiente diferencia impar es +13, por lo tanto 35 + 13 = 48.' },
+        { p: '[Verbal UCR/UNA] "La ciberseguridad no es un producto que se instala una vez, sino un proceso continuo de vigilancia y educación." Según el texto, la seguridad digital:', c: 'Exige actualización permanente y cultura preventiva', i: ['Se resuelve comprando el antivirus más costoso', 'Depende exclusivamente del hardware físico', 'Es innecesaria cuando se usa software libre'], exp: 'El texto contrasta "producto estático" frente a "proceso continuo de vigilancia y educación".' },
+        { p: '[Matemático UCR/UNA] Si 4 impresoras 3D fabrican 40 engranajes en 4 horas, ¿cuántos engranajes fabricarán 8 impresoras idénticas en 8 horas?', c: '160 engranajes', i: ['80 engranajes', '120 engranajes', '320 engranajes'], exp: 'Duplicar las impresoras (de 4 a 8) duplica la producción a 80 en 4 horas; duplicar además el tiempo (de 4h a 8h) vuelve a duplicar el resultado: 160 engranajes.' },
+        { p: '[Verbal UCR/UNA] "Ningún sistema infalible ignora las alertas tempranas. Ciertos protocolos obsoletos ignoran las alertas tempranas." Se deduce que:', c: 'Ciertos protocolos obsoletos no son sistemas infalibles', i: ['Todo protocolo obsoleto es infalible', 'Las alertas tempranas siempre fallan', 'Ningún protocolo actual usa alertas'], exp: 'Si ningún A hace X, y algunos B hacen X, entonces esos B no pueden pertenecer al conjunto A.' },
+        { p: '[Matemático UCR/UNA] El promedio aritmético de 5 números es 14. Si se agrega un sexto número y el nuevo promedio sube a 16, ¿cuál fue el sexto número agregado?', c: '26', i: ['20', '24', '28'], exp: 'La suma inicial de los 5 números es 5 × 14 = 70. La nueva suma de los 6 números es 6 × 16 = 96. La diferencia es 96 - 70 = 26.' }
       ]
     },
     {
       id: 'adm_tec', cat: 'admision', icono: '⚙️', titulo: 'Simulacro Oficial de Admisión — TEC (Escala 800)', niveles: 'Tecnológico de Costa Rica',
-      desc: 'Razonamiento Matemático Avanzado, Geometría Espacial, Lógica Proposicional y Comprensión Científica para Ingeniería.',
-      manual: 'Enfoque TEC: Proporcionalidad inversa, áreas sombreadas, combinatoria, operadores matemáticos definidos y lógica formal.',
+      desc: 'Matemática intensiva para ingeniería, operadores abstractos, geometría analítica y lógica proposicional.',
+      manual: 'Foco TEC: Despeje algebraico rápido, leyes de potencias, áreas por resta de figuras y tablas de verdad del condicional (P → Q).',
       preguntas: [
-        { p: '[TEC Matemático] Se define el operador a ★ b = (a² + b) / 2. ¿Cuál es el valor de (3 ★ 7) ★ 4?', c: '14.5', i: ['12', '16', '10.5'] },
-        { p: '[TEC Geometría] Si el radio de un círculo aumenta en un 100% (se duplica), ¿en qué porcentaje aumenta su área total?', c: 'Aumenta en un 300% (se cuadruplica)', i: ['Aumenta en un 100%', 'Aumenta en un 200%', 'Aumenta en un 400%'] },
-        { p: '[TEC Lógica] Si la proposición "Si hay código limpio, entonces el despliegue es exitoso" es FALSA, se cumple con certeza que:', c: 'Hubo código limpio y el despliegue NO fue exitoso', i: ['No hubo código limpio y el despliegue fue exitoso', 'El despliegue siempre es exitoso', 'Ambos enunciados son verdaderos'] }
+        { p: '[TEC Operadores] Para cualesquiera números reales se define a # b = a² - 2b. ¿Cuál es el valor numérico de (4 # 5) # 3?', c: '30', i: ['24', '18', '36'], exp: 'Primero resolvemos el paréntesis: (4 # 5) = 4² - 2(5) = 16 - 10 = 6. Luego evaluamos 6 # 3 = 6² - 2(3) = 36 - 6 = 30.' },
+        { p: '[TEC Geometría] Si el lado de un cuadrado aumenta en un 50%, ¿en qué porcentaje aumenta su área total?', c: 'Aumenta en un 125%', i: ['Aumenta en un 50%', 'Aumenta en un 100%', 'Aumenta en un 150%'], exp: 'Si el lado pasa de 1 a 1.5, el área pasa de 1² = 1 a (1.5)² = 2.25, lo cual representa un incremento del 125%.' },
+        { p: '[TEC Lógica] La proposición condicional "Si el servidor compila, entonces pasa las pruebas QA" resulta FALSA únicamente cuando:', c: 'El servidor compila y NO pasa las pruebas QA', i: ['El servidor no compila y pasa QA', 'Ambos hechos ocurren simultáneamente', 'El servidor no compila ni pasa QA'], exp: 'En lógica formal, una implicación (P → Q) solo es falsa cuando el antecedente P es verdadero y el consecuente Q es falso.' },
+        { p: '[TEC Álgebra] Si 2^(x+1) + 2^x = 24, ¿cuál es el valor real de x?', c: 'x = 3', i: ['x = 2', 'x = 4', 'x = 5'], exp: 'Factorizando 2^x: 2^x · (2 + 1) = 24 → 2^x · 3 = 24 → 2^x = 8 → x = 3.' },
+        { p: '[TEC Probabilidad] Al lanzar dos dados estándar de 6 caras simultáneamente, ¿cuál es la probabilidad de que la suma de sus caras superiores sea igual a 7?', c: '1/6 (6 de 36 casos posibles)', i: ['1/12', '7/36', '1/9'], exp: 'Las parejas que suman 7 son (1,6), (2,5), (3,4), (4,3), (5,2) y (6,1): son 6 casos favorables entre 36 posibles = 6/36 = 1/6.' }
       ]
     },
     {
-      id: 'adm_uned_utn', cat: 'admision', icono: '🎓', titulo: 'Ingreso y Nivelación — UNED & UTN', niveles: 'Educación Superior CR',
-      desc: 'Competencias de aprendizaje autónomo, lectoescritura académica, matemática introductoria para ingeniería y tecnología.',
-      manual: 'Guía de autogestión universitaria UNED y fundamentos lógico-matemáticos para carreras técnicas y diplomados UTN.',
+      id: 'adm_uned_utn', cat: 'admision', icono: '🎓', titulo: 'Nivelación y Admisión — UNED & UTN', niveles: 'Educación Superior CR',
+      desc: 'Resolución de problemas técnico-productivos, proporcionalidad compuesta, APA 7 y comprensión académica.',
+      manual: 'Método de las proporciones (Regla de tres compuesta directa e inversa) y normas de citación académica.',
       preguntas: [
-        { p: '[UTN / UNED] Un taller produce 120 piezas en 4 horas con 3 máquinas idénticas. ¿Cuántas piezas producirán 5 máquinas en 6 horas al mismo ritmo?', c: '300 piezas', i: ['240 piezas', '360 piezas', '200 piezas'] },
-        { p: '[UNED Académico] En la normativa APA 7ma edición, ¿qué datos incluye una cita narrativa o parentética breve dentro del texto?', c: 'Apellido del autor y año de publicación (y página si es cita textual)', i: ['El enlace URL completo y la editorial', 'Únicamente el nombre de pila del autor', 'El número de ISBN del libro'] }
+        { p: '[UTN Ingeniería] 3 técnicos instalan 18 puntos de red en 6 horas. ¿Cuántos puntos de red instalarán 5 técnicos trabajando 8 horas al mismo ritmo?', c: '40 puntos de red', i: ['30 puntos de red', '36 puntos de red', '45 puntos de red'], exp: 'Cada técnico instala 18 / (3 × 6) = 1 punto de red por hora. Por tanto, 5 técnicos en 8 horas instalan 5 × 8 × 1 = 40 puntos.' },
+        { p: '[UNED Investigación] En el formato APA 7ma edición, cuando una fuente tiene 3 o más autores, ¿cómo se cita dentro del texto desde la primera mención?', c: 'Primer Apellido seguido de "et al." y el año', i: ['Todos los nombres completos separados por guiones', 'Solo el título del libro sin año', 'El número de página únicamente'], exp: 'APA 7 simplificó la regla: a partir de 3 autores se abrevia con el primer autor seguido de la locución latina "et al." desde la primera cita.' },
+        { p: '[UTN Matemática] Una factura con el 13% de IVA incluido asciende a ₡113,000. ¿Cuál era el precio neto sin impuesto?', c: '₡100,000', i: ['₡98,310', '₡101,300', '₡99,000'], exp: 'Se divide el monto total entre 1.13: 113,000 / 1.13 = 100,000.' }
       ]
     },
     {
-      id: 'adm_ctp_cientificos', cat: 'admision', icono: '🔬', titulo: 'Admisión CTP (7° y 10°) & Colegios Científicos / Humanísticos', niveles: 'Secundaria Técnica y Científica',
-      desc: 'Pruebas vocacionales y de aptitud para ingreso a 7° CTP, elección de especialidad en 10° año y examen de Colegios Científicos de CR.',
-      manual: 'Aptitud numérica, razonamiento espacial, resolución de problemas científicos y afinidad tecnológica por especialidad.',
+      id: 'adm_ctp_cientificos', cat: 'admision', icono: '🔬', titulo: 'Admisión CTP (7° y 10°) & Colegios Científicos', niveles: 'Secundaria Técnica y Científica',
+      desc: 'Aptitud vocacional para ingreso a 7° CTP, elección de especialidad 10° y prueba nacional de Colegios Científicos.',
+      manual: 'Identidades algebraicas notables, razonamiento mecánico de poleas/engranajes y lógica algorítmica.',
       preguntas: [
-        { p: '[Colegios Científicos] Si x + 1/x = 3, ¿cuál es el valor exacto de la expresión algebraica x² + 1/x²?', c: '7', i: ['9', '5', '11'] },
-        { p: '[Admisión CTP 7°/10°] Tres engranajes A, B y C están conectados en fila. Si el engranaje A gira en sentido horario, ¿en qué sentido gira el engranaje C?', c: 'En sentido horario', i: ['En sentido antihorario', 'Permanece inmóvil', 'Gira alternadamente'] },
-        { p: '[Aptitud Técnica 10°] En un diagrama de flujo algorítmico, ¿qué figura geométrica representa una estructura condicional o toma de decisión (IF/ELSE)?', c: 'El rombo', i: ['El rectángulo', 'El óvalo', 'El paralelogramo'] }
+        { p: '[Colegios Científicos] Si a + b = 7 y a·b = 10, ¿cuál es el valor numérico de a² + b²?', c: '29', i: ['49', '19', '39'], exp: 'Sabemos que (a + b)² = a² + 2ab + b². Sustituyendo: 7² = a² + b² + 2(10) → 49 - 20 = 29.' },
+        { p: '[Admisión CTP] En un tren de 4 engranajes conectados en línea (A-B-C-D), si el engranaje A gira en sentido horario, ¿cómo gira el engranaje D?', c: 'En sentido antihorario', i: ['En sentido horario', 'No gira', 'A la mitad de velocidad en el mismo sentido'], exp: 'Cada contacto invierte el giro: A(Horario) → B(Antihorario) → C(Horario) → D(Antihorario).' },
+        { p: '[Especialidad 10° CTP] En lógica de programación, si X = 8 y Y = 3, ¿cuál es el resultado del operador módulo (X % Y)?', c: '2 (el residuo entero de dividir 8 entre 3)', i: ['2.66', '5', '24'], exp: '8 dividido entre 3 da cociente 2 y sobra un residuo entero de 2.' }
+      ]
+    },
+    {
+      id: 'espanol', cat: 'basica', icono: '📖', titulo: 'Español y Comunicación', niveles: '7° a 12° MEP',
+      desc: 'Lectura crítica, acentuación ortográfica, morfosintaxis, figuras literarias y redacción formal.',
+      manual: 'Agudas (tilde en n, s o vocal), Graves (tilde cuando NO terminan en n, s o vocal), Esdrújulas (todas se tildan).',
+      preguntas: [
+        { p: '¿Cuál serie contiene únicamente palabras graves (llanas) correctamente escritas?', c: 'Árbol, examen, cárcel', i: ['Café, compás, camión', 'Música, brújula, sílaba', 'Reloj, pared, cantar'], exp: 'Árbol, examen y cárcel tienen el acento prosódico en la penúltima sílaba.' },
+        { p: '¿Qué figura de construcción consiste en alterar el orden lógico o sintáctico habitual de las palabras en la oración?', c: 'Hipérbaton', i: ['Anáfora', 'Metáfora', 'Aliteración'], exp: 'El hipérbaton invierte el orden sintáctico regular (Sujeto + Verbo + Complemento).' },
+        { p: 'En la oración "El informe técnico fue revisado por la comisión", el verbo se encuentra en:', c: 'Voz pasiva', i: ['Voz activa', 'Modo imperativo', 'Gerundio compuesto'], exp: 'Tiene estructura de verbo ser conjugado ("fue") + participio ("revisado") + complemento agente ("por la comisión").' }
+      ]
+    },
+    {
+      id: 'matematicas', cat: 'basica', icono: '📐', titulo: 'Matemáticas Aplicadas MEP', niveles: '7° a 12° MEP',
+      desc: 'Álgebra, funciones, geometría analítica, trigonometría, estadística descriptiva y probabilidad.',
+      manual: 'Ecuación de la recta y = mx + b, discriminante Δ = b² - 4ac, teorema de Pitágoras y circunferencia (x-h)² + (y-k)² = r².',
+      preguntas: [
+        { p: '¿Cuál es la ecuación de la circunferencia con centro en C(2, -3) y radio r = 5?', c: '(x - 2)² + (y + 3)² = 25', i: ['(x + 2)² + (y - 3)² = 25', '(x - 2)² + (y + 3)² = 5', '(x - 2)² - (y + 3)² = 10'], exp: 'Se invierten los signos de las coordenadas del centro (h, k) y se eleva el radio al cuadrado (5² = 25).' },
+        { p: '¿Cuál es el vértice de la parábola dada por la función cuadrática f(x) = (x - 4)² + 7?', c: '(4, 7)', i: ['(-4, 7)', '(4, -7)', '(7, 4)'], exp: 'En la forma canónica a(x - h)² + k, el vértice corresponde directamente al par ordenado (h, k) = (4, 7).' },
+        { p: 'Si log₂(x) = 5, ¿cuál es el valor numérico de x?', c: '32', i: ['10', '25', '64'], exp: 'Por definición de logaritmo: base elevada al exponente es igual al argumento (2⁵ = 32).' }
+      ]
+    },
+    {
+      id: 'quimica', cat: 'basica', icono: '🧪', titulo: 'Química Científica y Laboratorio', niveles: '10° a 12° MEP',
+      desc: 'Estructura atómica, tabla periódica, nomenclatura inorgánica, estequiometría, gases ideales y pH.',
+      manual: 'A = Z + n° (Número másico = Protones + Neutrones). En un átomo neutro, electrones = protones (Z).',
+      preguntas: [
+        { p: 'El catión Calcio (Ca²⁺) cuyo número atómico es Z = 20 posee exactamente:', c: '20 protones y 18 electrones', i: ['20 protones y 22 electrones', '18 protones y 20 electrones', '22 protones y 20 electrones'], exp: 'La carga +2 indica que el átomo neutro cedió 2 electrones de valencia (20 - 2 = 18), manteniendo intactos sus 20 protones.' },
+        { p: 'Según el sistema Stock de nomenclatura inorgánica, ¿cómo se nombra el compuesto Fe₂O₃?', c: 'Óxido de hierro (III)', i: ['Óxido de hierro (II)', 'Hidróxido férrico', 'Peróxido de hierro'], exp: 'El oxígeno trabaja con estado -2 y el hierro en esta fórmula actúa con estado de oxidación +3.' },
+        { p: '¿Cuántos moles de moléculas hay en 88 gramos de dióxido de carbono (CO₂), sabiendo que C = 12 g/mol y O = 16 g/mol?', c: '2 moles', i: ['1 mol', '4 moles', '0.5 moles'], exp: 'La masa molar del CO₂ es 12 + 2(16) = 44 g/mol. Dividiendo 88 g entre 44 g/mol se obtienen 2 moles.' }
+      ]
+    },
+    {
+      id: 'fisica', cat: 'basica', icono: '⚡', titulo: 'Física y Mecánica Clásica', niveles: '10° a 12° MEP',
+      desc: 'Vectores, cinemática, dinámica de Newton, conservación de la energía, hidrostática y electrodinámica.',
+      manual: 'MRUA: v_f = v_i + a·t | d = v_i·t + ½·a·t². Ley de gravitación universal y Ley de Coulomb.',
+      preguntas: [
+        { p: 'Un automóvil parte del reposo y acelera uniformemente a razón de 3 m/s² durante 6 segundos. ¿Qué distancia recorre en ese lapso?', c: '54 metros', i: ['18 metros', '36 metros', '108 metros'], exp: 'Usando d = ½ · a · t² = 0.5 × 3 × (6²) = 0.5 × 3 × 36 = 54 metros.' },
+        { p: 'Tres resistencias de 10 Ω, 20 Ω y 30 Ω se conectan en SERIE a una fuente de 120 V. ¿Cuál es la resistencia equivalente total?', c: '60 Ω', i: ['5.45 Ω', '20 Ω', '120 Ω'], exp: 'En un circuito en serie, la resistencia equivalente es la suma directa: 10 + 20 + 30 = 60 Ω.' }
+      ]
+    },
+    {
+      id: 'ingles', cat: 'basica', icono: '🗣️', titulo: 'Inglés Técnico & Conversacional (OpenEnglish)', niveles: '7° a 12° Bilingüe',
+      desc: 'Grammar in Context, IT & Cybersecurity Vocabulary, Reading Comprehension and TOEIC Preparation.',
+      manual: 'First Conditional (If + Present, will + base verb), Second Conditional (If + Past, would + base verb).',
+      preguntas: [
+        { p: 'Select the best option: "Had we configured the firewall properly, the intrusion _____ prevented."', c: 'would have been', i: ['will be', 'was', 'is being'], exp: 'Third conditional inversion in passive voice requires "would have been + past participle".' },
+        { p: 'What does the acronym "API" stand for in modern software architecture?', c: 'Application Programming Interface', i: ['Automated Protocol Internet', 'Advanced Processor Integration', 'Active Port Identifier'], exp: 'API stands for Application Programming Interface.' }
+      ]
+    },
+    {
+      id: 'web', cat: 'ctp', icono: '💻', titulo: 'Desarrollo Web & Ingeniería de Software', niveles: '10°, 11° y 12° CTP',
+      desc: 'HTML5, CSS3/Tailwind, JavaScript moderno, React, Node.js, bases de datos relacionales SQL y Git.',
+      manual: 'Semántica HTML5, Flexbox/Grid, promesas async/await en JS, hooks de React y normalización de bases de datos (1FN, 2FN, 3FN).',
+      preguntas: [
+        { p: 'En JavaScript asíncrono, ¿qué palabra clave detiene la ejecución dentro de una función async hasta que una Promesa se resuelva?', c: 'await', i: ['yield', 'defer', 'static'], exp: 'El operador await pausa la ejecución de la función async esperando la resolución de la Promise.' },
+        { p: 'En una base de datos relacional PostgreSQL, ¿qué restricción garantiza que una columna no acepte valores duplicados ni nulos identificando cada fila?', c: 'PRIMARY KEY (Clave Primaria)', i: ['FOREIGN KEY', 'DEFAULT', 'INDEX'], exp: 'PRIMARY KEY combina implícitamente las restricciones UNIQUE y NOT NULL.' },
+        { p: '¿Qué propiedad de CSS Flexbox alinea los elementos hijos a lo largo del eje principal (main axis)?', c: 'justify-content', i: ['align-items', 'z-index', 'box-sizing'], exp: 'justify-content controla la distribución en el eje principal, mientras que align-items actúa en el eje transversal.' }
+      ]
+    },
+    {
+      id: 'ciber', cat: 'ctp', icono: '🛡️', titulo: 'Ciberseguridad, Hacking Ético y SOC', niveles: '10°, 11° y 12° CTP',
+      desc: 'Criptografía, pentesting, análisis de vulnerabilidades OWASP, endurecimiento de servidores, SIEM y normativa ISO 27001.',
+      manual: 'Defensa en profundidad, principio de mínimo privilegio (Zero Trust), hashing con sal (Salt) y mitigación de XSS/CSRF.',
+      preguntas: [
+        { p: '¿Qué vulnerabilidad web ocurre cuando una aplicación inserta datos no sanitizados del usuario en el DOM ejecutando scripts maliciosos en el navegador de la víctima?', c: 'Cross-Site Scripting (XSS)', i: ['Denegación de Servicio (DDoS)', 'Fuerza Bruta SSH', 'ARP Spoofing'], exp: 'XSS permite inyectar código JavaScript ejecutable en el contexto de la sesión del navegador de otros usuarios.' },
+        { p: 'En criptografía de clave pública (asimétrica) como RSA o ECC, si Alicia quiere enviar un mensaje confidencial a Benito, ¿con qué clave debe cifrarlo?', c: 'Con la clave pública de Benito', i: ['Con la clave privada de Alicia', 'Con una clave pública compartida en texto plano', 'Sin ninguna clave'], exp: 'Para garantizar confidencialidad, se cifra con la clave pública del destinatario para que solo su clave privada pueda descifrarlo.' }
+      ]
+    },
+    {
+      id: 'redes', cat: 'ctp', icono: '🌐', titulo: 'Redes Cisco, VLSM y Infraestructura TI', niveles: '10°, 11° y 12° CTP',
+      desc: 'Enrutamiento y conmutación, direccionamiento IPv4/IPv6, subneteo VLSM, VLANs, STP, DHCP, DNS y diagnóstico.',
+      manual: 'Rangos privados RFC 1918 (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) y cálculo de broadcast.',
+      preguntas: [
+        { p: 'Dada la dirección de subred 192.168.50.64/26, ¿cuál es su dirección de Broadcast correspondiente?', c: '192.168.50.127', i: ['192.168.50.128', '192.168.50.255', '192.168.50.95'], exp: 'Un prefijo /26 tiene saltos de bloque de 64 direcciones (2⁶ = 64). El bloque empieza en .64 y el siguiente inicia en .128, por lo que el broadcast es .127.' },
+        { p: '¿Qué comando de diagnóstico de red envía paquetes ICMP Echo Request para comprobar la conectividad y latencia hacia un host?', c: 'ping', i: ['netstat', 'nslookup', 'chmod'], exp: 'El comando ping utiliza mensajes ICMP Echo Request y Echo Reply para medir conectividad y tiempo de ida y vuelta (RTT).' }
+      ]
+    },
+    {
+      id: 'contabilidad', cat: 'ctp', icono: '📊', titulo: 'Contabilidad Pura, Costos y Finanzas', niveles: '10°, 11° y 12° CTP',
+      desc: 'Ciclo contable completo, estados financieros NIIF, conciliación bancaria, depreciación, planillas e impuestos.',
+      manual: 'Depreciación en línea recta = (Costo - Valor Residual) / Vida Útil. Ecuación contable básica: A = P + C.',
+      preguntas: [
+        { p: 'Una maquinaria cuesta ₡5,500,000, tiene un valor residual estimado de ₡500,000 y una vida útil de 5 años. ¿Cuál es el gasto por depreciación anual por el método de línea recta?', c: '₡1,000,000 por año', i: ['₡1,100,000 por año', '₡500,000 por año', '₡900,000 por año'], exp: '(5,500,000 - 500,000) / 5 = 5,000,000 / 5 = ₡1,000,000 anuales.' },
+        { p: '¿En cuál estado financiero oficial se presentan los Ingresos, Costos y Gastos de un período para determinar la Utilidad o Pérdida Neta?', c: 'Estado de Resultados Integral (Ganancias y Pérdidas)', i: ['Estado de Situación Financiera (Balance General)', 'Estado de Flujos de Efectivo', 'Arqueo de Caja Chica'], exp: 'El Estado de Resultados mide el rendimiento financiero comparando ingresos menos gastos durante un período.' }
       ]
     }
   ];
 
   // ============================================================================
-  // ESTILOS RESPONSIVE MOBILE-FIRST & MULTI-PANTALLA (CERO SOLAPAMIENTO)
+  // ESTILOS RESPONSIVE MOBILE-FIRST & GAMIFICACIÓN
   // ============================================================================
   function inyectarCSSGate() {
-    if (document.getElementById('bds-v146-css')) return;
+    if (document.getElementById('bds-v147-css')) return;
     const st = document.createElement('style');
-    st.id = 'bds-v146-css';
+    st.id = 'bds-v147-css';
     st.innerHTML = `
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
       html, body { font-family: 'Inter', system-ui, sans-serif !important; background: #060c17 !important; color: #f8fafc !important; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
       body:not(.bds-authenticated) #root { display: none !important; }
       body.bds-authenticated:not(.bds-ver-landing-base) #root { display: none !important; }
       body.bds-authenticated.bds-ver-landing-base #bds-app-shell { display: none !important; }
-      body.bds-authenticated.bds-ver-landing-base #root { display: block !important; padding-bottom: 80px !important; }
+      body.bds-authenticated.bds-ver-landing-base #root { display: block !important; padding-bottom: 85px !important; }
       #bds-soberana-bar, #bds-top-dock, #bds-fab-launcher, #bds-drawer-panel { display: none !important; }
 
       #bds-pro-header {
         position: sticky; top: 0; left: 0; right: 0; z-index: 99990;
         background: rgba(11, 19, 34, 0.98); backdrop-filter: blur(12px);
-        border-bottom: 1px solid #1e293b; padding: 8px 14px;
+        border-bottom: 1px solid #1e293b; padding: 8px 12px;
         display: flex; align-items: center; justify-content: space-between;
-        gap: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.65);
+        gap: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.7);
       }
       #bds-subheader-nav {
         position: sticky; top: 54px; z-index: 99985;
         background: #0f172a; border-bottom: 1px solid #1e293b;
-        padding: 7px 14px; display: flex; align-items: center; gap: 7px;
-        overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch;
+        padding: 7px 12px; display: flex; align-items: center; gap: 7px;
+        overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none;
       }
+      #bds-subheader-nav::-webkit-scrollbar { display: none; }
       .bds-subnav-item {
         background: #131f33; border: 1px solid #26354d; color: #e2e8f0;
-        padding: 7px 13px; border-radius: 8px; font-size: 12px; font-weight: 700;
-        cursor: pointer; flex-shrink: 0; transition: all 0.15s ease;
+        padding: 8px 13px; border-radius: 8px; font-size: 12px; font-weight: 700;
+        cursor: pointer; flex-shrink: 0; transition: all 0.15s ease; min-height: 36px;
       }
       .bds-subnav-item:hover, .bds-subnav-item.active { background: #0284c7; border-color: #38bdf8; color: #fff; }
 
       #bds-app-shell {
-        max-width: 1240px; margin: 0 auto; padding: 16px 14px 90px; box-sizing: border-box; min-height: calc(100vh - 110px);
+        max-width: 1240px; margin: 0 auto; padding: 14px 12px 96px; box-sizing: border-box; min-height: calc(100vh - 110px);
       }
       .bds-card-pro {
         background: #0b1322; border: 1px solid #1e293b; border-radius: 14px; padding: 16px;
@@ -325,26 +293,26 @@
 
       #bds-mobile-dock {
         position: fixed; bottom: 0; left: 0; right: 0; z-index: 99992;
-        background: rgba(11, 19, 34, 0.98); border-top: 1px solid #1e293b;
-        display: none; grid-template-columns: repeat(5, 1fr); padding: 6px 4px;
-        box-shadow: 0 -4px 20px rgba(0,0,0,0.8);
+        background: rgba(11, 19, 34, 0.98); border-top: 1.5px solid #0284c7;
+        display: none; grid-template-columns: repeat(5, 1fr); padding: 6px 4px env(safe-area-inset-bottom, 6px);
+        box-shadow: 0 -6px 24px rgba(0,0,0,0.85);
       }
       .bds-dock-btn {
-        background: none; border: none; color: #94a3b8; font-size: 10px; font-weight: 700;
-        display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; padding: 4px 2px;
+        background: none; border: none; color: #94a3b8; font-size: 10.5px; font-weight: 800;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+        cursor: pointer; padding: 4px 2px; min-height: 46px; border-radius: 8px;
       }
-      .bds-dock-btn.active { color: #38bdf8; }
+      .bds-dock-btn.active { color: #38bdf8; background: rgba(2, 132, 199, 0.15); }
 
-      @media (max-width: 820px) {
+      @media (max-width: 860px) {
         #bds-mobile-dock { display: grid; }
-        .hide-on-mobile { display: none !important; }
-        #bds-subheader-nav { top: 50px; padding: 6px 10px; }
+        #bds-subheader-nav { top: 52px; padding: 6px 8px; }
+        .bds-subnav-item { padding: 7px 11px; font-size: 11.5px; }
       }
     `;
     document.head.appendChild(st);
   }
 
-  // Reparador de inputs de Excel (sin cero pegado) y sincronización de sesión
   function iniciarObservadorSoberano() {
     document.addEventListener('focusin', (e) => {
       const el = e.target;
@@ -365,12 +333,12 @@
   // ============================================================================
   window.mostrarLoginEstricto = function (vistaInicial) {
     inyectarCSSGate();
-    let old = document.getElementById('bds-login-v146');
+    let old = document.getElementById('bds-login-v147');
     if (old) old.remove();
 
     let vista = vistaInicial || 'login';
     const gate = document.createElement('div');
-    gate.id = 'bds-login-v146';
+    gate.id = 'bds-login-v147';
     gate.style.cssText = 'position:fixed;inset:0;background:radial-gradient(circle at top,#0f2942 0%,#060c17 70%);z-index:300000;display:flex;align-items:center;justify-content:center;padding:14px;overflow-y:auto;';
 
     function getIntentos() { return parseInt(localStorage.getItem(LOCK_KEY) || '0', 10); }
@@ -386,7 +354,7 @@
             <h2 style="margin:0 0 6px;font-size:18px;font-weight:800;color:#fff;text-align:center;">🔐 Recuperar / Cambiar Clave</h2>
             <p style="margin:0 0 14px;font-size:11.5px;color:#94a3b8;text-align:center;">Restablecimiento seguro para cuentas institucionales</p>
             <div id="rec-msg" style="display:none;padding:8px;border-radius:6px;font-size:11.5px;margin-bottom:10px;text-align:center;font-weight:700;"></div>
-            <form id="f-rec-v146" style="display:flex;flex-direction:column;gap:10px;">
+            <form id="f-rec-v147" style="display:flex;flex-direction:column;gap:10px;">
               <input id="rc-mail" type="email" placeholder="usuario@est.mep.go.cr" required style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:8px;padding:10px;color:#fff;font-size:13px;"/>
               <input id="rc-pass1" type="password" placeholder="Nueva contraseña (mínimo 6 caracteres)" required minlength="6" style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:8px;padding:10px;color:#fff;font-size:13px;"/>
               <input id="rc-pass2" type="password" placeholder="Confirmar nueva contraseña" required minlength="6" style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:8px;padding:10px;color:#fff;font-size:13px;"/>
@@ -396,7 +364,7 @@
           </div>
         `;
         document.getElementById('btn-volver-login').onclick = () => { vista = 'login'; renderVistaAuth(); };
-        document.getElementById('f-rec-v146').onsubmit = (e) => {
+        document.getElementById('f-rec-v147').onsubmit = (e) => {
           e.preventDefault();
           const m = document.getElementById('rc-mail').value.trim();
           const p1 = document.getElementById('rc-pass1').value;
@@ -429,14 +397,14 @@
           </div>
           <div style="text-align:center;margin-bottom:14px;">
             <h1 style="margin:0;font-size:21px;font-weight:900;color:#fff;">prac<span style="color:#0ea5e9;">TICA</span>tecnica.com</h1>
-            <p style="margin:4px 0 0;font-size:11px;color:#94a3b8;">Ecosistema Educativo Gamificado • CTP Mercedes Norte</p>
+            <p style="margin:4px 0 0;font-size:11px;color:#94a3b8;">Plataforma Gamificada • CTP Mercedes Norte</p>
           </div>
 
           <div id="auth-error-msg" style="display:${bloqueado?'block':'none'};background:#450a0a;color:#fca5a5;padding:9px;border-radius:8px;font-size:11.5px;margin-bottom:10px;text-align:center;font-weight:700;">
-            ${bloqueado ? '🔒 Cuenta bloqueada por 5 intentos fallidos. Comunícate con soporte o usa "Recuperar Clave".' : ''}
+            ${bloqueado ? '🔒 Cuenta bloqueada por 5 intentos fallidos. Comunícate con el administrador o usa "Recuperar Clave".' : ''}
           </div>
 
-          <form id="f-login-v146" style="display:flex;flex-direction:column;gap:9px;">
+          <form id="f-login-v147" style="display:flex;flex-direction:column;gap:9px;">
             <div>
               <label style="display:block;font-size:11px;color:#cbd5e1;margin-bottom:3px;">Correo Institucional o Personal (@est.mep.go.cr / @gmail.com):</label>
               <input id="lg-mail" type="email" placeholder="usuario@est.mep.go.cr" required autofocus ${bloqueado?'disabled':''} style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:8px;padding:10px;color:#fff;font-size:13px;"/>
@@ -554,7 +522,7 @@
         activarPlataformaAutenticada();
       }
 
-      document.getElementById('f-login-v146').onsubmit = (e) => { e.preventDefault(); procesarIngreso(false); };
+      document.getElementById('f-login-v147').onsubmit = (e) => { e.preventDefault(); procesarIngreso(false); };
       document.getElementById('btn-google-oauth').onclick = () => {
         if (!passInput.value) passInput.value = 'oauth-verified';
         procesarIngreso(true);
@@ -566,14 +534,14 @@
   };
 
   // ============================================================================
-  // RENDERIZADOR DE LOS 12 JUEGOS 100% FUNCIONALES (AJEDREZ v145 INTACTO)
+  // RENDERIZADOR DE LOS 12 JUEGOS (DOMINÓ Y SOLITARIO MULTI-MODO + AJEDREZ INTACTO)
   // ============================================================================
   function renderSala12Juegos(contenedor, juegoInicial) {
     let juegoActivo = juegoInicial || 'ajedrez';
     const LISTA_12 = [
       { id: 'ajedrez', nom: '1. ♟️ Ajedrez FIDE' },
-      { id: 'domino', nom: '2. 🁣 Dominó Clásico' },
-      { id: 'solitario', nom: '3. 🃏 Solitario Pro' },
+      { id: 'domino', nom: '2. 🁣 Dominó Pro' },
+      { id: 'solitario', nom: '3. 🃏 Solitario Dual' },
       { id: 'damas', nom: '4. 🔴 Damas 8x8' },
       { id: 'cuatro', nom: '5. 🟡 4 en Línea' },
       { id: 'ranas', nom: '6. 🐸 Cruza Ranas' },
@@ -590,18 +558,18 @@
         <div style="background:#0b1322;border:1.5px solid #7c3aed;border-radius:14px;padding:14px;box-sizing:border-box;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
             <div style="display:flex;align-items:center;gap:8px;">
-              <span style="background:#7c3aed;color:#fff;font-size:11px;font-weight:900;padding:4px 9px;border-radius:6px;">ARCADE 12 JUEGOS</span>
+              <span style="background:#7c3aed;color:#fff;font-size:11px;font-weight:900;padding:4px 9px;border-radius:6px;">ARCADE 12 JUEGOS v147</span>
               <h2 style="margin:0;font-size:16px;color:#fff;">Centro Gamificado de Razonamiento y Entretenimiento Estudiantil</h2>
             </div>
           </div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;background:#070d19;padding:8px;border-radius:10px;border:1px solid #1e293b;">
             ${LISTA_12.map(j => `
-              <button data-jid="${j.id}" class="btn-sub-juego" style="padding:7px 11px;border-radius:7px;border:1px solid ${juegoActivo===j.id?'#a78bfa':'#334155'};background:${juegoActivo===j.id?'#7c3aed':'#131f33'};color:#fff;font-size:11.5px;font-weight:700;cursor:pointer;">
+              <button data-jid="${j.id}" class="btn-sub-juego" style="padding:8px 11px;border-radius:7px;border:1px solid ${juegoActivo===j.id?'#a78bfa':'#334155'};background:${juegoActivo===j.id?'#7c3aed':'#131f33'};color:#fff;font-size:11.5px;font-weight:700;cursor:pointer;">
                 ${j.nom}
               </button>
             `).join('')}
           </div>
-          <div id="juego-lienzo" style="background:#070d19;border:1px solid #1e293b;border-radius:12px;padding:14px;min-height:380px;"></div>
+          <div id="juego-lienzo" style="background:#070d19;border:1px solid #1e293b;border-radius:12px;padding:14px;min-height:390px;"></div>
         </div>
       `;
 
@@ -611,7 +579,7 @@
 
       const stg = document.getElementById('juego-lienzo');
 
-      // 1. AJEDREZ FIDE (EXACTO DE v145.0 — INTOCABLE)
+      // 1. AJEDREZ FIDE (EXACTO E INTOCABLE)
       if (juegoActivo === 'ajedrez') {
         const GLIFOS = { K: '♔', Q: '♕', R: '♖', B: '♗', N: '♘', P: '♙', k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟' };
         let tb = [
@@ -657,7 +625,7 @@
           tb[r2][c2] = pieza; tb[r1][c1] = '';
           historial.push(`${cols[c1]}${8-r1}${cap?'x':'-'}${cols[c2]}${8-r2}`);
           turnoB = !turnoB; sel = null;
-          ganarXP(5);
+          ganarXP(5, "♟️ Estratega FIDE");
         }
         function jugarPCNegras() {
           if (turnoB || !modoPC) return;
@@ -727,8 +695,9 @@
         drawChess();
       }
 
-      // 2. DOMINÓ CLÁSICO DOBLE-6 VS PC (NUEVO Y 100% JUGABLE)
+      // 2. DOMINÓ PRO CON SELECTOR DE DIFICULTAD Y EXTREMO (IZQ / DER)
       else if (juegoActivo === 'domino') {
+        let difDomino = 'turing'; // 'normal' | 'turing'
         let fichas = [];
         for (let i=0; i<=6; i++) for (let j=i; j<=6; j++) fichas.push([i, j]);
         fichas = shuffleCrypto(fichas);
@@ -736,53 +705,91 @@
         let manoPC = fichas.slice(7, 14);
         let pozo = fichas.slice(14);
         let mesa = [[6, 6]];
-        let izq = 6, der = 6, msgD = "Mesa iniciada con [6|6]. Toca una ficha de tu mano que coincida con los extremos.";
+        let izq = 6, der = 6, extremoPreferido = 'auto';
+        let msgD = "Mesa iniciada con [6|6]. Elige extremo (Auto, Izquierda o Derecha) y toca una ficha verde de tu mano.";
+
+        function sumaPuntosMano(arr) { return arr.reduce((acc, f) => acc + f[0] + f[1], 0); }
 
         function jugarTurnoPC() {
+          // Si dificultad es Maestro Turing, la PC prioriza descargar sus fichas más pesadas primero
+          if (difDomino === 'turing') manoPC.sort((a, b) => (b[0]+b[1]) - (a[0]+a[1]));
           for (let i=0; i<manoPC.length; i++) {
             const [a, b] = manoPC[i];
-            if (a === izq) { mesa.unshift([b, a]); izq = b; manoPC.splice(i, 1); msgD = `🤖 PC jugó [${b}|${a}] a la izquierda.`; return; }
-            if (b === izq) { mesa.unshift([a, b]); izq = a; manoPC.splice(i, 1); msgD = `🤖 PC jugó [${a}|${b}] a la izquierda.`; return; }
-            if (a === der) { mesa.push([a, b]); der = b; manoPC.splice(i, 1); msgD = `🤖 PC jugó [${a}|${b}] a la derecha.`; return; }
-            if (b === der) { mesa.push([b, a]); der = a; manoPC.splice(i, 1); msgD = `🤖 PC jugó [${b}|${a}] a la derecha.`; return; }
+            if (a === izq) { mesa.unshift([b, a]); izq = b; manoPC.splice(i, 1); msgD = `🤖 PC (${difDomino.toUpperCase()}) jugó [${b}|${a}] a la izquierda.`; return; }
+            if (b === izq) { mesa.unshift([a, b]); izq = a; manoPC.splice(i, 1); msgD = `🤖 PC (${difDomino.toUpperCase()}) jugó [${a}|${b}] a la izquierda.`; return; }
+            if (a === der) { mesa.push([a, b]); der = b; manoPC.splice(i, 1); msgD = `🤖 PC (${difDomino.toUpperCase()}) jugó [${a}|${b}] a la derecha.`; return; }
+            if (b === der) { mesa.push([b, a]); der = a; manoPC.splice(i, 1); msgD = `🤖 PC (${difDomino.toUpperCase()}) jugó [${b}|${a}] a la derecha.`; return; }
           }
-          if (pozo.length > 0) { manoPC.push(pozo.pop()); msgD = "🤖 PC robó del pozo y pasó."; }
-          else msgD = "🤖 PC pasó turno.";
+          while (pozo.length > 0) {
+            const robada = pozo.pop();
+            manoPC.push(robada);
+            const [ra, rb] = robada;
+            if (ra === izq || rb === izq || ra === der || rb === der) {
+              jugarTurnoPC(); return;
+            }
+          }
+          msgD = "🤖 PC no tenía jugada y pasó turno.";
         }
 
         function drawDomino() {
           const ganoJug = manoJug.length === 0;
           const ganoPC = manoPC.length === 0;
+          if (ganoJug) ganarXP(40, "🁣 Maestro del Dominó");
+
           stg.innerHTML = `
             <div style="text-align:center;">
-              <h3 style="margin:0 0 4px;font-size:16px;color:#38bdf8;">🁣 Dominó Costarricense Doble-6 (Jugador vs PC)</h3>
-              <p style="font-size:12px;color:#34d399;margin:0 0 8px;">${ganoJug?'🏆 ¡DOMINÓ! ¡GANASTE LA PARTIDA! (+50 XP)':(ganoPC?'❌ La PC dominó la partida.':msgD)}</p>
-              <div style="font-size:11.5px;color:#cbd5e1;margin-bottom:8px;">Extremo Izquierdo: <b style="color:#fbbf24;">[${izq}]</b> • Extremo Derecho: <b style="color:#fbbf24;">[${der}]</b> • Fichas PC: <b>${manoPC.length}</b> • Pozo: <b>${pozo.length}</b></div>
-              <div style="background:#0b1322;border:2px solid #059669;border-radius:10px;padding:12px;min-height:70px;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
-                ${mesa.map(f => `<span style="background:#f8fafc;color:#0f172a;padding:6px 9px;border-radius:6px;font-weight:900;font-size:13px;border:2px solid #334155;">${f[0]} | ${f[1]}</span>`).join('')}
+              <h3 style="margin:0 0 4px;font-size:16px;color:#38bdf8;">🁣 Dominó Doble-6 Pro (Modo Táctico vs IA Turing)</h3>
+              <p style="font-size:12px;color:#34d399;margin:0 0 8px;">${ganoJug?`🏆 ¡DOMINÓ! ¡GANASTE (+${sumaPuntosMano(manoPC)} pts de las fichas de la PC)!`:(ganoPC?'❌ La PC dominó la partida.':msgD)}</p>
+              <div style="display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+                <select id="dom-dif" style="background:#131f33;color:#fff;border:1px solid #38bdf8;padding:5px 9px;border-radius:6px;font-size:11.5px;font-weight:700;">
+                  <option value="turing" ${difDomino==='turing'?'selected':''}>🧠 IA Maestro Turing (Prioriza fichas altas)</option>
+                  <option value="normal" ${difDomino==='normal'?'selected':''}>🟢 IA Estándar</option>
+                </select>
+                <button id="dom-side-left" style="background:${extremoPreferido==='izq'?'#0284c7':'#131f33'};color:#fff;border:1px solid #334155;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:800;cursor:pointer;">⬅️ Jugar en Izq [${izq}]</button>
+                <button id="dom-side-auto" style="background:${extremoPreferido==='auto'?'#0284c7':'#131f33'};color:#fff;border:1px solid #334155;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:800;cursor:pointer;">⚡ Auto</button>
+                <button id="dom-side-right" style="background:${extremoPreferido==='der'?'#0284c7':'#131f33'};color:#fff;border:1px solid #334155;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:800;cursor:pointer;">Jugar en Der [${der}] ➡️</button>
               </div>
-              <div style="font-size:12px;font-weight:800;color:#38bdf8;margin-bottom:6px;">Tu Mano (Haz clic en una ficha para jugarla):</div>
+              <div style="font-size:11.5px;color:#cbd5e1;margin-bottom:8px;">Tus puntos en mano: <b>${sumaPuntosMano(manoJug)}</b> • Fichas PC: <b>${manoPC.length}</b> • Pozo: <b>${pozo.length}</b></div>
+              <div style="background:#0b1322;border:2px solid #059669;border-radius:10px;padding:12px;min-height:74px;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
+                ${mesa.map(f => `<span style="background:#f8fafc;color:#0f172a;padding:6px 9px;border-radius:6px;font-weight:900;font-size:13px;border:2px solid #334155;box-shadow:0 2px 6px rgba(0,0,0,0.4);">${f[0]} | ${f[1]}</span>`).join('')}
+              </div>
               <div id="dom-mano" style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;"></div>
-              <div style="display:flex;justify-content:center;gap:8px;">
-                <button id="dom-robar" style="background:#0284c7;color:#fff;border:none;padding:8px 14px;border-radius:7px;font-weight:800;cursor:pointer;font-size:12px;">Robar del Pozo (${pozo.length}) / Pasar</button>
-                <button id="dom-rst" style="background:#7f1d1d;color:#fecaca;border:none;padding:8px 14px;border-radius:7px;font-weight:800;cursor:pointer;font-size:12px;">Nueva Partida</button>
+              <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;">
+                <button id="dom-robar" style="background:#0284c7;color:#fff;border:none;padding:9px 14px;border-radius:7px;font-weight:800;cursor:pointer;font-size:12px;">Robar del Pozo (${pozo.length}) / Pasar</button>
+                <button id="dom-rst" style="background:#7f1d1d;color:#fecaca;border:none;padding:9px 14px;border-radius:7px;font-weight:800;cursor:pointer;font-size:12px;">Nueva Partida</button>
               </div>
             </div>
           `;
+          document.getElementById('dom-dif').onchange = (e) => { difDomino = e.target.value; drawDomino(); };
+          document.getElementById('dom-side-left').onclick = () => { extremoPreferido = 'izq'; drawDomino(); };
+          document.getElementById('dom-side-auto').onclick = () => { extremoPreferido = 'auto'; drawDomino(); };
+          document.getElementById('dom-side-right').onclick = () => { extremoPreferido = 'der'; drawDomino(); };
+
           const mn = document.getElementById('dom-mano');
           manoJug.forEach((f, idx) => {
-            const jugable = f[0]===izq || f[1]===izq || f[0]===der || f[1]===der;
+            const calzaIzq = f[0]===izq || f[1]===izq;
+            const calzaDer = f[0]===der || f[1]===der;
+            const jugable = calzaIzq || calzaDer;
             const b = document.createElement('button');
             b.style.cssText = `background:${jugable?'#064e3b':'#1e293b'};color:#fff;border:2px solid ${jugable?'#34d399':'#475569'};padding:10px 13px;border-radius:8px;font-weight:900;font-size:14px;cursor:pointer;`;
             b.innerText = `[ ${f[0]} | ${f[1]} ]`;
             b.onclick = () => {
               if (ganoJug || ganoPC) return;
               const [a, c] = f;
-              if (a === der) { mesa.push([a, c]); der = c; }
-              else if (c === der) { mesa.push([c, a]); der = a; }
-              else if (c === izq) { mesa.unshift([a, c]); izq = a; }
-              else if (a === izq) { mesa.unshift([c, a]); izq = c; }
-              else { msgD = `⚠️ La ficha [${a}|${c}] no calza con [${izq}] ni con [${der}].`; drawDomino(); return; }
+              let colocada = false;
+              if (extremoPreferido === 'izq' && calzaIzq) {
+                if (c === izq) { mesa.unshift([a, c]); izq = a; colocada = true; }
+                else if (a === izq) { mesa.unshift([c, a]); izq = c; colocada = true; }
+              } else if (extremoPreferido === 'der' && calzaDer) {
+                if (a === der) { mesa.push([a, c]); der = c; colocada = true; }
+                else if (c === der) { mesa.push([c, a]); der = a; colocada = true; }
+              } else {
+                if (a === der) { mesa.push([a, c]); der = c; colocada = true; }
+                else if (c === der) { mesa.push([c, a]); der = a; colocada = true; }
+                else if (c === izq) { mesa.unshift([a, c]); izq = a; colocada = true; }
+                else if (a === izq) { mesa.unshift([c, a]); izq = c; colocada = true; }
+              }
+              if (!colocada) { msgD = `⚠️ La ficha [${a}|${c}] no coincide con el extremo seleccionado.`; drawDomino(); return; }
               manoJug.splice(idx, 1);
               ganarXP(10);
               if (manoJug.length > 0) jugarTurnoPC();
@@ -800,56 +807,96 @@
         drawDomino();
       }
 
-      // 3. SOLITARIO PIRÁMIDE / SUMA 13 (NUEVO Y 100% JUGABLE)
+      // 3. SOLITARIO DUAL PRO (MODO PIRÁMIDE SUMA-13 + MODO ESCALERA POR PALOS + PISTA)
       else if (juegoActivo === 'solitario') {
+        let modoSol = 'suma13'; // 'suma13' | 'escalera'
         const palos = ['♠️','♥️','♦️','♣️'];
         let mazo = [];
         for (let v=1; v<=13; v++) palos.forEach(p => mazo.push({ v, p, nom: v===1?'A':(v===11?'J':(v===12?'Q':(v===13?'K':String(v)))) }));
         mazo = shuffleCrypto(mazo);
         let tablero = mazo.slice(0, 12);
         let reserva = mazo.slice(12);
-        let selIdx = null, pts = 0, msgS = "Selecciona dos cartas que sumen 13 (ej: A+Q, 2+J, 3+10, 4+9, 5+8, 6+7) o toca un Rey (K=13) para despejarlo.";
+        let basesPalos = { '♠️': 0, '♥️': 0, '♦️': 0, '♣️': 0 };
+        let selIdx = null, pts = 0, msgS = "Modo Suma-13: Empareja dos cartas que sumen 13 o toca una K (13). Usa '💡 Pista' si te atascas.";
+
+        function buscarPistaSuma13() {
+          for (let i=0; i<tablero.length; i++) {
+            if (tablero[i] && tablero[i].v === 13) return `💡 Pista: Toca directamente el Rey (${tablero[i].nom}${tablero[i].p}) en la casilla ${i+1}.`;
+            for (let j=i+1; j<tablero.length; j++) {
+              if (tablero[i] && tablero[j] && tablero[i].v + tablero[j].v === 13) {
+                return `💡 Pista: Combina ${tablero[i].nom}${tablero[i].p} (${tablero[i].v}) con ${tablero[j].nom}${tablero[j].p} (${tablero[j].v}) = 13.`;
+              }
+            }
+          }
+          return "💡 No hay pares directos en mesa; presiona 'Repartir Reemplazos'.";
+        }
 
         function drawSolitario() {
           stg.innerHTML = `
             <div style="text-align:center;">
-              <h3 style="margin:0 0 4px;font-size:16px;color:#38bdf8;">🃏 Solitario Matemático Suma-13 (Klondike / Pirámide)</h3>
+              <h3 style="margin:0 0 4px;font-size:16px;color:#38bdf8;">🃏 Solitario Dual Pro (${modoSol==='suma13'?'Pirámide Suma-13':'Escalera Real A → K'})</h3>
               <p style="font-size:12px;color:#34d399;margin:0 0 8px;">${msgS}</p>
-              <div style="font-size:12px;color:#fbbf24;font-weight:800;margin-bottom:10px;">Puntuación: ${pts} pts • Cartas en Mazo Reserva: ${reserva.length}</div>
+              <div style="display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+                <button id="sol-m1" style="background:${modoSol==='suma13'?'#0284c7':'#131f33'};color:#fff;border:1px solid #38bdf8;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:800;cursor:pointer;">🔢 Modo Pirámide (Suma 13)</button>
+                <button id="sol-m2" style="background:${modoSol==='escalera'?'#0284c7':'#131f33'};color:#fff;border:1px solid #334155;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:800;cursor:pointer;">♠️ Modo Escalera (Menor a Mayor)</button>
+                <button id="sol-hint" style="background:#f59e0b;color:#020617;border:none;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:900;cursor:pointer;">💡 Pista Inteligente</button>
+              </div>
+              <div style="font-size:12px;color:#fbbf24;font-weight:800;margin-bottom:10px;">Puntuación: ${pts} pts • Mazo Reserva: ${reserva.length} cartas</div>
               <div id="sol-grid" style="display:grid;grid-template-columns:repeat(4,74px);gap:8px;width:320px;margin:0 auto 12px;justify-content:center;"></div>
-              <div style="display:flex;justify-content:center;gap:8px;">
+              <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;">
                 <button id="sol-deal" style="background:#0284c7;color:#fff;border:none;padding:8px 14px;border-radius:7px;font-weight:800;cursor:pointer;font-size:12px;">Repartir Reemplazos (${reserva.length})</button>
-                <button id="sol-rst" style="background:#7f1d1d;color:#fecaca;border:none;padding:8px 14px;border-radius:7px;font-weight:800;cursor:pointer;font-size:12px;">Nuevo Solitario</button>
+                <button id="sol-rst" style="background:#7f1d1d;color:#fecaca;border:none;padding:8px 14px;border-radius:7px;font-weight:800;cursor:pointer;font-size:12px;">Nuevo Mazo</button>
               </div>
             </div>
           `;
+          document.getElementById('sol-m1').onclick = () => { modoSol = 'suma13'; msgS = "Modo Suma-13 activado."; drawSolitario(); };
+          document.getElementById('sol-m2').onclick = () => { modoSol = 'escalera'; msgS = "Modo Escalera: Toca siempre la carta de MENOR valor disponible en la mesa para despejar en orden."; drawSolitario(); };
+          document.getElementById('sol-hint').onclick = () => {
+            if (modoSol === 'suma13') msgS = buscarPistaSuma13();
+            else {
+              const vals = tablero.filter(Boolean).map(x => x.v);
+              msgS = vals.length ? `💡 Pista: La carta más baja actual tiene valor ${Math.min(...vals)}.` : "Mesa despejada.";
+            }
+            drawSolitario();
+          };
+
           const g = document.getElementById('sol-grid');
           tablero.forEach((c, idx) => {
             const b = document.createElement('button');
             if (!c) {
-              b.style.cssText = 'height:86px;border-radius:8px;border:1px dashed #334155;background:#060c17;';
+              b.style.cssText = 'height:84px;border-radius:8px;border:1px dashed #334155;background:#060c17;color:#34d399;';
               b.innerText = '✓';
             } else {
               const rojo = c.p === '♥️' || c.p === '♦️';
               const esSel = selIdx === idx;
-              b.style.cssText = `height:86px;border-radius:8px;border:2px solid ${esSel?'#38bdf8':'#cbd5e1'};background:${esSel?'#bae6fd':'#ffffff'};color:${rojo?'#dc2626':'#0f172a'};font-weight:900;font-size:16px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;`;
+              b.style.cssText = `height:84px;border-radius:8px;border:2px solid ${esSel?'#38bdf8':'#cbd5e1'};background:${esSel?'#bae6fd':'#ffffff'};color:${rojo?'#dc2626':'#0f172a'};font-weight:900;font-size:16px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;`;
               b.innerHTML = `<span>${c.nom}${c.p}</span><span style="font-size:10px;color:#475569;">Val: ${c.v}</span>`;
               b.onclick = () => {
+                if (modoSol === 'escalera') {
+                  const minV = Math.min(...tablero.filter(Boolean).map(x => x.v));
+                  if (c.v === minV) {
+                    tablero[idx] = reserva.length ? reserva.pop() : null;
+                    pts += 20; ganarXP(10, "🃏 As del Solitario");
+                    msgS = `✅ Carta mínima (${c.nom}${c.p}) despejada en escalera.`;
+                  } else {
+                    msgS = `⚠️ En modo Escalera debes tocar primero la carta de menor valor (${minV}).`;
+                  }
+                  drawSolitario();
+                  return;
+                }
                 if (c.v === 13) {
                   tablero[idx] = reserva.length ? reserva.pop() : null;
-                  pts += 20; selIdx = null; ganarXP(10); msgS = "👑 ¡Rey (13) despejado directamente!"; drawSolitario(); return;
+                  pts += 20; selIdx = null; ganarXP(10, "🃏 As del Solitario"); msgS = "👑 ¡Rey (13) despejado!"; drawSolitario(); return;
                 }
-                if (selIdx === null) { selIdx = idx; msgS = `Carta ${c.nom}${c.p} (${c.v}) seleccionada. Busca una carta de valor ${13 - c.v}.`; drawSolitario(); }
+                if (selIdx === null) { selIdx = idx; msgS = `Seleccionaste ${c.nom}${c.p} (${c.v}). Busca un ${13 - c.v}.`; drawSolitario(); }
                 else if (selIdx === idx) { selIdx = null; drawSolitario(); }
                 else {
-                  const primera = tablero[selIdx];
-                  if (primera && primera.v + c.v === 13) {
+                  const pr = tablero[selIdx];
+                  if (pr && pr.v + c.v === 13) {
                     tablero[selIdx] = reserva.length ? reserva.pop() : null;
                     tablero[idx] = reserva.length ? reserva.pop() : null;
-                    pts += 30; selIdx = null; ganarXP(15); msgS = `✅ ¡Par perfecto (${primera.v} + ${c.v} = 13)!`;
-                  } else {
-                    selIdx = null; msgS = `⚠️ ${primera.v} + ${c.v} no suman 13.`;
-                  }
+                    pts += 30; selIdx = null; ganarXP(15, "🃏 As del Solitario"); msgS = `✅ ¡Par perfecto (${pr.v} + ${c.v} = 13)!`;
+                  } else { selIdx = null; msgS = `⚠️ ${pr.v} + ${c.v} no suman 13.`; }
                   drawSolitario();
                 }
               };
@@ -857,17 +904,14 @@
             g.appendChild(b);
           });
           document.getElementById('sol-deal').onclick = () => {
-            if (reserva.length >= 4) {
-              for (let i=0; i<4; i++) tablero[i] = reserva.pop();
-              selIdx = null; msgS = "Nuevas cartas repartidas del mazo."; drawSolitario();
-            }
+            if (reserva.length >= 4) { for (let i=0; i<4; i++) tablero[i] = reserva.pop(); selIdx = null; msgS = "Nuevas cartas repartidas."; drawSolitario(); }
           };
           document.getElementById('sol-rst').onclick = () => pintarSelectorYJuego();
         }
         drawSolitario();
       }
 
-      // 4. DAMAS ESPAÑOLAS 8x8 COMPLETAS
+      // 4. DAMAS ESPAÑOLAS 8x8
       else if (juegoActivo === 'damas') {
         let tab = Array(8).fill(null).map((_, r) => Array(8).fill(null).map((__, c) => ((r + c) % 2 === 1 ? (r < 3 ? 'n' : (r > 4 ? 'b' : '')) : '')));
         let sel = null, turno = 'b', modoPC = true, msg = "Tu turno (Fichas Celestes abajo). Avanza en diagonal o salta para capturar.";
@@ -900,7 +944,7 @@
           const leg = sel ? movsFicha(sel.r, sel.c) : [];
           stg.innerHTML = `
             <div style="text-align:center;">
-              <h3 style="margin:0 0 4px;font-size:16px;color:#38bdf8;">🔴 Damas Españolas 8x8 (${modoPC?'vs PC':'1 vs 1'})</h3>
+              <h3 style="margin:0 0 4px;font-size:16px;color:#38bdf8;">🔴 Damas Españolas 8x8 vs PC</h3>
               <p style="font-size:12px;color:#34d399;margin:0 0 8px;">${msg}</p>
               <div id="dm-grid" style="display:grid;grid-template-columns:repeat(8,42px);width:336px;margin:0 auto 10px;border:3px solid #38bdf8;border-radius:8px;overflow:hidden;"></div>
               <button id="dm-rst" style="background:#0284c7;color:#fff;border:none;padding:6px 14px;border-radius:6px;font-weight:800;cursor:pointer;">Reiniciar Damas</button>
@@ -1142,7 +1186,7 @@
             b.style.cssText = 'background:#131f33;color:#fff;border:1px solid #334155;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;';
             b.innerText = o;
             b.onclick = () => {
-              if (o === `${utiles} IPs útiles`) { ganarXP(15); document.getElementById('vl-m').innerHTML = '<span style="color:#34d399;">✅ ¡Correcto! 2^(32-'+pref+') - 2 = '+utiles+'.</span>'; setTimeout(renderVLSM, 900); }
+              if (o === `${utiles} IPs útiles`) { ganarXP(15, "🌐 Arquitecto VLSM"); document.getElementById('vl-m').innerHTML = '<span style="color:#34d399;">✅ ¡Correcto! 2^(32-'+pref+') - 2 = '+utiles+'.</span>'; setTimeout(renderVLSM, 900); }
               else document.getElementById('vl-m').innerHTML = '<span style="color:#fca5a5;">❌ Revisa la fórmula 2^h - 2.</span>';
             };
             document.getElementById('vl-o').appendChild(b);
@@ -1180,34 +1224,42 @@
   }
 
   // ============================================================================
-  // SIMULADOR INTERACTIVO DE MATERIA / ESPECIALIDAD / ADMISIÓN (UCR, TEC, UNED)
+  // SIMULADOR DE MATERIA / UCR / TEC CON EXPLICACIÓN PASO A PASO Y CONTROL DE CANTIDAD
   // ============================================================================
   function abrirModuloCursoInteractivo(contenedor, idMateria) {
     const mat = CATALOGO_EDUCATIVO.find(x => x.id === idMateria) || CATALOGO_EDUCATIVO[0];
-    let modo = 'practica'; // 'manual' | 'practica' | 'simulacro'
     let dificultad = 'Intermedio';
-    let qActual = 0, aciertos = 0, pausado = false;
-    let mazoPreguntas = shuffleCrypto(mat.preguntas);
+    let limitePreguntas = mat.preguntas.length;
+    let mazoPreguntas = shuffleCrypto(mat.preguntas).slice(0, limitePreguntas);
+    let qActual = 0, aciertos = 0, pausado = false, respondida = false;
+
+    function reiniciarSimulacro(nuevoLimite) {
+      limitePreguntas = nuevoLimite || mat.preguntas.length;
+      mazoPreguntas = shuffleCrypto(mat.preguntas).slice(0, Math.min(limitePreguntas, mat.preguntas.length));
+      qActual = 0; aciertos = 0; pausado = false; respondida = false;
+      renderCurso();
+    }
 
     function renderCurso() {
       if (qActual >= mazoPreguntas.length) {
         const nota100 = Math.round((aciertos / mazoPreguntas.length) * 100);
         const escala800 = Math.round(200 + (aciertos / mazoPreguntas.length) * 600);
+        if (escala800 >= 700) ganarXP(35, "🏛️ Aspirante 800 UCR/TEC");
         contenedor.innerHTML = `
           <div style="background:#0b1322;border:1.5px solid #10b981;border-radius:14px;padding:24px;text-align:center;">
             <h2 style="color:#34d399;margin:0 0 8px;">🏆 ¡Evaluación Finalizada! — ${mat.titulo}</h2>
             <p style="font-size:15px;color:#fff;margin:0 0 12px;">Aciertos: <b>${aciertos}/${mazoPreguntas.length}</b> • Nota MEP: <b style="color:#38bdf8;">${nota100}%</b> • Escala Admisión UCR/TEC: <b style="color:#fbbf24;">${escala800} / 800 pts</b></p>
             <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;">
               <button id="cur-rep" style="background:#0284c7;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-weight:800;cursor:pointer;">🔄 Nuevo Intento Aleatorio (Fisher-Yates)</button>
-              <button id="cur-dl" style="background:#059669;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-weight:800;cursor:pointer;">📥 Descargar Reporte Oficial TXT/CSV</button>
+              <button id="cur-dl" style="background:#059669;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-weight:800;cursor:pointer;">📥 Descargar Reporte Oficial TXT</button>
               <button id="cur-back" style="background:#1e293b;color:#fff;border:1px solid #334155;padding:10px 18px;border-radius:8px;font-weight:800;cursor:pointer;">← Volver al Catálogo</button>
             </div>
           </div>
         `;
-        document.getElementById('cur-rep').onclick = () => { qActual = 0; aciertos = 0; mazoPreguntas = shuffleCrypto(mat.preguntas); renderCurso(); };
+        document.getElementById('cur-rep').onclick = () => reiniciarSimulacro(limitePreguntas);
         document.getElementById('cur-back').onclick = () => navegarVista('inicio');
         document.getElementById('cur-dl').onclick = () => {
-          const blob = new Blob([`REPORTE OFICIAL PRACTICATECNICA.COM\nMateria: ${mat.titulo}\nNivel Dificultad: ${dificultad}\nNota: ${nota100}%\nEscala Admision: ${escala800}/800\nFecha: ${new Date().toISOString()}`], { type: 'text/plain;charset=utf-8' });
+          const blob = new Blob([`REPORTE OFICIAL PRACTICATECNICA.COM\nMateria: ${mat.titulo}\nDificultad: ${dificultad}\nAciertos: ${aciertos}/${mazoPreguntas.length}\nNota: ${nota100}%\nEscala Admision: ${escala800}/800\nFecha: ${new Date().toISOString()}`], { type: 'text/plain;charset=utf-8' });
           const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Reporte_${mat.id}.txt`; a.click();
         };
         return;
@@ -1215,45 +1267,53 @@
 
       const item = mazoPreguntas[qActual];
       const opcionesBarajadas = shuffleCrypto([item.c, ...item.i]);
+      respondida = false;
 
       contenedor.innerHTML = `
-        <div style="background:#0b1322;border:1.5px solid #0284c7;border-radius:14px;padding:18px;">
+        <div style="background:#0b1322;border:1.5px solid #0284c7;border-radius:14px;padding:16px;">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid #1e293b;padding-bottom:10px;margin-bottom:12px;">
             <div>
               <span style="font-size:11px;background:#0284c7;color:#fff;padding:3px 8px;border-radius:5px;font-weight:800;">${mat.niveles}</span>
-              <h2 style="margin:4px 0 0;font-size:18px;color:#fff;">${mat.icono} ${mat.titulo}</h2>
+              <h2 style="margin:4px 0 0;font-size:17px;color:#fff;">${mat.icono} ${mat.titulo}</h2>
             </div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;">
-              <select id="cur-dif" style="background:#131f33;color:#fff;border:1px solid #334155;padding:6px 10px;border-radius:6px;font-size:11.5px;font-weight:700;">
-                <option value="Básico" ${dificultad==='Básico'?'selected':''}>🟢 Nivel Básico</option>
-                <option value="Intermedio" ${dificultad==='Intermedio'?'selected':''}>🟡 Nivel Intermedio</option>
-                <option value="Avanzado Turing" ${dificultad==='Avanzado Turing'?'selected':''}>🔴 Nivel Avanzado Turing</option>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+              <select id="cur-cant" title="Control de cantidad de preguntas" style="background:#131f33;color:#38bdf8;border:1px solid #38bdf8;padding:6px 9px;border-radius:6px;font-size:11.5px;font-weight:800;">
+                <option value="3" ${mazoPreguntas.length===3?'selected':''}>⚡ 3 Preguntas</option>
+                <option value="5" ${mazoPreguntas.length===5?'selected':''}>🎯 5 Preguntas</option>
+                <option value="${mat.preguntas.length}" ${mazoPreguntas.length===mat.preguntas.length?'selected':''}>📚 Banco Completo (${mat.preguntas.length})</option>
               </select>
-              <button id="cur-pausa" style="background:#b45309;color:#fff;border:none;padding:6px 11px;border-radius:6px;font-size:11.5px;font-weight:700;cursor:pointer;">${pausado?'▶️ Reanudar':'⏸️ Pausar'}</button>
-              <button id="cur-fin" style="background:#7f1d1d;color:#fecaca;border:none;padding:6px 11px;border-radius:6px;font-size:11.5px;font-weight:700;cursor:pointer;">⏹️ Finalizar</button>
-              <button id="cur-volver" style="background:#1e293b;color:#cbd5e1;border:1px solid #334155;padding:6px 11px;border-radius:6px;font-size:11.5px;font-weight:700;cursor:pointer;">← Catálogo</button>
+              <select id="cur-dif" style="background:#131f33;color:#fff;border:1px solid #334155;padding:6px 9px;border-radius:6px;font-size:11.5px;font-weight:700;">
+                <option value="Básico" ${dificultad==='Básico'?'selected':''}>🟢 Básico</option>
+                <option value="Intermedio" ${dificultad==='Intermedio'?'selected':''}>🟡 Intermedio</option>
+                <option value="Avanzado Turing" ${dificultad==='Avanzado Turing'?'selected':''}>🔴 Avanzado</option>
+              </select>
+              <button id="cur-pausa" style="background:#b45309;color:#fff;border:none;padding:6px 10px;border-radius:6px;font-size:11.5px;font-weight:700;cursor:pointer;">${pausado?'▶️ Seguir':'⏸️ Pausar'}</button>
+              <button id="cur-fin" style="background:#7f1d1d;color:#fecaca;border:none;padding:6px 10px;border-radius:6px;font-size:11.5px;font-weight:700;cursor:pointer;">⏹️ Calificar</button>
+              <button id="cur-volver" style="background:#1e293b;color:#cbd5e1;border:1px solid #334155;padding:6px 10px;border-radius:6px;font-size:11.5px;font-weight:700;cursor:pointer;">← Salir</button>
             </div>
           </div>
 
-          <div style="background:#070d19;border-left:4px solid #38bdf8;padding:12px;border-radius:8px;margin-bottom:14px;">
-            <div style="font-size:11.5px;font-weight:800;color:#38bdf8;margin-bottom:4px;">📘 MANUAL Y RESUMEN EJECUTIVO DE LA UNIDAD:</div>
-            <div style="font-size:12.5px;color:#cbd5e1;line-height:1.5;">${mat.manual}</div>
+          <div style="background:#070d19;border-left:4px solid #38bdf8;padding:11px;border-radius:8px;margin-bottom:12px;">
+            <div style="font-size:11px;font-weight:800;color:#38bdf8;margin-bottom:3px;">📘 MANUAL Y FÓRMULA CLAVE:</div>
+            <div style="font-size:12px;color:#cbd5e1;line-height:1.45;">${mat.manual}</div>
           </div>
 
-          ${pausado ? `<div style="text-align:center;padding:30px;background:#070d19;border-radius:10px;color:#fbbf24;font-weight:800;">⏸️ Simulacro en pausa. Presiona "Reanudar" cuando estés listo.</div>` : `
-            <div style="background:#070d19;border:1px solid #1e293b;border-radius:12px;padding:16px;">
+          ${pausado ? `<div style="text-align:center;padding:30px;background:#070d19;border-radius:10px;color:#fbbf24;font-weight:800;">⏸️ Simulacro en pausa. Presiona "Seguir" para continuar.</div>` : `
+            <div style="background:#070d19;border:1px solid #1e293b;border-radius:12px;padding:15px;">
               <div style="display:flex;justify-content:space-between;font-size:12px;color:#34d399;font-weight:800;margin-bottom:8px;">
-                <span>Pregunta ${qActual + 1} de ${mazoPreguntas.length} (Dificultad: ${dificultad})</span>
+                <span>Pregunta ${qActual + 1} de ${mazoPreguntas.length}</span>
                 <span>Aciertos: ${aciertos}</span>
               </div>
-              <p style="font-size:15px;font-weight:800;color:#fff;margin:0 0 14px;">${item.p}</p>
+              <p style="font-size:14.5px;font-weight:800;color:#fff;margin:0 0 14px;line-height:1.45;">${item.p}</p>
               <div id="cur-opts" style="display:flex;flex-direction:column;gap:8px;"></div>
-              <div id="cur-fb" style="margin-top:12px;font-size:12.5px;font-weight:700;"></div>
+              <div id="cur-fb" style="display:none;margin-top:12px;padding:12px;border-radius:8px;background:#0b1322;border:1px solid #38bdf8;font-size:12.5px;line-height:1.45;"></div>
+              <button id="cur-next-btn" style="display:none;margin-top:12px;background:#0284c7;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-weight:800;cursor:pointer;width:100%;">Siguiente Pregunta ➡</button>
             </div>
           `}
         </div>
       `;
 
+      document.getElementById('cur-cant').onchange = (e) => reiniciarSimulacro(parseInt(e.target.value, 10));
       document.getElementById('cur-dif').onchange = (e) => { dificultad = e.target.value; renderCurso(); };
       document.getElementById('cur-pausa').onclick = () => { pausado = !pausado; renderCurso(); };
       document.getElementById('cur-fin').onclick = () => { qActual = mazoPreguntas.length; renderCurso(); };
@@ -1261,24 +1321,32 @@
 
       if (!pausado) {
         const box = document.getElementById('cur-opts');
+        const fb = document.getElementById('cur-fb');
+        const nxt = document.getElementById('cur-next-btn');
+
         opcionesBarajadas.forEach((op, idx) => {
           const b = document.createElement('button');
-          b.style.cssText = 'background:#131f33;color:#fff;border:1px solid #334155;padding:11px 14px;border-radius:8px;text-align:left;font-size:13px;font-weight:700;cursor:pointer;';
+          b.style.cssText = 'background:#131f33;color:#fff;border:1px solid #334155;padding:11px 14px;border-radius:8px;text-align:left;font-size:13px;font-weight:700;cursor:pointer;min-height:44px;';
           b.innerText = `${String.fromCharCode(65 + idx)}) ${op}`;
           b.onclick = () => {
-            const fb = document.getElementById('cur-fb');
+            if (respondida) return;
+            respondida = true;
+            const explicacion = item.exp || 'Respuesta verificada según el temario oficial.';
             if (op === item.c) {
               aciertos++; ganarXP(15);
               b.style.background = '#064e3b'; b.style.borderColor = '#10b981';
-              fb.innerHTML = `<span style="color:#34d399;">✅ ¡Excelente! Respuesta correcta (+15 XP). Avanzando...</span>`;
+              fb.innerHTML = `<div style="color:#34d399;font-weight:900;margin-bottom:4px;">✅ ¡Respuesta Correcta! (+15 XP)</div><div style="color:#e2e8f0;"><b>Explicación paso a paso:</b> ${explicacion}</div>`;
             } else {
               b.style.background = '#7f1d1d'; b.style.borderColor = '#ef4444';
-              fb.innerHTML = `<span style="color:#fca5a5;">❌ Respuesta incorrecta. La opción correcta era: <b>${item.c}</b></span>`;
+              fb.innerHTML = `<div style="color:#fca5a5;font-weight:900;margin-bottom:4px;">❌ Incorrecto. La respuesta correcta es: ${item.c}</div><div style="color:#e2e8f0;"><b>Explicación paso a paso:</b> ${explicacion}</div>`;
             }
-            setTimeout(() => { qActual++; renderCurso(); }, 1100);
+            fb.style.display = 'block';
+            nxt.style.display = 'block';
           };
           box.appendChild(b);
         });
+
+        nxt.onclick = () => { qActual++; renderCurso(); };
       }
     }
 
@@ -1289,24 +1357,18 @@
   // SIMULADOR VIAL 2D EN CANVAS REAL (CON CONTROLES TÁCTILES MÓVIL Y TECLADO)
   // ============================================================================
   function renderSimuladorVial2D(contenedor) {
-    let puntos = 100, vel = 0, x = 260, y = 265, ang = 0, escena = 'rotonda';
+    let puntos = 100, vel = 0, x = 260, y = 265, ang = 0;
     contenedor.innerHTML = `
       <div style="background:#0b1322;border:1.5px solid #0284c7;border-radius:14px;padding:16px;text-align:center;">
         <h3 style="margin:0 0 6px;color:#38bdf8;">🚗 Simulador Vial 2D COSEVI (Límites Estrictos de Calzada & Controles Móviles)</h3>
-        <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
-          <select id="sv-esc" style="background:#131f33;color:#fff;border:1px solid #38bdf8;padding:6px 10px;border-radius:6px;font-weight:700;">
-            <option value="rotonda">Pista 1: Rotonda Multi-Carril (Antihorario Estricto)</option>
-            <option value="escolar">Pista 2: Zona Escolar (Máx 25 km/h) y Paso Peatonal</option>
-          </select>
-          <button id="sv-rst" style="background:#0284c7;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-weight:800;cursor:pointer;">Reiniciar Posición</button>
-        </div>
         <div id="sv-hud" style="font-size:12.5px;font-weight:800;color:#34d399;margin-bottom:8px;">Puntos COSEVI: 100/100 • Velocidad: 0 km/h • Circulación por la derecha</div>
         <canvas id="sv-canvas" width="520" height="320" style="max-width:100%;background:#064e3b;border:3px solid #334155;border-radius:12px;touch-action:none;"></canvas>
         <div style="display:flex;justify-content:center;gap:8px;margin-top:10px;flex-wrap:wrap;">
-          <button id="sv-left" style="background:#1e293b;color:#fff;border:1px solid #38bdf8;padding:10px 18px;border-radius:8px;font-weight:900;cursor:pointer;">⬅️ Giro Izq</button>
-          <button id="sv-up" style="background:#059669;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-weight:900;cursor:pointer;">⬆️ Avanzar</button>
-          <button id="sv-down" style="background:#7f1d1d;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-weight:900;cursor:pointer;">⬇️ Frenar</button>
-          <button id="sv-right" style="background:#1e293b;color:#fff;border:1px solid #38bdf8;padding:10px 18px;border-radius:8px;font-weight:900;cursor:pointer;">➡️ Giro Der</button>
+          <button id="sv-left" style="background:#1e293b;color:#fff;border:1px solid #38bdf8;padding:11px 16px;border-radius:8px;font-weight:900;cursor:pointer;min-height:44px;">⬅️ Giro Izq</button>
+          <button id="sv-up" style="background:#059669;color:#fff;border:none;padding:11px 18px;border-radius:8px;font-weight:900;cursor:pointer;min-height:44px;">⬆️ Avanzar</button>
+          <button id="sv-down" style="background:#7f1d1d;color:#fff;border:none;padding:11px 16px;border-radius:8px;font-weight:900;cursor:pointer;min-height:44px;">⬇️ Retroceder</button>
+          <button id="sv-right" style="background:#1e293b;color:#fff;border:1px solid #38bdf8;padding:11px 16px;border-radius:8px;font-weight:900;cursor:pointer;min-height:44px;">➡️ Giro Der</button>
+          <button id="sv-rst" style="background:#0284c7;color:#fff;border:none;padding:11px 14px;border-radius:8px;font-weight:800;cursor:pointer;min-height:44px;">🔄 Reiniciar</button>
         </div>
       </div>
     `;
@@ -1318,24 +1380,19 @@
     function dibujarPista() {
       ctx.clearRect(0, 0, 520, 320);
       ctx.fillStyle = '#064e3b'; ctx.fillRect(0, 0, 520, 320);
-
-      // Calles de acceso
       ctx.fillStyle = '#334155';
       ctx.fillRect(215, 0, 90, 320);
       ctx.fillRect(0, 115, 520, 90);
 
-      // Rotonda central de 2 carriles
       ctx.beginPath(); ctx.arc(260, 160, 115, 0, Math.PI * 2); ctx.fillStyle = '#334155'; ctx.fill();
       ctx.beginPath(); ctx.arc(260, 160, 80, 0, Math.PI * 2); ctx.strokeStyle = '#fbbf24'; ctx.setLineDash([6, 6]); ctx.lineWidth = 2; ctx.stroke(); ctx.setLineDash([]);
       ctx.beginPath(); ctx.arc(260, 160, 45, 0, Math.PI * 2); ctx.fillStyle = '#15803d'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#ffffff'; ctx.stroke();
 
-      // Señales viales
       ctx.fillStyle = '#ef4444'; ctx.fillRect(310, 215, 36, 18);
       ctx.fillStyle = '#fff'; ctx.font = 'bold 9px sans-serif'; ctx.fillText('CEDA', 315, 227);
       ctx.fillStyle = '#f59e0b'; ctx.fillRect(160, 85, 52, 18);
       ctx.fillStyle = '#000'; ctx.fillText('MÁX 25', 165, 97);
 
-      // Vehículo controlado con límites perimetrales (nunca se sale del mapa)
       ctx.save();
       ctx.translate(x, y);
       ctx.rotate(ang);
@@ -1378,24 +1435,24 @@
   // ============================================================================
   function renderEmuladores(contenedor) {
     contenedor.innerHTML = `
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;">
         <div style="background:#0b1322;border:1.5px solid #10b981;border-radius:14px;padding:16px;">
-          <h3 style="margin:0 0 6px;color:#34d399;">📊 Simulador de Hoja Electrónica Excel / Contabilidad (Sin Cero Pegado)</h3>
-          <p style="font-size:12px;color:#94a3b8;margin-bottom:10px;">Borra o escribe libremente en cualquier celda; el campo queda limpio sin trabar un cero:</p>
-          <div style="display:grid;grid-template-columns:80px 1fr 1fr;gap:6px;margin-bottom:10px;font-size:12px;">
-            <div style="font-weight:800;color:#38bdf8;">Celda</div><div style="font-weight:800;color:#38bdf8;">Concepto Contable</div><div style="font-weight:800;color:#38bdf8;">Monto (₡)</div>
+          <h3 style="margin:0 0 6px;color:#34d399;">📊 Simulador Excel / Contabilidad (Sin Cero Pegado)</h3>
+          <p style="font-size:12px;color:#94a3b8;margin-bottom:10px;">Borra o escribe libremente en cualquier celda sin que se trabe un cero:</p>
+          <div style="display:grid;grid-template-columns:60px 1fr 1fr;gap:6px;margin-bottom:10px;font-size:12px;">
+            <div style="font-weight:800;color:#38bdf8;">Celda</div><div style="font-weight:800;color:#38bdf8;">Detalle</div><div style="font-weight:800;color:#38bdf8;">Monto (₡)</div>
             <div>A1</div><input value="Ventas Gravadas" style="background:#060c17;border:1px solid #334155;color:#fff;padding:6px;border-radius:6px;"/><input class="ex-val" type="text" inputmode="decimal" value="150000" placeholder="Monto limpio" style="background:#060c17;border:1px solid #38bdf8;color:#fff;padding:6px;border-radius:6px;"/>
-            <div>A2</div><input value="Servicios TI" style="background:#060c17;border:1px solid #334155;color:#fff;padding:6px;border-radius:6px;"/><input class="ex-val" type="text" inputmode="decimal" value="85000" placeholder="Monto limpio" style="background:#060c17;border:1px solid #38bdf8;color:#fff;padding:6px;border-radius:6px;"/>
-            <div>A3</div><input value="Equipo Redes" style="background:#060c17;border:1px solid #334155;color:#fff;padding:6px;border-radius:6px;"/><input class="ex-val" type="text" inputmode="decimal" value="" placeholder="Escribe monto..." style="background:#060c17;border:1px solid #38bdf8;color:#fff;padding:6px;border-radius:6px;"/>
+            <div>A2</div><input value="Servicios Web" style="background:#060c17;border:1px solid #334155;color:#fff;padding:6px;border-radius:6px;"/><input class="ex-val" type="text" inputmode="decimal" value="85000" placeholder="Monto limpio" style="background:#060c17;border:1px solid #38bdf8;color:#fff;padding:6px;border-radius:6px;"/>
+            <div>A3</div><input value="Auditoría Red" style="background:#060c17;border:1px solid #334155;color:#fff;padding:6px;border-radius:6px;"/><input class="ex-val" type="text" inputmode="decimal" value="" placeholder="Escribe monto..." style="background:#060c17;border:1px solid #38bdf8;color:#fff;padding:6px;border-radius:6px;"/>
           </div>
           <div id="ex-res" style="background:#060c17;padding:10px;border-radius:8px;font-family:monospace;color:#34d399;font-size:12.5px;font-weight:800;">=SUMA(C1:C3): ₡235,000 | IVA 13%: ₡30,550</div>
         </div>
 
         <div style="background:#0b1322;border:1.5px solid #0284c7;border-radius:14px;padding:16px;">
           <h3 style="margin:0 0 6px;color:#38bdf8;">💻 Terminal Interactiva CLI (Ciberseguridad, Redes y Turing)</h3>
-          <p style="font-size:12px;color:#94a3b8;margin-bottom:8px;">Comandos disponibles: <code>help</code>, <code>vlsm</code>, <code>sha256</code>, <code>nmap</code>, <code>whoami</code></p>
+          <p style="font-size:12px;color:#94a3b8;margin-bottom:8px;">Comandos: <code>help</code>, <code>vlsm</code>, <code>sha256</code>, <code>nmap</code>, <code>whoami</code></p>
           <div id="cli-out" style="background:#060c17;border:1px solid #1e293b;border-radius:8px;padding:10px;height:140px;overflow-y:auto;font-family:monospace;font-size:11.5px;color:#34d399;margin-bottom:8px;">
-            [SICAI-OS v146.0] Terminal lista. Escribe un comando abajo.
+            [SICAI-OS v147.0] Terminal lista. Escribe un comando abajo.
           </div>
           <div style="display:flex;gap:6px;">
             <input id="cli-in" type="text" placeholder="Ej: nmap o vlsm" style="flex:1;background:#060c17;border:1px solid #38bdf8;color:#fff;padding:8px;border-radius:6px;font-family:monospace;"/>
@@ -1431,38 +1488,37 @@
   }
 
   // ============================================================================
-  // ENRUTADOR MULTI-PANTALLA PRINCIPAL (INICIO, MATERIAS, UCR/TEC, 12 JUEGOS, VIAL, GESTIÓN)
+  // ENRUTADOR MULTI-PANTALLA PRINCIPAL (CON HISTORIAL DEL BOTÓN ATRÁS)
   // ============================================================================
-  let vistaActualGlobal = 'inicio';
   let filtroCategoria = 'todos';
 
-  window.navegarVista = function (vista, param) {
-    vistaActualGlobal = vista;
+  window.navegarVista = function (vista, param, omitirPush) {
     document.body.classList.remove('bds-ver-landing-base');
     const shell = document.getElementById('bds-app-shell');
     if (!shell) return;
+
+    if (!omitirPush) {
+      history.pushState({ vista, param }, '', `#${vista}${param ? '-' + param : ''}`);
+    }
 
     document.querySelectorAll('.bds-subnav-item, .bds-dock-btn').forEach(b => {
       b.classList.toggle('active', b.getAttribute('data-vista') === vista);
     });
 
-    if (vista === 'curso') { abrirModuloCursoInteractivo(shell, param); return; }
-    if (vista === 'juegos') { renderSala12Juegos(shell, param || 'ajedrez'); return; }
-    if (vista === 'vial') { renderSimuladorVial2D(shell); return; }
-    if (vista === 'emulador') { renderEmuladores(shell); return; }
-    if (vista === 'landing_base') {
-      document.body.classList.add('bds-ver-landing-base');
-      return;
-    }
+    if (vista === 'curso') { abrirModuloCursoInteractivo(shell, param); window.scrollTo(0, 0); return; }
+    if (vista === 'juegos') { renderSala12Juegos(shell, param || 'ajedrez'); window.scrollTo(0, 0); return; }
+    if (vista === 'vial') { renderSimuladorVial2D(shell); window.scrollTo(0, 0); return; }
+    if (vista === 'emulador') { renderEmuladores(shell); window.scrollTo(0, 0); return; }
+    if (vista === 'landing_base') { document.body.classList.add('bds-ver-landing-base'); return; }
 
     if (vista === 'gestion') {
       const s = getSesion();
       shell.innerHTML = `
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px;">
           <div class="bds-card-pro">
             <div>
-              <h3 style="margin:0 0 6px;color:#38bdf8;">📋 Permisos y Tardías (Personal Docente / Admin)</h3>
-              <p style="font-size:12px;color:#94a3b8;">Sincronizado con la sesión activa de <b>${s.nombre}</b>:</p>
+              <h3 style="margin:0 0 6px;color:#38bdf8;">📋 Permisos y Tardías (Personal)</h3>
+              <p style="font-size:12px;color:#94a3b8;">Sincronizado con la cuenta activa de <b>${s.nombre}</b>:</p>
               <input value="${s.nombre} (${s.rol})" readonly style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;color:#fff;padding:8px;border-radius:6px;margin-bottom:8px;"/>
               <select style="width:100%;background:#060c17;border:1px solid #334155;color:#fff;padding:8px;border-radius:6px;margin-bottom:8px;">
                 <option>Cita Médica CCSS / INS</option>
@@ -1470,7 +1526,7 @@
                 <option>Justificación de Marca de Reloj</option>
               </select>
             </div>
-            <button onclick="this.innerText='✅ Boleta Firmada con SHA-256';" style="background:#059669;color:#fff;border:none;padding:9px;border-radius:7px;font-weight:800;cursor:pointer;">Emitir Boleta Oficial</button>
+            <button onclick="this.innerText='✅ Boleta Firmada con SHA-256';" style="background:#059669;color:#fff;border:none;padding:10px;border-radius:7px;font-weight:800;cursor:pointer;">Emitir Boleta Oficial</button>
           </div>
 
           <div class="bds-card-pro">
@@ -1479,7 +1535,7 @@
               <p style="font-size:12px;color:#94a3b8;">Envío directo al Profesor Guía (${s.seccion}):</p>
               <textarea rows="3" placeholder="Detalle médico o justificación del encargado legal..." style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;color:#fff;padding:8px;border-radius:6px;margin-bottom:8px;"></textarea>
             </div>
-            <button onclick="this.innerText='✅ Enviado a Profesor Guía';" style="background:#0284c7;color:#fff;border:none;padding:9px;border-radius:7px;font-weight:800;cursor:pointer;">Enviar Justificante</button>
+            <button onclick="this.innerText='✅ Enviado a Profesor Guía';" style="background:#0284c7;color:#fff;border:none;padding:10px;border-radius:7px;font-weight:800;cursor:pointer;">Enviar Justificante</button>
           </div>
 
           <div class="bds-card-pro" style="text-align:center;">
@@ -1496,9 +1552,8 @@
       return;
     }
 
-    // VISTA POR DEFECTO: MAPA GAMIFICADO DE MATERIAS, ESPECIALIDADES Y ADMISIÓN UCR/TEC/UNED
     if (vista === 'admision') filtroCategoria = 'admision';
-    else if (vista === 'materias') filtroCategoria = 'todos';
+    else if (vista === 'inicio') filtroCategoria = 'todos';
 
     function renderCatalogo(textoBusqueda) {
       const q = (textoBusqueda || '').toLowerCase().trim();
@@ -1510,42 +1565,44 @@
 
       const xpObj = getXP();
       shell.innerHTML = `
-        <div style="background:linear-gradient(135deg,#0f2942 0%,#0b1322 100%);border:1px solid #0284c7;border-radius:14px;padding:16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-          <div>
-            <span style="background:#10b981;color:#022c22;font-size:10.5px;font-weight:900;padding:3px 8px;border-radius:5px;">ARQUITECTURA SICAI / TURING v146.0</span>
-            <h2 style="margin:6px 0 2px;font-size:19px;color:#fff;">Ruta de Aprendizaje Gamificada & Simulacros Oficiales</h2>
-            <p style="margin:0;font-size:12px;color:#cbd5e1;">Selecciona cualquier materia básica, especialidad técnica CTP o prueba de admisión (UCR, TEC, UNA, UNED, UTN):</p>
-          </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button onclick="navegarVista('juegos','ajedrez')" style="background:#7c3aed;color:#fff;border:none;padding:9px 14px;border-radius:8px;font-size:12px;font-weight:900;cursor:pointer;">♟️ Ajedrez & 12 Juegos</button>
-            <button onclick="navegarVista('vial')" style="background:#0284c7;color:#fff;border:none;padding:9px 14px;border-radius:8px;font-size:12px;font-weight:900;cursor:pointer;">🚗 Simulador Vial 2D</button>
+        <div style="background:linear-gradient(135deg,#0f2942 0%,#0b1322 100%);border:1px solid #0284c7;border-radius:14px;padding:14px;margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+            <div>
+              <span style="background:#10b981;color:#022c22;font-size:10px;font-weight:900;padding:3px 8px;border-radius:5px;">RANGO: ${xpObj.nivel.toUpperCase()}</span>
+              <h2 style="margin:6px 0 2px;font-size:18px;color:#fff;">Centro de Estudio Gamificado, Admisión UCR/TEC y 12 Juegos</h2>
+              <div style="font-size:11.5px;color:#38bdf8;display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;">
+                ${(xpObj.medallas || []).map(med => `<span style="background:#131f33;border:1px solid #26354d;padding:2px 8px;border-radius:99px;">${med}</span>`).join('')}
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button onclick="navegarVista('curso','adm_ucr_una')" style="background:#f59e0b;color:#020617;border:none;padding:9px 13px;border-radius:8px;font-size:11.5px;font-weight:900;cursor:pointer;">🔥 Reto Diario UCR/TEC (+50 XP)</button>
+              <button onclick="navegarVista('juegos','domino')" style="background:#7c3aed;color:#fff;border:none;padding:9px 13px;border-radius:8px;font-size:11.5px;font-weight:900;cursor:pointer;">🁣 Dominó & Solitario</button>
+            </div>
           </div>
         </div>
 
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center;">
-          <input id="cat-search" type="search" value="${textoBusqueda||''}" placeholder="🔍 Buscar Español, Química, Redes, Ciberseguridad, UCR, TEC, Contabilidad..." style="flex:1;min-width:220px;background:#0b1322;border:1.5px solid #38bdf8;color:#fff;padding:10px 14px;border-radius:10px;font-size:13px;"/>
-          <button data-f="todos" class="btn-f-cat" style="padding:9px 13px;border-radius:8px;border:1px solid #334155;background:${filtroCategoria==='todos'?'#0284c7':'#131f33'};color:#fff;font-size:12px;font-weight:800;cursor:pointer;">📚 Todo (${CATALOGO_EDUCATIVO.length})</button>
-          <button data-f="basica" class="btn-f-cat" style="padding:9px 13px;border-radius:8px;border:1px solid #334155;background:${filtroCategoria==='basica'?'#0284c7':'#131f33'};color:#fff;font-size:12px;font-weight:800;cursor:pointer;">📖 Materias Básicas MEP</button>
-          <button data-f="ctp" class="btn-f-cat" style="padding:9px 13px;border-radius:8px;border:1px solid #334155;background:${filtroCategoria==='ctp'?'#0284c7':'#131f33'};color:#fff;font-size:12px;font-weight:800;cursor:pointer;">💻 Especialidades CTP</button>
-          <button data-f="admision" class="btn-f-cat" style="padding:9px 13px;border-radius:8px;border:1px solid #334155;background:${filtroCategoria==='admision'?'#0284c7':'#131f33'};color:#fff;font-size:12px;font-weight:800;cursor:pointer;">🏛️ UCR / TEC / UNA / UNED / CTP</button>
+        <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px;align-items:center;">
+          <input id="cat-search" type="search" value="${textoBusqueda||''}" placeholder="🔍 Buscar UCR, TEC, Español, Química, Redes, Ciberseguridad..." style="flex:1;min-width:210px;background:#0b1322;border:1.5px solid #38bdf8;color:#fff;padding:10px 13px;border-radius:10px;font-size:13px;"/>
+          <button data-f="todos" class="btn-f-cat" style="padding:9px 12px;border-radius:8px;border:1px solid #334155;background:${filtroCategoria==='todos'?'#0284c7':'#131f33'};color:#fff;font-size:11.5px;font-weight:800;cursor:pointer;">📚 Todo (${CATALOGO_EDUCATIVO.length})</button>
+          <button data-f="admision" class="btn-f-cat" style="padding:9px 12px;border-radius:8px;border:1px solid #334155;background:${filtroCategoria==='admision'?'#0284c7':'#131f33'};color:#fff;font-size:11.5px;font-weight:800;cursor:pointer;">🏛️ UCR / TEC / UNA / UNED</button>
+          <button data-f="basica" class="btn-f-cat" style="padding:9px 12px;border-radius:8px;border:1px solid #334155;background:${filtroCategoria==='basica'?'#0284c7':'#131f33'};color:#fff;font-size:11.5px;font-weight:800;cursor:pointer;">📖 Básicas MEP</button>
+          <button data-f="ctp" class="btn-f-cat" style="padding:9px 12px;border-radius:8px;border:1px solid #334155;background:${filtroCategoria==='ctp'?'#0284c7':'#131f33'};color:#fff;font-size:11.5px;font-weight:800;cursor:pointer;">💻 Especialidades CTP</button>
         </div>
 
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:12px;">
           ${filtrados.map(m => `
             <div class="bds-card-pro">
               <div>
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
                   <span style="font-size:24px;">${m.icono}</span>
-                  <span style="font-size:10.5px;background:#131f33;color:#38bdf8;border:1px solid #26354d;padding:3px 8px;border-radius:5px;font-weight:800;">${m.niveles}</span>
+                  <span style="font-size:10px;background:#131f33;color:#38bdf8;border:1px solid #26354d;padding:3px 8px;border-radius:5px;font-weight:800;">${m.niveles} • ${m.preguntas.length} Ítems</span>
                 </div>
-                <h3 style="margin:0 0 6px;font-size:15.5px;color:#fff;">${m.titulo}</h3>
+                <h3 style="margin:0 0 6px;font-size:15px;color:#fff;">${m.titulo}</h3>
                 <p style="margin:0 0 12px;font-size:12px;color:#94a3b8;line-height:1.45;">${m.desc}</p>
               </div>
-              <div style="display:flex;gap:6px;">
-                <button data-cid="${m.id}" class="btn-abrir-curso" style="flex:1;background:#0284c7;color:#fff;border:none;padding:9px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">
-                  🎯 Práctica, Manual & Simulacro →
-                </button>
-              </div>
+              <button data-cid="${m.id}" class="btn-abrir-curso" style="width:100%;background:#0284c7;color:#fff;border:none;padding:10px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;min-height:42px;">
+                🎯 Abrir Manual & Simulacro Explicado →
+              </button>
             </div>
           `).join('')}
         </div>
@@ -1571,8 +1628,16 @@
     renderCatalogo('');
   };
 
+  window.addEventListener('popstate', (e) => {
+    if (e.state && e.state.vista) {
+      navegarVista(e.state.vista, e.state.param, true);
+    } else if (getSesion()) {
+      navegarVista('inicio', null, true);
+    }
+  });
+
   // ============================================================================
-  // MENÚ HAMBURGUESA DESLIZABLE (VISIBLE EN CELULAR Y ESCRITORIO)
+  // MENÚ HAMBURGUESA CATEGORIZADO (OPTIMIZADO PARA CELULAR PEQUEÑO)
   // ============================================================================
   function abrirMenuHamburguesaMovil() {
     let old = document.getElementById('bds-slide-drawer');
@@ -1581,23 +1646,30 @@
     const s = getSesion();
     const drw = document.createElement('div');
     drw.id = 'bds-slide-drawer';
-    drw.style.cssText = 'position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:200000;display:flex;justify-content:flex-end;';
+    drw.style.cssText = 'position:fixed;inset:0;background:rgba(2,6,23,0.88);z-index:200000;display:flex;justify-content:flex-start;';
     drw.innerHTML = `
-      <div style="width:300px;max-width:85vw;background:#0b1322;border-left:2px solid #0284c7;height:100%;padding:16px;box-sizing:border-box;overflow-y:auto;display:flex;flex-direction:column;gap:8px;">
+      <div style="width:310px;max-width:86vw;background:#0b1322;border-right:2px solid #0284c7;height:100%;padding:16px;box-sizing:border-box;overflow-y:auto;display:flex;flex-direction:column;gap:7px;">
         <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1e293b;padding-bottom:10px;">
-          <b style="color:#38bdf8;font-size:14px;">☰ Menú Rápido CTPMN</b>
-          <button id="drw-close" style="background:#7f1d1d;color:#fff;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;font-weight:800;">✕</button>
+          <b style="color:#38bdf8;font-size:14.5px;">☰ Navegación Rápida</b>
+          <button id="drw-close" style="background:#7f1d1d;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-weight:800;">Cerrar ✕</button>
         </div>
         <div style="font-size:11.5px;color:#cbd5e1;padding:6px 0;border-bottom:1px solid #1e293b;">
           👤 <b>${s.nombre}</b><br><span style="color:#34d399;">${s.rol} • ${s.seccion}</span>
         </div>
-        <button class="drw-it" data-v="inicio" style="text-align:left;background:#131f33;color:#fff;border:1px solid #26354d;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">🏠 Mapa de Materias y Especialidades</button>
-        <button class="drw-it" data-v="admision" style="text-align:left;background:#131f33;color:#fff;border:1px solid #26354d;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">🏛️ Simulacros UCR / TEC / UNA / UNED</button>
-        <button class="drw-it" data-v="juegos" style="text-align:left;background:#7c3aed;color:#fff;border:none;padding:10px;border-radius:8px;font-weight:800;cursor:pointer;">🎮 12 Juegos (Ajedrez, Dominó, Solitario)</button>
+
+        <div style="font-size:10.5px;font-weight:900;color:#94a3b8;margin-top:4px;">JUEGOS & SIMULADORES</div>
+        <button class="drw-it" data-v="juegos" data-p="ajedrez" style="text-align:left;background:#7c3aed;color:#fff;border:none;padding:10px;border-radius:8px;font-weight:800;cursor:pointer;">♟️ Ajedrez FIDE (Intacto)</button>
+        <button class="drw-it" data-v="juegos" data-p="domino" style="text-align:left;background:#131f33;color:#fff;border:1px solid #26354d;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">🁣 Dominó Doble-6 Pro</button>
+        <button class="drw-it" data-v="juegos" data-p="solitario" style="text-align:left;background:#131f33;color:#fff;border:1px solid #26354d;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">🃏 Solitario Dual (Pirámide / Escalera)</button>
         <button class="drw-it" data-v="vial" style="text-align:left;background:#131f33;color:#fff;border:1px solid #26354d;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">🚗 Simulador Vial 2D COSEVI</button>
-        <button class="drw-it" data-v="emulador" style="text-align:left;background:#131f33;color:#fff;border:1px solid #26354d;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">📊 Emulador Excel & Consola CLI</button>
+        <button class="drw-it" data-v="emulador" style="text-align:left;background:#131f33;color:#fff;border:1px solid #26354d;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">📊 Simulador Excel & Consola CLI</button>
+
+        <div style="font-size:10.5px;font-weight:900;color:#94a3b8;margin-top:6px;">ADMISIÓN & MATERIAS</div>
+        <button class="drw-it" data-v="curso" data-p="adm_ucr_una" style="text-align:left;background:#131f33;color:#38bdf8;border:1px solid #26354d;padding:10px;border-radius:8px;font-weight:800;cursor:pointer;">🏛️ Simulacro PAA UCR / UNA (800 pts)</button>
+        <button class="drw-it" data-v="curso" data-p="adm_tec" style="text-align:left;background:#131f33;color:#38bdf8;border:1px solid #26354d;padding:10px;border-radius:8px;font-weight:800;cursor:pointer;">⚙️ Simulacro Admisión TEC (800 pts)</button>
+        <button class="drw-it" data-v="inicio" style="text-align:left;background:#131f33;color:#fff;border:1px solid #26354d;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">📚 Todas las Materias y Especialidades</button>
         <button class="drw-it" data-v="gestion" style="text-align:left;background:#131f33;color:#fff;border:1px solid #26354d;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">📋 Permisos, Tardías y Carné QR</button>
-        <button class="drw-it" data-v="landing_base" style="text-align:left;background:#1e293b;color:#38bdf8;border:1px solid #38bdf8;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">🏫 Ver Landing Base / Módulos Clásicos</button>
+
         <button id="drw-logout" style="margin-top:auto;background:#7f1d1d;color:#fecaca;border:none;padding:11px;border-radius:8px;font-weight:800;cursor:pointer;">🚪 Cerrar Sesión Segura</button>
       </div>
     `;
@@ -1605,7 +1677,12 @@
     document.getElementById('drw-close').onclick = () => drw.remove();
     document.getElementById('drw-logout').onclick = () => { drw.remove(); cerrarSesionTotal(); };
     drw.querySelectorAll('.drw-it').forEach(b => {
-      b.onclick = () => { const v = b.getAttribute('data-v'); drw.remove(); navegarVista(v); };
+      b.onclick = () => {
+        const v = b.getAttribute('data-v');
+        const p = b.getAttribute('data-p');
+        drw.remove();
+        navegarVista(v, p);
+      };
     });
   }
 
@@ -1627,7 +1704,7 @@
     hdr.id = 'bds-pro-header';
     hdr.innerHTML = `
       <div style="display:flex;align-items:center;gap:8px;">
-        <button id="btn-hamburger-pro" title="Menú Completo" style="background:#0284c7;color:#fff;border:none;width:36px;height:36px;border-radius:8px;font-size:18px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;">☰</button>
+        <button id="btn-hamburger-pro" aria-label="Abrir Menú" style="background:#0284c7;color:#fff;border:none;min-width:40px;height:40px;border-radius:8px;font-size:19px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;">☰</button>
         <img src="${SVG_CTP}" alt="CTP" style="height:32px;width:32px;"/>
         <div>
           <div style="font-size:13.5px;font-weight:900;color:#fff;display:flex;align-items:center;gap:5px;">
@@ -1642,21 +1719,20 @@
 
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
         <span id="bds-xp-counter" style="background:#131f33;border:1px solid #fbbf24;color:#fbbf24;padding:5px 9px;border-radius:7px;font-size:11px;font-weight:800;">🔥 ${xpObj.racha}d | ⚡ ${xpObj.xp} XP</span>
-        <button id="btn-top-games" style="background:#7c3aed;color:#fff;border:none;padding:7px 11px;border-radius:7px;font-size:11.5px;font-weight:900;cursor:pointer;">🎮 12 Juegos</button>
-        <button id="btn-top-logout" style="background:#7f1d1d;color:#fecaca;border:none;padding:7px 10px;border-radius:7px;font-size:11px;font-weight:800;cursor:pointer;">Salir</button>
+        <button id="btn-top-games" style="background:#7c3aed;color:#fff;border:none;padding:8px 11px;border-radius:7px;font-size:11.5px;font-weight:900;cursor:pointer;">🎮 12 Juegos</button>
+        <button id="btn-top-logout" style="background:#7f1d1d;color:#fecaca;border:none;padding:8px 10px;border-radius:7px;font-size:11px;font-weight:800;cursor:pointer;">Salir</button>
       </div>
     `;
 
     const sub = document.createElement('div');
     sub.id = 'bds-subheader-nav';
     const NAV_ITEMS = [
-      { v: 'inicio', label: '🏠 1. Materias & Especialidades CTP' },
-      { v: 'admision', label: '🏛️ 2. Simulacros UCR / TEC / UNA / UNED' },
+      { v: 'inicio', label: '🏠 1. Materias & Especialidades' },
+      { v: 'admision', label: '🏛️ 2. UCR / TEC / UNA / UNED' },
       { v: 'juegos', label: '🎮 3. 12 Juegos (Ajedrez, Dominó, Solitario)' },
       { v: 'vial', label: '🚗 4. Simulador Vial 2D' },
-      { v: 'emulador', label: '📊 5. Excel & Consola CLI' },
-      { v: 'gestion', label: '📋 6. Permisos & Carné QR' },
-      { v: 'landing_base', label: '🏫 7. Vista Clásica' }
+      { v: 'emulador', label: '📊 5. Excel & CLI' },
+      { v: 'gestion', label: '📋 6. Permisos & QR' }
     ];
     sub.innerHTML = NAV_ITEMS.map(m => `<button data-vista="${m.v}" class="bds-subnav-item">${m.label}</button>`).join('');
 
@@ -1666,11 +1742,11 @@
     const dock = document.createElement('nav');
     dock.id = 'bds-mobile-dock';
     dock.innerHTML = `
-      <button class="bds-dock-btn active" data-vista="inicio"><span style="font-size:16px;">📚</span><span>Materias</span></button>
-      <button class="bds-dock-btn" data-vista="admision"><span style="font-size:16px;">🏛️</span><span>UCR/TEC</span></button>
-      <button class="bds-dock-btn" data-vista="juegos"><span style="font-size:16px;">🎮</span><span>12 Juegos</span></button>
-      <button class="bds-dock-btn" data-vista="vial"><span style="font-size:16px;">🚗</span><span>Vial 2D</span></button>
-      <button class="bds-dock-btn" id="dock-menu-more"><span style="font-size:16px;">☰</span><span>Menú</span></button>
+      <button class="bds-dock-btn active" data-vista="inicio"><span style="font-size:17px;">📚</span><span>Materias</span></button>
+      <button class="bds-dock-btn" data-vista="admision"><span style="font-size:17px;">🏛️</span><span>UCR/TEC</span></button>
+      <button class="bds-dock-btn" data-vista="juegos"><span style="font-size:17px;">🎮</span><span>12 Juegos</span></button>
+      <button class="bds-dock-btn" data-vista="vial"><span style="font-size:17px;">🚗</span><span>Vial 2D</span></button>
+      <button class="bds-dock-btn" id="dock-menu-more"><span style="font-size:17px;">☰</span><span>Menú</span></button>
     `;
 
     document.body.prepend(shell);
@@ -1688,15 +1764,11 @@
     });
 
     iniciarObservadorSoberano();
-    navegarVista('inicio');
+    navegarVista('inicio', null, true);
   }
 
-  window.abrirCentroMaestroBDS = function (mod, sub) {
-    navegarVista(mod || 'juegos', sub || 'ajedrez');
-  };
-  window.abrirSalaJuegosHD = function (juego) {
-    navegarVista('juegos', juego || 'ajedrez');
-  };
+  window.abrirCentroMaestroBDS = function (mod, sub) { navegarVista(mod || 'juegos', sub || 'ajedrez'); };
+  window.abrirSalaJuegosHD = function (juego) { navegarVista('juegos', juego || 'ajedrez'); };
 
   window.addEventListener('DOMContentLoaded', () => {
     inyectarCSSGate();

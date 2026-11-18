@@ -1,0 +1,18 @@
+﻿
+/* --- REGLAS SUPREMAS RESPONSIVE (MOBILE-FIRST) --- */
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+/* Ajustes táctiles y de contenedores para Tablets y Celulares */
+@media (max-width: 768px) {
+  body {
+    font-size: 15px;
+  }
+  .container, max-w-7xl {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}

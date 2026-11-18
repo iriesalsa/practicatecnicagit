@@ -1,4 +1,4 @@
-const CACHE_NAME = "bds-practicatecnica-v151-tesla";
+const CACHE_NAME = "bds-practicatecnica-v151-turbo3000";
 const ASSETS = ["/", "/index.html", "/bds-auth-guard.js"];
 
 self.addEventListener("install", (e) => {

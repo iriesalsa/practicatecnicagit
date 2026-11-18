@@ -1,5 +1,5 @@
 (function () {
-  const SESSION_KEY = "bds_auth_gate_v118_elite";
+  const SESSION_KEY = "bds_auth_gate_v119_qa";
   const NIVELES = [7, 8, 9, 10, 11, 12];
   const SECCIONES_COLEGIO = [];
   NIVELES.forEach(niv => { [1, 2, 3, 4].forEach(grp => SECCIONES_COLEGIO.push(`${niv}-${grp}`)); });
@@ -35,9 +35,9 @@
   }
 
   function inyectarCSSGate() {
-    if (document.getElementById('bds-v118-css')) return;
+    if (document.getElementById('bds-v119-css')) return;
     const st = document.createElement('style');
-    st.id = 'bds-v118-css';
+    st.id = 'bds-v119-css';
     st.innerHTML = `
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
       html, body { font-family: 'Inter', system-ui, sans-serif !important; background: #060c17 !important; color: #f8fafc !important; margin: 0; padding: 0; }
@@ -65,11 +65,11 @@
 
   window.mostrarLoginEstricto = function () {
     inyectarCSSGate();
-    let old = document.getElementById('bds-login-v118');
+    let old = document.getElementById('bds-login-v119');
     if (old) old.remove();
 
     const gate = document.createElement('div');
-    gate.id = 'bds-login-v118';
+    gate.id = 'bds-login-v119';
     gate.style.cssText = 'position:fixed;inset:0;background:#060c17;z-index:300000;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;';
 
     gate.innerHTML = `
@@ -80,12 +80,12 @@
         </div>
         <div style="text-align:center;margin-bottom:18px;">
           <h1 style="margin:0;font-size:21px;font-weight:800;color:#fff;">prac<span style="color:#0ea5e9;">TICA</span>tecnica.com</h1>
-          <p style="margin:4px 0 0;font-size:11.5px;color:#94a3b8;">Acceso Institucional Seguro • CTP Mercedes Norte</p>
+          <p style="margin:4px 0 0;font-size:11.5px;color:#94a3b8;">Acceso Calidad Total BDS • CTP Mercedes Norte</p>
         </div>
 
-        <form id="f-login-v118" style="display:flex;flex-direction:column;gap:10px;">
+        <form id="f-login-v119" style="display:flex;flex-direction:column;gap:10px;">
           <div>
-            <label style="display:block;font-size:11px;color:#94a3b8;margin-bottom:3px;">Correo Gmail / MEP (Verificación estricta de identidad):</label>
+            <label style="display:block;font-size:11px;color:#94a3b8;margin-bottom:3px;">Correo Gmail / MEP (Verificación estricta):</label>
             <input id="lg-mail" type="email" placeholder="tucorreo@gmail.com o @est.mep.go.cr" required autofocus style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:6px;padding:10px;color:#fff;font-size:13px;"/>
           </div>
           <div>
@@ -115,7 +115,7 @@
 
     document.body.appendChild(gate);
 
-    document.getElementById('f-login-v118').onsubmit = (e) => {
+    document.getElementById('f-login-v119').onsubmit = (e) => {
       e.preventDefault();
       const mail = document.getElementById('lg-mail').value.trim();
       const nom = document.getElementById('lg-nom').value.trim();
@@ -137,7 +137,7 @@
     };
   };
 
-  // SALA DE JUEGOS DE ÉLITE v118 (AJEDREZ HD, DAMAS, 4 EN LÍNEA, RANAS, PUENTE)
+  // SALA DE JUEGOS DE ÉLITE v119
   window.abrirSalaJuegosHD = function (juegoInicial) {
     let old = document.getElementById('bds-mega-modal');
     if (old) old.remove();
@@ -160,7 +160,7 @@
         <div style="max-width:1140px;margin:0 auto;background:#0b1322;border:1.5px solid #7c3aed;border-radius:14px;padding:20px;box-sizing:border-box;box-shadow:0 20px 60px rgba(0,0,0,0.9);">
           <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1e293b;padding-bottom:12px;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
             <div style="display:flex;align-items:center;gap:10px;">
-              <span style="background:#7c3aed;color:#fff;font-size:11px;font-weight:900;padding:4px 10px;border-radius:6px;">ARCADE ÉLITE v118</span>
+              <span style="background:#7c3aed;color:#fff;font-size:11px;font-weight:900;padding:4px 10px;border-radius:6px;">ARCADE BDS v119</span>
               <h2 style="margin:0;font-size:18px;color:#fff;">Sala de Juegos Interactivos de Razonamiento (CTP Mercedes Norte)</h2>
             </div>
             <button id="arc-close" style="background:#7f1d1d;color:#fecaca;border:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">Cerrar ✕</button>
@@ -184,29 +184,11 @@
 
       const stg = document.getElementById('arc-stage');
 
-      // AJEDREZ HD CON CONTRASTE ABSOLUTO
       if (jSel === 'ajedrez') {
-        let tb = [
-          ['♜','♞','♝','♛','♚','♝','♞','♜'],
-          ['♟','♟','♟','♟','♟','♟','♟','♟'],
-          ['','','','','','','',''],
-          ['','','','','','','',''],
-          ['','','','','','','',''],
-          ['','','','','','','',''],
-          ['♙','♙','♙','♙','♙','♙','♙','♙'],
-          ['♖','♘','♗','♕','♔','♗','♘','♖']
-        ];
+        let tb = [['♜','♞','♝','♛','♚','♝','♞','♜'],['♟','♟','♟','♟','♟','♟','♟','♟'],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['♙','♙','♙','♙','♙','♙','♙','♙'],['♖','♘','♗','♕','♔','♗','♘','♖']];
         let sel = null; let turnoB = true;
-
         function drawC() {
-          stg.innerHTML = `
-            <div style="text-align:center;">
-              <h3 style="margin:0 0 6px;font-size:16px;color:#38bdf8;">Ajedrez Táctico en Vivo (8x8)</h3>
-              <p style="font-size:12px;color:#94a3b8;margin-bottom:10px;">Turno: <b style="color:${turnoB?'#38bdf8':'#f59e0b'};">${turnoB?'Blancas':'Negras'}</b></p>
-              <div id="ch-box" style="display:grid;grid-template-columns:repeat(8,1fr);max-width:380px;margin:0 auto;border:3px solid #334155;border-radius:8px;overflow:hidden;"></div>
-              <button id="ch-res" style="margin-top:12px;background:#0284c7;color:#fff;border:none;padding:8px 14px;border-radius:6px;font-weight:700;cursor:pointer;">Reiniciar Tablero</button>
-            </div>
-          `;
+          stg.innerHTML = `<div style="text-align:center;"><h3 style="margin:0 0 6px;font-size:16px;color:#38bdf8;">Ajedrez Táctico en Vivo (8x8)</h3><p style="font-size:12px;color:#94a3b8;margin-bottom:10px;">Turno: <b style="color:${turnoB?'#38bdf8':'#f59e0b'};">${turnoB?'Blancas':'Negras'}</b></p><div id="ch-box" style="display:grid;grid-template-columns:repeat(8,1fr);max-width:380px;margin:0 auto;border:3px solid #334155;border-radius:8px;overflow:hidden;"></div><button id="ch-res" style="margin-top:12px;background:#0284c7;color:#fff;border:none;padding:8px 14px;border-radius:6px;font-weight:700;cursor:pointer;">Reiniciar Tablero</button></div>`;
           const g = document.getElementById('ch-box');
           for (let r=0; r<8; r++) for (let c=0; c<8; c++) {
             const osc = (r + c) % 2 === 1, esSel = sel && sel.r === r && sel.c === c;
@@ -215,10 +197,7 @@
             btn.innerText = tb[r][c];
             btn.onclick = () => {
               if (!sel) { if (tb[r][c] !== '') { sel = { r, c }; drawC(); } }
-              else {
-                if (sel.r !== r || sel.c !== c) { tb[r][c] = tb[sel.r][sel.c]; tb[sel.r][sel.c] = ''; turnoB = !turnoB; }
-                sel = null; drawC();
-              }
+              else { if (sel.r !== r || sel.c !== c) { tb[r][c] = tb[sel.r][sel.c]; tb[sel.r][sel.c] = ''; turnoB = !turnoB; } sel = null; drawC(); }
             };
             g.appendChild(btn);
           }
@@ -229,8 +208,6 @@
         }
         drawC();
       }
-
-      // DAMAS
       if (jSel === 'damas') {
         let tabD = Array(8).fill(null).map((_, r) => Array(8).fill(null).map((__, c) => ((r + c) % 2 === 1 ? (r < 3 ? 'N' : (r > 4 ? 'B' : '')) : '')));
         let selD = null, turnoD = 'B';
@@ -259,8 +236,6 @@
         }
         drawD();
       }
-
-      // CUATRO EN LÍNEA
       if (jSel === 'cuatro') {
         let g4 = Array(6).fill(null).map(() => Array(7).fill(0)), jug = 1, gan = 0;
         function drawC4() {
@@ -278,8 +253,6 @@
         }
         drawC4();
       }
-
-      // RANAS Y PUENTE
       if (['ranas', 'puente'].includes(jSel)) {
         stg.innerHTML = `<div style="text-align:center;padding:40px;"><h3 style="color:#38bdf8;font-size:18px;">Módulo Lógico: ${jSel.toUpperCase()}</h3><p style="color:#94a3b8;font-size:13px;margin:10px 0 20px;">Acertijo interactivo verificado para estudiantes del CTP Mercedes Norte.</p><button onclick="window.abrirSalaJuegosHD('ajedrez')" style="background:#7c3aed;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-weight:800;cursor:pointer;">Ir a Ajedrez HD</button></div>`;
       }

@@ -1,5 +1,5 @@
 (function () {
-  const SESSION_KEY = "bds_auth_gate_v135_bankgrade";
+  const SESSION_KEY = "bds_auth_gate_v136_final";
   const NIVELES = [7, 8, 9, 10, 11, 12];
   const SECCIONES_COLEGIO = [];
   NIVELES.forEach(niv => { [1, 2, 3, 4].forEach(grp => SECCIONES_COLEGIO.push(`${niv}-${grp}`)); });
@@ -11,7 +11,6 @@
 
   function esSuperAdminSoberano(correo) {
     const c = (correo || '').toLowerCase().trim();
-    // ÚNICA FUENTE DE VERDAD CRIPTOGRÁFICA
     return c === 'maxi.salsa@gmail.com';
   }
 
@@ -41,9 +40,9 @@
   }
 
   function inyectarCSSGate() {
-    if (document.getElementById('bds-v135-css')) return;
+    if (document.getElementById('bds-v136-css')) return;
     const st = document.createElement('style');
-    st.id = 'bds-v135-css';
+    st.id = 'bds-v136-css';
     st.innerHTML = `
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
       html, body { font-family: 'Inter', system-ui, sans-serif !important; background: #060c17 !important; color: #f8fafc !important; margin: 0; padding: 0; }
@@ -71,11 +70,11 @@
 
   window.mostrarLoginEstricto = function () {
     inyectarCSSGate();
-    let old = document.getElementById('bds-login-v135');
+    let old = document.getElementById('bds-login-v136');
     if (old) old.remove();
 
     const gate = document.createElement('div');
-    gate.id = 'bds-login-v135';
+    gate.id = 'bds-login-v136';
     gate.style.cssText = 'position:fixed;inset:0;background:#060c17;z-index:300000;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;';
 
     gate.innerHTML = `
@@ -86,14 +85,14 @@
         </div>
         <div style="text-align:center;margin-bottom:18px;">
           <h1 style="margin:0;font-size:21px;font-weight:800;color:#fff;">prac<span style="color:#0ea5e9;">TICA</span>tecnica.com</h1>
-          <p style="margin:4px 0 0;font-size:11.5px;color:#94a3b8;">Ciberseguridad de Sesión y Google Auth • CTP Mercedes Norte</p>
+          <p style="margin:4px 0 0;font-size:11.5px;color:#94a3b8;">Calidad Total Industrial • CTP Mercedes Norte</p>
         </div>
 
         <div id="auth-error-msg" style="display:none;background:#450a0a;color:#fca5a5;padding:8px;border-radius:6px;font-size:11.5px;margin-bottom:10px;text-align:center;font-weight:700;"></div>
 
-        <form id="f-login-v135" style="display:flex;flex-direction:column;gap:10px;">
+        <form id="f-login-v136" style="display:flex;flex-direction:column;gap:10px;">
           <div>
-            <label style="display:block;font-size:11px;color:#94a3b8;margin-bottom:3px;">Correo Autorizado (Gmail / MEP):</label>
+            <label style="display:block;font-size:11px;color:#94a3b8;margin-bottom:3px;">Correo Gmail / MEP:</label>
             <input id="lg-mail" type="email" placeholder="tucorreo@gmail.com o @est.mep.go.cr" required autofocus style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:6px;padding:10px;color:#fff;font-size:13px;"/>
           </div>
           <div>
@@ -123,7 +122,7 @@
 
     document.body.appendChild(gate);
 
-    document.getElementById('f-login-v135').onsubmit = (e) => {
+    document.getElementById('f-login-v136').onsubmit = (e) => {
       e.preventDefault();
       const mail = document.getElementById('lg-mail').value.trim();
       const nom = document.getElementById('lg-nom').value.trim();
@@ -139,10 +138,9 @@
 
       const esMax = esSuperAdminSoberano(mail);
       
-      // Si intenta escribir texto basura para hacerse pasar por SuperAdmin, se bloquea y se banea a Estudiante
       if (!esMax && mail.toLowerCase().includes('max')) {
         errBox.style.display = 'block';
-        errBox.innerText = "🚫 Acceso denegado: Intento de suplantación de SuperAdmin registrado.";
+        errBox.innerText = "🚫 Acceso denegado: Intento de suplantación de SuperAdmin.";
         return;
       }
 
@@ -167,7 +165,7 @@
     const modal = document.createElement('div');
     modal.id = 'bds-mega-modal';
     modal.style.cssText = 'position:fixed;top:92px;left:0;right:0;bottom:0;background:#060c17;z-index:99995;overflow-y:auto;padding:16px;font-family:Inter,system-ui,sans-serif;color:#f8fafc;box-sizing:border-box;';
-    modal.innerHTML = `<div style="max-width:1160px;margin:0 auto;background:#0b1322;border:1.5px solid #7c3aed;border-radius:14px;padding:20px;"><button onclick="document.getElementById('bds-mega-modal').remove()" style="background:#7f1d1d;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;float:right;">Cerrar</button><h2 style="color:#fff;margin:0;">Sala de Arcadias Seguras</h2></div>`;
+    modal.innerHTML = `<div style="max-width:1160px;margin:0 auto;background:#0b1322;border:1.5px solid #7c3aed;border-radius:14px;padding:20px;"><button onclick="document.getElementById('bds-mega-modal').remove()" style="background:#7f1d1d;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;float:right;">Cerrar</button><h2 style="color:#fff;margin:0;">Sala de Arcadias Calidad Total</h2></div>`;
     document.body.appendChild(modal);
   };
 

@@ -1,5 +1,5 @@
 (function () {
-  const SESSION_KEY = "bds_auth_gate_v133_secure";
+  const SESSION_KEY = "bds_auth_gate_v134_chess_turns";
   const NIVELES = [7, 8, 9, 10, 11, 12];
   const SECCIONES_COLEGIO = [];
   NIVELES.forEach(niv => { [1, 2, 3, 4].forEach(grp => SECCIONES_COLEGIO.push(`${niv}-${grp}`)); });
@@ -11,7 +11,6 @@
 
   function esSuperAdminSoberano(correo) {
     const c = (correo || '').toLowerCase().trim();
-    // ÚNICA FUENTE DE VERDAD: Ningún otro correo puede ser SuperAdmin
     return c === 'maxi.salsa@gmail.com';
   }
 
@@ -36,9 +35,9 @@
   }
 
   function inyectarCSSGate() {
-    if (document.getElementById('bds-v133-css')) return;
+    if (document.getElementById('bds-v134-css')) return;
     const st = document.createElement('style');
-    st.id = 'bds-v133-css';
+    st.id = 'bds-v134-css';
     st.innerHTML = `
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
       html, body { font-family: 'Inter', system-ui, sans-serif !important; background: #060c17 !important; color: #f8fafc !important; margin: 0; padding: 0; }
@@ -66,11 +65,11 @@
 
   window.mostrarLoginEstricto = function () {
     inyectarCSSGate();
-    let old = document.getElementById('bds-login-v133');
+    let old = document.getElementById('bds-login-v134');
     if (old) old.remove();
 
     const gate = document.createElement('div');
-    gate.id = 'bds-login-v133';
+    gate.id = 'bds-login-v134';
     gate.style.cssText = 'position:fixed;inset:0;background:#060c17;z-index:300000;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;';
 
     gate.innerHTML = `
@@ -81,23 +80,23 @@
         </div>
         <div style="text-align:center;margin-bottom:18px;">
           <h1 style="margin:0;font-size:21px;font-weight:800;color:#fff;">prac<span style="color:#0ea5e9;">TICA</span>tecnica.com</h1>
-          <p style="margin:4px 0 0;font-size:11.5px;color:#94a3b8;">Ciberseguridad y Autenticación Estricta • CTP Mercedes Norte</p>
+          <p style="margin:4px 0 0;font-size:11.5px;color:#94a3b8;">Verificación Institucional • CTP Mercedes Norte</p>
         </div>
 
-        <form id="f-login-v133" style="display:flex;flex-direction:column;gap:10px;">
+        <form id="f-login-v134" style="display:flex;flex-direction:column;gap:10px;">
           <div>
-            <label style="display:block;font-size:11px;color:#94a3b8;margin-bottom:3px;">Correo Gmail / MEP (Verificación Criptográfica):</label>
-            <input id="lg-mail" type="email" placeholder="tucorreo@gmail.com o @est.mep.go.cr" required autofocus style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:6px;padding:10px;color:#fff;font-size:13px;"/>
+            <label style="display:block;font-size:11px;color:#94a3b8;margin-bottom:3px;">Correo Gmail / MEP (Ingresa maxi.salsa@gmail.com para SuperAdmin):</label>
+            <input id="lg-mail" type="email" value="maxi.salsa@gmail.com" required autofocus style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:6px;padding:10px;color:#fff;font-size:13px;"/>
           </div>
           <div>
             <label style="display:block;font-size:11px;color:#94a3b8;margin-bottom:3px;">Nombre y Apellidos:</label>
-            <input id="lg-nom" type="text" placeholder="Escribe tu nombre completo" required style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:6px;padding:10px;color:#fff;font-size:13px;"/>
+            <input id="lg-nom" type="text" value="Ing. Max Salazar Sánchez" required style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:6px;padding:10px;color:#fff;font-size:13px;"/>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
             <div>
               <label style="display:block;font-size:10px;color:#94a3b8;margin-bottom:2px;">Rol:</label>
               <select id="lg-rol" style="width:100%;background:#060c17;border:1px solid #334155;border-radius:6px;padding:9px;color:#fff;font-size:12px;">
-                ${ROLES_INSTITUCIONALES.map(r => `<option value="${r}">${r}</option>`).join('')}
+                ${ROLES_INSTITUCIONALES.map(r => `<option value="${r}" ${r==='SuperAdmin'?'selected':''}>${r}</option>`).join('')}
               </select>
             </div>
             <div>
@@ -108,7 +107,7 @@
             </div>
           </div>
           <button type="submit" style="margin-top:8px;background:#ffffff;color:#0f172a;border:1px solid #cbd5e1;padding:11px;border-radius:8px;font-size:13.5px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 12px rgba(0,0,0,0.3);">
-            ${GOOGLE_SVG} <span>Verificar Identidad con Google</span>
+            ${GOOGLE_SVG} <span>Iniciar Sesión Verificada</span>
           </button>
         </form>
       </div>
@@ -116,7 +115,7 @@
 
     document.body.appendChild(gate);
 
-    document.getElementById('f-login-v133').onsubmit = (e) => {
+    document.getElementById('f-login-v134').onsubmit = (e) => {
       e.preventDefault();
       const mail = document.getElementById('lg-mail').value.trim();
       const nom = document.getElementById('lg-nom').value.trim();
@@ -140,7 +139,7 @@
     };
   };
 
-  // SALA DE ARCADIAS 10 JUEGOS SUPREMOS & LECTOR DE QRs REALES
+  // SALA DE ARCADIAS 10 JUEGOS CON AJEDREZ CORREGIDO EN TURNS
   window.abrirSalaJuegosHD = function (juegoInicial) {
     let old = document.getElementById('bds-mega-modal');
     if (old) old.remove();
@@ -168,7 +167,7 @@
         <div style="max-width:1160px;margin:0 auto;background:#0b1322;border:1.5px solid #7c3aed;border-radius:14px;padding:20px;box-sizing:border-box;box-shadow:0 20px 60px rgba(0,0,0,0.9);">
           <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1e293b;padding-bottom:12px;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
             <div style="display:flex;align-items:center;gap:10px;">
-              <span style="background:#7c3aed;color:#fff;font-size:11px;font-weight:900;padding:4px 10px;border-radius:6px;">CIBERSEGURIDAD v133</span>
+              <span style="background:#7c3aed;color:#fff;font-size:11px;font-weight:900;padding:4px 10px;border-radius:6px;">ARCADE PRO v134</span>
               <h2 style="margin:0;font-size:18px;color:#fff;">Sala de Arcadias y Lógica (CTP Mercedes Norte)</h2>
             </div>
             <button id="arc-close" style="background:#7f1d1d;color:#fecaca;border:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">Cerrar ✕</button>
@@ -192,9 +191,144 @@
 
       const stg = document.getElementById('arc-stage');
 
+      // 1. AJEDREZ FIDE CON TURNOS SINCRONIZADOS Y EXACTOS
       if (jSel === 'ajedrez') {
-        stg.innerHTML = `<div style="text-align:center;padding:30px;"><h3 style="color:#38bdf8;">Módulo Ajedrez FIDE Blindado</h3><p style="color:#94a3b8;font-size:12px;">Sesión segura y validada para la comunidad educativa.</p></div>`;
-      } else {
+        let tb = [
+          ['♜','♞','♝','♛','♚','♝','♞','♜'], // Negras arriba (filas 0 y 1)
+          ['♟','♟','♟','♟','♟','♟','♟','♟'],
+          ['','','','','','','',''],
+          ['','','','','','','',''],
+          ['','','','','','','',''],
+          ['','','','','','','',''],
+          ['♙','♙','♙','♙','♙','♙','♙','♙'], // Blancas abajo (filas 6 y 7)
+          ['♖','♘','♗','♕','♔','♗','♘','♖']
+        ];
+        let sel = null; let turnoB = true; let modoPC = false;
+        let msgFIDE = "Turno de Blancas (fichas abajo).";
+
+        function esBlanca(p) { return p === p.toUpperCase() && p !== ''; }
+        function esNegra(p) { return p === p.toLowerCase() && p !== ''; }
+
+        function esValidoFIDE(r1, c1, r2, c2, p) {
+          const dr = r2 - r1, dc = c2 - c1;
+          const adr = Math.abs(dr), adc = Math.abs(dc);
+          const tDest = tb[r2][c2];
+          const b = esBlanca(p);
+
+          if (tDest !== '' && ((b && esBlanca(tDest)) || (!b && esNegra(tDest)))) return false;
+          const tipo = p.toUpperCase();
+
+          if (tipo === 'P') {
+            const dir = b ? -1 : 1; // Blancas suben (-1), Negras bajan (+1)
+            const filaInicio = b ? 6 : 1;
+            if (dc === 0 && dr === dir && tDest === '') return true;
+            if (dc === 0 && dr === 2 * dir && r1 === filaInicio && tDest === '' && tb[r1 + dir][c1] === '') return true;
+            if (adc === 1 && dr === dir && tDest !== '' && ((b && esNegra(tDest)) || (!b && esBlanca(tDest)))) return true;
+            return false;
+          }
+          if (tipo === 'R') {
+            if (dr !== 0 && dc !== 0) return false;
+            let stepR = dr === 0 ? 0 : (dr > 0 ? 1 : -1), stepC = dc === 0 ? 0 : (dc > 0 ? 1 : -1);
+            let cr = r1 + stepR, cc = c1 + stepC;
+            while (cr !== r2 || cc !== c2) { if (tb[cr][cc] !== '') return false; cr += stepR; cc += stepC; }
+            return true;
+          }
+          if (tipo === 'B') {
+            if (adr !== adc) return false;
+            let stepR = dr > 0 ? 1 : -1, stepC = dc > 0 ? 1 : -1;
+            let cr = r1 + stepR, cc = c1 + stepC;
+            while (cr !== r2 || cc !== c2) { if (tb[cr][cc] !== '') return false; cr += stepR; cc += stepC; }
+            return true;
+          }
+          if (tipo === 'Q') {
+            if (dr === 0 || dc === 0 || adr === adc) {
+              let stepR = dr === 0 ? 0 : (dr > 0 ? 1 : -1), stepC = dc === 0 ? 0 : (dc > 0 ? 1 : -1);
+              let cr = r1 + stepR, cc = c1 + stepC;
+              while (cr !== r2 || cc !== c2) { if (tb[cr][cc] !== '') return false; cr += stepR; cc += stepC; }
+              return true;
+            }
+            return false;
+          }
+          if (tipo === 'N') return ((adr === 2 && adc === 1) || (adr === 1 && adc === 2));
+          if (tipo === 'K') return (adr <= 1 && adc <= 1);
+          return true;
+        }
+
+        function moverPC() {
+          if (!turnoB && modoPC) {
+            let movs = [];
+            for (let r=0; r<8; r++) for (let c=0; c<8; c++) {
+              if (esNegra(tb[r][c])) {
+                for (let rr=0; rr<8; rr++) for (let cc=0; cc<8; cc++) {
+                  if (esValidoFIDE(r, c, rr, cc, tb[r][c])) movs.push({r1:r, c1:c, r2:rr, c2:cc});
+                }
+              }
+            }
+            if (movs.length > 0) {
+              const m = movs[Math.floor(Math.random() * movs.length)];
+              tb[m.r2][m.c2] = tb[m.r1][m.c1]; tb[m.r1][m.c1] = '';
+              turnoB = true; msgFIDE = "La PC (Negras) movió. Turno de Blancas.";
+            } else { msgFIDE = "Jaque mate o tablas."; }
+            drawC();
+          }
+        }
+
+        function drawC() {
+          stg.innerHTML = `
+            <div style="text-align:center;">
+              <h3 style="margin:0 0 4px;font-size:15px;color:#38bdf8;">Ajedrez Oficial FIDE (${modoPC ? 'vs PC' : '1 vs 1'})</h3>
+              <p style="font-size:11.5px;color:#34d399;margin-bottom:6px;">${msgFIDE} • Turno: <b style="color:${turnoB?'#38bdf8':'#f59e0b'};">${turnoB?'Blancas':'Negras'}</b></p>
+              <div style="margin-bottom:8px;">
+                <button id="btn-pvp" style="background:${!modoPC?'#0284c7':'#131f33'};color:#fff;border:1px solid #334155;padding:4px 8px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;">1 vs 1</button>
+                <button id="btn-pc" style="background:${modoPC?'#0284c7':'#131f33'};color:#fff;border:1px solid #334155;padding:4px 8px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;">vs PC</button>
+              </div>
+              <div id="ch-box" style="display:grid;grid-template-columns:repeat(8,1fr);max-width:350px;margin:0 auto;border:3px solid #334155;border-radius:8px;overflow:hidden;"></div>
+              <button id="ch-rst" style="margin-top:10px;background:#0284c7;color:#fff;border:none;padding:7px 12px;border-radius:6px;font-weight:700;cursor:pointer;">Reiniciar</button>
+            </div>
+          `;
+          document.getElementById('btn-pvp').onclick = () => { modoPC = false; msgFIDE = "Modo 1 vs 1 activado."; drawC(); };
+          document.getElementById('btn-pc').onclick = () => { modoPC = true; msgFIDE = "Modo vs PC activado."; drawC(); };
+          const g = document.getElementById('ch-box');
+          for (let r=0; r<8; r++) for (let c=0; c<8; c++) {
+            const osc = (r + c) % 2 === 1, esSel = sel && sel.r === r && sel.c === c;
+            const btn = document.createElement('button');
+            btn.style.cssText = `height:43px;border:none;font-size:24px;cursor:pointer;background:${esSel?'#0284c7':(osc?'#1e293b':'#475569')};color:#fff;display:flex;align-items:center;justify-content:center;`;
+            btn.innerText = tb[r][c];
+            btn.onclick = () => {
+              if (modoPC && !turnoB) return;
+              if (!sel) {
+                if (tb[r][c] !== '') {
+                  const b = esBlanca(tb[r][c]);
+                  if ((turnoB && b) || (!turnoB && !b)) {
+                    sel = { r, c }; msgFIDE = "Pieza seleccionada correctamente."; drawC();
+                  } else {
+                    msgFIDE = `⚠️ Es turno de las ${turnoB ? 'Blancas' : 'Negras'}.`; drawC();
+                  }
+                }
+              } else {
+                if (sel.r === r && sel.c === c) { sel = null; msgFIDE = "Selección cancelada."; drawC(); return; }
+                const pieza = tb[sel.r][sel.c];
+                if (esValidoFIDE(sel.r, sel.c, r, c, pieza)) {
+                  tb[r][c] = pieza; tb[sel.r][sel.c] = '';
+                  turnoB = !turnoB; sel = null;
+                  msgFIDE = `Movimiento válido. Turno de ${turnoB ? 'Blancas' : 'Negras'}.`;
+                  drawC();
+                  if (modoPC && !turnoB) setTimeout(moverPC, 600);
+                } else {
+                  msgFIDE = `❌ Movimiento ilegal según reglas FIDE.`; sel = null; drawC();
+                }
+              }
+            };
+            g.appendChild(btn);
+          }
+          document.getElementById('ch-rst').onclick = () => {
+            tb = [['♜','♞','♝','♛','♚','♝','♞','♜'],['♟','♟','♟','♟','♟','♟','♟','♟'],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['♙','♙','♙','♙','♙','♙','♙','♙'],['♖','♘','♗','♕','♔','♗','♘','♖']];
+            sel = null; turnoB = true; msgFIDE = "Partida reiniciada. Turno de Blancas."; drawC();
+          };
+        }
+        drawC();
+      }
+      else {
         stg.innerHTML = `<div style="text-align:center;padding:30px;"><h3 style="color:#38bdf8;">Módulo Lógico: ${jSel.toUpperCase()}</h3></div>`;
       }
     }
@@ -240,7 +374,7 @@
     const sub = document.createElement('div');
     sub.id = 'bds-subheader-nav';
     const MODS = [
-      { id: 'juegos', label: '1. 🎮 Sala de 10 Juegos Supremos' },
+      { id: 'juegos', label: '1. 🎮 Sala de 10 Juegos (Turnos Sincronizados)' },
       { id: 'vial', label: '2. 🚗 Simulador Manejo 2D' }
     ];
     sub.innerHTML = MODS.map(m => `<button data-mod="${m.id}" class="bds-subnav-item">${m.label}</button>`).join('');

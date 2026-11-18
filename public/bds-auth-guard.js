@@ -303,6 +303,12 @@
     };
 
     syncPageWithRole(user);
+    document.querySelectorAll('img').forEach(img => {
+      img.onerror = function() {
+        this.onerror = null;
+        this.src = '/lumi-owl.svg?v=identidad2026';
+      };
+    });
     setTimeout(() => syncPageWithRole(user), 400);
   }
 

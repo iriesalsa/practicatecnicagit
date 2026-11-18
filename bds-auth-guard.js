@@ -1,6 +1,6 @@
 (function () {
-  const SESSION_KEY = "bds_auth_gate_v162_perfect";
-  const CHAT_REGISTRY_KEY = "bds_whatsapp_dynamic_registry_v162";
+  const SESSION_KEY = "bds_auth_gate_v164_chats";
+  const CHAT_REGISTRY_KEY = "bds_whatsapp_all_channels_v164";
   const NIVELES = [7, 8, 9, 10, 11, 12];
   const SECCIONES_COLEGIO = [];
   NIVELES.forEach(niv => { [1, 2, 3, 4].forEach(grp => SECCIONES_COLEGIO.push(`${niv}-${grp}`)); });
@@ -9,10 +9,13 @@
     { rol: "Estudiante", requiereSeccion: true },
     { rol: "Docente MEP", requiereSeccion: true },
     { rol: "Director(a)", requiereSeccion: false },
+    { rol: "Auxiliar Administrativo", requiereSeccion: false },
+    { rol: "Guarda / Seguridad", requiereSeccion: false },
+    { rol: "Conserje / Mantenimiento", requiereSeccion: false },
     { rol: "SuperAdmin", requiereSeccion: false }
   ];
 
-  const SVG_BUHO_ORIGINAL = "/buho-original.svg?v=162";
+  const SVG_BUHO_ORIGINAL = "/buho-original.svg?v=164";
   const SVG_MEP = "data:image/svg+xml;utf8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 52" width="150" height="32"><rect width="240" height="52" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1.5"/><circle cx="26" cy="26" r="15" fill="#1d4ed8"/><text x="26" y="30" text-anchor="middle" fill="#fff" font-family="system-ui" font-weight="800" font-size="11">MEP</text><text x="50" y="23" fill="#f8fafc" font-family="system-ui" font-weight="700" font-size="11">Ministerio de Educación Pública</text><text x="50" y="38" fill="#94a3b8" font-family="system-ui" font-weight="600" font-size="9.5">CTP Mercedes Norte • Circuito 04</text></svg>`);
   const GOOGLE_SVG = `<svg width="17" height="17" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>`;
 
@@ -40,7 +43,7 @@
     localStorage.setItem(SESSION_KEY, raw);
   }
 
-  function cerrarSesionTotal() {
+  window.cerrarSesionTotal = function () {
     sessionStorage.clear();
     localStorage.clear();
     document.body.classList.remove('bds-authenticated');
@@ -48,7 +51,7 @@
       const el = document.getElementById(id); if (el) el.remove();
     });
     mostrarLoginSobrio();
-  }
+  };
 
   function actualizarFaviconOficial() {
     let link = document.querySelector("link[rel~='icon']");
@@ -57,9 +60,9 @@
   }
 
   function inyectarCSS() {
-    if (document.getElementById('bds-v162-css')) return;
+    if (document.getElementById('bds-v164-css')) return;
     const st = document.createElement('style');
-    st.id = 'bds-v162-css';
+    st.id = 'bds-v164-css';
     st.innerHTML = `
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
       html, body { font-family: 'Inter', system-ui, -apple-system, sans-serif !important; background: #070d19 !important; color: #f1f5f9 !important; margin: 0; padding: 0; }
@@ -67,7 +70,7 @@
       body.bds-authenticated #root { display: block !important; }
       #bds-pro-header {
         position: sticky; top: 0; left: 0; right: 0; z-index: 99990;
-        background: rgba(11, 18, 32, 0.96); backdrop-filter: blur(10px);
+        background: rgba(11, 18, 32, 0.98); backdrop-filter: blur(10px);
         border-bottom: 1px solid #1e293b; padding: 8px 16px;
         display: flex; align-items: center; justify-content: space-between; gap: 12px;
       }
@@ -75,17 +78,14 @@
     document.head.appendChild(st);
   }
 
-  // ============================================================================
-  // PANTALLA DE LOGIN CLÁSICA (CON EL BÚHO AZUL ORIGINAL EXACTO)
-  // ============================================================================
   window.mostrarLoginSobrio = function () {
     inyectarCSS();
     actualizarFaviconOficial();
-    let old = document.getElementById('bds-login-v162');
+    let old = document.getElementById('bds-login-v164');
     if (old) old.remove();
 
     const gate = document.createElement('div');
-    gate.id = 'bds-login-v162';
+    gate.id = 'bds-login-v164';
     gate.style.cssText = 'position:fixed;inset:0;background:radial-gradient(circle at 50% 0%,#0f1f3d 0%,#060b16 70%);z-index:300000;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;';
 
     gate.innerHTML = `
@@ -96,7 +96,7 @@
           <p style="margin:4px 0 0;font-size:12px;color:#94a3b8;">Plataforma Educativa Técnica • CTP Mercedes Norte</p>
         </div>
 
-        <form id="f-login-v162" style="display:flex;flex-direction:column;gap:11px;">
+        <form id="f-login-v164" style="display:flex;flex-direction:column;gap:11px;">
           <div>
             <label style="display:block;font-size:11.5px;color:#cbd5e1;font-weight:500;margin-bottom:4px;">Correo Institucional o Gmail</label>
             <input id="lg-mail" type="email" value="maxi.salsa@gmail.com" required autofocus style="width:100%;box-sizing:border-box;background:#070d19;border:1px solid #334155;border-radius:8px;padding:10px 12px;color:#f8fafc;font-size:13px;"/>
@@ -109,7 +109,7 @@
             <div>
               <label style="display:block;font-size:11px;color:#cbd5e1;font-weight:500;margin-bottom:4px;">Perfil</label>
               <select id="lg-rol" style="width:100%;background:#070d19;border:1px solid #334155;border-radius:8px;padding:9px;color:#f8fafc;font-size:12.5px;">
-                ${ROLES_INSTITUCIONALES.map(r => `<option value="${r.rol}">${r.rol}</option>`).join('')}
+                ${ROLES_INSTITUCIONALES.map(r => `<option value="${r.rol}" ${r.rol==='SuperAdmin'?'selected':''}>${r.rol}</option>`).join('')}
               </select>
             </div>
             <div>
@@ -120,10 +120,7 @@
             </div>
           </div>
           <button type="submit" style="margin-top:4px;background:#1d4ed8;color:#ffffff;border:none;padding:11px;border-radius:8px;font-size:13.5px;font-weight:600;cursor:pointer;">
-            Ingresar a la Plataforma
-          </button>
-          <button type="button" id="btn-google-auth" style="background:#ffffff;color:#0f172a;border:1px solid #cbd5e1;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
-            ${GOOGLE_SVG} <span>Continuar con Google</span>
+            Ingresar con Google Auth
           </button>
         </form>
       </div>
@@ -131,7 +128,7 @@
 
     document.body.appendChild(gate);
 
-    document.getElementById('f-login-v162').onsubmit = (e) => {
+    document.getElementById('f-login-v164').onsubmit = (e) => {
       e.preventDefault();
       const mail = document.getElementById('lg-mail').value.trim();
       const nom = document.getElementById('lg-nom').value.trim();
@@ -149,14 +146,10 @@
       gate.remove();
       activarPlataforma();
     };
-
-    document.getElementById('btn-google-auth').onclick = () => {
-      document.getElementById('f-login-v162').requestSubmit();
-    };
   };
 
   // ============================================================================
-  // CENTRO DE CHATS FLOTANTE CON CREACIÓN DINÁMICA DE CANALES Y SUBGRUPOS
+  // CENTRO DE CHATS FLOTANTE CON TODOS LOS NIVELES, SUBGRUPOS A/B Y ADMINISTRATIVOS
   // ============================================================================
   function abrirModalChatsDinamicamente() {
     let old = document.getElementById('bds-chat-float-modal');
@@ -165,11 +158,14 @@
     const s = getSesion();
     const secBase = (s.seccion || "Sección 10-3").replace("Sección ", "");
 
-    let canalesDefecto = [
-      { id: `sec_${secBase}_A`, nombre: `Sección ${secBase} • Subgrupo A (Especialidad 1)`, msgs: [{ rem: "Coordinación", hora: "07:30", txt: "Canal oficial Subgrupo A activo." }] },
-      { id: `sec_${secBase}_B`, nombre: `Sección ${secBase} • Subgrupo B (Especialidad 2)`, msgs: [{ rem: "Coordinación", hora: "07:35", txt: "Canal oficial Subgrupo B activo." }] },
-      { id: "dir", nombre: "🏛️ Dirección & Jefatura CTPMN", msgs: [{ rem: "Dirección", hora: "07:00", txt: "Avisos oficiales y circulares del Circuito 04." }] }
-    ];
+    // Construir canales base para todas las secciones y subgrupos A/B + Administrativos
+    let canalesDefecto = [];
+    SECCIONES_COLEGIO.forEach(sc => {
+      canalesDefecto.push({ id: `sec_${sc}_A`, nombre: `Sección ${sc} • Subgrupo A (Esp. 1)`, msgs: [{ rem: "Coordinación", hora: "07:30", txt: `Canal oficial Subgrupo A de la sección ${sc}.` }] });
+      canalesDefecto.push({ id: `sec_${sc}_B`, nombre: `Sección ${sc} • Subgrupo B (Esp. 2)`, msgs: [{ rem: "Coordinación", hora: "07:35", txt: `Canal oficial Subgrupo B de la sección ${sc}.` }] });
+    });
+    canalesDefecto.push({ id: "dir", nombre: "🏛️ Dirección & Jefatura CTPMN", msgs: [{ rem: "Dirección", hora: "07:00", txt: "Avisos oficiales y circulares del Circuito 04." }] });
+    canalesDefecto.push({ id: "admin", nombre: "📋 Personal Administrativo & Guardas", msgs: [{ rem: "Prefectura", hora: "06:45", txt: "Control de ingresos, permisos y bitácoras." }] });
 
     function obtenerCanales() {
       try {
@@ -184,27 +180,27 @@
     }
 
     let canales = obtenerCanales();
-    let actId = canales[0].id;
+    let actId = canales.find(c => c.id === `sec_${secBase}_A`) ? `sec_${secBase}_A` : canales[0].id;
 
     const modal = document.createElement('div');
     modal.id = 'bds-chat-float-modal';
-    modal.style.cssText = 'position:fixed;top:60px;right:16px;z-index:250000;width:400px;max-width:92vw;background:#111b21;border:1px solid #00a884;border-radius:14px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,0.9);display:flex;flex-direction:column;height:480px;';
+    modal.style.cssText = 'position:fixed;top:60px;right:16px;z-index:250000;width:420px;max-width:92vw;background:#111b21;border:1px solid #00a884;border-radius:14px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,0.9);display:flex;flex-direction:column;height:520px;';
 
     function pintarModal() {
       canales = obtenerCanales();
       const cObj = canales.find(x => x.id === actId) || canales[0];
-      const storageKey = `bds_wa_dyn_msg_${cObj.id}`;
+      const storageKey = `bds_wa_all_msg_${cObj.id}`;
       let msgs = cObj.msgs;
       try { msgs = JSON.parse(localStorage.getItem(storageKey)) || cObj.msgs; } catch {}
 
       modal.innerHTML = `
         <div style="background:#202c33;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #222d34;">
           <div>
-            <div style="font-weight:900;color:#e9edef;font-size:14px;">💬 Chats CTPMN & Canales Dinámicos</div>
-            <div style="font-size:10.5px;color:#8696a0;">Canal activo: ${cObj.nombre}</div>
+            <div style="font-weight:900;color:#e9edef;font-size:14px;">💬 Chats CTPMN (Todos los Niveles y Subgrupos A/B)</div>
+            <div style="font-size:10.5px;color:#8696a0;">Canal actual: ${cObj.nombre}</div>
           </div>
           <div style="display:flex;gap:6px;">
-            <button id="cm-add-chat" title="Crear nuevo canal o subgrupo" style="background:#00a884;color:#111b21;border:none;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:900;cursor:pointer;">+ Nuevo</button>
+            <button id="cm-add-chat" title="Crear canal personalizado" style="background:#00a884;color:#111b21;border:none;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:900;cursor:pointer;">+ Nuevo</button>
             <button id="cm-close" style="background:#7f1d1d;color:#fff;border:none;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:800;cursor:pointer;">✕</button>
           </div>
         </div>
@@ -233,10 +229,10 @@
 
       document.getElementById('cm-close').onclick = () => modal.remove();
       document.getElementById('cm-add-chat').onclick = () => {
-        const nuevoNombre = prompt("Nombre del nuevo canal o subgrupo (ej: Sección 11-2 • Especialidad Redes):");
+        const nuevoNombre = prompt("Nombre del nuevo canal o subgrupo (ej: Sección 11-1 • Especialidad Redes):");
         if (nuevoNombre) {
           const idNew = 'chat_' + Date.now();
-          canales.push({ id: idNew, nombre: nuevoNombre, msgs: [{ rem: "Sistema", hora: new Date().toLocaleTimeString('es-CR', {hour:'2-digit', minute:'2-digit'}), txt: `Canal ${nuevoNombre} creado con éxito.` }] });
+          canales.push({ id: idNew, nombre: nuevoNombre, msgs: [{ rem: "Sistema", hora: new Date().toLocaleTimeString('es-CR', {hour:'2-digit', minute:'2-digit'}), txt: `Canal ${nuevoNombre} creado.` }] });
           guardarCanales(canales);
           actId = idNew;
           pintarModal();
@@ -267,7 +263,7 @@
   }
 
   // ============================================================================
-  // BARRA SUPERIOR SOBERANA Y FORMAL
+  // BARRA SUPERIOR SOBERANA
   // ============================================================================
   function activarPlataforma() {
     const s = getSesion();
@@ -282,7 +278,7 @@
     hdr.id = 'bds-pro-header';
     hdr.innerHTML = `
       <div style="display:flex;align-items:center;gap:10px;">
-        <img src="${SVG_BUHO_ORIGINAL}" width="34" height="34" alt="pracTICAtecnica.com" style="border-radius:50%;cursor:pointer;" onclick="location.reload()"/>
+        <img src="${SVG_BUHO_ORIGINAL}" width="34" height="34" alt="Búho Azul Original" style="border-radius:50%;cursor:pointer;" onclick="location.reload()"/>
         <div style="cursor:pointer;" onclick="location.reload()">
           <div style="font-size:14px;font-weight:800;color:#f8fafc;letter-spacing:-0.01em;">prac<span style="color:#2dd4bf;">TICA</span>tecnica.com</div>
           <div style="font-size:11px;color:#94a3b8;"><b>${s.nombre}</b> • ${s.rol} (${s.seccion})</div>
@@ -304,7 +300,7 @@
   }
 
   window.addEventListener('DOMContentLoaded', () => {
-    inyectarEstilos();
+    inyectarCSS();
     actualizarFaviconOficial();
     const s = getSesion();
     if (s && s.email) activarPlataforma();

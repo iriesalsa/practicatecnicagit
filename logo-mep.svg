@@ -1,9 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 92" width="360" height="92">
-  <rect width="360" height="92" rx="10" fill="#ffffff"/>
-  <rect x="10" y="10" width="72" height="72" rx="6" fill="#1e294f"/>
-  <path d="M24 24 L42 26 L56 24 L68 48 L72 68 L62 66 L58 58 L46 50 L36 42 L26 44 L22 36 Z" fill="#d4b362"/>
-  <text x="96" y="34" fill="#1e294f" font-family="Georgia,serif" font-weight="700" font-size="22" letter-spacing="1">MINISTERIO</text>
-  <text x="96" y="54" fill="#1e294f" font-family="Georgia,serif" font-size="15.5">DE EDUCACIÓN PÚBLICA</text>
-  <line x1="96" y1="62" x2="346" y2="62" stroke="#1e294f" stroke-width="1.5"/>
-  <text x="96" y="79" fill="#1e294f" font-family="Georgia,serif" font-weight="700" font-size="14">GOBIERNO DE COSTA RICA</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 86" width="380" height="86">
+  <defs>
+    <linearGradient id="mepBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#132245"/>
+      <stop offset="100%" stop-color="#0b152c"/>
+    </linearGradient>
+    <linearGradient id="crGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f3d478"/>
+      <stop offset="100%" stop-color="#c99b3b"/>
+    </linearGradient>
+  </defs>
+  <rect x="1.5" y="1.5" width="377" height="83" rx="12" fill="url(#mepBg)" stroke="#334b7a" stroke-width="1.5"/>
+  <rect x="12" y="12" width="62" height="62" rx="9" fill="#091124" stroke="#c99b3b" stroke-width="1.2" stroke-opacity="0.65"/>
+  <!-- Silueta estilizada de Costa Rica en dorado metálico -->
+  <path d="M21 24 C27 22 33 25 41 24 L48 27 L57 38 C60 44 63 50 64 56 L61 63 L55 61 C54 57 52 54 48 53 L43 49 C39 45 36 42 32 41 L29 44 L24 41 C23 36 22 31 21 24 Z" fill="url(#crGold)"/>
+  <circle cx="24" cy="54" r="2.2" fill="url(#crGold)"/>
+  <text x="88" y="33" fill="#f8fafc" font-family="Georgia,'Times New Roman',serif" font-weight="700" font-size="21" letter-spacing="1.6">MINISTERIO</text>
+  <text x="88" y="51" fill="#cbd5e1" font-family="Georgia,'Times New Roman',serif" font-size="13.5" letter-spacing="0.8">DE EDUCACIÓN PÚBLICA</text>
+  <line x1="88" y1="58" x2="362" y2="58" stroke="#c99b3b" stroke-width="1" stroke-opacity="0.7"/>
+  <text x="88" y="72" fill="#e5c158" font-family="system-ui,-apple-system,sans-serif" font-weight="700" font-size="10.5" letter-spacing="1.4">GOBIERNO DE COSTA RICA • HEREDIA • CIRCUITO 02</text>
 </svg>

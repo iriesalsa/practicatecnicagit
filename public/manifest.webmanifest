@@ -1,0 +1,13 @@
+{
+  "name": "pracTICAtecnica.com — CTP Mercedes Norte",
+  "short_name": "pracTICA",
+  "description": "Plataforma educativa y administrativa del Colegio Técnico Profesional Mercedes Norte (Circuito 02)",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#060c17",
+  "theme_color": "#0b1322",
+  "orientation": "any",
+  "icons": [
+    { "src": "/buho-original.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

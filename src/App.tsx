@@ -1,50 +1,74 @@
-﻿import React from 'react';
-import LoginGate from './components/LoginGate';
+﻿import React, { useState, useEffect } from 'react';
+import { supabase } from './lib/supabase';
 
 export default function App() {
-  return (
-    <LoginGate>
-      <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
-        
-        {/* Encabezado Institucional */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <img src="/lumi-owl.svg" alt="Lumi Búho" className="w-14 h-14 animate-pulse" />
-            <div>
-              <h1 className="text-2xl font-black text-slate-100 tracking-wide">practicatecnica.com</h1>
-              <p className="text-sm text-cyan-400 font-medium">CTP Mercedes Norte • Cursos, Simuladores y Registros</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 bg-slate-950 px-4 py-2 rounded-xl border border-slate-800">
-            <span className="w-3 h-3 bg-emerald-500 rounded-full animate-ping"></span>
-            <span className="text-xs text-slate-300 font-semibold">Sistema Activo & Seguro (Supabase)</span>
-          </div>
-        </div>
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-        {/* Panel de Bienvenida y Roles */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
-          <h2 className="text-xl font-bold text-slate-200 mb-2">¡Bienvenido al Ecosistema CTP!</h2>
-          <p className="text-slate-400 text-sm mb-6">
-            Selecciona una herramienta o accede a tus simuladores de examen y registros institucionales con tu cuenta autorizada.
-          </p>
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="bg-slate-950 border border-slate-800 p-5 rounded-xl hover:border-cyan-500 transition cursor-pointer">
-              <h3 className="font-bold text-cyan-400 mb-1">Simuladores UCR / TEC</h3>
-              <p className="text-xs text-slate-400">Pruebas de admisión y prácticas guiadas para estudiantes.</p>
-            </div>
-            <div className="bg-slate-950 border border-slate-800 p-5 rounded-xl hover:border-cyan-500 transition cursor-pointer">
-              <h3 className="font-bold text-cyan-400 mb-1">Permisos y Tardías</h3>
-              <p className="text-xs text-slate-400">Control administrativo y gestión directa con Dirección.</p>
-            </div>
-            <div className="bg-slate-950 border border-slate-800 p-5 rounded-xl hover:border-cyan-500 transition cursor-pointer">
-              <h3 className="font-bold text-cyan-400 mb-1">Registros MEP CSV</h3>
-              <p className="text-xs text-slate-400">Exportación de notas y plantillas oficiales para docentes.</p>
-            </div>
-          </div>
-        </div>
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setLoading(false);
+    });
 
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    localStorage.clear();
+    await supabase.auth.signOut();
+    setSession(null);
+    window.location.reload();
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-cyan-400 font-bold">
+        Cargando pracTICAtecnica.com...
       </div>
-    </LoginGate>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100">
+      {/* Barra superior de control de sesión y Cierre de Sesión */}
+      <header className="bg-slate-900 border-b border-slate-800 px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-lg">
+        <div className="flex items-center gap-3">
+          <img src="/lumi-owl.svg" alt="Búho" className="w-8 h-8" />
+          <span className="font-bold text-cyan-400">practicatecnica.com</span>
+        </div>
+        {session ? (
+          <div className="flex items-center gap-4">
+            <span className="text-xs text-slate-300 hidden sm:inline">{session.user.email}</span>
+            <button
+              onClick={handleSignOut}
+              className="bg-red-600/20 hover:bg-red-600/40 text-red-300 border border-red-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition"
+            >
+              Cerrar Sesión
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } })}
+            className="bg-white text-slate-900 font-semibold px-4 py-1.5 rounded-lg text-xs hover:bg-slate-200 transition"
+          >
+            Ingresar
+          </button>
+        )}
+      </header>
+
+      {/* Contenido Principal */}
+      <main className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+          <h1 className="text-2xl font-bold text-slate-100 mb-2">¡Bienvenido, {session?.user?.user_metadata?.full_name || 'Profesor Max'}!</h1>
+          <p className="text-slate-400 text-sm">Sistema institucional activo para CTP Mercedes Norte.</p>
+        </div>
+      </main>
+    </div>
   );
 }

@@ -1,5 +1,5 @@
 (function () {
-  const DB_KEY = 'bds_sea_mep_v93_db';
+  const DB_KEY = 'bds_sea_mep_v101_db';
   const SALT = 'CTPMN-REAC2026-DECRETO40862';
 
   const ARTICULOS_REAC = [

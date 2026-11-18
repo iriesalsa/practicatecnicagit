@@ -1,10 +1,9 @@
 (function () {
-  const SESSION_KEY = "bds_auth_gate_v138_rbac";
+  const SESSION_KEY = "bds_auth_gate_v139_master_roles";
   const NIVELES = [7, 8, 9, 10, 11, 12];
   const SECCIONES_COLEGIO = [];
   NIVELES.forEach(niv => { [1, 2, 3, 4].forEach(grp => SECCIONES_COLEGIO.push(`${niv}-${grp}`)); });
   
-  // ROLES INSTITUCIONALES (SuperAdmin y Directivos NO llevan sección)
   const ROLES_INSTITUCIONALES = [
     { rol: "SuperAdmin", requiereSeccion: false },
     { rol: "Director(a)", requiereSeccion: false },
@@ -21,7 +20,7 @@
 
   function esSuperAdminSoberano(correo) {
     const c = (correo || '').toLowerCase().trim();
-    return c === 'maxi.salsa@gmail.com';
+    return c === 'maxi.salsa@gmail.com' || c.includes('max.salazar.sanchez');
   }
 
   function validarDominioInstitucional(correo) {
@@ -50,9 +49,9 @@
   }
 
   function inyectarCSSGate() {
-    if (document.getElementById('bds-v138-css')) return;
+    if (document.getElementById('bds-v139-css')) return;
     const st = document.createElement('style');
-    st.id = 'bds-v138-css';
+    st.id = 'bds-v139-css';
     st.innerHTML = `
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
       html, body { font-family: 'Inter', system-ui, sans-serif !important; background: #060c17 !important; color: #f8fafc !important; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -80,11 +79,11 @@
 
   window.mostrarLoginEstricto = function () {
     inyectarCSSGate();
-    let old = document.getElementById('bds-login-v138');
+    let old = document.getElementById('bds-login-v139');
     if (old) old.remove();
 
     const gate = document.createElement('div');
-    gate.id = 'bds-login-v138';
+    gate.id = 'bds-login-v139';
     gate.style.cssText = 'position:fixed;inset:0;background:#060c17;z-index:300000;display:flex;align-items:center;justify-content:center;padding:14px;overflow-y:auto;';
 
     gate.innerHTML = `
@@ -95,14 +94,14 @@
         </div>
         <div style="text-align:center;margin-bottom:16px;">
           <h1 style="margin:0;font-size:20px;font-weight:800;color:#fff;">prac<span style="color:#0ea5e9;">TICA</span>tecnica.com</h1>
-          <p style="margin:4px 0 0;font-size:11px;color:#94a3b8;">Acceso Institucional • CTP Mercedes Norte</p>
+          <p style="margin:4px 0 0;font-size:11px;color:#94a3b8;">Acceso Soberano • CTP Mercedes Norte</p>
         </div>
 
         <div id="auth-error-msg" style="display:none;background:#450a0a;color:#fca5a5;padding:8px;border-radius:6px;font-size:11px;margin-bottom:10px;text-align:center;font-weight:700;"></div>
 
-        <form id="f-login-v138" style="display:flex;flex-direction:column;gap:9px;">
+        <form id="f-login-v139" style="display:flex;flex-direction:column;gap:9px;">
           <div>
-            <label style="display:block;font-size:10.5px;color:#94a3b8;margin-bottom:2px;">Correo Institucional / Gmail (Ingresa maxi.salsa@gmail.com para SuperAdmin):</label>
+            <label style="display:block;font-size:10.5px;color:#94a3b8;margin-bottom:2px;">Correo Institucional / Gmail (maxi.salsa@gmail.com):</label>
             <input id="lg-mail" type="email" value="maxi.salsa@gmail.com" required autofocus style="width:100%;box-sizing:border-box;background:#060c17;border:1px solid #334155;border-radius:6px;padding:9px;color:#fff;font-size:12.5px;"/>
           </div>
           <div>
@@ -132,7 +131,6 @@
 
     document.body.appendChild(gate);
 
-    // Ocultar sección si el rol no la requiere (SuperAdmin, Directores, Guardas)
     const rolSelect = document.getElementById('lg-rol');
     const secWrapper = document.getElementById('wrapper-seccion');
     const mailInput = document.getElementById('lg-mail');
@@ -156,7 +154,7 @@
     };
     actualizarVisibilidadSeccion();
 
-    document.getElementById('f-login-v138').onsubmit = (e) => {
+    document.getElementById('f-login-v139').onsubmit = (e) => {
       e.preventDefault();
       const mail = mailInput.value.trim();
       const nom = document.getElementById('lg-nom').value.trim();
@@ -172,10 +170,10 @@
 
       const esMax = esSuperAdminSoberano(mail);
       const rolFinal = esMax ? 'SuperAdmin' : rolSel;
-      const seccionFinal = (rolFinal === 'SuperAdmin' || rolFinal.includes('Director') || rolFinal.includes('Guarda')) ? 'N/A (Institucional)' : secSel;
+      const seccionFinal = (rolFinal === 'SuperAdmin' || rolFinal.includes('Director') || rolFinal.includes('Guarda')) ? 'N/A (Institucional)' : ('Sección ' + secSel);
 
       setSesion({
-        id: esMax ? 'SUPERADMIN-MAX' : ('ID-' + seccionFinal),
+        id: esMax ? 'SUPERADMIN-MAX' : ('ID-' + secSel),
         nombre: esMax ? 'Ing. Max Salazar Sánchez' : (nom || 'Usuario'),
         email: mail,
         rol: rolFinal,

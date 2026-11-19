@@ -18,6 +18,7 @@
     { rol: "Guarda / Seguridad", sec: false, ic: "🛡️", desc: "Escáner y validador criptográfico QR SHA-256 de portón y canal operativo de seguridad." },
     { rol: "Conserje / Mantenimiento", sec: false, ic: "🛠️", desc: "Horarios de laboratorios/aulas por bloque, canal operativo 5S y credencial digital." },
     { rol: "Encargada Comedor / Junta", sec: false, ic: "🍽️", desc: "Escáner QR de comedor, venta de tiquetes, aprobación SINPE, menús MEP A–E y cierre de caja." },
+    { rol: "Particular (MOPT / Admisión)", sec: false, ic: "🎯", desc: "Acceso particular (₡2,500/año o ₡3,500 vitalicio): MOPT, Admisión UCR/TEC/UNA, 29 áreas, juegos, hábitos y racha." },
     { rol: "SuperAdmin", sec: false, ic: "👑", desc: "Control integral de la PWA, los 8 perfiles, seguridad RBAC, malla MEP y comunicaciones." }
   ];
 
@@ -31,8 +32,8 @@
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v189.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v189.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v190.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v190.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -364,7 +365,7 @@
 
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid #1e293b;font-size:11.5px;">
             <button type="button" id="lg-rec" style="background:none;border:none;color:#94a3b8;cursor:pointer;padding:0;">¿Olvidó su contraseña?</button>
-            <span style="color:#64748b;font-weight:600;">PWA Multi-SO • v189.0</span>
+            <span style="color:#64748b;font-weight:600;">PWA Multi-SO • v190.0</span>
           </div>
         </div>
       `;
@@ -924,6 +925,7 @@
   function iniciarApp(vistaInicial = "inicio") {
     const s = getSesion(); if (!s) { mostrarLogin("login"); return; }
     document.body.classList.add("bds-authenticated");
+    if (!sesionActiva.visitante && window.BDS_SUSCRIPCION && window.BDS_SUSCRIPCION.isLocked(sesionActiva)) { inyectarEstilos(); setFavicon(); window.BDS_SUSCRIPCION.renderPaywall(sesionActiva, cerrarSesion); return; }
     inyectarEstilos(); setFavicon();
     ["bds-header","bds-subnav","bds-shell","bds-dock"].forEach(id => { const e = document.getElementById(id); if (e) e.remove(); });
     const xp = getXP();
@@ -989,7 +991,7 @@
       else if (v === "direccion") { if (window.BDS_RENDER_DIRECCION_Y_FAMILIA) window.BDS_RENDER_DIRECCION_Y_FAMILIA(shell, getSesion()); }
       else if (v === "juegos") window.BDS_RENDER_SALA_JUEGOS(shell, ganarXP);
       else renderInicio(shell);
-      if (window.BDS_BRAND) window.BDS_BRAND.applyTexts(); window.scrollTo(0, 0);
+      if (window.BDS_BRAND) window.BDS_BRAND.applyTexts(); if (sesionActiva.visitante && window.BDS_SUSCRIPCION) window.BDS_SUSCRIPCION.prependGuestPromo(shell, cerrarSesion); window.scrollTo(0, 0);
     };
 
     document.getElementById("btn-hm").onclick = abrirHamburguesa;

@@ -14,6 +14,7 @@ window.addEventListener("error", function (ev) {
   } catch (e) {}
 });
 (function () {
+  var sesionActiva = null;
   const SESSION_KEY = "bds_session_v180_ctpmn_c02";
   const LOCK_KEY = "bds_lock_attempts_v180";
   const TRIAL_KEY = "bds_trial_start_v180";
@@ -47,8 +48,8 @@ window.addEventListener("error", function (ev) {
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v1901.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v1901.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v1902.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v1902.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -940,7 +941,7 @@ window.addEventListener("error", function (ev) {
   function iniciarApp(vistaInicial = "inicio") {
     const s = getSesion(); if (!s) { mostrarLogin("login"); return; }
     document.body.classList.add("bds-authenticated");
-    if (!sesionActiva.visitante && window.BDS_SUSCRIPCION && window.BDS_SUSCRIPCION.isLocked(sesionActiva)) { inyectarEstilos(); setFavicon(); window.BDS_SUSCRIPCION.renderPaywall(sesionActiva, cerrarSesion); return; }
+    if (sesionActiva && !sesionActiva.visitante && window.BDS_SUSCRIPCION && window.BDS_SUSCRIPCION.isLocked(sesionActiva)) { inyectarEstilos(); setFavicon(); window.BDS_SUSCRIPCION.renderPaywall(sesionActiva, cerrarSesion); return; }
     inyectarEstilos(); setFavicon();
     ["bds-header","bds-subnav","bds-shell","bds-dock"].forEach(id => { const e = document.getElementById(id); if (e) e.remove(); });
     const xp = getXP();
@@ -1006,7 +1007,7 @@ window.addEventListener("error", function (ev) {
       else if (v === "direccion") { if (window.BDS_RENDER_DIRECCION_Y_FAMILIA) window.BDS_RENDER_DIRECCION_Y_FAMILIA(shell, getSesion()); }
       else if (v === "juegos") window.BDS_RENDER_SALA_JUEGOS(shell, ganarXP);
       else renderInicio(shell);
-      if (window.BDS_BRAND) window.BDS_BRAND.applyTexts(); if (sesionActiva.visitante && window.BDS_SUSCRIPCION) window.BDS_SUSCRIPCION.prependGuestPromo(shell, cerrarSesion); window.scrollTo(0, 0); } catch (errGo) { console.error("bdsGo error:", errGo); shell.innerHTML = `<div class="bds-card" style="text-align:center;padding:24px;border-color:#f59e0b;"><h3>⚠️ Módulo en recarga</h3><p style="font-size:12.5px;color:#94a3b8;">${errGo.message || errGo}</p><button onclick="window.bdsGo(\'inicio\')" style="background:#1d4ed8;color:#fff;border:none;padding:9px 16px;border-radius:8px;font-weight:800;cursor:pointer;">🏠 Volver al Inicio</button></div>`; }
+      if (window.BDS_BRAND) window.BDS_BRAND.applyTexts(); if (sesionActiva && sesionActiva.visitante && window.BDS_SUSCRIPCION) window.BDS_SUSCRIPCION.prependGuestPromo(shell, cerrarSesion); window.scrollTo(0, 0); } catch (errGo) { console.error("bdsGo error:", errGo); shell.innerHTML = `<div class="bds-card" style="text-align:center;padding:24px;border-color:#f59e0b;"><h3>⚠️ Módulo en recarga</h3><p style="font-size:12.5px;color:#94a3b8;">${errGo.message || errGo}</p><button onclick="window.bdsGo(\'inicio\')" style="background:#1d4ed8;color:#fff;border:none;padding:9px 16px;border-radius:8px;font-weight:800;cursor:pointer;">🏠 Volver al Inicio</button></div>`; }
     };
 
     document.getElementById("btn-hm").onclick = abrirHamburguesa;

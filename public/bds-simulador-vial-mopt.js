@@ -3,7 +3,8 @@
     moto:   { id: "moto",   nom: "🏍️ Motocicleta (A)",   w: 14, h: 28, maxV: 4.2, acc: 0.14, turn: 0.062, color: "#f97316" },
     carro:  { id: "carro",  nom: "🚗 Automóvil (B1)",    w: 22, h: 42, maxV: 3.8, acc: 0.11, turn: 0.052, color: "#38bdf8" },
     camion: { id: "camion", nom: "🚚 Camión (B2–B4)",    w: 28, h: 66, maxV: 2.9, acc: 0.075, turn: 0.036, color: "#eab308" },
-    bus:    { id: "bus",    nom: "🚌 Autobús (C2)",      w: 28, h: 70, maxV: 2.8, acc: 0.072, turn: 0.034, color: "#10b981" }
+    bus:    { id: "bus",    nom: "🚌 Autobús (C2)",      w: 28, h: 70, maxV: 2.8, acc: 0.072, turn: 0.034, color: "#10b981" },
+    especial: { id: "especial", nom: "🚜 Equipo Especial (D1–D3)", w: 30, h: 58, maxV: 2.3, acc: 0.065, turn: 0.038, color: "#f59e0b" }
   };
 
   const CIRCUITOS = [
@@ -399,11 +400,11 @@
           ` : `
             <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;background:#070d19;padding:10px;border-radius:10px;">
               <select id="mt-cat" style="background:#0b1322;color:#fff;border:1px solid #334155;padding:8px;border-radius:8px;font-size:12px;font-weight:700;">
-                <option value="ALL" ${moptCat==="ALL"?"selected":""}>🌎 Todas las Licencias (A, B, C)</option>
+                <option value="ALL" ${moptCat==="ALL"?"selected":""}>🌎 Todas las Licencias (A, B, C, D)</option>
                 <option value="MOTO" ${moptCat==="MOTO"?"selected":""}>🏍️ Motocicleta (A1–A3)</option>
                 <option value="CARRO" ${moptCat==="CARRO"?"selected":""}>🚗 Automóvil (B1)</option>
                 <option value="CAMION" ${moptCat==="CAMION"?"selected":""}>🚚 Camión Pesado (B2–B4)</option>
-                <option value="BUS" ${moptCat==="BUS"?"selected":""}>🚌 Autobús / Público (C1–C2)</option>
+                <option value="BUS" ${moptCat==="BUS"?"selected":""}>🚌 Autobús / Público (C1–C2)</option><option value="ESPECIAL" ${moptCat==="ESPECIAL"?"selected":""}>🚜 Equipo Especial / Tractor (D1–D3)</option>
               </select>
               <select id="mt-qty" style="background:#0b1322;color:#fbbf24;border:1px solid #334155;padding:8px;border-radius:8px;font-size:12px;font-weight:800;">
                 ${[10, 20, 40, 60].map(q => `<option value="${q}" ${moptQty===q?"selected":""}>${q} preguntas${q===40?" (Oficial COSEVI)":""}</option>`).join("")}

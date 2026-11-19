@@ -31,8 +31,8 @@
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v188.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v188.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v189.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v189.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -364,7 +364,7 @@
 
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid #1e293b;font-size:11.5px;">
             <button type="button" id="lg-rec" style="background:none;border:none;color:#94a3b8;cursor:pointer;padding:0;">¿Olvidó su contraseña?</button>
-            <span style="color:#64748b;font-weight:600;">PWA Multi-SO • v188.0</span>
+            <span style="color:#64748b;font-weight:600;">PWA Multi-SO • v189.0</span>
           </div>
         </div>
       `;
@@ -566,7 +566,7 @@
             <h2 style="margin:10px 0 6px;color:#fff;">Acta Oficial — ${areaMeta ? areaMeta.name : "Toda la Malla MEP"}</h2>
             <p style="font-size:15px;color:#cbd5e1;">Aciertos: <b style="color:#34d399;">${okCnt}/${items.length}</b> • Nota MEP: <b style="color:#38bdf8;">${pct}%</b> • Escala UCR/TEC: <b style="color:#fbbf24;">${ucr}/800 pts</b></p>
             <div style="display:flex;justify-content:center;gap:10px;margin:14px 0;flex-wrap:wrap;">
-              <button id="sim-again" style="background:#1d4ed8;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer;">🔄 Nuevo Simulacro</button>
+              <button id="sim-again" style="background:#1d4ed8;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer;margin-bottom:14px;">🔄 Nuevo Simulacro</button><div class="bds-sim-review-v189" style="text-align:left;max-height:360px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-top:8px;">${items.map((it, i) => { const r = answers[i]; const ok = r !== undefined && it.opts[r] && it.opts[r].ok; const corr = (it.opts.find(o => o.ok) || {}).txt || ""; return `<div style="background:#070d19;border-left:4px solid ${ok?'#10b981':'#ef4444'};padding:9px;border-radius:7px;font-size:12px;"><b>${i+1}. ${it.q}</b><div style="color:${ok?'#34d399':'#fca5a5'};">${ok?'✅ Correcta':'❌ Tu respuesta: ' + (r!==undefined&&it.opts[r]?it.opts[r].txt:'Sin responder')}</div><div style="color:#38bdf8;">Clave: ${corr}</div><div style="color:#94a3b8;font-size:11px;">${it.e || ""}</div></div>`; }).join("")}</div>
               <button id="sim-rev" style="background:#131f33;color:#38bdf8;border:1px solid #334155;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer;">📖 Revisar Explicaciones</button>
             </div>
             <div id="rev-list" style="display:none;text-align:left;margin-top:14px;flex-direction:column;gap:8px;max-height:360px;overflow-y:auto;">
@@ -907,7 +907,7 @@
           ["admin", "qr", "🪪 Carné & Escáner QR SHA-256"],
           ["practica", null, "🧭 Práctica Libre y Guiada"],
           ["simulacro", null, "⏱️ Simulacro (10–60 Ítems)"],["admision", null, "🎓 Admisión UCR/TEC/UNA/UNED/UTN"],
-          ["biblioteca", null, "📚 Libros & Afiches Marca Blanca"],
+          ["opendocs","biblioteca", null, "📚 Libros & Afiches Marca Blanca"],
           ["juegos", null, "♟️ Ajedrez FIDE & 6 Juegos"]
         ].map(([k, p, l]) => `<button data-dw="${k}" data-dp="${p||''}" style="text-align:left;background:#131f33;color:#f1f5f9;border:1px solid #26354d;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;min-height:42px;">${l}</button>`).join("")}
         <button id="dw-brand" style="text-align:left;background:#131f33;color:#2dd4bf;border:1px solid #0d9488;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;min-height:42px;">🛡️ Identidad (Escudo / Mascota / MEP)</button><button id="dw-chat" style="text-align:left;background:#064e3b;color:#6ee7b7;border:1px solid #10b981;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;min-height:42px;">💬 Chats Subgrupos A/B</button>
@@ -954,7 +954,7 @@
       ["admin","📅 Horarios, Permisos & Dirección"],
       ["practica","🧭 Práctica Guiada"],
       ["simulacro","⏱️ Simulacro (10–60)"],["admision","🎓 Admisión UCR/TEC/UNA/UNED"],
-      ["biblioteca","📚 Libros & Afiches"],
+      ["opendocs","biblioteca","📚 Libros & Afiches"],
       ["fase2","📋 Asistencia & CSP"],["fase3","📘 Planes & 50 Esp."],["fase4","🚦 MOPT, 6 Idiomas & Lab"],["fase5","📊 Libreta REA/SEA"],["juegos","♟️ Juegos & Ajedrez"]
     ].map(([k, l]) => `<button data-v="${k}" class="bds-nav-btn">${l}</button>`).join("");
 

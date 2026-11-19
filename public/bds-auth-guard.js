@@ -20,9 +20,9 @@
     { rol: "SuperAdmin", sec: false, ic: "👑", desc: "Control integral de la PWA, los 8 perfiles, seguridad RBAC, malla MEP y comunicaciones." }
   ];
 
-  const IMG_BUHO = "/buho-original.svg?v=178";
-  const IMG_ESCUDO = "/=182";
-  const IMG_MEP = "/logo-mep-oficial.png?v=182";
+  const IMG_BUHO = (window.BDS_BRAND ? window.BDS_BRAND.get().mascota : "/=183");
+  const IMG_ESCUDO = (window.BDS_BRAND ? window.BDS_BRAND.get().escudo : "/=183");
+  const IMG_MEP = (window.BDS_BRAND ? window.BDS_BRAND.get().logoMep : "/=183");
   const GOOGLE_SVG = `<svg width="17" height="17" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>`;
 
   const GROSERIAS = ["tonto","idiota","estupido","imbecil","malparido","mierda","puta","cabron","carajo","basura","pendejo","hijueputa","carepicha","playo","zorra"];
@@ -30,8 +30,8 @@
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v182.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v182.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v183.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v183.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -140,6 +140,22 @@
         overflow-x: hidden; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
       }
       #root { display: none !important; }
+      /* bds-logos-universal-v183 */
+      img[src*="logo-mep-oficial"], img[alt*="MEP"] {
+        background: #ffffff !important;
+        padding: 5px 11px !important;
+        border-radius: 9px !important;
+        object-fit: contain !important;
+        max-width: 100% !important;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.38) !important;
+      }
+      img[src*="escudo-ctpmn-oficial"], img[alt*="Escudo"] {
+        background: #ffffff !important;
+        padding: 2px !important;
+        border-radius: 8px !important;
+        object-fit: contain !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.35) !important;
+      }
       /* bds-logos-oficiales-css */
       img[src*="logo-mep-oficial"] {
         background: #ffffff !important;
@@ -329,7 +345,7 @@
 
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid #1e293b;font-size:11.5px;">
             <button type="button" id="lg-rec" style="background:none;border:none;color:#94a3b8;cursor:pointer;padding:0;">¿Olvidó su contraseña?</button>
-            <span style="color:#64748b;font-weight:600;">PWA Multi-SO • v182.0</span>
+            <span style="color:#64748b;font-weight:600;">PWA Multi-SO • v183.0</span>
           </div>
         </div>
       `;
@@ -771,7 +787,7 @@
           <button onclick="window.bdsGo('admin','justificaciones')" class="bds-quick-btn" style="background:#0d9488;">🎓 Justificar Estudiante → Docente</button>
           <button onclick="window.bdsGo('admin','bandeja')" class="bds-quick-btn" style="background:#6d28d9;">🏛️ Bandeja Dirección (Aprobar 1-Clic)</button>
           <button onclick="window.bdsGo('admin','notas')" class="bds-quick-btn" style="background:#b45309;">📊 Registro Notas & Excel CSV</button>
-          <button onclick="window.bdsGo('direccion')" class="bds-quick-btn" style="background:#4f46e5;">📈 Panel Dirección & Familia</button><button onclick="window.bdsGo('fase3')" class="bds-quick-btn" style="background:#7c3aed;">🏭 50 Especialidades & Planes</button><button onclick="window.bdsGo('admin','qr')" class="bds-quick-btn" style="background:#1e40af;">🪪 Carné & Escáner QR SHA-256</button>
+          <button onclick="window.bdsGo('direccion')" class="bds-quick-btn" style="background:#4f46e5;">📈 Panel Dirección & Familia</button><button onclick="window.bdsGo('fase3')" class="bds-quick-btn" style="background:#7c3aed;">🏭 50 Especialidades & Planes</button><button onclick="window.BDS_BRAND && window.BDS_BRAND.openModal()" class="bds-quick-btn" style="background:#0f766e;">🛡️ Escudo / Mascota / Logo MEP</button><button onclick="window.bdsGo('admin','qr')" class="bds-quick-btn" style="background:#1e40af;">🪪 Carné & Escáner QR SHA-256</button>
         </div>
       </div>
 
@@ -875,13 +891,13 @@
           ["biblioteca", null, "📚 Libros & Afiches Marca Blanca"],
           ["juegos", null, "♟️ Ajedrez FIDE & 6 Juegos"]
         ].map(([k, p, l]) => `<button data-dw="${k}" data-dp="${p||''}" style="text-align:left;background:#131f33;color:#f1f5f9;border:1px solid #26354d;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;min-height:42px;">${l}</button>`).join("")}
-        <button id="dw-chat" style="text-align:left;background:#064e3b;color:#6ee7b7;border:1px solid #10b981;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;min-height:42px;">💬 Chats Subgrupos A/B</button>
+        <button id="dw-brand" style="text-align:left;background:#131f33;color:#2dd4bf;border:1px solid #0d9488;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;min-height:42px;">🛡️ Identidad (Escudo / Mascota / MEP)</button><button id="dw-chat" style="text-align:left;background:#064e3b;color:#6ee7b7;border:1px solid #10b981;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;min-height:42px;">💬 Chats Subgrupos A/B</button>
         <button id="dw-out" style="margin-top:auto;background:#7f1d1d;color:#fecaca;border:none;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;min-height:42px;">🚪 Cerrar Sesión</button>
       </div>
     `;
     document.body.appendChild(drw);
     document.getElementById("dw-x").onclick = () => drw.remove();
-    document.getElementById("dw-chat").onclick = () => { drw.remove(); toggleChats(); };
+    document.getElementById("dw-brand").onclick = () => { drw.remove(); if (window.BDS_BRAND) window.BDS_BRAND.openModal(); }; document.getElementById("dw-chat").onclick = () => { drw.remove(); toggleChats(); };
     document.getElementById("dw-out").onclick = () => { drw.remove(); cerrarSesion(); };
     drw.querySelectorAll("[data-dw]").forEach(b => b.onclick = () => { drw.remove(); window.bdsGo(b.getAttribute("data-dw"), b.getAttribute("data-dp") || null); });
   }
@@ -954,7 +970,7 @@
       else if (v === "direccion") { if (window.BDS_RENDER_DIRECCION_Y_FAMILIA) window.BDS_RENDER_DIRECCION_Y_FAMILIA(shell, getSesion()); }
       else if (v === "juegos") window.BDS_RENDER_SALA_JUEGOS(shell, ganarXP);
       else renderInicio(shell);
-      window.scrollTo(0, 0);
+      if (window.BDS_BRAND) window.BDS_BRAND.applyTexts(); window.scrollTo(0, 0);
     };
 
     document.getElementById("btn-hm").onclick = abrirHamburguesa;

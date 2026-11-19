@@ -17,6 +17,7 @@
     { rol: "Auxiliar Administrativo", sec: false, ic: "📋", desc: "Control de justificaciones estudiantiles, tardías, horarios por sección y carnés QR." },
     { rol: "Guarda / Seguridad", sec: false, ic: "🛡️", desc: "Escáner y validador criptográfico QR SHA-256 de portón y canal operativo de seguridad." },
     { rol: "Conserje / Mantenimiento", sec: false, ic: "🛠️", desc: "Horarios de laboratorios/aulas por bloque, canal operativo 5S y credencial digital." },
+    { rol: "Encargada Comedor / Junta", sec: false, ic: "🍽️", desc: "Escáner QR de comedor, venta de tiquetes, aprobación SINPE, menús MEP A–E y cierre de caja." },
     { rol: "SuperAdmin", sec: false, ic: "👑", desc: "Control integral de la PWA, los 8 perfiles, seguridad RBAC, malla MEP y comunicaciones." }
   ];
 
@@ -30,8 +31,8 @@
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v183.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v183.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v185.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v185.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -345,7 +346,7 @@
 
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid #1e293b;font-size:11.5px;">
             <button type="button" id="lg-rec" style="background:none;border:none;color:#94a3b8;cursor:pointer;padding:0;">¿Olvidó su contraseña?</button>
-            <span style="color:#64748b;font-weight:600;">PWA Multi-SO • v183.0</span>
+            <span style="color:#64748b;font-weight:600;">PWA Multi-SO • v185.0</span>
           </div>
         </div>
       `;

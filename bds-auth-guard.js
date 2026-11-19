@@ -1,3 +1,18 @@
+/* bds-anti-blank-v1901 */
+window.addEventListener("error", function (ev) {
+  try {
+    if (!document.getElementById("bds-shell") && !document.getElementById("bds-login-v184") && !document.getElementById("bds-paywall-v190")) {
+      var box = document.createElement("div");
+      box.id = "bds-rescue-ui";
+      box.style.cssText = "position:fixed;inset:0;background:#060c17;color:#f1f5f9;display:flex;align-items:center;justify-content:center;padding:20px;z-index:999999;font-family:Inter,sans-serif;";
+      box.innerHTML = '<div style="max-width:420px;background:#0b1322;border:2px solid #38bdf8;border-radius:14px;padding:22px;text-align:center;">' +
+        '<h2 style="margin:0 0 8px;color:#38bdf8;">Recuperación Automática</h2>' +
+        '<p style="font-size:13px;color:#cbd5e1;margin:0 0 14px;">Se detectó un dato en caché antiguo (' + (ev.message || 'error de carga') + '). Presiona el botón para reiniciar limpio.</p>' +
+        '<button onclick="sessionStorage.clear();localStorage.removeItem(\'bds_session_v184_ctpmn_c02\');location.reload(true);" style="background:#059669;color:#fff;border:none;padding:11px 18px;border-radius:8px;font-weight:800;cursor:pointer;">🔄 Recargar Plataforma</button></div>';
+      document.body.appendChild(box);
+    }
+  } catch (e) {}
+});
 (function () {
   const SESSION_KEY = "bds_session_v180_ctpmn_c02";
   const LOCK_KEY = "bds_lock_attempts_v180";
@@ -32,8 +47,8 @@
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v190.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v190.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v1901.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v1901.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -412,7 +427,7 @@
       }
 
       document.getElementById("lg-f").onsubmit = (e) => { e.preventDefault(); procesarAcceso(false); };
-      document.getElementById("lg-google").onclick = () => procesarAcceso(true);
+      document.getElementById("lg-google").onclick = () => { if (!mIn.value.trim()) { const gm = prompt("Ingrese su correo de Google (@gmail.com) o institucional (@mep.go.cr / @est.mep.go.cr):"); if (!gm) return; mIn.value = gm.trim(); if (esSuperAdmin(gm)) rSel.value = "SuperAdmin"; } procesarAcceso(true); };
       document.getElementById("lg-guest").onclick = async () => {
         const firma = await sha256Hex("VISITANTE|CTPMN-C02");
         setSesion({ nombre: "Visitante (Repaso Gratuito)", email: "visitante@practicatecnica.com", rol: "Estudiante", seccion: "10-3", visitante: true, firma, qr: `CTPMN-C02|VISITANTE|10-3|${firma.slice(0, 24)}` });
@@ -975,7 +990,7 @@
 
     document.body.prepend(shell); document.body.prepend(sub); document.body.prepend(hdr); document.body.appendChild(dock);
 
-    window.bdsGo = function (v, subParam) {
+    window.bdsGo = function (v, subParam) { /* bds-safe-go-v1901 */ try {
       if (simTimer) { clearInterval(simTimer); simTimer = null; }
       setNavActive(v);
       if (v === "admin") {
@@ -991,7 +1006,7 @@
       else if (v === "direccion") { if (window.BDS_RENDER_DIRECCION_Y_FAMILIA) window.BDS_RENDER_DIRECCION_Y_FAMILIA(shell, getSesion()); }
       else if (v === "juegos") window.BDS_RENDER_SALA_JUEGOS(shell, ganarXP);
       else renderInicio(shell);
-      if (window.BDS_BRAND) window.BDS_BRAND.applyTexts(); if (sesionActiva.visitante && window.BDS_SUSCRIPCION) window.BDS_SUSCRIPCION.prependGuestPromo(shell, cerrarSesion); window.scrollTo(0, 0);
+      if (window.BDS_BRAND) window.BDS_BRAND.applyTexts(); if (sesionActiva.visitante && window.BDS_SUSCRIPCION) window.BDS_SUSCRIPCION.prependGuestPromo(shell, cerrarSesion); window.scrollTo(0, 0); } catch (errGo) { console.error("bdsGo error:", errGo); shell.innerHTML = `<div class="bds-card" style="text-align:center;padding:24px;border-color:#f59e0b;"><h3>⚠️ Módulo en recarga</h3><p style="font-size:12.5px;color:#94a3b8;">${errGo.message || errGo}</p><button onclick="window.bdsGo(\'inicio\')" style="background:#1d4ed8;color:#fff;border:none;padding:9px 16px;border-radius:8px;font-weight:800;cursor:pointer;">🏠 Volver al Inicio</button></div>`; }
     };
 
     document.getElementById("btn-hm").onclick = abrirHamburguesa;

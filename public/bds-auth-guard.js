@@ -31,8 +31,8 @@
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v187.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v187.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v188.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v188.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -364,7 +364,7 @@
 
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid #1e293b;font-size:11.5px;">
             <button type="button" id="lg-rec" style="background:none;border:none;color:#94a3b8;cursor:pointer;padding:0;">¿Olvidó su contraseña?</button>
-            <span style="color:#64748b;font-weight:600;">PWA Multi-SO • v187.0</span>
+            <span style="color:#64748b;font-weight:600;">PWA Multi-SO • v188.0</span>
           </div>
         </div>
       `;
@@ -592,7 +592,7 @@
             </div>
             <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center;">
               <select id="ev-area" style="background:#070d19;color:#fff;border:1px solid #334155;padding:8px 10px;border-radius:8px;font-size:12px;font-weight:600;max-width:240px;">
-                <option value="ALL" ${area==="ALL"?"selected":""}>🌎 Toda la Malla MEP (22 Áreas)</option>
+                <option value="ALL" ${area==="ALL"?"selected":""}>🌎 Modo Mixto (Todas las 22 Áreas)</option>
                 ${malla.map(m => `<option value="${m.id}" ${area===m.id?"selected":""}>${m.name} (${m.cat})</option>`).join("")}
               </select>
               <select id="ev-cant" style="background:#070d19;color:#fbbf24;border:1px solid #334155;padding:8px 10px;border-radius:8px;font-size:12px;font-weight:800;">

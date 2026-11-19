@@ -64,8 +64,8 @@ window.addEventListener("error", function (ev) {
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v191.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v191.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v192.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v192.js").catch(() => {});
     }).catch(() => {});
   }
 

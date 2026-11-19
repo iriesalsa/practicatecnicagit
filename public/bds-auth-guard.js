@@ -31,8 +31,8 @@
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v185.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v185.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v186.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v186.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -346,7 +346,7 @@
 
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid #1e293b;font-size:11.5px;">
             <button type="button" id="lg-rec" style="background:none;border:none;color:#94a3b8;cursor:pointer;padding:0;">¿Olvidó su contraseña?</button>
-            <span style="color:#64748b;font-weight:600;">PWA Multi-SO • v185.0</span>
+            <span style="color:#64748b;font-weight:600;">PWA Multi-SO • v186.0</span>
           </div>
         </div>
       `;
@@ -387,7 +387,7 @@
         const rolFinal = isMax ? "SuperAdmin" : rSel.value;
         const secVal = document.getElementById("lg-s").value;
         const firma = await sha256Hex(`${mail}|${rolFinal}|${secVal}|CTPMN-C02`);
-        setSesion({ nombre: nom || mail.split("@")[0], email: mail, rol: rolFinal, seccion: secVal, visitante: false, firma, qr: `CTPMN-C02|${rolFinal}|${secVal}|${firma.slice(0, 24)}` });
+        setSesion({ nombre: nom || mail.split("@")[0], email: mail, rol: rolFinal, seccion: secVal, visitante: false, firma, qr: `PT-QR|v186|${mail}|${rolFinal}|${firma.slice(0, 16)}` });
         gate.remove();
         iniciarApp("inicio");
       }

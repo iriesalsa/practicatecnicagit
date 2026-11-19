@@ -101,6 +101,12 @@ ALTER TABLE public.gradebook_rea ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.institutional_chats ENABLE ROW LEVEL SECURITY;
 
 -- Políticas esenciales PRODHAB / RBAC
+DROP POLICY IF EXISTS "verificacion_publica_por_hash" ON public.verification_registry;
+DROP POLICY IF EXISTS "perfiles_propios_o_direccion" ON public.profiles;
+DROP POLICY IF EXISTS "notas_lectura_roles_autorizados" ON public.gradebook_rea;
+DROP POLICY IF EXISTS "notas_edicion_solo_docente_superadmin" ON public.gradebook_rea;
+DROP POLICY IF EXISTS "chats_solo_usuarios_autenticados" ON public.institutional_chats;
+
 CREATE POLICY "verificacion_publica_por_hash" ON public.verification_registry FOR SELECT USING (true);
 CREATE POLICY "perfiles_propios_o_direccion" ON public.profiles FOR SELECT USING (
   auth.uid() = id OR EXISTS (SELECT 1 FROM public.profiles p WHERE p.id = auth.uid() AND p.role IN ('SuperAdmin','Director','Docente'))

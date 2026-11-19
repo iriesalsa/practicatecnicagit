@@ -15,6 +15,22 @@ window.addEventListener("error", function (ev) {
 });
 (function () {
   var sesionActiva = null;
+  /* bds-pwa-detect-v191 */
+  var bdsDeferredPrompt = null;
+  function bdsIsAppInstalled() {
+    return (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true;
+  }
+  window.addEventListener("beforeinstallprompt", function (e) {
+    e.preventDefault();
+    bdsDeferredPrompt = e;
+    var btn = document.getElementById("bds-pwa-install-btn");
+    if (btn && !bdsIsAppInstalled()) btn.style.display = "inline-flex";
+  });
+  window.addEventListener("appinstalled", function () {
+    bdsDeferredPrompt = null;
+    var btn = document.getElementById("bds-pwa-install-btn");
+    if (btn) btn.style.display = "none";
+  });
   const SESSION_KEY = "bds_session_v180_ctpmn_c02";
   const LOCK_KEY = "bds_lock_attempts_v180";
   const TRIAL_KEY = "bds_trial_start_v180";
@@ -48,8 +64,8 @@ window.addEventListener("error", function (ev) {
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v1902.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v1902.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v191.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v191.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -959,7 +975,7 @@ window.addEventListener("error", function (ev) {
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-        <span id="bds-xp-pill" class="hide-sm" style="background:#131f33;border:1px solid #fbbf24;color:#fbbf24;padding:5px 9px;border-radius:7px;font-size:11px;font-weight:800;">🔥 ${xp.racha}d • ⚡ ${xp.xp} XP</span>
+        <button id="bds-pwa-install-btn" style="display:none;background:#0f766e;color:#fff;border:none;padding:6px 9px;border-radius:7px;font-size:11px;font-weight:800;cursor:pointer;min-height:34px;align-items:center;gap:4px;">📲 Instalar</button><button id="bds-notif-btn" title="Notificaciones" style="position:relative;background:#131f33;color:#38bdf8;border:1px solid #334155;padding:6px 9px;border-radius:7px;font-size:13px;cursor:pointer;min-height:34px;">🔔<span id="bds-notif-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:#dc2626;color:#fff;font-size:9.5px;font-weight:900;min-width:16px;height:16px;border-radius:99px;align-items:center;justify-content:center;padding:0 4px;"></span></button><span id="bds-xp-pill" class="hide-sm" style="background:#131f33;border:1px solid #fbbf24;color:#fbbf24;padding:5px 9px;border-radius:7px;font-size:11px;font-weight:800;">🔥 ${xp.racha}d • ⚡ ${xp.xp} XP</span>
         <button id="btn-ch" style="background:#064e3b;color:#6ee7b7;border:1px solid #10b981;padding:7px 11px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;min-height:36px;">💬 Chats</button>
         <button id="btn-out" style="background:transparent;color:#fca5a5;border:1px solid #7f1d1d;padding:7px 11px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;min-height:36px;">Salir</button>
       </div>

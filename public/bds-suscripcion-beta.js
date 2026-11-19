@@ -12,7 +12,7 @@
     { id: "est_inst", nombre: "Estudiante en Institución Activa", precio: "₡1,000 / año", color: "#0f766e", detalle: "Para colegios/escuelas con licencia institucional (el centro define su cuota de ₡3,000–₡4,000 y conserva la diferencia)." },
     { id: "doc_inst", nombre: "Docente en Institución Activa", precio: "₡2,000 / año", color: "#7c3aed", detalle: "Matrícula de estudiantes, libreta REA, asistencia automática por lecciones efectivas y planeamiento IA." },
     { id: "doc_indep", nombre: "Docente Independiente", precio: "₡3,500 / año", color: "#6d28d9", detalle: "Acceso total a herramientas docentes, planeamiento inverso IA, asistencia automática REA y banco de 9,400+ ítems." },
-    { id: "inst_anual", nombre: "Institución Educativa (Competencia SICAI)", precio: "₡19,900 / año", color: "#b45309", detalle: "Administración educativa total: matrícula QR SHA-256, horarios IA sin choques, comedor QR, marca blanca y estadísticas." }
+    { id: "inst_anual", nombre: "Institución Educativa (Competencia SICAI)", precio: "₡19,100 / año", color: "#b45309", detalle: "Administración educativa total: matrícula QR SHA-256, horarios IA sin choques, comedor QR, marca blanca y estadísticas." }
   ];
 
   function loadTrialMap() { try { return JSON.parse(localStorage.getItem(TRIAL_MAP_KEY)) || {}; } catch { return {}; } }
@@ -183,7 +183,7 @@
         <div style="background:#070d19;border:1px solid #1e3a8a;border-radius:9px;padding:9px;"><b style="color:#38bdf8;">🪪 Carné QR SHA-256</b><div style="color:#94a3b8;">Identificación digital verificable para portón y trámites.</div></div>
         <div style="background:#070d19;border:1px solid #10b981;border-radius:9px;padding:9px;"><b style="color:#34d399;">🍽️ Comedor Escolar QR</b><div style="color:#94a3b8;">Becas PANEA, saldo en colones y pago SINPE a la Junta.</div></div>
         <div style="background:#070d19;border:1px solid #f59e0b;border-radius:9px;padding:9px;"><b style="color:#fbbf24;">📊 Notas y Asistencia Auto</b><div style="color:#94a3b8;">Cálculo automático REA por lecciones efectivas y CSV SEA.</div></div>
-        <div style="background:#070d19;border:1px solid #a855f7;border-radius:9px;padding:9px;"><b style="color:#c084fc;">🚗 MOPT & Admisión UCR</b><div style="color:#94a3b8;">Particulares ₡2,500/año o ₡3,500 vitalicio • Colegios ₡19,900/año.</div></div>
+        <div style="background:#070d19;border:1px solid #a855f7;border-radius:9px;padding:9px;"><b style="color:#c084fc;">🚗 MOPT & Admisión UCR</b><div style="color:#94a3b8;">Particulares ₡2,500/año o ₡3,500 vitalicio • Colegios ₡19,100/año.</div></div>
       </div>
     `;
     shell.prepend(promo);

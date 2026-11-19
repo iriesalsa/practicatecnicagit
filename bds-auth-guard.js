@@ -1,9 +1,9 @@
 (function () {
-  const SESSION_KEY = "bds_session_v179_ctpmn_c02";
-  const LOCK_KEY = "bds_lock_attempts_v179";
-  const TRIAL_KEY = "bds_trial_start_v179";
-  const XP_KEY = "bds_xp_profile_v179";
-  const CHAT_KEY = "bds_chats_v179_c02";
+  const SESSION_KEY = "bds_session_v180_ctpmn_c02";
+  const LOCK_KEY = "bds_lock_attempts_v180";
+  const TRIAL_KEY = "bds_trial_start_v180";
+  const XP_KEY = "bds_xp_profile_v180";
+  const CHAT_KEY = "bds_chats_v180_c02";
 
   const NIVELES = [7, 8, 9, 10, 11, 12];
   const SECCIONES = [];
@@ -30,8 +30,8 @@
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v179.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v179.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v180.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v180.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -113,7 +113,7 @@
   }
 
   function cerrarSesion() {
-    const keep = [LOCK_KEY, XP_KEY, CHAT_KEY, TRIAL_KEY, "bds_permisos_v179_c02", "bds_notas_excel_v179_c02"].map(k => [k, localStorage.getItem(k)]);
+    const keep = [LOCK_KEY, XP_KEY, CHAT_KEY, TRIAL_KEY, "bds_permisos_v180_c02", "bds_notas_excel_v180_c02"].map(k => [k, localStorage.getItem(k)]);
     sessionStorage.clear(); localStorage.clear();
     keep.forEach(([k, v]) => { if (v !== null) localStorage.setItem(k, v); });
     document.body.classList.remove("bds-authenticated");
@@ -128,9 +128,9 @@
   }
 
   function inyectarEstilos() {
-    if (document.getElementById("bds-v179-css")) return;
+    if (document.getElementById("bds-v180-css")) return;
     const st = document.createElement("style");
-    st.id = "bds-v179-css";
+    st.id = "bds-v180-css";
     st.innerHTML = `
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
       *, *::before, *::after { box-sizing: border-box; }
@@ -197,10 +197,10 @@
   // ==================== LOGIN SOBERANO ESTÉTICO ====================
   function mostrarLogin(vista = "login") {
     inyectarEstilos(); setFavicon();
-    const old = document.getElementById("bds-login-v179"); if (old) old.remove();
+    const old = document.getElementById("bds-login-v180"); if (old) old.remove();
     const gate = document.createElement("div");
-    gate.id = "bds-login-v179";
-    gate.style.cssText = "position:fixed;inset:0;background:radial-gradient(circle at 50% 0%,#0f2247 0%,#060c17 72%);z-index:300000;display:flex;align-items:center;justify-content:center;padding:14px;overflow-y:auto;";
+    gate.id = "bds-login-v180";
+    gate.style.cssText = "position:fixed;inset:0;background:radial-gradient(circle at 50% 0%,#0f2247 0%,#060c17 72%);z-index:300000;display:flex;align-items:flex-start;justify-content:center;padding:16px 14px;overflow-y:auto;min-height:100dvh;";
 
     const getInt = () => parseInt(localStorage.getItem(LOCK_KEY) || "0", 10);
     const setInt = (n) => localStorage.setItem(LOCK_KEY, String(n));
@@ -298,7 +298,7 @@
 
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid #1e293b;font-size:11.5px;">
             <button type="button" id="lg-rec" style="background:none;border:none;color:#94a3b8;cursor:pointer;padding:0;">¿Olvidó su contraseña?</button>
-            <span style="color:#64748b;font-weight:600;">PWA Multi-SO • v179.0</span>
+            <span style="color:#64748b;font-weight:600;">PWA Multi-SO • v180.0</span>
           </div>
         </div>
       `;
@@ -740,7 +740,7 @@
           <button onclick="window.bdsGo('admin','justificaciones')" class="bds-quick-btn" style="background:#0d9488;">🎓 Justificar Estudiante → Docente</button>
           <button onclick="window.bdsGo('admin','bandeja')" class="bds-quick-btn" style="background:#6d28d9;">🏛️ Bandeja Dirección (Aprobar 1-Clic)</button>
           <button onclick="window.bdsGo('admin','notas')" class="bds-quick-btn" style="background:#b45309;">📊 Registro Notas & Excel CSV</button>
-          <button onclick="window.bdsGo('admin','qr')" class="bds-quick-btn" style="background:#1e40af;">🪪 Carné & Escáner QR SHA-256</button>
+          <button onclick="window.bdsGo('direccion')" class="bds-quick-btn" style="background:#4f46e5;">📈 Panel Dirección & Familia</button><button onclick="window.bdsGo('fase3')" class="bds-quick-btn" style="background:#7c3aed;">🏭 50 Especialidades & Planes</button><button onclick="window.bdsGo('admin','qr')" class="bds-quick-btn" style="background:#1e40af;">🪪 Carné & Escáner QR SHA-256</button>
         </div>
       </div>
 
@@ -889,7 +889,7 @@
       ["practica","🧭 Práctica Guiada"],
       ["simulacro","⏱️ Simulacro (10–60)"],["admision","🎓 Admisión UCR/TEC/UNA/UNED"],
       ["biblioteca","📚 Libros & Afiches"],
-      ["juegos","♟️ Juegos & Ajedrez"]
+      ["fase2","📋 Asistencia & CSP"],["fase3","📘 Planes & 50 Esp."],["fase4","🚦 MOPT, 6 Idiomas & Lab"],["fase5","📊 Libreta REA/SEA"],["juegos","♟️ Juegos & Ajedrez"]
     ].map(([k, l]) => `<button data-v="${k}" class="bds-nav-btn">${l}</button>`).join("");
 
     const shell = document.createElement("main");
@@ -916,14 +916,18 @@
       else if (v === "practica") renderEvaluacion(shell, "guiada", subParam || "ALL");
       else if (v === "simulacro") renderEvaluacion(shell, "simulacro", subParam || "ALL");
       else if (v === "admision") { if (window.BDS_RENDER_ADMISION) window.BDS_RENDER_ADMISION(shell, subParam || "ucr", ganarXP); } else if (v === "biblioteca") { if (window.BDS_RENDER_BIBLIOTECA_ILUSTRADA) window.BDS_RENDER_BIBLIOTECA_ILUSTRADA(shell, { malla: window.BDS_MALLA_MEP || [], ganarXP, abrirPractica: (m, a) => { setNavActive(m === "simulacro" ? "simulacro" : "practica"); renderEvaluacion(shell, m, a); }, IMG_ESCUDO, IMG_MEP }); else renderBiblioteca(shell); }
+            else if (v === "fase2") { if (window.BDS_RENDER_FASE2) window.BDS_RENDER_FASE2(shell, subParam, { sesion: getSesion(), sha256Hex, generarQRSVG, ganarXP }); }
+      else if (v === "fase3") { if (window.BDS_RENDER_FASE3) window.BDS_RENDER_FASE3(shell); }
+      else if (v === "fase4") { if (window.BDS_RENDER_FASE4) window.BDS_RENDER_FASE4(shell, subParam, ganarXP); }
+      else if (v === "fase5") { if (window.BDS_RENDER_FASE5_REA) window.BDS_RENDER_FASE5_REA(shell, { sesion: getSesion() }); }
+      else if (v === "direccion") { if (window.BDS_RENDER_DIRECCION_Y_FAMILIA) window.BDS_RENDER_DIRECCION_Y_FAMILIA(shell, getSesion()); }
       else if (v === "juegos") window.BDS_RENDER_SALA_JUEGOS(shell, ganarXP);
       else renderInicio(shell);
       window.scrollTo(0, 0);
     };
 
     document.getElementById("btn-hm").onclick = abrirHamburguesa;
-    document.getElementById("btn-ch").onclick = toggleChats;
-    document.getElementById("dk-ch").onclick = toggleChats;
+    if (s.visitante) { ["btn-ch","dk-ch"].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = "none"; }); } else { document.getElementById("btn-ch").onclick = toggleChats; } /* bds-visitante-lock */
     document.getElementById("btn-out").onclick = cerrarSesion;
     document.querySelectorAll("[data-v]").forEach(b => b.onclick = () => window.bdsGo(b.getAttribute("data-v")));
     window.bdsGo(vistaInicial);
@@ -931,8 +935,7 @@
 
   window.addEventListener("DOMContentLoaded", () => {
     inyectarEstilos(); setFavicon();
-    const s = getSesion();
-    if (s && s.email) iniciarApp("inicio");
+    if (location.hash.includes("verificar-horario/")) { const h = location.hash.split("verificar-horario/")[1]; const res = window.BDS_VERIFY_HASH ? window.BDS_VERIFY_HASH(h) : { ok: false }; alert(res.ok ? ("✅ Verificado CTPMN: " + res.rec.holder_name + " (" + res.rec.doc_type + ")") : "Hash no encontrado en verification_registry."); } const s = getSesion(); if (s && s.email) iniciarApp("inicio");
     else mostrarLogin("login");
   });
 })();

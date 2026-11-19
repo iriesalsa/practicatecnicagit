@@ -1,0 +1,10 @@
+/* pracTICAtecnica.com v700 — Reportes PDF Limpios (Cero botones al imprimir/exportar) */
+@media print {
+  header, nav, #pt-v700-bar, #pt-v700-dock, #pt-guest-ad-banner, #pt-buho-welcome-modal,
+  button, .no-print, [data-no-print="true"], [role="button"],
+  input[type="button"], input[type="submit"], a[download] {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  body { background: #ffffff !important; color: #0f172a !important; }
+}

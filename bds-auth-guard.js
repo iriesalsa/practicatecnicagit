@@ -31,8 +31,8 @@
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v186.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v186.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v187.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v187.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -234,6 +234,15 @@
         .hide-sm { display: none !important; }
         #bds-shell { padding: 12px 10px calc(94px + env(safe-area-inset-bottom)); }
       }
+            /* bds-responsive-v187 */
+      @media (max-width: 640px) {
+        #bds-header { padding: 8px 8px; gap: 4px; }
+        #bds-shell { padding: 10px 8px 98px; }
+        .bds-card { padding: 12px; border-radius: 12px; }
+        .bds-quick-btn { width: 100%; justify-content: center; font-size: 13px; min-height: 44px; }
+        #bds-subnav { top: 50px; padding: 6px 8px; }
+        .bds-nav-btn { font-size: 12.5px; padding: 8px 12px; min-height: 40px; }
+      }
       @media print {
         #bds-header, #bds-subnav, #bds-dock, #bds-chat-modal { display: none !important; }
         body, .bds-card { background: #fff !important; color: #000 !important; border-color: #ccc !important; }
@@ -346,7 +355,7 @@
 
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid #1e293b;font-size:11.5px;">
             <button type="button" id="lg-rec" style="background:none;border:none;color:#94a3b8;cursor:pointer;padding:0;">¿Olvidó su contraseña?</button>
-            <span style="color:#64748b;font-weight:600;">PWA Multi-SO • v186.0</span>
+            <span style="color:#64748b;font-weight:600;">PWA Multi-SO • v187.0</span>
           </div>
         </div>
       `;
@@ -586,7 +595,7 @@
                 <option value="Intermedio" ${diff==="Intermedio"?"selected":""}>🟡 Intermedio</option>
                 <option value="Avanzado" ${diff==="Avanzado"?"selected":""}>🔴 Avanzado</option>
               </select>
-              <button id="ev-go" style="background:#059669;color:#fff;border:none;padding:8px 13px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">🔀 Generar</button>
+              <select id="ev-diff" style="background:#070d19;color:#34d399;border:1px solid #334155;padding:8px;border-radius:8px;font-size:12px;font-weight:700;"><option value="ALL" ${diff==="ALL"?"selected":""}>🎯 Todos los Niveles</option><option value="Básico" ${diff==="Básico"?"selected":""}>Básico</option><option value="Medio" ${diff==="Medio"?"selected":""}>Medio</option><option value="Intermedio" ${diff==="Intermedio"?"selected":""}>Intermedio</option><option value="Avanzado" ${diff==="Avanzado"?"selected":""}>Avanzado</option></select><button type="button" onclick="window.BDS_OPEN_AI_ITEMS && window.BDS_OPEN_AI_ITEMS()" style="background:#7c3aed;color:#fff;border:none;padding:8px 11px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">🤖 +Preguntas IA</button><button id="ev-go" style="background:#059669;color:#fff;border:none;padding:8px 13px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">🔀 Generar</button>
             </div>
           </div>
           ${modo === "simulacro" ? `
@@ -631,7 +640,7 @@
       `;
       shell.querySelectorAll(".m-sw").forEach(b => b.onclick = () => { modo = b.getAttribute("data-m"); iniciarPrueba(); });
       document.getElementById("ev-area").onchange = (e) => { area = e.target.value; iniciarPrueba(); };
-      document.getElementById("ev-cant").onchange = (e) => { cantidad = Number(e.target.value); iniciarPrueba(); };
+      document.getElementById("ev-cant").onchange = (e) => { cantidad = Number(e.target.value); iniciarPrueba(); }; if (document.getElementById("ev-diff")) document.getElementById("ev-diff").onchange = (e) => { diff = e.target.value; iniciarPrueba(); };
       document.getElementById("ev-diff").onchange = (e) => { diff = e.target.value; iniciarPrueba(); };
       document.getElementById("ev-go").onclick = iniciarPrueba;
       if (document.getElementById("sim-pause")) document.getElementById("sim-pause").onclick = () => { paused = !paused; draw(); };

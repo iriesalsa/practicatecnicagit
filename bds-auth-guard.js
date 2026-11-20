@@ -1,3 +1,5 @@
+if (!window.__BDS_AUTH_GUARD_LOADED_V235) {
+window.__BDS_AUTH_GUARD_LOADED_V235 = true;
 /* bds-anti-blank-v193 */
 window.addEventListener("error", function (ev) {
   try {
@@ -529,7 +531,7 @@ window.addEventListener("error", function (ev) {
             ${locked ? "Cuenta bloqueada tras 5 intentos fallidos. Comuníquese con soporte." : ""}
           </div>
 
-          <form id="lg-f" style="display:flex;flex-direction:column;gap:8px;">
+          <form id="lg-f" novalidate style="display:flex;flex-direction:column;gap:8px;">
             <div>
               <label style="display:block;font-size:11px;margin-bottom:3px;">Correo Institucional o Gmail</label>
               <input id="lg-m" type="email" placeholder="usuario@est.mep.go.cr" required autofocus ${locked?"disabled":""} style="width:100%;background:#070d19;border:1px solid #334155;border-radius:8px;padding:9px 11px;color:#fff;font-size:13px;min-height:40px;"/>
@@ -1187,3 +1189,4 @@ window.addEventListener("error", function (ev) {
     else mostrarLogin("login");
   });
 })();
+}

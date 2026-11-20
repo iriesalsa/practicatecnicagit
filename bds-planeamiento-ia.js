@@ -116,7 +116,7 @@
   }
 
   window.BDS_RENDER_PLANEAMIENTO_IA = function (shell, ctx) {
-    const { sesion, sha256Hex, generarQRSVG, ganarXP } = ctx;
+    /* bds-planes-solo-docentes-v195 */ const { sesion, sha256Hex, generarQRSVG, ganarXP } = ctx; if (!sesion || !["SuperAdmin", "Docente MEP"].includes(sesion.rol)) { shell.innerHTML = `<div class="bds-card" style="text-align:center;padding:30px;border-color:#dc2626;"><h3 style="color:#f87171;margin:0 0 6px;">🚫 Módulo Exclusivo para Docentes MEP</h3><p style="font-size:12.5px;color:#94a3b8;margin:0;">El Generador de Planeamientos con IA está habilitado únicamente para el perfil <b>Docente MEP</b> y <b>SuperAdmin</b>.</p></div>`; return; }
     const malla = window.BDS_MALLA_MEP || [];
     let areaId = malla[0] ? malla[0].id : "web";
     let nivel = "11° Año";

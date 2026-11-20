@@ -38,9 +38,7 @@
     saveNotifs(arr.slice(0, 40));
     updateBellBadge();
     try {
-      if ("Notification" in window && Notification.permission === "granted") {
-        new Notification(titulo, { body: cuerpo, icon: "/buho-oficial.png" });
-      }
+      if (window.BDS_NATIVE && window.BDS_NATIVE.notify) { window.BDS_NATIVE.notify(titulo, cuerpo); }
     } catch {}
   }
 

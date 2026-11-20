@@ -427,6 +427,37 @@
         }
       }
     }
+        /* bds-boost-v195 */
+    if (tipo === "mate" || tipo === "admision" || tipo === "primaria" || tipo === "ingles" || tipo === "frances" || tipo === "ciber" || tipo === "redes_conf") {
+      for (let m = 1; m <= 60; m++) {
+        if (tipo === "mate") {
+          const base = 2 + (m % 9), exp = 2 + (m % 2), rPow = Math.pow(base, exp), extra = 3 + (m % 7);
+          out.push({ a: areaId, d: DIFFS[m % 4], q: `[Cálculo Potencias #${m}] Evalúe la expresión: ${base}^${exp} + ${extra}`, o: [`${rPow + extra}`, `${base * exp + extra}`, `${rPow + extra + 2}`, `${Math.max(1, rPow - extra)}`], c: 0, g: "Calcula primero la potencia y luego suma.", e: `${base}^${exp} = ${rPow}; ${rPow} + ${extra} = ${rPow + extra}.` });
+        } else if (tipo === "admision") {
+          const p1 = 10 + m * 2, p2 = 4 + (m % 7), prom = ((p1 + (p1 + p2 * 2)) / 2);
+          out.push({ a: areaId, d: DIFFS[m % 4], q: `[Razonamiento PAA #${m}] El promedio de dos números es ${prom}. Si el menor es ${p1}, ¿cuál es el número mayor?`, o: [`${p1 + p2 * 2}`, `${p1 + p2}`, `${prom + p1}`, `${p1 + p2 * 3}`], c: 0, g: "Multiplica el promedio por 2 para hallar la suma total y resta el menor.", e: `Suma = ${prom * 2}; mayor = ${prom * 2} - ${p1} = ${p1 + p2 * 2}.` });
+        } else if (tipo === "primaria") {
+          const n1 = 5 + m, n2 = 3 + (m % 9);
+          out.push({ a: areaId, d: DIFFS[m % 4], q: `[Primaria #${m}] Si tienes ${n1} cuadernos y recibes ${n2} más para tu aula, ¿cuántos cuadernos tienes ahora?`, o: [`${n1 + n2} cuadernos`, `${Math.abs(n1 - n2)} cuadernos`, `${n1 + n2 + 3} cuadernos`, `${n1 * 2} cuadernos`], c: 0, g: "Suma ambas cantidades.", e: `${n1} + ${n2} = ${n1 + n2} cuadernos.` });
+        } else if (tipo === "ingles") {
+          const pairs = [["always", "100% frequency"], ["never", "0% frequency"], ["usually", "most of the time"], ["yesterday", "Past Simple marker"], ["tomorrow", "Future tense marker"], ["software", "computer programs"]];
+          const [w, def] = pairs[m % pairs.length];
+          out.push({ a: areaId, d: DIFFS[m % 4], q: `[English Boost #${m}] What is the correct meaning/use of "${w}"?`, o: [def, "A type of car license", "A mathematical fraction", "A kitchen tool"], c: 0, g: "Connect the English word with its accurate grammar or vocabulary meaning.", e: `"${w}" corresponds to: ${def}.`, lang: "en-US" });
+        } else if (tipo === "frances") {
+          const pairs = [["Bonjour", "Buenos días"], ["Bonsoir", "Buenas noches"], ["Merci", "Gracias"], ["Oui", "Sí"], ["Non", "No"], ["École", "Escuela"]];
+          const [w, def] = pairs[m % pairs.length];
+          out.push({ a: areaId, d: DIFFS[m % 4], q: `[Français Boost #${m}] ¿Qué significa la palabra francesa "${w}"?`, o: [def, "Automóvil", "Teclado", "Ventana"], c: 0, g: "Asocia el vocabulario básico del MEP en francés.", e: `"${w}" significa "${def}" en español.`, lang: "fr-FR" });
+        } else if (tipo === "ciber") {
+          const okMap = ["Usar contraseñas únicas con MFA", "Verificar remitente antes de abrir enlaces", "Mantener RLS activo en PostgreSQL", "Aplicar hash SHA-256 para integridad", "Actualizar parches de seguridad periódicamente", "Aplicar principio de mínimo privilegio RBAC"];
+          out.push({ a: areaId, d: DIFFS[m % 4], q: `[Ciberseguridad #${m}] ¿Cuál práctica protege mejor una plataforma educativa institucional?`, o: [okMap[m % okMap.length], "Publicar contraseñas en un cartel", "Desactivar el cifrado HTTPS", "Otorgar SuperAdmin a usuarios anónimos"], c: 0, g: "Aplica defensa en profundidad y Ley N.° 8968.", e: `${okMap[m % okMap.length]} reduce drásticamente el riesgo de intrusión.` });
+        } else if (tipo === "redes_conf") {
+          const hosts = [254, 126, 62, 30, 14, 6];
+          const cidrs = ["/24", "/25", "/26", "/27", "/28", "/29"];
+          const idx = m % 6;
+          out.push({ a: areaId, d: DIFFS[m % 4], q: `[Subneteo IPv4 #${m}] ¿Cuántos hosts utilizables admite una subred con prefijo ${cidrs[idx]}?`, o: [`${hosts[idx]} hosts`, `${hosts[idx] + 20} hosts`, `1024 hosts`, `2 hosts`], c: 0, g: "Aplica 2^(32 - prefijo) - 2.", e: `Con ${cidrs[idx]} quedan ${32 - (24 + idx)} bits de host: 2^${32 - (24 + idx)} - 2 = ${hosts[idx]} hosts.` });
+        }
+      }
+    }
     return out;
   }
 
@@ -537,7 +568,7 @@
         });
       } else {
         const seeds = PURO[tipo] || [];
-        const reps = seeds.length > 0 ? Math.min(MARCOS_CURRICULARES.length, Math.ceil(330 / seeds.length)) : 0;
+        const reps = seeds.length > 0 ? Math.min(MARCOS_CURRICULARES.length, Math.ceil(360 / seeds.length)) : 0;
         seeds.forEach((s, si) => {
           const [q, ok, d1, d2, d3, exp] = s;
           for (let r = 0; r < reps; r++) {

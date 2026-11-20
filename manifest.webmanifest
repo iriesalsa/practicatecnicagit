@@ -1,13 +1,23 @@
 {
-  "name": "pracTICAtecnica.com — CTP Mercedes Norte",
-  "short_name": "pracTICA",
-  "description": "Plataforma educativa y administrativa del Colegio Técnico Profesional Mercedes Norte (Circuito 02)",
+  "name": "pracTICAtecnica.com — Plataforma Educativa Universal",
+  "short_name": "pracTICAtecnica",
+  "description": "Plataforma educativa multiplataforma (Android, iOS, Windows, macOS) con prácticas MEP, MOPT, Admisión, Comedor QR y Gestión Institucional.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#060c17",
-  "theme_color": "#0b1322",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "orientation": "any",
+  "background_color": "#060c17",
+  "theme_color": "#0b1220",
+  "lang": "es-CR",
+  "categories": ["education", "productivity", "utilities"],
   "icons": [
-    { "src": "/buho-original.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+    { "src": "/buho-oficial.png", "sizes": "192x192", "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "/buho-oficial.png", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Práctica Guiada", "short_name": "Práctica", "url": "/#practica" },
+    { "name": "Simulador MOPT", "short_name": "MOPT", "url": "/#mopt" },
+    { "name": "Comedor QR", "short_name": "Comedor", "url": "/#comedor" }
   ]
 }

@@ -41,8 +41,8 @@ window.addEventListener("error", function (ev) {
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v194.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v194.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v195.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v195.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -153,9 +153,9 @@ window.addEventListener("error", function (ev) {
       institucionCorta: "CTP Mercedes Norte",
       regional: "Dirección Regional de Heredia",
       circuito: "Circuito 02",
-      escudo: "/escudo-ctpmn-oficial.jpeg?v=194",
-      mascota: "/buho-oficial.png?v=194",
-      logoMep: "/logo-mep-oficial.png?v=194"
+      escudo: "/escudo-ctpmn-oficial.jpeg?v=195",
+      mascota: "/buho-oficial.png?v=195",
+      logoMep: "/logo-mep-oficial.png?v=195"
     };
     if (!window.BDS_BRAND) return def;
     const b = window.BDS_BRAND.get();
@@ -321,6 +321,26 @@ window.addEventListener("error", function (ev) {
         .bds-card { padding: 12px; }
         .bds-quick-btn { flex: 1 1 calc(50% - 6px); justify-content: center; font-size: 12px; min-height: 44px; }
       }
+            /* bds-ultrawide-v195 — Responsive Total (Móvil -> Tablet -> Desktop -> 4K) */
+      @media (min-width: 1120px) {
+        #bds-header { padding: 10px 24px; gap: 14px; }
+        #bds-subnav {
+          padding: 9px 24px;
+          flex-wrap: wrap;
+          justify-content: center;
+          white-space: normal;
+          overflow-x: visible;
+          gap: 7px;
+        }
+        .bds-nav-btn { padding: 6px 13px; font-size: 12px; min-height: 36px; }
+        #bds-shell { max-width: 1440px; padding: 20px 28px 60px; }
+        .bds-card { padding: 20px; border-radius: 16px; }
+        .bds-quick-btn { padding: 9px 15px; font-size: 12.5px; }
+      }
+      @media (min-width: 1680px) {
+        #bds-shell { max-width: 1620px; padding: 24px 36px 70px; }
+        .bds-nav-btn { font-size: 13px; padding: 7px 15px; }
+      }
       @media print { #bds-header, #bds-subnav, #bds-preview-bar, #bds-dock, #bds-chat-modal { display: none !important; } }
     `;
     document.head.appendChild(st);
@@ -449,7 +469,7 @@ window.addEventListener("error", function (ev) {
 
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:11px;padding-top:9px;border-top:1px solid #1e293b;font-size:11.5px;">
             <button type="button" id="lg-rec" style="background:none;border:none;color:#94a3b8;cursor:pointer;padding:0;">¿Olvidó su contraseña?</button>
-            <span data-no-i18n="true" style="color:#64748b;font-weight:600;">PWA v194.0</span>
+            <span data-no-i18n="true" style="color:#64748b;font-weight:600;">PWA v195.0 • Universal</span>
           </div>
         </div>
       `;
@@ -545,7 +565,7 @@ window.addEventListener("error", function (ev) {
   }
 
   // ==================== CHATS FLOTANTES RESPONSIVE (MÓVIL Y DESKTOP REPARADO) ====================
-  function toggleChats() {
+  function toggleChats() { if (window.BDS_TOGGLE_CHATS_PRO) { window.BDS_TOGGLE_CHATS_PRO(sesionActiva); return; }
     if (!sesionActiva || sesionActiva.visitante) return;
     const old = document.getElementById("bds-chat-modal"); if (old) { old.remove(); return; }
     const s = sesionActiva, baseSec = s.seccion || "11-1";
@@ -706,7 +726,7 @@ window.addEventListener("error", function (ev) {
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
               <span style="background:${mCur.color};color:#fff;font-size:11px;font-weight:800;padding:3px 10px;border-radius:99px;">${mCur.name}</span>
               <div style="display:flex;gap:8px;align-items:center;">
-                <button id="ev-tts" style="background:#131f33;color:#38bdf8;border:1px solid #334155;padding:4px 9px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">🔊 Audio</button>
+                <button id="ev-tts" title="Leer pregunta y opciones en el idioma activo" style="background:#0f766e;color:#fff;border:none;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">🔊 Escuchar Todo</button><button id="ev-tts-stop" title="Detener audio" style="background:#334155;color:#fff;border:none;padding:5px 8px;border-radius:6px;font-size:11px;cursor:pointer;">⏹</button>
                 <span style="font-size:12px;font-weight:800;color:#38bdf8;">${idx + 1} / ${items.length} • ${cur.d}</span>
               </div>
             </div>
@@ -738,7 +758,7 @@ window.addEventListener("error", function (ev) {
       document.getElementById("ev-go").onclick = iniciarPrueba;
       if (document.getElementById("sim-pause")) document.getElementById("sim-pause").onclick = () => { paused = !paused; draw(); };
       if (document.getElementById("sim-end")) document.getElementById("sim-end").onclick = () => { finished = true; draw(); };
-      if (document.getElementById("ev-tts")) document.getElementById("ev-tts").onclick = () => hablar(cur.audio || cur.q, cur.lang || "es-CR");
+      /* bds-tts-v195 */ if (document.getElementById("ev-tts")) document.getElementById("ev-tts").onclick = () => { if (window.BDS_NATIVE) window.BDS_NATIVE.speakQuestion(cur); else hablar(cur.audio || cur.q, cur.lang || "es-CR"); }; if (document.getElementById("ev-tts-stop")) document.getElementById("ev-tts-stop").onclick = () => { if (window.BDS_NATIVE) window.BDS_NATIVE.stopSpeak(); };
       /* bds-sim-nav-v194 */ shell.querySelectorAll(".sim-jmp").forEach(jb => jb.onclick = () => { idx = Number(jb.getAttribute("data-ji")); draw(); }); if (!paused && cur) {
         shell.querySelectorAll(".ev-opt").forEach(b => b.onclick = () => {
           const ch = Number(b.getAttribute("data-oi"));

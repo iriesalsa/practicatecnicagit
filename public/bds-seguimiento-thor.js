@@ -48,7 +48,7 @@
     }).join("");
     const w = window.open("", "_blank");
     if (!w) return alert("Permita ventanas emergentes para imprimir el informe PDF.");
-    w.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"/><title>Informe de Seguimiento Pedagógico</title><style>body{font-family:Inter,Arial,sans-serif;padding:24px;color:#0f172a;font-size:12px}.hdr{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #0f2247;padding-bottom:10px;margin-bottom:14px}table{width:100%;border-collapse:collapse;margin-bottom:14px}th,td{border:1px solid #cbd5e1;padding:7px;text-align:left}th{background:#0f2247;color:#fff}.qr{display:flex;align-items:center;gap:12px;border:2px solid #0f766e;padding:10px;border-radius:8px}</style></head><body><div class="hdr"><img src="${b.escudo}" style="height:56px"/><div style="text-align:center"><h2 style="margin:0">${b.institucion}</h2><div>INFORME DE SEGUIMIENTO E INDICADORES REA (STEAM • DUA • MODELO FINLANDIA)</div></div><img src="${b.logoMep}" style="height:44px"/></div><p><b>Persona:</b> ${sesion.nombre} (${sesion.rol}) &nbsp;|&nbsp; <b>Desempeño Global:</b> ${pctG}% (${nG.lbl}) &nbsp;|&nbsp; <b>Ítems Evaluados:</b> ${d.total}</p><table><tr><th>Asignatura</th><th>Aciertos</th><th>Logro</th><th>Nivel REA (1–3)</th><th>Último Indicador Evaluado</th></tr>${rows || '<tr><td colspan="5">Sin intentos registrados todavía.</td></tr>'}</table><div class="qr">${generarQRSVG("PT-SEG|" + hash, 84)}<div><b>Informe Pedagógico Verificable QR SHA-256</b><br/><code>${hash}</code></div></div><script>window.onload=()=>window.print();</script></body></html>`);
+    w.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"/><title>Informe de Seguimiento Pedagógico</title><style>body{font-family:Inter,Arial,sans-serif;padding:24px;color:#0f172a;font-size:12px}.hdr{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #0f2247;padding-bottom:10px;margin-bottom:14px}table{width:100%;border-collapse:collapse;margin-bottom:14px}th,td{border:1px solid #cbd5e1;padding:7px;text-align:left}th{background:#0f2247;color:#fff}.qr{display:flex;align-items:center;gap:12px;border:2px solid #0f766e;padding:10px;border-radius:8px}</style></head><body><div class="hdr"><img src="${b.escudo}" style="height:56px"/><div style="text-align:center"><h2 style="margin:0">${b.institucion}</h2><div>INFORME DE SEGUIMIENTO E INDICADORES REA (STEAM • DUA • ENFOQUE FENÓMENO REAL)</div></div><img src="${b.logoMep}" style="height:44px"/></div><p><b>Persona:</b> ${sesion.nombre} (${sesion.rol}) &nbsp;|&nbsp; <b>Desempeño Global:</b> ${pctG}% (${nG.lbl}) &nbsp;|&nbsp; <b>Ítems Evaluados:</b> ${d.total}</p><table><tr><th>Asignatura</th><th>Aciertos</th><th>Logro</th><th>Nivel REA (1–3)</th><th>Último Indicador Evaluado</th></tr>${rows || '<tr><td colspan="5">Sin intentos registrados todavía.</td></tr>'}</table><div class="qr">${generarQRSVG("PT-SEG|" + hash, 84)}<div><b>Informe Pedagógico Verificable QR SHA-256</b><br/><code>${hash}</code></div></div><script>window.onload=()=>window.print();</script></body></html>`);
     w.document.close();
   }
 
@@ -63,7 +63,7 @@
       const pctG = d.total ? Math.round((d.correct / d.total) * 100) : 0;
       const nivG = calcNivelREA(pctG);
 
-      // Identificar el área más débil para botón adaptativo (Modelo Finlandia)
+      // Identificar el área más débil para botón adaptativo (ENFOQUE FENÓMENO REAL)
       const areaEntries = Object.entries(d.byArea).map(([aid, st]) => ({
         aid,
         name: (malla.find(x => x.id === aid) || { name: aid }).name,
@@ -77,7 +77,7 @@
         <div class="bds-card" style="margin-bottom:14px;">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;border-bottom:1px solid #1e293b;padding-bottom:12px;margin-bottom:14px;">
             <div>
-              <span style="background:#059669;color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:99px;">MOTOR THOR 50× (${stBank.afterTotal.toLocaleString("es-CR")}+ ÍTEMS) • STEAM • DUA • EXCELENCIA FINLANDIA</span>
+              <span style="background:#059669;color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:99px;">MOTOR THOR 50× (${stBank.afterTotal.toLocaleString("es-CR")}+ ÍTEMS) • STEAM • DUA • EXCELENCIA PEDAGÓGICA</span>
               <h2 style="margin:5px 0 0;font-size:17.5px;color:#fff;">📈 Seguimiento por Indicadores y Niveles de Desempeño (REA 1–3)</h2>
             </div>
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
@@ -96,7 +96,7 @@
 
           <div style="background:#070d19;border-left:4px solid ${nivG.col};border-radius:10px;padding:12px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
             <div style="font-size:12.5px;color:#e2e8f0;">
-              <b>🧭 Retroalimentación Formativa (Modelo Finlandia + DUA):</b> ${nivG.msg}
+              <b>🧭 Retroalimentación Formativa (ENFOQUE FENÓMENO REAL + DUA):</b> ${nivG.msg}
               ${weakest ? `<br/><span style="color:#fbbf24;">Área prioritaria sugerida para reforzar hoy: <b>${weakest.name}</b> (${weakest.pct}% de dominio).</span>` : `<br/><span style="color:#94a3b8;">Completa tu primera práctica guiada o simulacro para generar tu mapa adaptativo de indicadores.</span>`}
             </div>
             <button id="sg-adapt" style="background:#059669;color:#fff;border:none;padding:9px 14px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">🎯 ${weakest ? `Reforzar ${weakest.name.slice(0,22)}` : "Iniciar Práctica Adaptativa"}</button>

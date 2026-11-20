@@ -41,8 +41,8 @@ window.addEventListener("error", function (ev) {
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v196.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v196.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v197.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v197.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -154,9 +154,9 @@ window.addEventListener("error", function (ev) {
       institucionCorta: "CTP Mercedes Norte",
       regional: "Dirección Regional de Heredia",
       circuito: "Circuito 02",
-      escudo: "/escudo-ctpmn-oficial.jpeg?v=196",
-      mascota: "/buho-oficial.png?v=196",
-      logoMep: "/logo-mep-oficial.png?v=196"
+      escudo: "/escudo-ctpmn-oficial.jpeg?v=197",
+      mascota: "/buho-oficial.png?v=197",
+      logoMep: "/logo-mep-oficial.png?v=197"
     };
     if (!window.BDS_BRAND) return def;
     const b = window.BDS_BRAND.get();
@@ -470,7 +470,7 @@ window.addEventListener("error", function (ev) {
 
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:11px;padding-top:9px;border-top:1px solid #1e293b;font-size:11.5px;">
             <button type="button" id="lg-rec" style="background:none;border:none;color:#94a3b8;cursor:pointer;padding:0;">¿Olvidó su contraseña?</button>
-            <span data-no-i18n="true" style="color:#64748b;font-weight:600;">PWA v196.0 Thor • Universal</span>
+            <span data-no-i18n="true" style="color:#64748b;font-weight:600;">PWA v197.0 • BDS Devs</span>
           </div>
         </div>
       `;
@@ -731,7 +731,7 @@ window.addEventListener("error", function (ev) {
                 <span style="font-size:12px;font-weight:800;color:#38bdf8;">${idx + 1} / ${items.length} • ${cur.d}</span>
               </div>
             </div>
-            ${cur.indicador ? `<div style="background:#070d19;border:1px solid #1e3a8a;border-radius:8px;padding:8px 11px;margin-bottom:10px;font-size:11.5px;color:#93c5fd;"><b>🎯 Indicador:</b> ${cur.indicador} &nbsp;•&nbsp; <b style="color:#34d399;">${cur.nivelDesempeno || "Nivel 2"}</b><div style="color:#94a3b8;font-size:11px;margin-top:2px;">🌍 ${cur.steam || "STEAM • Modelo Finlandia"}</div></div>` : ""}${modo === "guiada" ? `<div style="background:#070d19;border-left:4px solid #10b981;padding:9px 12px;border-radius:8px;margin-bottom:12px;font-size:12px;color:#a7f3d0;"><b>🧭 Guía:</b> ${cur.g}${cur.dua ? `<div style="color:#fde68a;font-size:11px;margin-top:4px;">♿ ${cur.dua}</div>` : ""}</div>` : ""}
+            ${cur.indicador ? `<div style="background:#070d19;border:1px solid #1e3a8a;border-radius:8px;padding:8px 11px;margin-bottom:10px;font-size:11.5px;color:#93c5fd;"><b>🎯 Indicador:</b> ${cur.indicador} &nbsp;•&nbsp; <b style="color:#34d399;">${cur.nivelDesempeno || "Nivel 2"}</b><div style="color:#94a3b8;font-size:11px;margin-top:2px;">🌍 ${cur.steam || "STEAM • ENFOQUE FENÓMENO REAL"}</div></div>` : ""}${modo === "guiada" ? `<div style="background:#070d19;border-left:4px solid #10b981;padding:9px 12px;border-radius:8px;margin-bottom:12px;font-size:12px;color:#a7f3d0;"><b>🧭 Guía:</b> ${cur.g}${cur.dua ? `<div style="color:#fde68a;font-size:11px;margin-top:4px;">♿ ${cur.dua}</div>` : ""}</div>` : ""}
             <h3 style="margin:0 0 14px;font-size:16px;line-height:1.45;">${cur.q}</h3>
             <div style="display:flex;flex-direction:column;gap:8px;">
               ${cur.opts.map((o, i) => {

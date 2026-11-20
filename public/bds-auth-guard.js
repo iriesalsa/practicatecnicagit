@@ -41,8 +41,8 @@ window.addEventListener("error", function (ev) {
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v195.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v195.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v196.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v196.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -79,6 +79,7 @@ window.addEventListener("error", function (ev) {
     opendocs: "📖 Open Docs",
     biblioteca: "📚 Biblioteca",
     juegos: "🎮 Juegos",
+    /* bds-thor-v196-wired */ seguimiento: "📈 Seguimiento REA",
     habitos: "🔥 Hábitos",
     carnet_qr: "🪪 Carné QR",
     direccion: "📈 Dirección"
@@ -94,7 +95,7 @@ window.addEventListener("error", function (ev) {
     }
     const MAP = {
       "SuperAdmin": {
-        tabs: ["inicio","trazabilidad","instituciones","horarios","permisos","justificaciones","notas_rea","planeamiento_ia","comedor","agenda","reportes","practica","simulacro","admision","simulador_mopt","opendocs","biblioteca","juegos","carnet_qr"],
+        tabs: ["inicio","seguimiento","trazabilidad","instituciones","horarios","permisos","justificaciones","notas_rea","planeamiento_ia","comedor","agenda","reportes","practica","simulacro","admision","simulador_mopt","opendocs","biblioteca","juegos","carnet_qr"],
         chats: true, identidad: true, admisionHome: true, mallaHome: true,
         quick: ["trazabilidad","instituciones","horarios","permisos","justificaciones","notas_rea","planeamiento_ia","comedor","simulador_mopt","identidad"],
         cards: ["practica","simulacro","biblioteca","juegos"]
@@ -106,19 +107,19 @@ window.addEventListener("error", function (ev) {
         cards: ["biblioteca"]
       },
       "Docente MEP": {
-        tabs: ["inicio","notas_rea","planeamiento_ia","horarios","permisos","justificaciones","comedor","agenda","reportes","practica","simulacro","admision","simulador_mopt","opendocs","biblioteca","juegos","carnet_qr"],
+        tabs: ["inicio","seguimiento","notas_rea","planeamiento_ia","horarios","permisos","justificaciones","comedor","agenda","reportes","practica","simulacro","admision","simulador_mopt","opendocs","biblioteca","juegos","carnet_qr"],
         chats: true, identidad: false, admisionHome: true, mallaHome: true,
         quick: ["notas_rea","planeamiento_ia","horarios","permisos","justificaciones","comedor"],
         cards: ["practica","simulacro","biblioteca","juegos"]
       },
       "Estudiante": {
-        tabs: ["inicio","mis_notas","habitos","practica","simulacro","admision","simulador_mopt","juegos","horarios","comedor","agenda","justificaciones","opendocs","biblioteca","carnet_qr"],
+        tabs: ["inicio","seguimiento","mis_notas","habitos","practica","simulacro","admision","simulador_mopt","juegos","horarios","comedor","agenda","justificaciones","opendocs","biblioteca","carnet_qr"],
         chats: true, identidad: false, admisionHome: true, mallaHome: true,
         quick: ["mis_notas","horarios","comedor","justificaciones","simulador_mopt","carnet_qr"],
         cards: ["practica","simulacro","biblioteca","juegos"]
       },
       "Particular (MOPT / Admisión)": {
-        tabs: ["inicio","habitos","simulador_mopt","admision","practica","simulacro","opendocs","juegos"],
+        tabs: ["inicio","seguimiento","habitos","simulador_mopt","admision","practica","simulacro","opendocs","juegos"],
         chats: false, identidad: false, admisionHome: true, mallaHome: true,
         quick: ["simulador_mopt","habitos","opendocs"],
         cards: ["practica","simulacro","juegos"]
@@ -153,9 +154,9 @@ window.addEventListener("error", function (ev) {
       institucionCorta: "CTP Mercedes Norte",
       regional: "Dirección Regional de Heredia",
       circuito: "Circuito 02",
-      escudo: "/escudo-ctpmn-oficial.jpeg?v=195",
-      mascota: "/buho-oficial.png?v=195",
-      logoMep: "/logo-mep-oficial.png?v=195"
+      escudo: "/escudo-ctpmn-oficial.jpeg?v=196",
+      mascota: "/buho-oficial.png?v=196",
+      logoMep: "/logo-mep-oficial.png?v=196"
     };
     if (!window.BDS_BRAND) return def;
     const b = window.BDS_BRAND.get();
@@ -469,7 +470,7 @@ window.addEventListener("error", function (ev) {
 
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:11px;padding-top:9px;border-top:1px solid #1e293b;font-size:11.5px;">
             <button type="button" id="lg-rec" style="background:none;border:none;color:#94a3b8;cursor:pointer;padding:0;">¿Olvidó su contraseña?</button>
-            <span data-no-i18n="true" style="color:#64748b;font-weight:600;">PWA v195.0 • Universal</span>
+            <span data-no-i18n="true" style="color:#64748b;font-weight:600;">PWA v196.0 Thor • Universal</span>
           </div>
         </div>
       `;
@@ -672,7 +673,7 @@ window.addEventListener("error", function (ev) {
       if (finished) {
         if (simTimer) { clearInterval(simTimer); simTimer = null; }
         let okCnt = 0;
-        items.forEach((it, i) => { if (answers[i] !== undefined && it.opts[answers[i]] && it.opts[answers[i]].ok) okCnt++; });
+        items.forEach((it, i) => { const okA = answers[i] !== undefined && it.opts[answers[i]] && it.opts[answers[i]].ok; if (okA) okCnt++; if (modo === "simulacro" && answers[i] !== undefined && window.BDS_SEGUIMIENTO_THOR) window.BDS_SEGUIMIENTO_THOR.recordAttempt(it, Boolean(okA)); });
         const pct = Math.round((okCnt / Math.max(1, items.length)) * 100), ucr = Math.round(200 + (okCnt / Math.max(1, items.length)) * 600);
         if (pct >= 70) ganarXP(cantidad * 3, "⏱️ Simulacro Aprobado");
         shell.innerHTML = `
@@ -730,7 +731,7 @@ window.addEventListener("error", function (ev) {
                 <span style="font-size:12px;font-weight:800;color:#38bdf8;">${idx + 1} / ${items.length} • ${cur.d}</span>
               </div>
             </div>
-            ${modo === "guiada" ? `<div style="background:#070d19;border-left:4px solid #10b981;padding:10px 12px;border-radius:8px;margin-bottom:12px;font-size:12.5px;color:#a7f3d0;"><b>🧭 Guía:</b> ${cur.g}</div>` : ""}
+            ${cur.indicador ? `<div style="background:#070d19;border:1px solid #1e3a8a;border-radius:8px;padding:8px 11px;margin-bottom:10px;font-size:11.5px;color:#93c5fd;"><b>🎯 Indicador:</b> ${cur.indicador} &nbsp;•&nbsp; <b style="color:#34d399;">${cur.nivelDesempeno || "Nivel 2"}</b><div style="color:#94a3b8;font-size:11px;margin-top:2px;">🌍 ${cur.steam || "STEAM • Modelo Finlandia"}</div></div>` : ""}${modo === "guiada" ? `<div style="background:#070d19;border-left:4px solid #10b981;padding:9px 12px;border-radius:8px;margin-bottom:12px;font-size:12px;color:#a7f3d0;"><b>🧭 Guía:</b> ${cur.g}${cur.dua ? `<div style="color:#fde68a;font-size:11px;margin-top:4px;">♿ ${cur.dua}</div>` : ""}</div>` : ""}
             <h3 style="margin:0 0 14px;font-size:16px;line-height:1.45;">${cur.q}</h3>
             <div style="display:flex;flex-direction:column;gap:8px;">
               ${cur.opts.map((o, i) => {
@@ -764,7 +765,7 @@ window.addEventListener("error", function (ev) {
           const ch = Number(b.getAttribute("data-oi"));
           if (modo !== "simulacro" && answers[idx] !== undefined) return;
           answers[idx] = ch;
-          if (modo !== "simulacro" && cur.opts[ch].ok) ganarXP(10);
+          if (modo !== "simulacro") { if (window.BDS_SEGUIMIENTO_THOR) window.BDS_SEGUIMIENTO_THOR.recordAttempt(cur, Boolean(cur.opts[ch].ok)); if (cur.opts[ch].ok) ganarXP(10); }
           draw();
         });
         document.getElementById("ev-prev").onclick = () => { if (idx > 0) { idx--; draw(); } };
@@ -988,7 +989,8 @@ window.addEventListener("error", function (ev) {
         else if (destino === "opendocs" && window.BDS_RENDER_OPENDOCS) window.BDS_RENDER_OPENDOCS(shell, { sesion: sesionActiva, generarQRSVG, sha256Hex });
         else if (destino === "biblioteca" && window.BDS_RENDER_BIBLIOTECA_ILUSTRADA) window.BDS_RENDER_BIBLIOTECA_ILUSTRADA(shell, { malla: window.BDS_MALLA_MEP || [], ganarXP, subInicial: subParam || "manuales", abrirPractica: (m, a) => window.bdsGo(m === "simulacro" ? "simulacro" : "practica", a), IMG_ESCUDO: b.escudo, IMG_MEP: b.logoMep });
         else if (destino === "juegos" && window.BDS_RENDER_SALA_JUEGOS) window.BDS_RENDER_SALA_JUEGOS(shell, ganarXP);
-        else if (destino === "habitos" && window.BDS_SUSCRIPCION) window.BDS_SUSCRIPCION.renderHabitos(shell, sesionActiva, getXP());
+        else if (destino === "seguimiento" && window.BDS_SEGUIMIENTO_THOR) window.BDS_SEGUIMIENTO_THOR.renderPanel(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
+      else if (destino === "habitos" && window.BDS_SUSCRIPCION) window.BDS_SUSCRIPCION.renderHabitos(shell, sesionActiva, getXP());
         else if (destino === "direccion" && window.BDS_RENDER_DIRECCION_Y_FAMILIA) window.BDS_RENDER_DIRECCION_Y_FAMILIA(shell, sesionActiva);
         else if (destino === "practica") renderEvaluacion(shell, "guiada", subParam);
         else if (destino === "simulacro") renderEvaluacion(shell, "simulacro", subParam);

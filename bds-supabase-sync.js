@@ -25,7 +25,7 @@
     "bds_docente_pesos_rea_v190",
     "bds_agenda_escolar_v191",
     "bds_respaldos_notas_anios_v191",
-    "bds_chats_v184_c02", "bds_permisos_edus_v193", "bds_justificaciones_comp_v193", "bds_access_logs_v193", "bds_familia_links_v194"
+    "bds_chats_v184_c02", "bds_permisos_edus_v193", "bds_justificaciones_comp_v193", "bds_access_logs_v193", "bds_familia_links_v194", "bds_seguimiento_thor_v196"
   ];
 
   function getCfg() {

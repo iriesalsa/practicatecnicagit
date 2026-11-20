@@ -1,8 +1,10 @@
 -- ============================================================================
--- pracTICAtecnica.com — Migración v229.0: Asistencia Portón Realtime & Push
+-- pracTICAtecnica.com — SQL Oficial v229.1 para Supabase SQL Editor
+-- Tablas: Plan Familiar ₡1,000, Asistencia Portón Realtime y Tokens Push
 -- Cumplimiento: Ley N.° 8968 (PRODHAB) & Ley N.° 7739 (Niñez y Adolescencia)
--- Ejecutar en: Supabase Dashboard -> SQL Editor -> New Query -> Run
 -- ============================================================================
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE TABLE IF NOT EXISTS public.bds_familias_plan (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -28,7 +30,8 @@ CREATE TABLE IF NOT EXISTS public.bds_asistencia_porton (
   creado_en TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_bds_porton_encargado ON public.bds_asistencia_porton (encargado_email, creado_en DESC);
+CREATE INDEX IF NOT EXISTS idx_bds_porton_encargado
+  ON public.bds_asistencia_porton (encargado_email, creado_en DESC);
 
 CREATE TABLE IF NOT EXISTS public.bds_push_tokens (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -44,7 +47,7 @@ ALTER TABLE public.bds_familias_plan ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.bds_asistencia_porton ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.bds_push_tokens ENABLE ROW LEVEL SECURITY;
 
--- Políticas de privacidad: cada familia solo consulta sus propios registros
+-- Políticas de privacidad: cada familia solo ve a sus propios hijos/hijas
 DROP POLICY IF EXISTS "familia_ver_propio_plan" ON public.bds_familias_plan;
 CREATE POLICY "familia_ver_propio_plan" ON public.bds_familias_plan
   FOR SELECT USING (LOWER(encargado_email) = LOWER(COALESCE(auth.jwt() ->> 'email', '')));
@@ -62,7 +65,7 @@ CREATE POLICY "familia_gestiona_su_token_push" ON public.bds_push_tokens
   FOR ALL USING (LOWER(encargado_email) = LOWER(COALESCE(auth.jwt() ->> 'email', '')))
   WITH CHECK (LOWER(encargado_email) = LOWER(COALESCE(auth.jwt() ->> 'email', '')));
 
--- Habilitar Supabase Realtime para notificaciones en vivo al instante
+-- Activar publicación Realtime de Supabase sobre bds_asistencia_porton
 DO $$
 BEGIN
   IF NOT EXISTS (

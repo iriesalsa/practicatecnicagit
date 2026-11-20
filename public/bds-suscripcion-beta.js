@@ -78,7 +78,7 @@
       <div style="background:#0b1322;border:1px solid #1e3a8a;border-radius:9px;padding:9px;font-size:11.5px;color:#93c5fd;">
         <b>Planes Oficiales pracTICAtecnica.com:</b><br/>
         • <b>Institución Educativa:</b> ₡19,100/año (Estudiantes ₡1,000/año • Docentes ₡2,000/año)<br/>
-        • <b>Particular (MOPT / Admisión / 29 áreas):</b> ₡2,500/año o ₡3,500 vitalicio
+        • <b>Plan Familiar Único (Padres/Encargados):</b> <b>₡1,000/año total</b> (cubre a <b>todos los hijos o hermanos matriculados</b> + avisos entrada/salida)<br/>• <b>Particular (MOPT / Admisión / 29 áreas):</b> ₡2,500/año o ₡3,500 vitalicio
       </div>
     `;
   }

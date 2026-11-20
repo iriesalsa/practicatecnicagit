@@ -41,8 +41,8 @@ window.addEventListener("error", function (ev) {
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v202.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v202.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v203.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v203.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -157,9 +157,9 @@ window.addEventListener("error", function (ev) {
       institucionCorta: "CTP Mercedes Norte",
       regional: "Dirección Regional de Heredia",
       circuito: "Circuito 02",
-      escudo: "/escudo-ctpmn-oficial.jpeg?v=202",
-      mascota: "/buho-oficial.png?v=202",
-      logoMep: "/logo-mep-oficial.png?v=202"
+      escudo: "/escudo-ctpmn-oficial.jpeg?v=203",
+      mascota: "/buho-oficial.png?v=203",
+      logoMep: "/logo-mep-oficial.png?v=203"
     };
     if (!window.BDS_BRAND) return def;
     const b = window.BDS_BRAND.get();
@@ -471,7 +471,7 @@ window.addEventListener("error", function (ev) {
 
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:11px;padding-top:9px;border-top:1px solid #1e293b;font-size:11.5px;">
             <button type="button" id="lg-rec" style="background:none;border:none;color:#94a3b8;cursor:pointer;padding:0;">¿Olvidó su contraseña?</button>
-            <span data-no-i18n="true" style="color:#64748b;font-weight:600;">pracTICA Odín 2.0 (v202)</span>
+            <span data-no-i18n="true" style="color:#64748b;font-weight:600;">pracTICA Infinito (v203)</span>
           </div>
         </div>
       `;
@@ -975,7 +975,7 @@ window.addEventListener("error", function (ev) {
         document.querySelectorAll("[data-v]").forEach(btn => btn.classList.toggle("active", btn.getAttribute("data-v") === destino));
 
         if (destino === "trazabilidad" && window.BDS_TRAZABILIDAD) window.BDS_TRAZABILIDAD.renderPanel(shell, { sesion: sesionActiva, sha256Hex });
-        else if (destino === "instituciones" && window.BDS_RENDER_INSTITUCIONES_CRUD) window.BDS_RENDER_INSTITUCIONES_CRUD(shell, { sesion: sesionActiva });
+        else if (destino === "instituciones" && window.BDS_RENDER_INSTITUCIONES_CRUD) window.BDS_RENDER_INSTITUCIONES_CRUD(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
         else if (destino === "horarios" && window.BDS_RENDER_MATRICULA_HORARIOS) window.BDS_RENDER_MATRICULA_HORARIOS(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
         else if ((destino === "permisos" || destino === "justificaciones" || destino === "carnet_qr") && window.BDS_RENDER_PERMISOS_JUSTIF) window.BDS_RENDER_PERMISOS_JUSTIF(shell, destino === "carnet_qr" ? "qr" : destino, { sesion: sesionActiva, sha256Hex, generarQRSVG });
         else if (destino === "mis_notas" && window.BDS_RENDER_MIS_NOTAS_ESTUDIANTE) window.BDS_RENDER_MIS_NOTAS_ESTUDIANTE(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });

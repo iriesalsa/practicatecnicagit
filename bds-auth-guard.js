@@ -41,8 +41,8 @@ window.addEventListener("error", function (ev) {
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v203.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v203.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v2033.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v2033.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -54,6 +54,10 @@ window.addEventListener("error", function (ev) {
     { rol: "Padre/Madre", ic: "👨‍👩‍👧‍👦", desc: "Seguimiento estudiantil, horarios, comedor QR, agenda y justificaciones." },
     { rol: "Encargada Comedor / Junta", ic: "🍽️", desc: "Escáner QR de comedor, becas PANEA, tiquetes SINPE/efectivo, menús A–E y cierre de caja." },
     { rol: "Auxiliar Administrativo", ic: "📋", desc: "Matrícula, horarios IA, justificaciones, comedor QR y validación documental." },
+        { rol: "Supervisor(a) de Circuito", ic: "🧭", desc: "Supervisión de circuito educativo (solo lectura): dirección, horarios, comedor, permisos y reportes." },
+    { rol: "Asesor(a) Regional / Nacional", ic: "📘", desc: "Asesoría pedagógica (solo lectura): seguimiento REA, Open Docs, biblioteca, horarios y reportes." },
+    { rol: "Viceministro(a) MEP", ic: "🏛️", desc: "Supervisión viceministerial (solo lectura): indicadores, reportes institucionales, comedor y agenda." },
+    { rol: "Ministro(a) MEP", ic: "🇨🇷", desc: "Supervisión ministerial nacional (solo lectura): panorama institucional, reportes y trazabilidad general." },
     { rol: "SuperAdmin", ic: "👑", desc: "Control soberano total: trazabilidad y bitácora de accesos, instituciones CRUD, cortesías y auditoría." }
   ];
 
@@ -103,6 +107,30 @@ window.addEventListener("error", function (ev) {
         quick: ["trazabilidad","instituciones","horarios","permisos","justificaciones","notas_rea","planeamiento_ia","comedor","simulador_mopt","identidad"],
         cards: ["practica","simulacro","biblioteca","juegos"]
       },
+            "Supervisor(a) de Circuito": {
+        tabs: ["inicio","direccion","horarios","permisos","justificaciones","comedor","agenda","reportes","biblioteca","carnet_qr"],
+        chats: true, identidad: false, admisionHome: false, mallaHome: false,
+        quick: ["horarios","permisos","justificaciones","comedor","reportes","agenda"],
+        cards: ["biblioteca"]
+      },
+      "Asesor(a) Regional / Nacional": {
+        tabs: ["inicio","direccion","seguimiento","horarios","opendocs","biblioteca","reportes","agenda","carnet_qr"],
+        chats: true, identidad: false, admisionHome: false, mallaHome: true,
+        quick: ["horarios","opendocs","reportes","agenda"],
+        cards: ["biblioteca"]
+      },
+      "Viceministro(a) MEP": {
+        tabs: ["inicio","direccion","reportes","horarios","comedor","agenda","biblioteca","carnet_qr"],
+        chats: false, identidad: false, admisionHome: false, mallaHome: false,
+        quick: ["reportes","horarios","comedor","agenda"],
+        cards: ["biblioteca"]
+      },
+      "Ministro(a) MEP": {
+        tabs: ["inicio","direccion","reportes","horarios","comedor","agenda","biblioteca","carnet_qr"],
+        chats: false, identidad: false, admisionHome: false, mallaHome: false,
+        quick: ["reportes","horarios","comedor","agenda"],
+        cards: ["biblioteca"]
+      },
       "Director(a)": {
         tabs: ["inicio","direccion","horarios","permisos","justificaciones","comedor","notas_rea","agenda","reportes","biblioteca","carnet_qr"],
         chats: true, identidad: true, admisionHome: false, mallaHome: false,
@@ -147,7 +175,7 @@ window.addEventListener("error", function (ev) {
       }
     };
     const cfg = MAP[rol] || MAP["Estudiante"];
-    const ex = (sesionActiva && Array.isArray(sesionActiva.extraRoles)) ? sesionActiva.extraRoles : []; const outTabs = cfg.tabs.slice(); if (!esVisitante && rol !== "Particular (MOPT / Admisión)") { if (!outTabs.includes("cooperativa")) outTabs.splice(2, 0, "cooperativa"); if (!outTabs.includes("practica_guia")) outTabs.splice(2, 0, "practica_guia"); if (ex.includes("Comedor") && !outTabs.includes("comedor")) outTabs.splice(2, 0, "comedor"); } if (rol === "Particular (MOPT / Admisión)" && !outTabs.includes("practica_guia")) outTabs.splice(1, 0, "practica_guia"); if (!esVisitante && rol !== "Particular (MOPT / Admisión)" && !outTabs.includes("conducta_sea")) outTabs.splice(2, 0, "conducta_sea"); cfg.tabs = Array.from(new Set(outTabs)).filter(k => Boolean(TAB_META[k]));
+    const ex = (sesionActiva && Array.isArray(sesionActiva.extraRoles)) ? sesionActiva.extraRoles : []; const outTabs = cfg.tabs.slice(); if (!esVisitante && rol !== "Particular (MOPT / Admisión)") { if (!outTabs.includes("cooperativa")) outTabs.splice(2, 0, "cooperativa"); if (!outTabs.includes("practica_guia")) outTabs.splice(2, 0, "practica_guia"); /* bds-extra-roles-rbac-v200 */ if (ex.includes("Comedor") && !outTabs.includes("comedor")) outTabs.splice(2, 0, "comedor"); if (ex.includes("Cooperativa") && !outTabs.includes("cooperativa")) outTabs.splice(2, 0, "cooperativa"); if (ex.includes("Juegos") && !outTabs.includes("juegos")) outTabs.push("juegos"); if (ex.includes("Permisos")) { if (!outTabs.includes("permisos")) outTabs.push("permisos"); if (!outTabs.includes("justificaciones")) outTabs.push("justificaciones"); } if (ex.includes("ValidadorQR") && !outTabs.includes("carnet_qr")) outTabs.push("carnet_qr"); } if (rol === "Particular (MOPT / Admisión)" && !outTabs.includes("practica_guia")) outTabs.splice(1, 0, "practica_guia"); if (!esVisitante && rol !== "Particular (MOPT / Admisión)" && !outTabs.includes("conducta_sea")) outTabs.splice(2, 0, "conducta_sea"); cfg.tabs = Array.from(new Set(outTabs)).filter(k => Boolean(TAB_META[k]));
     return cfg;
   }
 
@@ -157,9 +185,9 @@ window.addEventListener("error", function (ev) {
       institucionCorta: "CTP Mercedes Norte",
       regional: "Dirección Regional de Heredia",
       circuito: "Circuito 02",
-      escudo: "/escudo-ctpmn-oficial.jpeg?v=203",
-      mascota: "/buho-oficial.png?v=203",
-      logoMep: "/logo-mep-oficial.png?v=203"
+      escudo: "/escudo-ctpmn-oficial.jpeg?v=2033",
+      mascota: "/buho-oficial.png?v=2033",
+      logoMep: "/logo-mep-oficial.png?v=2033"
     };
     if (!window.BDS_BRAND) return def;
     const b = window.BDS_BRAND.get();
@@ -345,6 +373,14 @@ window.addEventListener("error", function (ev) {
         #bds-shell { max-width: 1620px; padding: 24px 36px 70px; }
         .bds-nav-btn { font-size: 13px; padding: 7px 15px; }
       }
+            /* bds-mobile-compact-v200 — Tipografía compacta en teléfono para múltiples opciones */
+      @media (max-width: 768px) {
+        #bds-header { padding: max(6px, env(safe-area-inset-top)) 8px 6px; gap: 4px; }
+        #bds-subnav { padding: 5px 8px; gap: 4px; top: 48px; }
+        .bds-nav-btn { padding: 4px 8px !important; font-size: 10.5px !important; font-weight: 500 !important; min-height: 30px !important; border-radius: 6px !important; }
+        .bds-quick-btn { padding: 6px 9px !important; font-size: 11px !important; min-height: 36px !important; }
+        .bds-dock-b { font-size: 9.5px !important; min-height: 42px !important; }
+      }
       @media print { #bds-header, #bds-subnav, #bds-preview-bar, #bds-dock, #bds-chat-modal { display: none !important; } }
     `;
     document.head.appendChild(st);
@@ -471,7 +507,7 @@ window.addEventListener("error", function (ev) {
 
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:11px;padding-top:9px;border-top:1px solid #1e293b;font-size:11.5px;">
             <button type="button" id="lg-rec" style="background:none;border:none;color:#94a3b8;cursor:pointer;padding:0;">¿Olvidó su contraseña?</button>
-            <span data-no-i18n="true" style="color:#64748b;font-weight:600;">pracTICA Infinito (v203)</span>
+            <span data-no-i18n="true" style="color:#64748b;font-weight:600;">pracTICA Odín 3.3 (v203.3)</span>
           </div>
         </div>
       `;
@@ -974,7 +1010,7 @@ window.addEventListener("error", function (ev) {
         const destino = perms.tabs.includes(v) ? v : perms.tabs[0];
         document.querySelectorAll("[data-v]").forEach(btn => btn.classList.toggle("active", btn.getAttribute("data-v") === destino));
 
-        if (destino === "trazabilidad" && window.BDS_TRAZABILIDAD) window.BDS_TRAZABILIDAD.renderPanel(shell, { sesion: sesionActiva, sha256Hex });
+        if (destino === "trazabilidad" && window.BDS_TRAZABILIDAD) window.BDS_TRAZABILIDAD.renderPanel(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
         else if (destino === "instituciones" && window.BDS_RENDER_INSTITUCIONES_CRUD) window.BDS_RENDER_INSTITUCIONES_CRUD(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
         else if (destino === "horarios" && window.BDS_RENDER_MATRICULA_HORARIOS) window.BDS_RENDER_MATRICULA_HORARIOS(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
         else if ((destino === "permisos" || destino === "justificaciones" || destino === "carnet_qr") && window.BDS_RENDER_PERMISOS_JUSTIF) window.BDS_RENDER_PERMISOS_JUSTIF(shell, destino === "carnet_qr" ? "qr" : destino, { sesion: sesionActiva, sha256Hex, generarQRSVG });

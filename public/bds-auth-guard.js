@@ -41,8 +41,8 @@ window.addEventListener("error", function (ev) {
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v208.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v208.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v209.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v209.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -87,6 +87,7 @@ window.addEventListener("error", function (ev) {
     simulacro: "⏱️ Simulacro",
     admision: "🎓 Admisión",
     simulador_mopt: "🚗 MOPT",
+    antologias: "📖 Antologías & Libros",
     opendocs: "📖 Open Docs",
     biblioteca: "📚 Biblioteca",
     juegos: "🎮 Juegos",
@@ -197,7 +198,7 @@ window.addEventListener("error", function (ev) {
       }
     };
     const cfg = MAP[rol] || MAP["Estudiante"];
-    const ex = (sesionActiva && Array.isArray(sesionActiva.extraRoles)) ? sesionActiva.extraRoles : []; const outTabs = cfg.tabs.slice(); if (!esVisitante && rol !== "Particular (MOPT / Admisión)") { if (!outTabs.includes("cooperativa")) outTabs.splice(2, 0, "cooperativa"); if (!outTabs.includes("practica_guia")) outTabs.splice(2, 0, "practica_guia"); /* bds-extra-roles-rbac-v200 */ if (ex.includes("Comedor") && !outTabs.includes("comedor")) outTabs.splice(2, 0, "comedor"); if (ex.includes("Cooperativa") && !outTabs.includes("cooperativa")) outTabs.splice(2, 0, "cooperativa"); if (ex.includes("Juegos") && !outTabs.includes("juegos")) outTabs.push("juegos"); if (ex.includes("Permisos")) { if (!outTabs.includes("permisos")) outTabs.push("permisos"); if (!outTabs.includes("justificaciones")) outTabs.push("justificaciones"); } if (ex.includes("ValidadorQR") && !outTabs.includes("carnet_qr")) outTabs.push("carnet_qr"); } if (rol === "Particular (MOPT / Admisión)" && !outTabs.includes("practica_guia")) outTabs.splice(1, 0, "practica_guia"); if (!esVisitante && rol !== "Particular (MOPT / Admisión)" && !outTabs.includes("conducta_sea")) outTabs.splice(2, 0, "conducta_sea"); if (!esVisitante && ["SuperAdmin","Director(a)","Subdirector(a)","Asistente de Dirección","Orientador(a)","Docente MEP","Padre/Madre"].includes(rol) && !outTabs.includes("orientacion_reac")) outTabs.splice(2, 0, "orientacion_reac"); cfg.tabs = Array.from(new Set(outTabs)).filter(k => Boolean(TAB_META[k]));
+    const ex = (sesionActiva && Array.isArray(sesionActiva.extraRoles)) ? sesionActiva.extraRoles : []; const outTabs = cfg.tabs.slice(); if (!esVisitante && rol !== "Particular (MOPT / Admisión)") { if (!outTabs.includes("cooperativa")) outTabs.splice(2, 0, "cooperativa"); if (!outTabs.includes("practica_guia")) outTabs.splice(2, 0, "practica_guia"); /* bds-extra-roles-rbac-v200 */ if (ex.includes("Comedor") && !outTabs.includes("comedor")) outTabs.splice(2, 0, "comedor"); if (ex.includes("Cooperativa") && !outTabs.includes("cooperativa")) outTabs.splice(2, 0, "cooperativa"); if (ex.includes("Juegos") && !outTabs.includes("juegos")) outTabs.push("juegos"); if (ex.includes("Permisos")) { if (!outTabs.includes("permisos")) outTabs.push("permisos"); if (!outTabs.includes("justificaciones")) outTabs.push("justificaciones"); } if (ex.includes("ValidadorQR") && !outTabs.includes("carnet_qr")) outTabs.push("carnet_qr"); } if (rol === "Particular (MOPT / Admisión)" && !outTabs.includes("practica_guia")) outTabs.splice(1, 0, "practica_guia"); if (!esVisitante && rol !== "Particular (MOPT / Admisión)" && !outTabs.includes("conducta_sea")) outTabs.splice(2, 0, "conducta_sea"); if (!esVisitante && ["SuperAdmin","Director(a)","Subdirector(a)","Asistente de Dirección","Orientador(a)","Docente MEP","Padre/Madre"].includes(rol) && !outTabs.includes("orientacion_reac")) outTabs.splice(2, 0, "orientacion_reac"); if (!esVisitante && !outTabs.includes("antologias")) outTabs.push("antologias"); cfg.tabs = Array.from(new Set(outTabs)).filter(k => Boolean(TAB_META[k]));
     return cfg;
   }
 
@@ -207,9 +208,9 @@ window.addEventListener("error", function (ev) {
       institucionCorta: "CTP Mercedes Norte",
       regional: "Dirección Regional de Heredia",
       circuito: "Circuito 02",
-      escudo: "/escudo-ctpmn-oficial.jpeg?v=208",
-      mascota: "/buho-oficial.png?v=208",
-      logoMep: "/logo-mep-oficial.png?v=208"
+      escudo: "/escudo-ctpmn-oficial.jpeg?v=209",
+      mascota: "/buho-oficial.png?v=209",
+      logoMep: "/logo-mep-oficial.png?v=209"
     };
     if (!window.BDS_BRAND) return def;
     const b = window.BDS_BRAND.get();
@@ -368,7 +369,7 @@ window.addEventListener("error", function (ev) {
       @media (max-width: 860px) {
         #bds-dock { display: grid; }
         .hide-sm { display: none !important; }
-        #btn-ch { display: none !important; }
+        #btn-ch { display: inline-flex !important; align-items: center; padding: 5px 8px !important; font-size: 11px !important; }
       }
       @media (max-width: 640px) {
         #bds-shell { padding: 10px 8px 98px; }
@@ -861,6 +862,7 @@ window.addEventListener("error", function (ev) {
       reportes: `<button onclick="window.bdsGo('reportes')" class="bds-quick-btn" style="background:#0369a1;">🗂️ Respaldos</button>`,
       simulador_mopt: `<button onclick="window.bdsGo('simulador_mopt')" class="bds-quick-btn" style="background:#0284c7;">🚗 MOPT</button>`,
       habitos: `<button onclick="window.bdsGo('habitos')" class="bds-quick-btn" style="background:#059669;">🔥 Hábitos</button>`,
+      antologias: `<button onclick="window.bdsGo('antologias')" class="bds-quick-btn" style="background:#7c3aed;">📖 Antologías & Libros PDF</button>`,
       opendocs: `<button onclick="window.bdsGo('opendocs')" class="bds-quick-btn" style="background:#0f766e;">📖 Open Docs</button>`,
       identidad: `<button onclick="window.BDS_BRAND && window.BDS_BRAND.openModal()" class="bds-quick-btn" style="background:#334155;">🛡️ Escudo y Logo</button>`,
       carnet_qr: `<button onclick="window.bdsGo('carnet_qr')" class="bds-quick-btn" style="background:#1e40af;">🪪 Carné QR</button>`
@@ -1050,7 +1052,8 @@ window.addEventListener("error", function (ev) {
         else if (destino === "reportes" && window.BDS_RENDER_REPORTES_RESPALDOS) window.BDS_RENDER_REPORTES_RESPALDOS(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
         else if (destino === "simulador_mopt" && window.BDS_RENDER_SIMULADOR_MOPT) window.BDS_RENDER_SIMULADOR_MOPT(shell, ganarXP);
         else if (destino === "admision" && window.BDS_RENDER_ADMISION) window.BDS_RENDER_ADMISION(shell, subParam || "ucr", ganarXP);
-        else if (destino === "opendocs" && window.BDS_RENDER_OPENDOCS) window.BDS_RENDER_OPENDOCS(shell, { sesion: sesionActiva, generarQRSVG, sha256Hex });
+        else if (destino === "antologias" && window.BDS_RENDER_ANTOLOGIAS_LIBROS) window.BDS_RENDER_ANTOLOGIAS_LIBROS(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG, ganarXP });
+      else if (destino === "opendocs" && window.BDS_RENDER_OPENDOCS) window.BDS_RENDER_OPENDOCS(shell, { sesion: sesionActiva, generarQRSVG, sha256Hex });
         else if (destino === "biblioteca" && window.BDS_RENDER_BIBLIOTECA_ILUSTRADA) window.BDS_RENDER_BIBLIOTECA_ILUSTRADA(shell, { malla: window.BDS_MALLA_MEP || [], ganarXP, subInicial: subParam || "manuales", abrirPractica: (m, a) => window.bdsGo(m === "simulacro" ? "simulacro" : "practica", a), IMG_ESCUDO: b.escudo, IMG_MEP: b.logoMep });
         else if (destino === "juegos" && window.BDS_RENDER_SALA_JUEGOS) window.BDS_RENDER_SALA_JUEGOS(shell, ganarXP);
         else if (destino === "seguimiento" && window.BDS_SEGUIMIENTO_THOR) window.BDS_SEGUIMIENTO_THOR.renderPanel(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
@@ -1086,7 +1089,7 @@ window.addEventListener("error", function (ev) {
       ib.onclick = async () => { if (!bdsDeferredPrompt) return; bdsDeferredPrompt.prompt(); await bdsDeferredPrompt.userChoice; bdsDeferredPrompt = null; ib.style.display = "none"; };
     }
     document.getElementById("btn-out").onclick = cerrarSesion;
-    if (document.getElementById("btn-ch")) document.getElementById("btn-ch").onclick = toggleChats;
+    window.bdsOpenChats = toggleChats; if (document.getElementById("btn-ch")) document.getElementById("btn-ch").onclick = () => window.bdsOpenChats();
 
     document.querySelectorAll("[data-v]").forEach(btn => { btn.onclick = () => window.bdsGo(btn.getAttribute("data-v")); });
     dock.querySelectorAll("[data-act]").forEach(btn => {

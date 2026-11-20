@@ -13,7 +13,7 @@
 
       const preguntasHtml = items.map((it, i) => `
         <div class="qbox">
-          <div class="qmeta">${i + 1}. [${it.d || "Intermedio"} • ${it.unidadEstudio || "Unidad MEP 2026"}]</div>
+          <div class="qmeta">${i + 1}. [${it.d || "Intermedio"} • ${it.subarea || ""} • ${it.unidadEstudio || "Unidad MEP 2026"} • ${it.saberEsencial || ""}]</div>
           <div class="qtxt">${it.q}</div>
           <div class="qopts">${(it.opts || []).map((o, oi) => `<div><b>${letras[oi]})</b> ${o.txt}</div>`).join("")}</div>
         </div>
@@ -30,7 +30,7 @@
         const idxOk = (it.opts || []).findIndex(o => o.ok);
         const lOk = idxOk >= 0 ? letras[idxOk] : "A";
         const tOk = idxOk >= 0 ? it.opts[idxOk].txt : "";
-        return `<tr><td><b>${i + 1}</b></td><td style="text-align:center;font-weight:900;color:#0f766e">${lOk}</td><td>${tOk}</td><td>${it.unidadEstudio || "Unidad 2026"} • ${it.indicador || "Indicador REAC"}</td></tr>`;
+        return `<tr><td><b>${i + 1}</b></td><td style="text-align:center;font-weight:900;color:#0f766e">${lOk}</td><td>${tOk}</td><td><b>${it.subarea || ""}</b> — ${it.unidadEstudio || ""} — <i>${it.saberEsencial || ""}</i> • ${it.indicador || "Indicador REAC"}</td></tr>`;
       }).join("");
 
       const w = window.open("", "_blank");

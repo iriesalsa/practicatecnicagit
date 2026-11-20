@@ -41,8 +41,8 @@ window.addEventListener("error", function (ev) {
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v207.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v207.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v208.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v208.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -207,9 +207,9 @@ window.addEventListener("error", function (ev) {
       institucionCorta: "CTP Mercedes Norte",
       regional: "Dirección Regional de Heredia",
       circuito: "Circuito 02",
-      escudo: "/escudo-ctpmn-oficial.jpeg?v=207",
-      mascota: "/buho-oficial.png?v=207",
-      logoMep: "/logo-mep-oficial.png?v=207"
+      escudo: "/escudo-ctpmn-oficial.jpeg?v=208",
+      mascota: "/buho-oficial.png?v=208",
+      logoMep: "/logo-mep-oficial.png?v=208"
     };
     if (!window.BDS_BRAND) return def;
     const b = window.BDS_BRAND.get();
@@ -788,7 +788,7 @@ window.addEventListener("error", function (ev) {
                 <span style="font-size:12px;font-weight:800;color:#38bdf8;">${idx + 1} / ${items.length} • ${cur.d}</span>
               </div>
             </div>
-            ${cur.indicador ? `<div style="background:#070d19;border:1px solid #1e3a8a;border-radius:8px;padding:8px 11px;margin-bottom:10px;font-size:11.5px;color:#93c5fd;"><b>🎯 Indicador:</b> ${cur.indicador} &nbsp;•&nbsp; <b style="color:#34d399;">${cur.nivelDesempeno || "Nivel 2"}</b><div style="color:#94a3b8;font-size:11px;margin-top:2px;">🌍 ${cur.steam || "STEAM • ENFOQUE FENÓMENO REAL"}</div></div>` : ""}${modo === "guiada" ? `<div style="background:#070d19;border-left:4px solid #10b981;padding:9px 12px;border-radius:8px;margin-bottom:12px;font-size:12px;color:#a7f3d0;"><b>🧭 Guía:</b> ${cur.g}${cur.dua ? `<div style="color:#fde68a;font-size:11px;margin-top:4px;">♿ ${cur.dua}</div>` : ""}</div>` : ""}
+            ${cur.indicador ? `<div style="background:#070d19;border:1px solid #1e3a8a;border-radius:8px;padding:8px 11px;margin-bottom:10px;font-size:11.5px;color:#93c5fd;"><div style="color:#2dd4bf;font-weight:700;margin-bottom:3px;">📘 ${cur.materia || mCur.name} • 📂 ${cur.subarea || mCur.name} • 📑 ${cur.unidadEstudio || "Unidad MEP 2026"}</div>${cur.saberEsencial ? `<div style="color:#fde68a;font-size:11px;margin-bottom:3px;">🔑 <b>Saber Esencial:</b> ${cur.saberEsencial}</div>` : ""}<b>🎯 Indicador REAC:</b> ${cur.indicador} &nbsp;•&nbsp; <b style="color:#34d399;">${cur.nivelDesempeno || "Nivel 2"}</b><div style="color:#94a3b8;font-size:11px;margin-top:2px;">🌍 ${cur.steam || "STEAM • ENFOQUE FENÓMENO REAL"}</div></div>` : ""}${modo === "guiada" ? `<div style="background:#070d19;border-left:4px solid #10b981;padding:9px 12px;border-radius:8px;margin-bottom:12px;font-size:12px;color:#a7f3d0;"><b>🧭 Guía:</b> ${cur.g}${cur.dua ? `<div style="color:#fde68a;font-size:11px;margin-top:4px;">♿ ${cur.dua}</div>` : ""}</div>` : ""}
             <h3 style="margin:0 0 14px;font-size:16px;line-height:1.45;">${cur.q}</h3>
             <div style="display:flex;flex-direction:column;gap:8px;">
               ${cur.opts.map((o, i) => {

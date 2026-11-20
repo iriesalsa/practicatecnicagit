@@ -12,12 +12,12 @@
       if (!silencioso && typeof window !== "undefined" && window.location) {
         const u = new URL(window.location.href);
         u.searchParams.set("v215_sync", String(Date.now()));
-        /* replace desactivado para evitar bucle */
+        window.location.replace(u.toString());
       }
       return true;
     } catch {
       if (!silencioso && typeof window !== "undefined" && window.location) {
-        /* reload desactivado para evitar bucle */
+        window.location.reload();
       }
       return false;
     }
@@ -25,7 +25,7 @@
 
   function registrarEscuchaSW() {
     if (typeof navigator === "undefined" || !navigator.serviceWorker) return;
-    navigator.serviceWorker.register("/sw-bds-v248.js?v=248").then((reg) => {
+    navigator.serviceWorker.register("/sw-bds-v215.js?v=215").then((reg) => {
       reg.update().catch(() => {});
     }).catch(() => {});
 
@@ -75,7 +75,7 @@
       const alreadyReloaded = sessionStorage.getItem(RESET_FLAG) === "1";
       if (removedOld && !alreadyReloaded) {
         sessionStorage.setItem(RESET_FLAG, "1");
-        /* reload desactivado para evitar bucle */
+        window.location.reload();
       }
     } catch {}
   }

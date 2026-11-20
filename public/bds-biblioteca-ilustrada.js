@@ -207,9 +207,9 @@
         document.getElementById("man-prac").onclick = () => abrirPractica("guiada", mat.id);
         document.getElementById("man-sim").onclick = () => abrirPractica("simulacro", mat.id);
       } else {
-        document.getElementById("af-t").oninput = (e) => { afiche.titulo = e.target.value; };
-        document.getElementById("af-s").oninput = (e) => { afiche.sub = e.target.value; };
-        document.getElementById("af-c").oninput = (e) => { afiche.cuerpo = e.target.value; };
+        document.getElementById("af-t").oninput = (e) => { afiche.titulo = e.target.value; draw(); document.getElementById("af-t").focus(); };
+        document.getElementById("af-s").oninput = (e) => { afiche.sub = e.target.value; draw(); document.getElementById("af-s").focus(); };
+        document.getElementById("af-c").oninput = (e) => { afiche.cuerpo = e.target.value; draw(); document.getElementById("af-c").focus(); };
         document.getElementById("af-fmt").onchange = (e) => { afiche.formato = e.target.value; };
         document.getElementById("af-bg").onchange = (e) => { afiche.tema = e.target.value; draw(); };
         document.getElementById("af-dl").onclick = exportarPosterPNG;

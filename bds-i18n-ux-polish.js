@@ -263,3 +263,169 @@
   `;
   document.head.appendChild(st);
 })();
+
+/* bds-escuchar-real-v218 */
+(function () {
+  if (typeof window === "undefined" || typeof document === "undefined") return;
+
+  let hablando = false;
+  let estadoTexto = "";
+
+  function getTextoSaludoLimpio() {
+    const quoteEl = document.querySelector("#bds-shell .bds-card blockquote, #bds-shell .bds-card p[style*='font-weight'], #bds-shell .bds-card div[style*='font-size:15'], #bds-shell .bds-card div[style*='font-size:16']");
+    if (quoteEl && quoteEl.innerText && quoteEl.innerText.trim().length > 8) {
+      return quoteEl.innerText.replace(/\s+/g, " ").trim().slice(0, 360);
+    }
+    const cards = Array.from(document.querySelectorAll("#bds-shell .bds-card"));
+    const mainCard = cards.find(c => !c.id || c.id !== "bds-mi-dia-v204");
+    if (mainCard) {
+      return mainCard.innerText
+        .replace(/Vista:\s*SuperAdmin/gi, "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 360);
+    }
+    return "Bienvenido a pracTICAtecnica.com";
+  }
+
+  function actualizarEstadoBoton(btn) {
+    if (!btn) return;
+    btn.innerText = hablando ? "⏹ Detener" : "🔊 Escuchar";
+    btn.style.background = hablando ? "#b45309" : "#1e3a8a";
+    btn.style.color = "#ffffff";
+    btn.style.borderColor = hablando ? "#fbbf24" : "#38bdf8";
+
+    let stBox = document.getElementById("bds-tts-status-v218");
+    if (!stBox && btn.parentElement && btn.parentElement.parentElement) {
+      stBox = document.createElement("div");
+      stBox.id = "bds-tts-status-v218";
+      stBox.style.cssText = "width:100%;font-size:11px;color:#93c5fd;margin-top:6px;display:none;";
+      btn.parentElement.parentElement.appendChild(stBox);
+    }
+    if (stBox) {
+      stBox.style.display = estadoTexto ? "block" : "none";
+      stBox.innerText = estadoTexto;
+    }
+  }
+
+  function detenerAudio() {
+    hablando = false;
+    estadoTexto = "";
+    try {
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    } catch {}
+    actualizarEstadoBoton(document.getElementById("pr-mot-tts"));
+  }
+
+  function alternarEscuchar(btn) {
+    if (hablando) {
+      detenerAudio();
+      return;
+    }
+    const texto = getTextoSaludoLimpio();
+    if (!("speechSynthesis" in window) || typeof SpeechSynthesisUtterance === "undefined") {
+      estadoTexto = "⚠️ Este navegador o dispositivo no tiene síntesis de voz (TTS) habilitada.";
+      actualizarEstadoBoton(btn);
+      return;
+    }
+
+    try {
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(texto);
+      utter.lang = "es-419";
+      utter.rate = 0.96;
+      utter.pitch = 1.0;
+
+      const voices = window.speechSynthesis.getVoices() || [];
+      const latam = voices.find(v => /^(es-419|es-cr|es-mx|es-us|es-co|es-ar|es-cl|es-pe)/i.test(v.lang || "")) ||
+                    voices.find(v => /^es/i.test(v.lang || "") && !/es-es|españa|spain|jorge|monica|jordi|helena|paloma/i.test(`${v.lang} ${v.name}`)) ||
+                    voices.find(v => /^es/i.test(v.lang || ""));
+      if (latam) {
+        utter.voice = latam;
+        utter.lang = latam.lang || "es-419";
+      }
+
+      hablando = true;
+      estadoTexto = `🔊 Reproduciendo en voz ${utter.lang}: "${texto.slice(0, 75)}${texto.length > 75 ? "..." : ""}"`;
+      actualizarEstadoBoton(btn);
+
+      utter.onend = () => { detenerAudio(); };
+      utter.onerror = () => {
+        hablando = false;
+        estadoTexto = "⚠️ No se pudo reproducir el audio. Revisa el volumen del dispositivo o los permisos de audio del navegador.";
+        actualizarEstadoBoton(btn);
+      };
+
+      window.speechSynthesis.speak(utter);
+
+      // Respaldo si el navegador bloquea speechSynthesis silenciosamente
+      setTimeout(() => {
+        if (hablando && !window.speechSynthesis.speaking && !window.speechSynthesis.pending) {
+          hablando = false;
+          estadoTexto = "💡 Si no escuchas audio, toca el ícono de volumen del dispositivo o prueba en Chrome/Edge con voces instaladas.";
+          actualizarEstadoBoton(btn);
+        }
+      }, 1200);
+    } catch {
+      hablando = false;
+      estadoTexto = "⚠️ Error al iniciar la lectura de audio.";
+      actualizarEstadoBoton(btn);
+    }
+  }
+
+  function mejorarBotonYEstilos() {
+    if (!document.getElementById("bds-ux-v218-css") && document.head) {
+      const st = document.createElement("style");
+      st.id = "bds-ux-v218-css";
+      st.innerHTML = `
+        #bds-subnav {
+          max-height: 124px;
+          overflow-y: auto;
+          scrollbar-width: thin;
+        }
+        .bds-nav-btn {
+          padding: 6px 10px !important;
+          font-size: 11.5px !important;
+          line-height: 1.25 !important;
+        }
+        #bds-shell .bds-card {
+          border-radius: 14px !important;
+        }
+        #pr-mot-tts {
+          cursor: pointer !important;
+          user-select: none;
+        }
+      `;
+      document.head.appendChild(st);
+    }
+
+    const motBtn = document.getElementById("pr-mot-next");
+    if (motBtn) {
+      let b = document.getElementById("pr-mot-tts");
+      if (!b) {
+        b = document.createElement("button");
+        b.type = "button";
+        b.id = "pr-mot-tts";
+        b.style.cssText = "background:#1e3a8a;color:#ffffff;border:1px solid #38bdf8;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;";
+        motBtn.parentElement.insertBefore(b, motBtn);
+      }
+      b.onclick = (e) => {
+        if (e) e.preventDefault();
+        alternarEscuchar(b);
+      };
+      actualizarEstadoBoton(b);
+    }
+  }
+
+  window.BDS_ESCUCHAR_V218 = { alternarEscuchar, detenerAudio, getTextoSaludoLimpio };
+  if (typeof window.addEventListener === "function") {
+    window.addEventListener("DOMContentLoaded", () => {
+      mejorarBotonYEstilos();
+      if (typeof MutationObserver !== "undefined" && document.body) {
+        new MutationObserver(() => mejorarBotonYEstilos()).observe(document.body, { childList: true, subtree: true });
+      }
+    });
+  }
+})();

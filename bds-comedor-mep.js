@@ -86,7 +86,7 @@
       sinpeJunta: (prev && prev.sinpeJunta) || "8888-0000",
       precioEstudiante: (prev && Number(prev.precioEstudiante)) || 1000,
       precioDocente: (prev && Number(prev.precioDocente)) || 1800,
-      semanaActiva: (prev && prev.semanaActiva) || "A",
+      /* bds-comedor-cierre-anual-v199 */ anioLectivo: (prev && prev.anioLectivo) || String(new Date().getFullYear()), semanaActiva: (prev && prev.semanaActiva) || "A",
       horarios: JSON.parse(JSON.stringify(TIEMPOS_CATALOGO))
     };
     localStorage.setItem(CFG_KEY, JSON.stringify(def));
@@ -533,7 +533,7 @@
         <div class="bds-card" style="margin-bottom:14px;">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;border-bottom:1px solid #1e293b;padding-bottom:12px;margin-bottom:12px;">
             <div>
-              <span style="background:#059669;color:#fff;font-size:10px;font-weight:800;padding:3px 9px;border-radius:99px;">COMEDOR MEP / PANEA • ${activos.length} TIEMPO${activos.length>1?"S":""} ACTIVO${activos.length>1?"S":""}</span>
+              <span style="background:#059669;color:#fff;font-size:10px;font-weight:800;padding:3px 9px;border-radius:99px;">FONDOS EXCLUSIVOS JUNTA (APARTE DE COOPERATIVA) • AÑO ${cfg.anioLectivo || new Date().getFullYear()} • ${activos.length} TIEMPO${activos.length>1?"S":""} ACTIVO${activos.length>1?"S":""}</span>
               <h2 style="margin:5px 0 2px;font-size:18px;color:#fff;">🍽️ Comedor Escolar — ${b.institucion}</h2>
               <div style="font-size:11.5px;color:#94a3b8;">${cfg.juntaTipo} • Servicios: <b style="color:#2dd4bf;">${activos.map(t => t.nom).join(", ")}</b> • Menú: <b style="color:#fbbf24;">Semana ${cfg.semanaActiva}</b> • SINPE Junta: <b style="color:#34d399;">${cfg.sinpeJunta}</b></div>
             </div>
@@ -587,7 +587,7 @@
                 <div style="font-size:11.5px;color:#94a3b8;margin-bottom:10px;">${miWallet.rol} • ${miWallet.seccion} • ID: <b>${miWallet.id}</b></div>
                 <div style="display:inline-block;margin-bottom:8px;">${generarQRSVG(miWallet.qrCode, 180)}</div>
                 <div style="font-size:10.5px;font-family:monospace;color:#6ee7b7;background:#0b1322;padding:5px 8px;border-radius:6px;word-break:break-all;margin-bottom:8px;">${miWallet.qrCode}</div>
-                <div style="font-size:11px;color:#cbd5e1;">Muestre este <b>Carné Digital QR SHA-256</b> frente a la cámara en la fila del comedor para pasar en menos de 1 segundo.</div>
+                <div style="font-size:11px;color:#cbd5e1;"><b>Tiquetes acumulables:</b> Compra 1, 3, 5, 10 o 20 tiquetes y úsalos los días que desees durante el año lectivo <b>${cfg.anioLectivo || new Date().getFullYear()}</b>. <i>Recuerda gastar tus tiquetes antes del cierre anual (se reinician cada año escolar).</i></div>
               </div>
 
               <!-- Compra Fácil de Varios Tiquetes / Recarga en Colones por SINPE -->
@@ -826,7 +826,13 @@
                     <button type="submit" style="width:100%;background:#059669;color:#fff;border:none;padding:10px;border-radius:8px;font-weight:800;cursor:pointer;">💾 Guardar Tiempos, Tarifas y SINPE</button>
                   </div>
                 </div>
-              </form>
+              </form>            <div style="background:#451a03;border:1.5px solid #f59e0b;border-radius:12px;padding:14px;margin-top:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+              <div>
+                <div style="font-size:13px;font-weight:800;color:#fbbf24;">🗓️ Cierre Anual de Tiquetes de Comedor (Año Lectivo ${cfg.anioLectivo || new Date().getFullYear()})</div>
+                <div style="font-size:11.5px;color:#fef3c7;">Los tiquetes de almuerzo son administrados por la Junta y vencen al cerrar el año lectivo. Este botón descarga un respaldo CSV y reinicia el saldo de tiquetes en 0 para iniciar el siguiente año (NO afecta los saldos permanentes de la Cooperativa).</div>
+              </div>
+              <button type="button" id="com-cierre-anual" style="background:#dc2626;color:#fff;border:none;padding:10px 14px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">🔄 Ejecutar Cierre Anual → ${Number(cfg.anioLectivo || new Date().getFullYear()) + 1}</button>
+            </div>
             </div>
           ` : ""}
         </div>
@@ -997,7 +1003,7 @@
           cfg.horarios.forEach(h => { h.activo = pre.activos.includes(h.id); });
           saveCfg(cfg); draw();
         });
-        document.getElementById("cfg-f").onsubmit = (e) => {
+        if (document.getElementById("com-cierre-anual")) document.getElementById("com-cierre-anual").onclick = () => { const curY = Number(cfg.anioLectivo || new Date().getFullYear()); const nextY = String(curY + 1); if (!confirm(`¿Ejecutar cierre anual del Comedor ${curY} → ${nextY}? Se descargará respaldo CSV y los tiquetes no gastados pasarán a ₡0 (la Cooperativa NO se toca).`)) return; const ws = loadWallets(); const rows = [["ANIO","ID","NOMBRE","EMAIL","ROL","BECA","SALDO_CIERRE_CRC"], ...ws.map(w => [curY, w.id, w.nombre, w.email, w.rol, w.becaPanea?"SI":"NO", w.saldoColones||0])]; const csv = "\\uFEFF" + rows.map(r => r.map(x => `"${String(x).replace(/"/g, "\"\"")}"`).join(",")).join("\\n"); const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" })); a.download = `respaldo-cierre-comedor-${curY}.csv`; a.click(); ws.forEach(w => { w.saldoColones = 0; }); saveWallets(ws); cfg.anioLectivo = nextY; saveCfg(cfg); alert(`✅ Cierre anual completado. Comedor listo para el año lectivo ${nextY}.`); draw(); }; document.getElementById("cfg-f").onsubmit = (e) => {
           e.preventDefault();
           shell.querySelectorAll(".ch-act").forEach(el => { cfg.horarios[Number(el.getAttribute("data-hi"))].activo = el.checked; });
           shell.querySelectorAll(".ch-hr").forEach(el => { cfg.horarios[Number(el.getAttribute("data-hi"))].hora = el.value.trim(); });

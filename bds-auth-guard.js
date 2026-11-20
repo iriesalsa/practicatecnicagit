@@ -41,8 +41,8 @@ window.addEventListener("error", function (ev) {
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v198.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v198.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v199.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v199.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -156,9 +156,9 @@ window.addEventListener("error", function (ev) {
       institucionCorta: "CTP Mercedes Norte",
       regional: "Dirección Regional de Heredia",
       circuito: "Circuito 02",
-      escudo: "/escudo-ctpmn-oficial.jpeg?v=198",
-      mascota: "/buho-oficial.png?v=198",
-      logoMep: "/logo-mep-oficial.png?v=198"
+      escudo: "/escudo-ctpmn-oficial.jpeg?v=199",
+      mascota: "/buho-oficial.png?v=199",
+      logoMep: "/logo-mep-oficial.png?v=199"
     };
     if (!window.BDS_BRAND) return def;
     const b = window.BDS_BRAND.get();
@@ -445,11 +445,9 @@ window.addEventListener("error", function (ev) {
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
               <div>
-                <label style="display:block;font-size:11px;margin-bottom:3px;">Modalidad de Ingreso</label>
+                <label style="display:block;font-size:11px;margin-bottom:3px;">Acceso de Cuenta</label>
                 <select id="lg-r" ${locked?"disabled":""} style="width:100%;background:#070d19;border:1px solid #334155;border-radius:8px;padding:8px;color:#fff;font-size:12px;min-height:40px;">
-                  <option value="Estudiante">🎒 Estudiante (Predeterminado)</option>
-                  <option value="Particular (MOPT / Admisión)">🎯 Particular (MOPT / Admisión)</option><option value="Padre/Madre">👨‍👩‍👧‍👦 Padre / Madre / Encargado</option>
-                  <option value="AUTO">🔐 Rol Asignado (Dirección / Docente)</option>
+                  <option value="Estudiante">🎒 Estudiante / Rol Asignado</option>
                 </select>
               </div>
               <div id="lg-swrap">
@@ -472,7 +470,7 @@ window.addEventListener("error", function (ev) {
 
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:11px;padding-top:9px;border-top:1px solid #1e293b;font-size:11.5px;">
             <button type="button" id="lg-rec" style="background:none;border:none;color:#94a3b8;cursor:pointer;padding:0;">¿Olvidó su contraseña?</button>
-            <span data-no-i18n="true" style="color:#64748b;font-weight:600;">PWA v198.0 • BDS Devs</span>
+            <span data-no-i18n="true" style="color:#64748b;font-weight:600;">PWA v199.0 • BDS Devs</span>
           </div>
         </div>
       `;
@@ -518,15 +516,13 @@ window.addEventListener("error", function (ev) {
         let nombreFinal = nomIn || mail.split("@")[0];
         if (esSuperAdmin(mail)) {
           rolFinal = "SuperAdmin";
-          if (!nomIn) nombreFinal = "Ing. Max Salazar Sánchez";
+          nombreFinal = "Ing. Max Salazar Sánchez";
         } else if (esDirectoraAutorizada(mail)) {
           rolFinal = "Director(a)";
-          if (!nomIn) nombreFinal = "Directora Laura Ramón Elizondo";
+          nombreFinal = "Directora Laura Ramón Elizondo";
         } else if (preUser && preUser.rol) {
           rolFinal = preUser.rol;
           if (!nomIn && preUser.nombre) nombreFinal = preUser.nombre;
-        } else if (rSel.value === "Padre/Madre") { rolFinal = "Padre/Madre"; } else if (rSel.value === "Particular (MOPT / Admisión)") {
-          rolFinal = "Particular (MOPT / Admisión)";
         }
 
         setInt(0);
@@ -783,9 +779,9 @@ window.addEventListener("error", function (ev) {
     const esRealSA = sesionActiva && sesionActiva.rolReal === "SuperAdmin";
     const primerNom = (sesionActiva.nombre || "Usuario").replace(/^(Ing\.|Prof\.|Licda\.|Lic\.|Directora)\s+/i, "").split(" ")[0];
     const saludoBuho = esSuperAdmin(sesionActiva.email)
-      ? "¡Hola Max, bienvenido! Qué bueno verte de nuevo. Todo el ecosistema está listo bajo tu control."
+      ? "¡Hola Ing. Max Salazar Sánchez, bienvenido! Qué bueno verte de nuevo. Todo el ecosistema está listo bajo tu control."
       : (esDirectoraAutorizada(sesionActiva.email)
-          ? "¡Bienvenida, Directora Laura! Qué alegría tenerte de nuevo. Tu bandeja de permisos, justificaciones y gestión está lista."
+          ? "¡Bienvenida, Directora Laura Ramón Elizondo! Qué alegría tenerte de nuevo. Tu bandeja de permisos, justificaciones y gestión está lista."
           : `¡Hola ${primerNom}, bienvenido(a)! Qué bueno verte de nuevo. ¡Sigamos sumando racha hoy!`);
 
     const estBeta = window.BDS_SUSCRIPCION ? window.BDS_SUSCRIPCION.getEstadoCuenta(sesionActiva).etiqueta : "Beta activa";

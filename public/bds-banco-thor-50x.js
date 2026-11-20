@@ -262,6 +262,81 @@
       return enrichItem({ d: seedIdx % 2 === 0 ? "Intermedio" : "Avanzado", indicador: "Calcula hosts utilizables en subneteo IPv4.", q: `Subred 172.${oct2}.${oct3}.0${cidr} (máscara ${mask}). ¿Cuántos hosts utilizables admite?`, o: [`${hosts} hosts utilizables`, `${hosts + 2} hosts utilizables`, `${hosts * 2} hosts utilizables`, `256 hosts utilizables`], c: 0, g: "2^(bits host) − 2.", e: `La máscara ${mask} (${cidr}) ofrece ${hosts} hosts válidos.` }, mat, seedIdx);
     }
 
+        /* bds-ultra-500k-v199 */
+    if (tipo === "quimica") {
+      const m = seedIdx % 3;
+      if (m === 0) {
+        const z = randInt(1, 30), n = z + randInt(0, 8), aMas = z + n;
+        return enrichItem({ d: "Básico", indicador: "Determina número másico (A = Z + N) a partir de protones y neutrones.", q: `Un átomo posee Z = ${z} protones y N = ${n} neutrones en su núcleo. ¿Cuál es su número másico (A)?`, o: [`A = ${aMas}`, `A = ${Math.abs(n - z)}`, `A = ${z * 2}`, `A = ${aMas + 2}`], c: 0, g: "El número másico es la suma de protones más neutrones (A = Z + N).", e: `A = ${z} + ${n} = ${aMas}.` }, mat, seedIdx);
+      }
+      if (m === 1) {
+        const ph = randInt(1, 13);
+        const tipoPh = ph < 7 ? "Ácida" : (ph === 7 ? "Neutra" : "Básica / Alcalina");
+        const otros = ["Ácida", "Neutra", "Básica / Alcalina", "Metálica pura"].filter(x => x !== tipoPh);
+        return enrichItem({ d: "Medio", indicador: "Clasifica disoluciones acuosas según la escala oficial de pH (0–14).", q: `Una muestra de laboratorio registra un valor de pH = ${ph}. ¿Cómo se clasifica?`, o: [tipoPh, otros[0], otros[1], otros[2]], c: 0, g: "pH < 7 es ácido, pH = 7 es neutro y pH > 7 es básico.", e: `Un pH de ${ph} corresponde a una disolución ${tipoPh.toLowerCase()}.` }, mat, seedIdx);
+      }
+      const mols = randInt(1, 8), mm = [18, 44, 58.5, 40, 36.5][seedIdx % 5], nom = ["agua (H₂O)", "CO₂", "NaCl", "NaOH", "HCl"][seedIdx % 5];
+      const masa = Number((mols * mm).toFixed(1));
+      return enrichItem({ d: "Avanzado", indicador: "Calcula masa en gramos a partir de moles y masa molar.", q: `Si la masa molar de ${nom} es ${mm} g/mol, ¿cuántos gramos hay en ${mols} moles?`, o: [`${masa} g`, `${(mm / mols).toFixed(1)} g`, `${(mols + mm).toFixed(1)} g`, `${(masa + mm).toFixed(1)} g`], c: 0, g: "Masa (g) = moles × masa molar.", e: `${mols} mol × ${mm} g/mol = ${masa} g.` }, mat, seedIdx);
+    }
+
+    if (tipo === "mopt") {
+      const m = seedIdx % 3;
+      if (m === 0) {
+        const zonas = [
+          ["Zona Escolar con estudiantes presentes", "25 km/h", "40 km/h", "50 km/h", "60 km/h", "Art. 98 Ley N.° 9078: máximo 25 km/h en zonas escolares y hospitalarias."],
+          ["Vía urbana secundaria sin señalización específica", "40 km/h", "80 km/h", "100 km/h", "15 km/h", "En vías urbanas secundarias la velocidad segura general es 40 km/h salvo señal distinta."],
+          ["Autopista o carretera de alta velocidad en Costa Rica (límite máximo legal)", "80 a 100 km/h según demarcación", "140 km/h", "25 km/h", "160 km/h", "Siempre se respeta la señalización vertical oficial sin exceder el límite de ley."]
+        ];
+        const z = zonas[seedIdx % zonas.length];
+        return enrichItem({ moptCat: "COMUN", d: "Básico", indicador: "Aplica los límites de velocidad establecidos en la Ley de Tránsito N.° 9078.", q: `[MOPT / COSEVI #${seedIdx % 999}] ¿Cuál es el límite de velocidad reglamentario en: ${z[0]}?`, o: [z[1], z[2], z[3], z[4]], c: 0, g: "Verifica el tipo de vía y la presencia de peatones o estudiantes.", e: z[5] }, mat, seedIdx);
+      }
+      if (m === 1) {
+        const lics = [
+          ["MOTO", "A1", "Motocicletas hasta 125 cc", "Camiones articulados", "Autobuses públicos", "Tractores de oruga"],
+          ["MOTO", "A3", "Motocicletas sin límite de cilindrada", "Solo bicicletas", "Autobuses de 50 pasajeros", "Grúas D3"],
+          ["CARRO", "B1", "Vehículos livianos hasta 4.000 kg de peso bruto", "Tráileres de 25 toneladas", "Autobuses C2", "Motos A3"],
+          ["CAMION", "B4", "Vehículos pesados articulados (tráileres) sin límite de peso", "Motocicletas hasta 125 cc", "Taxis C1", "Solo cuadriciclos"],
+          ["BUS", "C2", "Autobuses, busetas y microbuses de transporte público", "Automóviles particulares únicamente", "Tractores D1", "Motocicletas A2"],
+          ["ESPECIAL", "D1", "Tractores de llantas (equipo agrícola)", "Automóviles B1", "Taxis C1", "Autobuses C2"],
+          ["ESPECIAL", "D3", "Otros equipos especiales (retroexcavadoras, montacargas, grúas)", "Motocicletas A1", "Automóviles livianos", "Taxis"]
+        ];
+        const l = lics[seedIdx % lics.length];
+        return enrichItem({ moptCat: l[0], d: "Medio", indicador: "Distingue las categorías oficiales de licencias de conducir en Costa Rica.", q: `[Licencias MOPT #${seedIdx % 999}] ¿Qué vehículos autoriza a conducir la Licencia tipo ${l[1]} en Costa Rica?`, o: [l[2], l[3], l[4], l[5]], c: 0, g: "A=Moto, B=Particular/Carga, C=Transporte Público, D=Equipo Especial.", e: `La licencia ${l[1]} habilita: ${l[2]}.` }, mat, seedIdx);
+      }
+      const kmh = [30, 40, 50, 60, 70, 80][seedIdx % 6];
+      const distReac = Math.round((kmh / 3.6) * 1.5);
+      return enrichItem({ moptCat: "CARRO", d: "Avanzado", indicador: "Evalúa distancia de reacción y seguimiento seguro en manejo defensivo.", q: `[Manejo Defensivo #${seedIdx % 999}] Si circula a ${kmh} km/h (≈ ${(kmh/3.6).toFixed(1)} m/s) y tarda 1,5 s en reaccionar ante un peatón, ¿qué distancia aproximada recorre antes siquiera de pisar el freno?`, o: [`Aproximadamente ${distReac} metros`, `Menos de 2 metros`, `Exactamente 0 metros`, `${distReac * 4} metros`], c: 0, g: "Distancia de reacción = velocidad (m/s) × tiempo de reacción (s).", e: `A ${kmh} km/h se recorren ~${distReac} m solo durante el tiempo de reacción, por eso la regla de 2–3 segundos salva vidas.` }, mat, seedIdx);
+    }
+
+    if (tipo === "ingles") {
+      const verbos = [
+        ["go", "went", "goed", "going", "goes"],
+        ["write", "wrote", "writed", "writing", "writes"],
+        ["build", "built", "builded", "building", "builds"],
+        ["speak", "spoke", "speaked", "speaking", "speaks"],
+        ["teach", "taught", "teached", "teaching", "teaches"],
+        ["learn", "learned / learnt", "learneding", "learning", "learns"],
+        ["take", "took", "taked", "taking", "takes"],
+        ["give", "gave", "gived", "giving", "gives"]
+      ];
+      const v = verbos[seedIdx % verbos.length];
+      const subj = ["She", "He", "The student", "The team", "Our teacher"][seedIdx % 5];
+      return enrichItem({ d: DIFFS[seedIdx % 4], lang: "en-US", indicador: "Uses irregular and regular verbs accurately in Simple Past statements.", q: `[English Grammar #${seedIdx % 999}] Complete in Simple Past: "${subj} ___ the task yesterday." (verb: ${v[0]})`, o: [v[1], v[2], v[3], v[4]], c: 0, g: "Identify the correct Simple Past form of the verb.", e: `The Simple Past form of "${v[0]}" is "${v[1]}".` }, mat, seedIdx);
+    }
+
+    if (tipo === "espanol") {
+      const pals = [
+        ["técnico", "Esdrújula (siempre lleva tilde)", "Aguda", "Grave", "Sobresdrújula"],
+        ["canción", "Aguda (termina en n, s o vocal)", "Esdrújula", "Grave", "Monosílaba"],
+        ["árbol", "Grave / Llana (no termina en n, s ni vocal)", "Aguda", "Esdrújula", "Sobresdrújula"],
+        ["matemática", "Esdrújula (siempre lleva tilde)", "Aguda", "Grave", "Sobresdrújula"],
+        ["café", "Aguda (termina en vocal)", "Grave", "Esdrújula", "Sobresdrújula"],
+        ["lápiz", "Grave / Llana (termina en z)", "Aguda", "Esdrújula", "Sobresdrújula"]
+      ];
+      const p = pals[seedIdx % pals.length];
+      return enrichItem({ d: DIFFS[seedIdx % 4], indicador: "Clasifica palabras según la posición del acento prosódico y las reglas de tildación.", q: `[Ortografía MEP #${seedIdx % 999}] Según la posición de su sílaba tónica, la palabra "${p[0]}" se clasifica como:`, o: [p[1], p[2], p[3], p[4]], c: 0, g: "Divide en sílabas e identifica si la fuerza recae en la última (aguda), penúltima (grave) o antepenúltima (esdrújula).", e: `"${p[0]}" es ${p[1]}.` }, mat, seedIdx);
+    }
     return null;
   }
 
@@ -281,9 +356,9 @@
     malla.forEach(m => {
       const baseCnt = (byArea[m.id] || []).length;
       const tipo = detectarTipo(m);
-      const cap = (tipo === "mate" || tipo === "admision") ? 30000
-        : (tipo === "mopt" || tipo === "electro" || tipo === "fisica" || tipo === "conta") ? 20000
-        : Math.max(10000, baseCnt * 30);
+      const cap = (tipo === "mate" || tipo === "admision") ? 55000
+        : (tipo === "mopt" || tipo === "electro" || tipo === "fisica" || tipo === "conta") ? 35000
+        : Math.max(14000, baseCnt * 45);
       capacityByArea[m.id] = cap;
       totalAddressable += cap;
     });
@@ -349,7 +424,7 @@
       },
       moptTotal: capacityByArea[moptMat ? moptMat.id : "mopt"] || 20000,
       totalAreas: malla.length,
-      engine: "Motor Procedural 350K+ (Zero DB Bloat • STEAM + DUA)"
+      engine: "Motor Procedural 500K+ (Zero DB Bloat • STEAM + DUA) (Zero DB Bloat • STEAM + DUA)"
     };
     window.__BDS_MOTOR_350K_READY = true;
     return window.__BDS_BANCO_STATS;

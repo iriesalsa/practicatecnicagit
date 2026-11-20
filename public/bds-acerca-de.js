@@ -8,7 +8,7 @@
     if (old) { old.remove(); return; }
 
     const stBank = window.__BDS_BANCO_STATS || { afterTotal: 350000, totalAreas: 29 };
-    const buhoSrc = (window.BDS_BRAND && window.BDS_BRAND.get().mascota) || "/buho-oficial.png?v=197";
+    const buhoSrc = (window.BDS_BRAND && window.BDS_BRAND.get().mascota) || "/buho-oficial.png?v=199";
 
     const modal = document.createElement("div");
     modal.id = "bds-about-modal";
@@ -21,7 +21,7 @@
             <img src="${buhoSrc}" width="44" height="44" alt="Búho Azul" style="border-radius:50%;"/>
             <div>
               <h2 style="margin:0;font-size:18px;color:#fff;">Acerca de prac<span style="color:#2dd4bf;">TICA</span>tecnica.com</h2>
-              <div style="font-size:11px;color:#94a3b8;">Plataforma Educativa Multiplataforma • Versión PWA v197.0 • BDS Devs</div>
+              <div style="font-size:11px;color:#94a3b8;">Plataforma Educativa Multiplataforma • Versión PWA v199.0 • BDS Devs</div>
             </div>
           </div>
           <button id="ab-cls" style="background:#7f1d1d;color:#fff;border:none;padding:6px 11px;border-radius:7px;font-weight:800;cursor:pointer;">✕</button>

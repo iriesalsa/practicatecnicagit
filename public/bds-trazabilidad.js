@@ -7,9 +7,9 @@
     try { const d = JSON.parse(localStorage.getItem(USERS_KEY)); if (Array.isArray(d) && d.length) return d; } catch {}
     const mock = [
       { id: "USR-001", nombre: "Ing. Max Salazar Sánchez", email: "maxi.salsa@gmail.com", rol: "SuperAdmin", inst: "CTP Mercedes Norte", estado: "Activo", plan: "Vitalicio Propietario", vence: "Permanente", intentos: 0 },
-      { id: "USR-002", nombre: "Directora Laura Ramón", email: "laura.ramon@mep.go.cr", rol: "Director(a)", inst: "CTP Mercedes Norte", estado: "Activo", plan: "Institucional ₡19,100", vence: "2027-12-31", intentos: 0 },
-      { id: "USR-003", nombre: "Prof. Carlos Quesada Mora", email: "carlos.quesada@mep.go.cr", rol: "Docente MEP", inst: "CTP Mercedes Norte", estado: "Cortesía", plan: "Cortesía 90 días", vence: "2027-02-18", intentos: 0 },
-      { id: "USR-004", nombre: "Sofía Alvarado Rojas", email: "sofia.alvarado@est.mep.go.cr", rol: "Estudiante", inst: "CTP Mercedes Norte (11-1)", estado: "Activo", plan: "Institucional ₡1,000", vence: "2027-12-31", intentos: 0 }
+      { id: "USR-002", nombre: "Directora Laura Ramón Elizondo", email: "laura.ramon@mep.go.cr", rol: "Director(a)", inst: "CTP Mercedes Norte", estado: "Activo", plan: "Vitalicio Cortesía (Editable)", vence: "Permanente", intentos: 0 },
+      { id: "USR-003", nombre: "Prof. Carlos Quesada Mora", email: "carlos.quesada@mep.go.cr", rol: "Docente MEP", inst: "CTP Mercedes Norte", estado: "Cortesía", plan: "Vitalicio Cortesía (Editable)", vence: "Permanente", intentos: 0 },
+      { id: "USR-004", nombre: "Sofía Alvarado Rojas", email: "sofia.alvarado@est.mep.go.cr", rol: "Estudiante", inst: "CTP Mercedes Norte (11-1)", estado: "Activo", plan: "Vitalicio Cortesía (Editable)", vence: "Permanente", intentos: 0 }
     ];
     localStorage.setItem(USERS_KEY, JSON.stringify(mock));
     return mock;
@@ -51,8 +51,8 @@
           rol: sesion.rol,
           inst: (window.BDS_BRAND ? window.BDS_BRAND.get().institucionCorta : "CTP Mercedes Norte"),
           estado: "Activo",
-          plan: "Beta 13 días",
-          vence: new Date(Date.now() + 13 * 86400000).toISOString().slice(0, 10),
+          plan: "Vitalicio Cortesía (Editable)",
+          vence: "Permanente",
           intentos: 0
         });
         saveUsers(users);
@@ -161,7 +161,7 @@
         const email = prompt("Correo (@mep.go.cr, @est.mep.go.cr o @gmail.com):"); if (!email) return;
         const rol = prompt("Rol (Estudiante, Docente MEP, Director(a), Auxiliar Administrativo):", "Docente MEP") || "Docente MEP";
         const arr = loadUsers();
-        arr.unshift({ id: "USR-" + String(Date.now()).slice(-4), nombre: nom.trim(), email: email.trim().toLowerCase(), rol, inst: "CTP Mercedes Norte", estado: "Cortesía", plan: "Cortesía 90 días", vence: new Date(Date.now() + 90 * 86400000).toISOString().slice(0, 10), intentos: 0 });
+        arr.unshift({ id: "USR-" + String(Date.now()).slice(-4), nombre: nom.trim(), email: email.trim().toLowerCase(), rol, inst: "CTP Mercedes Norte", estado: "Cortesía", plan: "Vitalicio Cortesía (Editable)", vence: new Date(Date.now() + 90 * 86400000).toISOString().slice(0, 10), intentos: 0 });
         saveUsers(arr);
         await logEvento(sesion.nombre, email.trim().toLowerCase(), `ALTA (${rol})`, "Autorizado por SuperAdmin", sha256Hex);
         draw();

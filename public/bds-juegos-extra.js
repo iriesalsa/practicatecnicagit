@@ -180,6 +180,95 @@
     prepRound(); drawImp();
   }
 
+    function renderSudokuEdu(stage, ganarXP) {
+    const PUZZLES = [
+      { init: [[1,0,0,4],[0,4,1,0],[2,0,4,0],[0,3,0,1]], sol: [[1,2,3,4],[3,4,1,2],[2,1,4,3],[4,3,2,1]] },
+      { init: [[0,2,0,4],[4,0,2,0],[0,1,4,0],[2,0,0,3]], sol: [[1,2,3,4],[4,3,2,1],[3,1,4,2],[2,4,1,3]] },
+      { init: [[3,0,1,0],[0,1,0,3],[1,0,3,0],[0,3,0,2]], sol: [[3,2,1,4],[4,1,2,3],[1,4,3,2],[2,3,4,1]] }
+    ];
+    let pIdx = Math.floor(Math.random() * PUZZLES.length);
+    let grid = PUZZLES[pIdx].init.map(r => r.slice());
+    let msg = "Completa cada fila, columna y bloque 2×2 con los números del 1 al 4 sin repetir.";
+
+    function drawS() {
+      const base = PUZZLES[pIdx].init, sol = PUZZLES[pIdx].sol;
+      stage.innerHTML = `
+        <div style="max-width:340px;margin:0 auto;text-align:center;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <b style="color:#38bdf8;">🔢 Sudoku Lógico 4×4</b>
+            <button id="su-new" style="background:#1d4ed8;color:#fff;border:none;padding:6px 10px;border-radius:7px;font-size:11.5px;cursor:pointer;">🔄 Nuevo</button>
+          </div>
+          <div style="font-size:12px;color:#cbd5e1;margin-bottom:10px;">${msg}</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;background:#070d19;padding:10px;border-radius:12px;border:2px solid #334155;margin-bottom:12px;">
+            ${grid.map((row, r) => row.map((v, c) => {
+              const fijo = base[r][c] !== 0;
+              return `<button data-rc="${r},${c}" class="su-c" ${fijo?"disabled":""} style="aspect-ratio:1;background:${fijo?'#1e3a8a':'#131f33'};border:2px solid ${fijo?'#38bdf8':'#334155'};color:#fff;border-radius:8px;font-size:22px;font-weight:800;cursor:${fijo?'default':'pointer'};">${v || ""}</button>`;
+            }).join("")).join("")}
+          </div>
+          <button id="su-chk" style="background:#059669;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer;">✅ Verificar Solución</button>
+        </div>
+      `;
+      document.getElementById("su-new").onclick = () => { pIdx = (pIdx + 1) % PUZZLES.length; grid = PUZZLES[pIdx].init.map(r => r.slice()); msg = "Nuevo tablero listo."; drawS(); };
+      stage.querySelectorAll(".su-c").forEach(b => b.onclick = () => {
+        const [r, c] = b.getAttribute("data-rc").split(",").map(Number);
+        grid[r][c] = (grid[r][c] % 4) + 1;
+        drawS();
+      });
+      document.getElementById("su-chk").onclick = () => {
+        const ok = JSON.stringify(grid) === JSON.stringify(sol);
+        if (ok) { msg = "🎉 ¡SUDOKU RESUELTO CORRECTAMENTE! (+30 XP)"; if (ganarXP) ganarXP(30, "🔢 Sudoku Lógico"); }
+        else { msg = "❌ Hay algún número repetido en fila, columna o bloque. Revisa e intenta de nuevo."; }
+        drawS();
+      };
+    }
+    drawS();
+  }
+
+  function renderMecanografiaTech(stage, ganarXP) {
+    const FRASES = [
+      "La seguridad informatica protege confidencialidad integridad y disponibilidad.",
+      "En zona escolar de Costa Rica la velocidad maxima permitida es 25 km por hora.",
+      "Todo documento institucional puede verificarse mediante codigo QR SHA 256.",
+      "Active learning and daily practice build lasting habits for university admission.",
+      "En contabilidad la ecuacion fundamental establece que activo es igual a pasivo mas patrimonio."
+    ];
+    let frase = FRASES[Math.floor(Math.random() * FRASES.length)];
+    let t0 = 0, done = false, resTxt = "Empieza a escribir la frase exacta para medir tus palabras por minuto (WPM).";
+
+    function drawT() {
+      stage.innerHTML = `
+        <div style="max-width:640px;margin:0 auto;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <b style="color:#34d399;">⌨️ Mecanografía Tech (Velocidad WPM)</b>
+            <button id="tp-new" style="background:#1d4ed8;color:#fff;border:none;padding:6px 10px;border-radius:7px;font-size:11.5px;cursor:pointer;">🔄 Otra Frase</button>
+          </div>
+          <div style="background:#070d19;border:1px solid #38bdf8;border-radius:10px;padding:14px;font-family:monospace;font-size:15px;color:#e0f2fe;line-height:1.5;margin-bottom:10px;user-select:none;">${frase}</div>
+          <input id="tp-in" type="text" autocomplete="off" ${done?"disabled":""} placeholder="Escribe la frase aquí sin copiar ni pegar..." style="width:100%;background:#0b1322;border:2px solid #334155;color:#fff;padding:12px;border-radius:9px;font-size:14px;font-family:monospace;margin-bottom:10px;"/>
+          <div id="tp-res" style="font-size:13px;color:#fbbf24;font-weight:700;">${resTxt}</div>
+        </div>
+      `;
+      document.getElementById("tp-new").onclick = () => { frase = FRASES[Math.floor(Math.random() * FRASES.length)]; t0 = 0; done = false; resTxt = "Escribe la nueva frase para medir tu velocidad."; drawT(); };
+      const inp = document.getElementById("tp-in");
+      if (inp) {
+        inp.focus();
+        inp.oninput = () => {
+          if (!t0) t0 = Date.now();
+          const val = inp.value;
+          const okPref = frase.startsWith(val);
+          inp.style.borderColor = okPref ? "#10b981" : "#ef4444";
+          if (val === frase) {
+            done = true;
+            const secs = Math.max(1, (Date.now() - t0) / 1000);
+            const wpm = Math.round((frase.split(" ").length / secs) * 60);
+            resTxt = `🎉 ¡Completado en ${secs.toFixed(1)}s! Velocidad: ${wpm} WPM (+25 XP)`;
+            if (ganarXP) ganarXP(25, "⌨️ Mecanografía Tech");
+            drawT();
+          }
+        };
+      }
+    }
+    drawT();
+  }
   // Envolver BDS_RENDER_SALA_JUEGOS para sumar los 2 juegos virales (total 10 juegos)
   window.BDS_RENDER_SALA_JUEGOS = function (shell, ganarXP) {
     ORIG_RENDER(shell, ganarXP);
@@ -197,15 +286,14 @@
           shell.querySelectorAll(".gm-tab").forEach(x => { x.style.background = "#131f33"; x.style.borderColor = "#334155"; });
           b.style.background = "#1d4ed8"; b.style.borderColor = "#38bdf8";
           const stage = document.getElementById("gm-stage");
-          if (id === "adivina") renderAdivinaQuien(stage, ganarXP);
-          else renderImpostor(stage, ganarXP);
+          if (id === "adivina") renderAdivinaQuien(stage, ganarXP); else if (id === "impostor") renderImpostor(stage, ganarXP); else if (id === "sudoku") renderSudokuEdu(stage, ganarXP); else renderMecanografiaTech(stage, ganarXP);
         };
         return b;
       };
       bar.appendChild(mk("adivina", "🕵️ Adivina Quién"));
-      bar.appendChild(mk("impostor", "🚀 Impostor (Among Us)"));
+      bar.appendChild(mk("impostor", "🚀 Impostor")); bar.appendChild(mk("sudoku", "🔢 Sudoku")); bar.appendChild(mk("mecanografia", "⌨️ Mecanografía"));
       const h2 = shell.querySelector("h2");
-      if (h2 && h2.innerText.includes("8 Juegos")) h2.innerText = "🎮 Sala de 10 Juegos Interactivos Más Jugados";
+      if (h2 && h2.innerText.includes("8 Juegos")) h2.innerText = "🎮 🎮 Juegos Educativos (12 Modos)";
     };
     injectButtons();
     const obs = new MutationObserver(() => injectButtons());

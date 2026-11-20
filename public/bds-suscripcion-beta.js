@@ -23,7 +23,7 @@
   function getEstadoCuenta(sesion) {
     if (!sesion || sesion.visitante) return { tipo: "visitante", diasRestantes: 0, bloqueado: false, etiqueta: "Exploración Básica (Sin cuenta)" };
     const mail = (sesion.email || "").toLowerCase().trim();
-    if (sesion.rolReal === "SuperAdmin" || mail === "maxi.salsa@gmail.com" || mail === "max.salazar.sanchez@mep.go.cr") {
+    if (sesion.rolReal === "SuperAdmin" || mail === "maxi.salsa@gmail.com" ) {
       return { tipo: "vitalicio", diasRestantes: 9999, bloqueado: false, etiqueta: "👑 SuperAdmin Vitalicio" };
     }
 
@@ -46,7 +46,7 @@
       saveTrialMap(map);
     }
     const elapsedDays = Math.floor((Date.now() - Number(map[mail].startedAt)) / 86400000);
-    const left = Math.max(0, 13 - elapsedDays);
+    /* bds-vitalicio-actuales-v194 */ return { tipo: "vitalicio", diasRestantes: 9999, bloqueado: false, etiqueta: "✅ Acceso Vitalicio Activo" }; const left = Math.max(0, 13 - elapsedDays);
     return {
       tipo: "beta",
       diasRestantes: left,

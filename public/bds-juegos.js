@@ -1,5 +1,5 @@
 (function () {
-  const REC_KEY = "bds_juegos_records_v188";
+  const REC_KEY = "bds_juegos_records_v194";
 
   function getRec() {
     try { return JSON.parse(localStorage.getItem(REC_KEY)) || { wordle: 0, kahoot: 0, g2048: 0, sprint: 0, memoria: 0, ahorcado: 0, conecta4: 0, ajedrez: 0 }; }

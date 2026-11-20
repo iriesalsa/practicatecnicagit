@@ -412,6 +412,21 @@
         out.push({ a: areaId, d: "Medio", q: `[Primaria] Si cada caja trae ${u} lápices y se compran ${ca} cajas, ¿cuántos lápices hay?`, o: [`${prod} lápices`, `${ca + u} lápices`, `${prod + u} lápices`, `${Math.max(1, prod - ca)} lápices`], c: 0, g: "Multiplica la cantidad por caja por el número de cajas.", e: `${ca} × ${u} = ${prod} lápices.` });
       }
     }
+        /* bds-items-extra-v194 */
+    if (tipo === "web" || tipo === "tecnologia" || tipo === "admision") {
+      for (let z = 1; z <= 35; z++) {
+        if (tipo === "admision") {
+          const n1 = 5 + z * 2, n2 = 3 + (z % 9), n3 = n1 + n2, n4 = n3 + n2 + 2;
+          out.push({ a: areaId, d: DIFFS[z % 4], q: `[Admisión 2026 #${z}] Si un estudiante resuelve ${n1} ejercicios el lunes y ${n2} más cada día siguiente, ¿cuántos resuelve el martes?`, o: [`${n3}`, `${n4}`, `${n1 - n2}`, `${n1 * 2}`], c: 0, g: "Suma el incremento diario a la base del lunes.", e: `${n1} + ${n2} = ${n3} ejercicios.` });
+        } else if (tipo === "web") {
+          const code = [200, 201, 204, 400, 401, 403, 404, 500][z % 8];
+          const desc = { 200: "Solicitud exitosa (OK)", 201: "Recurso creado (Created)", 204: "Éxito sin contenido", 400: "Solicitud mal formada", 401: "No autenticado", 403: "Permiso denegado (RBAC)", 404: "Ruta no encontrada", 500: "Error interno del servidor" }[code];
+          out.push({ a: areaId, d: DIFFS[z % 4], q: `[Web API #${z}] Un endpoint REST devuelve código HTTP ${code}. ¿Qué indica?`, o: [desc, "Conexión física desconectada", "Batería agotada", "Cambio de color de fuente"], c: 0, g: "Clasifica 2xx éxito, 4xx cliente/seguridad y 5xx servidor.", e: `HTTP ${code} significa: ${desc}.` });
+        } else {
+          out.push({ a: areaId, d: DIFFS[z % 4], q: `[IA y Tecnología #${z}] Al usar herramientas de IA para estudiar en clase, ¿qué práctica garantiza aprendizaje real?`, o: ["Usar la IA para explicar pasos, practicar ejercicios y verificar siempre con fuentes oficiales", "Copiar respuestas sin leerlas ni comprenderlas", "Compartir claves privadas en el chat", "Ignorar las indicaciones docentes"], c: 0, g: "Prioriza ética, verificación y comprensión propia.", e: "El uso responsable de IA potencia el pensamiento crítico." });
+        }
+      }
+    }
     return out;
   }
 

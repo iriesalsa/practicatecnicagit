@@ -4,6 +4,7 @@
   const ACCESS_KEY = "bds_access_logs_v193";
 
   const ROLES_PRINCIPALES = [
+    "Admin",
     "Estudiante",
     "Docente MEP",
     "Director(a)",
@@ -30,10 +31,31 @@
     { id: "ValidadorQR", lbl: "🪪 QR Portón", desc: "Escáner verificador de carnés QR SHA-256 institucionales" }
   ];
 
+  function ensureAdmin(arr, id, nom, mail) {
+    const first = nom.split(" ")[0].toLowerCase();
+    if (!arr.some(u => u.id === id || ((u.nombre || "").toLowerCase().includes(first) && u.rol === "Admin"))) {
+      arr.splice(1, 0, {
+        id, nombre: nom, email: mail, rol: "Admin",
+        extraRoles: ["Comedor", "Cooperativa", "Permisos", "ValidadorQR"],
+        planilla: "Equipo Admin BDS Devs", inst: "CTP Mercedes Norte",
+        estado: "Activo", plan: "Admin Vitalicio", vence: "Permanente", intentos: 0
+      });
+    }
+  }
+
   function loadUsers() {
-    try { const d = JSON.parse(localStorage.getItem(USERS_KEY)); if (Array.isArray(d) && d.length) return d; } catch {}
+    try {
+      const d = JSON.parse(localStorage.getItem(USERS_KEY));
+      if (Array.isArray(d) && d.length) {
+        ensureAdmin(d, "USR-ADM-DAN", "Daniel (Admin Revisión)", "daniel@bdsdevs.com");
+        ensureAdmin(d, "USR-ADM-AAR", "Aarón (Admin Revisión)", "aaron@bdsdevs.com");
+        return d;
+      }
+    } catch {}
     const seed = [
       { id: "USR-001", nombre: "Ing. Max Salazar Sánchez", email: "maxi.salsa@gmail.com", rol: "SuperAdmin", extraRoles: ["Comedor","Cooperativa","Juegos","Permisos","ValidadorQR"], planilla: "Propietario", inst: "CTP Mercedes Norte", estado: "Activo", plan: "Vitalicio Propietario", vence: "Permanente", intentos: 0 },
+      { id: "USR-ADM-DAN", nombre: "Daniel (Admin Revisión)", email: "daniel@bdsdevs.com", rol: "Admin", extraRoles: ["Comedor","Cooperativa","Permisos","ValidadorQR"], planilla: "Equipo Admin BDS Devs", inst: "CTP Mercedes Norte", estado: "Activo", plan: "Admin Vitalicio", vence: "Permanente", intentos: 0 },
+      { id: "USR-ADM-AAR", nombre: "Aarón (Admin Revisión)", email: "aaron@bdsdevs.com", rol: "Admin", extraRoles: ["Comedor","Cooperativa","Permisos","ValidadorQR"], planilla: "Equipo Admin BDS Devs", inst: "CTP Mercedes Norte", estado: "Activo", plan: "Admin Vitalicio", vence: "Permanente", intentos: 0 },
       { id: "USR-002", nombre: "Directora Laura Ramón Elizondo", email: "laura.ramon@mep.go.cr", rol: "Director(a)", extraRoles: ["Comedor","Cooperativa"], planilla: "MEP", inst: "CTP Mercedes Norte", estado: "Activo", plan: "Vitalicio Cortesía", vence: "Permanente", intentos: 0 },
       { id: "USR-003", nombre: "Encargada Comedor (Junta Administrativa)", email: "comedor.junta@gmail.com", rol: "Encargada Comedor / Junta", extraRoles: ["Comedor","Juegos"], planilla: "Junta Administrativa (No MEP)", inst: "CTP Mercedes Norte", estado: "Activo", plan: "Vitalicio Cortesía", vence: "Permanente", intentos: 0 },
       { id: "USR-004", nombre: "Prof. Carlos Quesada Mora", email: "carlos.quesada@mep.go.cr", rol: "Docente MEP", extraRoles: ["Cooperativa"], planilla: "MEP", inst: "CTP Mercedes Norte", estado: "Activo", plan: "Vitalicio Cortesía", vence: "Permanente", intentos: 0 },
@@ -91,8 +113,8 @@
           planilla: sesion.email.endsWith("@mep.go.cr") ? "MEP" : (sesion.email.endsWith("@est.mep.go.cr") ? "Estudiante" : "Externo / Junta"),
           inst: (window.BDS_BRAND ? window.BDS_BRAND.get().institucionCorta : "CTP Mercedes Norte"),
           estado: "Activo",
-          plan: "Vitalicio Cortesía",
-          vence: "Permanente",
+          plan: "Beta 13 días",
+          vence: new Date(Date.now() + 13 * 86400000).toISOString().slice(0, 10),
           intentos: 0
         });
         saveUsers(users);
@@ -121,7 +143,7 @@
     const old = document.getElementById("bds-tz-qr-modal"); if (old) old.remove();
     (async () => {
       const firma = sha256Hex ? (await sha256Hex(`PT-USR|${u.id}|${u.email}|${u.rol}|${(u.extraRoles || []).join(",")}`)).slice(0, 20) : "SHA256VERIFICADO";
-      const qrPayload = `PT-QR|v206|${u.email}|${u.rol}|EX:${(u.extraRoles || []).join("+")}|${firma}`;
+      const qrPayload = `PT-QR|v212|${u.email}|${u.rol}|EX:${(u.extraRoles || []).join("+")}|${firma}`;
       const m = document.createElement("div");
       m.id = "bds-tz-qr-modal";
       m.style.cssText = "position:fixed;inset:0;background:rgba(2,6,23,0.9);z-index:299500;display:flex;align-items:center;justify-content:center;padding:16px;";
@@ -147,9 +169,9 @@
 
   function renderPanel(shell, ctx) {
     const { sesion, sha256Hex, generarQRSVG } = ctx || {};
-    const autorizado = sesion && (sesion.rol === "SuperAdmin" || sesion.rolReal === "SuperAdmin");
+    const autorizado = sesion && (sesion.rol === "SuperAdmin" || sesion.rolReal === "SuperAdmin" || sesion.rol === "Admin");
     if (!autorizado) {
-      shell.innerHTML = `<div class="bds-card" style="text-align:center;padding:30px;border-color:#dc2626;"><h3 style="color:#f87171;margin:0;">🚫 Acceso restringido a SuperAdmin</h3></div>`;
+      shell.innerHTML = `<div class="bds-card" style="text-align:center;padding:30px;border-color:#dc2626;"><h3 style="color:#f87171;margin:0;">🚫 Acceso restringido a SuperAdmin / Admin</h3></div>`;
       return;
     }
     let sub = "usuarios", filtro = "TODOS", busca = "", qrVerifMsg = "";
@@ -169,8 +191,8 @@
         <div class="bds-card">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid #1e293b;padding-bottom:11px;margin-bottom:12px;">
             <div>
-              <span style="background:#b45309;color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:99px;">SUPERTRAZABILIDAD RBAC • 17 ROLES + 5 ROLES EXTRA • QR SHA-256</span>
-              <h2 style="margin:4px 0 0;font-size:17px;color:#fff;">🛡️ Trazabilidad, Control de Cuentas, Roles Extra y Bitácora</h2>
+              <span style="background:#b45309;color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:99px;">SUPERTRAZABILIDAD RBAC • 18 ROLES + 5 ROLES EXTRA • QR SHA-256</span>
+              <h2 style="margin:4px 0 0;font-size:17px;color:#fff;">🛡️ Trazabilidad, Admins (Daniel/Aarón), Roles Extra y Bitácora</h2>
             </div>
             <div style="display:flex;gap:5px;flex-wrap:wrap;">
               <button data-st="usuarios" class="tz-st" style="background:${sub === 'usuarios' ? '#1d4ed8' : '#131f33'};color:#fff;border:1px solid #334155;padding:6px 10px;border-radius:7px;font-size:11.5px;font-weight:700;cursor:pointer;">👥 Usuarios (${users.length})</button>
@@ -192,7 +214,7 @@
                 ${ROLES_PRINCIPALES.map(r => `<option value="${r}">${r}</option>`).join("")}
               </select>
               <select id="tzn-pln" style="background:#0b1322;border:1px solid #334155;color:#fff;padding:8px;border-radius:7px;font-size:12px;">
-                <option>MEP</option><option>Junta Administrativa (No MEP)</option><option>Estudiante</option><option>Particular / Familia</option>
+                <option>MEP</option><option>Junta Administrativa (No MEP)</option><option>Estudiante</option><option>Equipo Admin BDS Devs</option><option>Particular / Familia</option>
               </select>
               <button type="submit" style="background:#059669;color:#fff;border:none;padding:8px 12px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">+ Crear / Autorizar Cuenta</button>
             </form>
@@ -241,6 +263,7 @@
                     <td style="padding:7px;border-bottom:1px solid #1e293b;"><b>${u.plan || "Vitalicio"}</b><br/><span style="font-size:10px;color:#94a3b8;">Vence: ${u.vence || "Permanente"}</span></td>
                     <td style="padding:7px;border-bottom:1px solid #1e293b;text-align:center;">
                       <div style="display:flex;gap:4px;justify-content:center;flex-wrap:wrap;">
+                        ${!prop ? `<button data-act="editmail" data-uid="${u.id}" class="tz-btn" title="Editar nombre o correo" style="background:#334155;color:#fff;border:none;padding:5px 7px;border-radius:5px;font-size:10.5px;cursor:pointer;">✏️</button>` : ""}
                         <button data-act="qr" data-uid="${u.id}" class="tz-btn" title="Ver Carné QR SHA-256" style="background:#0f766e;color:#fff;border:none;padding:5px 7px;border-radius:5px;font-size:10.5px;cursor:pointer;">🪪 QR</button>
                         <button data-act="motivar" data-uid="${u.id}" class="tz-btn" title="Enviar mensaje motivacional pracTICA" style="background:#7c3aed;color:#fff;border:none;padding:5px 7px;border-radius:5px;font-size:10.5px;cursor:pointer;">🌟</button>
                         ${prop ? `<span style="color:#6ee7b7;font-size:10.5px;align-self:center;">Propietario</span>` : `
@@ -324,7 +347,7 @@
           arr.unshift({ id: "USR-" + String(Date.now()).slice(-4), nombre: nom, email: mail, rol, extraRoles: extraDef, planilla: pln, inst: "CTP Mercedes Norte", estado: "Activo", plan: "Vitalicio Cortesía", vence: "Permanente", intentos: 0 });
         }
         saveUsers(arr);
-        await logEvento(sesion.nombre, mail, `ALTA/UPDATE (${rol} • ${pln})`, "Gestión SuperAdmin", sha256Hex);
+        await logEvento(sesion.nombre, mail, `ALTA/UPDATE (${rol} • ${pln})`, "Gestión Admin", sha256Hex);
         draw();
       };
 
@@ -340,7 +363,7 @@
         const uid = bx.getAttribute("data-uid"), er = bx.getAttribute("data-exr");
         toggleExtraRole(uid, er);
         const u = loadUsers().find(x => x.id === uid);
-        if (u) await logEvento(sesion.nombre, u.email, `ROL EXTRA (${er})`, "Permiso adicional SuperAdmin", sha256Hex);
+        if (u) await logEvento(sesion.nombre, u.email, `ROL EXTRA (${er})`, "Permiso adicional", sha256Hex);
         draw();
       });
 
@@ -348,6 +371,16 @@
         const arr = loadUsers(), u = arr.find(x => x.id === b.getAttribute("data-uid"));
         if (!u) return;
         const act = b.getAttribute("data-act");
+        if (act === "editmail") {
+          const nm = prompt("Nombre completo:", u.nombre);
+          const em = prompt("Correo real (@gmail.com o @mep.go.cr):", u.email);
+          if (nm && em) {
+            u.nombre = nm.trim(); u.email = em.trim().toLowerCase(); saveUsers(arr);
+            await logEvento(sesion.nombre, u.email, "EDITAR CORREO/NOMBRE", "Actualización Admin", sha256Hex);
+            draw();
+          }
+          return;
+        }
         if (act === "qr") { abrirModalQRUsuario(u, generarQRSVG, sha256Hex); return; }
         if (act === "motivar") {
           const msg = prompt(`Mensaje motivacional pracTICA para ${u.nombre}:`, "¡Excelente trabajo en pracTICA! Sigue avanzando hoy hacia tu meta.");
@@ -363,13 +396,13 @@
           u.estado = "Cortesía";
           u.plan = d.toUpperCase().includes("VIT") ? "Cortesía Vitalicia" : `Cortesía ${parseInt(d, 10) || 30} días`;
           u.vence = d.toUpperCase().includes("VIT") ? "Permanente" : new Date(Date.now() + (parseInt(d, 10) || 30) * 86400000).toISOString().slice(0, 10);
-          await logEvento(sesion.nombre, u.email, u.plan, "Cortesía SuperAdmin", sha256Hex);
+          await logEvento(sesion.nombre, u.email, u.plan, "Cortesía Admin", sha256Hex);
         } else if (act === "activar" || act === "desbloquear") {
           u.estado = "Activo"; u.intentos = 0;
           await logEvento(sesion.nombre, u.email, act.toUpperCase(), "Habilitado", sha256Hex);
         } else if (act === "desactivar") {
           u.estado = "Desactivado";
-          await logEvento(sesion.nombre, u.email, "DESACTIVAR", "Desactivado por SuperAdmin", sha256Hex);
+          await logEvento(sesion.nombre, u.email, "DESACTIVAR", "Desactivado por Admin", sha256Hex);
         } else if (act === "bloquear") {
           u.estado = "Bloqueado";
           await logEvento(sesion.nombre, u.email, "BLOQUEAR", "Bloqueo de seguridad", sha256Hex);

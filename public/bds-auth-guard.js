@@ -41,8 +41,8 @@ window.addEventListener("error", function (ev) {
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v211.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v211.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v212.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v212.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -63,6 +63,7 @@ window.addEventListener("error", function (ev) {
     { rol: "Asesor(a) Regional / Nacional", ic: "📘", desc: "Asesoría pedagógica (solo lectura): seguimiento REA, Open Docs, biblioteca, horarios y reportes." },
     { rol: "Viceministro(a) MEP", ic: "🏛️", desc: "Supervisión viceministerial (solo lectura): indicadores, reportes institucionales, comedor y agenda." },
     { rol: "Ministro(a) MEP", ic: "🇨🇷", desc: "Supervisión ministerial nacional (solo lectura): panorama institucional, reportes y trazabilidad general." },
+        { rol: "Admin", ic: "🛡️", desc: "Co-Administrador de revisión (Daniel / Aarón): trazabilidad, instituciones, llaves, asignación y auditoría." },
     { rol: "SuperAdmin", ic: "👑", desc: "Control soberano total: trazabilidad y bitácora de accesos, instituciones CRUD, cortesías y auditoría." }
   ];
 
@@ -72,6 +73,9 @@ window.addEventListener("error", function (ev) {
     trazabilidad: "🛡️ Trazabilidad",
     instituciones: "🏛️ Instituciones",
     horarios: "📅 Horarios",
+    llaves_aulas: "🔑 Llaves & Aulas",
+    idiomas_lab: "🗣️ Idiomas (4 Skills)",
+    asignacion_acad: "🧩 Asignación Grupos",
     permisos: "📝 Gestionar Permisos",
     justificaciones: "🎓 Gestionar Justificaciones",
     /* bds-odin2-v202 */ notas_rea: "📊 Notas MEP",
@@ -110,6 +114,12 @@ window.addEventListener("error", function (ev) {
       };
     }
     const MAP = {
+            "Admin": {
+        tabs: ["inicio","trazabilidad","instituciones","llaves_aulas","asignacion_acad","idiomas_lab","horarios","permisos","justificaciones","orientacion_reac","conducta_sea","porton_seguridad","conserjeria_mant","cooperativa","comedor","notas_rea","practica","simulacro","admision","simulador_mopt","antologias","biblioteca","juegos","carnet_qr"],
+        chats: true, identidad: true, admisionHome: true, mallaHome: true,
+        quick: ["trazabilidad","instituciones","llaves_aulas","asignacion_acad","idiomas_lab","horarios","permisos","comedor"],
+        cards: ["practica","simulacro","biblioteca","juegos"]
+      },
       "SuperAdmin": {
         tabs: ["inicio","seguimiento","trazabilidad","instituciones","horarios","permisos","justificaciones","notas_rea","planeamiento_ia","comedor","agenda","reportes","practica","simulacro","admision","simulador_mopt","opendocs","biblioteca","juegos","carnet_qr"],
         chats: true, identidad: true, admisionHome: true, mallaHome: true,
@@ -214,7 +224,7 @@ window.addEventListener("error", function (ev) {
       }
     };
     const cfg = MAP[rol] || MAP["Estudiante"];
-    const ex = (sesionActiva && Array.isArray(sesionActiva.extraRoles)) ? sesionActiva.extraRoles : []; const outTabs = cfg.tabs.slice(); if (!esVisitante && rol !== "Particular (MOPT / Admisión)") { if (!outTabs.includes("cooperativa")) outTabs.splice(2, 0, "cooperativa"); if (!outTabs.includes("practica_guia")) outTabs.splice(2, 0, "practica_guia"); /* bds-extra-roles-rbac-v200 */ if (ex.includes("Comedor") && !outTabs.includes("comedor")) outTabs.splice(2, 0, "comedor"); if (ex.includes("Cooperativa") && !outTabs.includes("cooperativa")) outTabs.splice(2, 0, "cooperativa"); if (ex.includes("Juegos") && !outTabs.includes("juegos")) outTabs.push("juegos"); if (ex.includes("Permisos")) { if (!outTabs.includes("permisos")) outTabs.push("permisos"); if (!outTabs.includes("justificaciones")) outTabs.push("justificaciones"); } if (ex.includes("ValidadorQR") && !outTabs.includes("carnet_qr")) outTabs.push("carnet_qr"); } if (rol === "Particular (MOPT / Admisión)" && !outTabs.includes("practica_guia")) outTabs.splice(1, 0, "practica_guia"); if (!esVisitante && rol !== "Particular (MOPT / Admisión)" && !outTabs.includes("conducta_sea")) outTabs.splice(2, 0, "conducta_sea"); if (!esVisitante && ["SuperAdmin","Director(a)","Subdirector(a)","Asistente de Dirección","Orientador(a)","Docente MEP","Padre/Madre"].includes(rol) && !outTabs.includes("orientacion_reac")) outTabs.splice(2, 0, "orientacion_reac"); if (!esVisitante && ["SuperAdmin","Director(a)","Subdirector(a)","Asistente de Dirección","Auxiliar Administrativo"].includes(rol)) { if (!outTabs.includes("porton_seguridad")) outTabs.push("porton_seguridad"); if (!outTabs.includes("conserjeria_mant")) outTabs.push("conserjeria_mant"); } if (!esVisitante && !outTabs.includes("antologias")) outTabs.push("antologias"); cfg.tabs = Array.from(new Set(outTabs)).filter(k => Boolean(TAB_META[k]));
+    const ex = (sesionActiva && Array.isArray(sesionActiva.extraRoles)) ? sesionActiva.extraRoles : []; const outTabs = cfg.tabs.slice(); if (!esVisitante && rol !== "Particular (MOPT / Admisión)") { if (!outTabs.includes("cooperativa")) outTabs.splice(2, 0, "cooperativa"); if (!outTabs.includes("practica_guia")) outTabs.splice(2, 0, "practica_guia"); /* bds-extra-roles-rbac-v200 */ if (ex.includes("Comedor") && !outTabs.includes("comedor")) outTabs.splice(2, 0, "comedor"); if (ex.includes("Cooperativa") && !outTabs.includes("cooperativa")) outTabs.splice(2, 0, "cooperativa"); if (ex.includes("Juegos") && !outTabs.includes("juegos")) outTabs.push("juegos"); if (ex.includes("Permisos")) { if (!outTabs.includes("permisos")) outTabs.push("permisos"); if (!outTabs.includes("justificaciones")) outTabs.push("justificaciones"); } if (ex.includes("ValidadorQR") && !outTabs.includes("carnet_qr")) outTabs.push("carnet_qr"); } if (rol === "Particular (MOPT / Admisión)" && !outTabs.includes("practica_guia")) outTabs.splice(1, 0, "practica_guia"); if (!esVisitante && rol !== "Particular (MOPT / Admisión)" && !outTabs.includes("conducta_sea")) outTabs.splice(2, 0, "conducta_sea"); if (!esVisitante && ["SuperAdmin","Director(a)","Subdirector(a)","Asistente de Dirección","Orientador(a)","Docente MEP","Padre/Madre"].includes(rol) && !outTabs.includes("orientacion_reac")) outTabs.splice(2, 0, "orientacion_reac"); if (!esVisitante && ["SuperAdmin","Director(a)","Subdirector(a)","Asistente de Dirección","Auxiliar Administrativo"].includes(rol)) { if (!outTabs.includes("porton_seguridad")) outTabs.push("porton_seguridad"); if (!outTabs.includes("conserjeria_mant")) outTabs.push("conserjeria_mant"); } if (!esVisitante && !outTabs.includes("idiomas_lab")) outTabs.push("idiomas_lab"); if (!esVisitante && ["SuperAdmin","Admin","Director(a)","Subdirector(a)","Asistente de Dirección","Auxiliar Administrativo","Auxiliar de Vigilancia (Seguridad)","Conserje / Mantenimiento","Docente MEP","Orientador(a)"].includes(rol) && !outTabs.includes("llaves_aulas")) outTabs.splice(3, 0, "llaves_aulas"); if (!esVisitante && ["SuperAdmin","Admin","Director(a)","Subdirector(a)","Asistente de Dirección","Auxiliar Administrativo","Docente MEP"].includes(rol) && !outTabs.includes("asignacion_acad")) outTabs.splice(3, 0, "asignacion_acad"); if (!esVisitante && !outTabs.includes("antologias")) outTabs.push("antologias"); cfg.tabs = Array.from(new Set(outTabs)).filter(k => Boolean(TAB_META[k]));
     return cfg;
   }
 
@@ -224,9 +234,9 @@ window.addEventListener("error", function (ev) {
       institucionCorta: "CTP Mercedes Norte",
       regional: "Dirección Regional de Heredia",
       circuito: "Circuito 02",
-      escudo: "/escudo-ctpmn-oficial.jpeg?v=211",
-      mascota: "/buho-oficial.png?v=211",
-      logoMep: "/logo-mep-oficial.png?v=211"
+      escudo: "/escudo-ctpmn-oficial.jpeg?v=212",
+      mascota: "/buho-oficial.png?v=212",
+      logoMep: "/logo-mep-oficial.png?v=212"
     };
     if (!window.BDS_BRAND) return def;
     const b = window.BDS_BRAND.get();
@@ -862,6 +872,9 @@ window.addEventListener("error", function (ev) {
     const QUICK_DEF = {
       trazabilidad: `<button onclick="window.bdsGo('trazabilidad')" class="bds-quick-btn" style="background:#b45309;">🛡️ Trazabilidad</button>`,
       instituciones: `<button onclick="window.bdsGo('instituciones')" class="bds-quick-btn" style="background:#4f46e5;">🏛️ Instituciones</button>`,
+      llaves_aulas: `<button onclick="window.bdsGo('llaves_aulas')" class="bds-quick-btn" style="background:#b45309;">🔑 Llaves & Aula 13</button>`,
+      idiomas_lab: `<button onclick="window.bdsGo('idiomas_lab')" class="bds-quick-btn" style="background:#0284c7;">🗣️ Idiomas 4 Skills</button>`,
+      asignacion_acad: `<button onclick="window.bdsGo('asignacion_acad')" class="bds-quick-btn" style="background:#0f766e;">🧩 Asignación Grupos</button>`,
       horarios: `<button onclick="window.bdsGo('horarios')" class="bds-quick-btn" style="background:#0284c7;">📅 Horarios</button>`,
       permisos: `<button onclick="window.bdsGo('permisos')" class="bds-quick-btn" style="background:#059669;">📝 Gestionar Permisos</button>`,
       justificaciones: `<button onclick="window.bdsGo('justificaciones')" class="bds-quick-btn" style="background:#0d9488;">🎓 Gestionar Justificaciones</button>`,
@@ -1002,7 +1015,7 @@ window.addEventListener("error", function (ev) {
         <button id="bds-notif-btn" title="Notificaciones" style="position:relative;background:#131f33;color:#38bdf8;border:1px solid #334155;padding:6px 8px;border-radius:7px;font-size:13px;cursor:pointer;min-height:34px;">🔔<span id="bds-notif-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:#dc2626;color:#fff;font-size:9px;font-weight:900;min-width:15px;height:15px;border-radius:99px;align-items:center;justify-content:center;padding:0 3px;"></span></button>
         <span id="bds-xp-pill" class="hide-sm" data-no-i18n="true" style="background:#131f33;border:1px solid #fbbf24;color:#fbbf24;padding:5px 8px;border-radius:7px;font-size:11px;font-weight:800;">🔥 ${xp.racha}d • ⚡ ${xp.xp} XP</span>
         ${perms.chats ? `<button id="btn-ch" style="background:#064e3b;color:#6ee7b7;border:1px solid #10b981;padding:6px 10px;border-radius:7px;font-size:11.5px;font-weight:700;cursor:pointer;min-height:34px;">💬 Chats</button>` : ""}
-        <button id="btn-out" style="background:transparent;color:#fca5a5;border:1px solid #7f1d1d;padding:6px 9px;border-radius:7px;font-size:11.5px;font-weight:700;cursor:pointer;min-height:34px;">Salir</button>
+        <button id="btn-pay-top" title="Planes y Pagos (Tarjeta, PayPal, SINPE)" class="hide-sm" style="background:#059669;color:#fff;border:none;padding:6px 9px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;min-height:34px;">💳 Planes</button><button id="btn-out" style="background:transparent;color:#fca5a5;border:1px solid #7f1d1d;padding:6px 9px;border-radius:7px;font-size:11.5px;font-weight:700;cursor:pointer;min-height:34px;">Salir</button>
       </div>
     `;
 
@@ -1055,7 +1068,10 @@ window.addEventListener("error", function (ev) {
 
         if (destino === "trazabilidad" && window.BDS_TRAZABILIDAD) window.BDS_TRAZABILIDAD.renderPanel(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
         else if (destino === "instituciones" && window.BDS_RENDER_INSTITUCIONES_CRUD) window.BDS_RENDER_INSTITUCIONES_CRUD(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
-        else if (destino === "horarios" && window.BDS_RENDER_MATRICULA_HORARIOS) window.BDS_RENDER_MATRICULA_HORARIOS(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
+        else if (destino === "llaves_aulas" && window.BDS_RENDER_LLAVES_AULAS) window.BDS_RENDER_LLAVES_AULAS(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
+      else if (destino === "idiomas_lab" && window.BDS_RENDER_IDIOMAS_LAB) window.BDS_RENDER_IDIOMAS_LAB(shell, { sesion: sesionActiva, ganarXP });
+      else if (destino === "asignacion_acad" && window.BDS_RENDER_ASIGNACION_ACAD) window.BDS_RENDER_ASIGNACION_ACAD(shell, { sesion: sesionActiva });
+      else if (destino === "horarios" && window.BDS_RENDER_MATRICULA_HORARIOS) window.BDS_RENDER_MATRICULA_HORARIOS(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
         else if ((destino === "permisos" || destino === "justificaciones" || destino === "carnet_qr") && window.BDS_RENDER_PERMISOS_JUSTIF) window.BDS_RENDER_PERMISOS_JUSTIF(shell, destino === "carnet_qr" ? "qr" : destino, { sesion: sesionActiva, sha256Hex, generarQRSVG });
         else if (destino === "mis_notas" && window.BDS_RENDER_MIS_NOTAS_ESTUDIANTE) window.BDS_RENDER_MIS_NOTAS_ESTUDIANTE(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
       else if (destino === "familia" && window.BDS_RENDER_PORTAL_FAMILIA) window.BDS_RENDER_PORTAL_FAMILIA(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
@@ -1108,7 +1124,7 @@ window.addEventListener("error", function (ev) {
       if (bdsDeferredPrompt && !bdsIsAppInstalled()) ib.style.display = "inline-flex";
       ib.onclick = async () => { if (!bdsDeferredPrompt) return; bdsDeferredPrompt.prompt(); await bdsDeferredPrompt.userChoice; bdsDeferredPrompt = null; ib.style.display = "none"; };
     }
-    document.getElementById("btn-out").onclick = cerrarSesion;
+    document.getElementById("btn-out").onclick = cerrarSesion; if (document.getElementById("btn-pay-top")) document.getElementById("btn-pay-top").onclick = () => { if (window.BDS_SUSCRIPCION) window.BDS_SUSCRIPCION.openPlanesModal(sesionActiva, cerrarSesion); };
     window.bdsOpenChats = toggleChats; if (document.getElementById("btn-ch")) document.getElementById("btn-ch").onclick = () => window.bdsOpenChats();
 
     document.querySelectorAll("[data-v]").forEach(btn => { btn.onclick = () => window.bdsGo(btn.getAttribute("data-v")); });

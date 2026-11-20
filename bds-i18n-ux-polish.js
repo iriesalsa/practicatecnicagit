@@ -1,5 +1,5 @@
 (function () {
-  // Diccionario extendido 4 idiomas (ES -> EN / PT / FR) cubriendo TODOS los módulos hasta v203.0
+  const THEME_KEY = "bds_theme_mode_v212";
   const DICT_EXT = {
     "Inicio": { en: "Home", pt: "Início", fr: "Accueil" },
     "Trazabilidad": { en: "Traceability", pt: "Rastreabilidade", fr: "Traçabilité" },
@@ -9,18 +9,24 @@
     "Gestionar Justificaciones": { en: "Manage Excuses", pt: "Gerenciar Justificativas", fr: "Gérer les Justificatifs" },
     "Notas MEP": { en: "Grades", pt: "Notas", fr: "Notes" },
     "Mis Notas": { en: "My Grades", pt: "Minhas Notas", fr: "Mes Notes" },
-    "Conducta & SEA": { en: "Conduct & SEA", pt: "Conduta e SEA", fr: "Conduite & SEA" },
+    "Conducta REAC & SEA": { en: "Conduct & SEA", pt: "Conduta e SEA", fr: "Conduite & SEA" },
+    "Orientación REAC": { en: "Counseling", pt: "Orientação", fr: "Orientation" },
+    "Llaves & Aulas": { en: "Room Keys QR", pt: "Chaves e Salas", fr: "Clés des Salles" },
+    "Idiomas (4 Skills)": { en: "Language Lab", pt: "Lab. Idiomas", fr: "Lab. Langues" },
+    "Asignación Grupos": { en: "Assignments", pt: "Atribuições", fr: "Affectations" },
+    "Portón & Seguridad": { en: "Gate Security", pt: "Portaria QR", fr: "Sécurité Portail" },
+    "Conserjería": { en: "Maintenance", pt: "Manutenção", fr: "Entretien" },
+    "Antologías & Libros": { en: "Books & Anthologies", pt: "Livros e Antologias", fr: "Livres & Anthologies" },
     "Planeamiento IA": { en: "AI Lesson Plans", pt: "Planejamento IA", fr: "Plans de Cours IA" },
     "Cooperativa": { en: "School Co-op", pt: "Cooperativa", fr: "Coopérative" },
     "Práctica Guía": { en: "Práctica Guide", pt: "Guia Práctica", fr: "Guide Práctica" },
     "Comedor": { en: "Cafeteria", pt: "Refeitório", fr: "Cantine" },
     "Agenda": { en: "Calendar", pt: "Agenda", fr: "Agenda" },
     "Respaldos": { en: "Backups", pt: "Backups", fr: "Sauvegardes" },
-    "Seguimiento REA": { en: "Progress", pt: "Progresso", fr: "Suivi" },
+    "Seguimiento REAC": { en: "Progress", pt: "Progresso", fr: "Suivi" },
     "Práctica": { en: "Practice", pt: "Prática", fr: "Pratique" },
     "Simulacro": { en: "Mock Exam", pt: "Simulado", fr: "Examen Blanc" },
     "Admisión": { en: "Admission", pt: "Admissão", fr: "Admission" },
-    "Open Docs": { en: "Open Docs", pt: "Open Docs", fr: "Open Docs" },
     "Biblioteca": { en: "Library", pt: "Biblioteca", fr: "Bibliothèque" },
     "Juegos": { en: "Games", pt: "Jogos", fr: "Jeux" },
     "Hábitos": { en: "Habits", pt: "Hábitos", fr: "Habitudes" },
@@ -35,159 +41,184 @@
     "Libreta Digital": { en: "Digital Ledger", pt: "Caderneta Digital", fr: "Carnet Numérique" },
     "Reciclaje": { en: "Recycling", pt: "Reciclagem", fr: "Recyclage" },
     "Productos": { en: "Products", pt: "Produtos", fr: "Produits" },
-    "Matrícula & Docs QR": { en: "Enrollment & QR Docs", pt: "Matrícula e Docs QR", fr: "Inscription & Docs QR" },
-    "Conducta REA": { en: "Conduct", pt: "Conduta", fr: "Conduite" },
-    "Organización": { en: "Organization", pt: "Organização", fr: "Organisation" },
-    "Bienestar": { en: "Wellness", pt: "Bem-estar", fr: "Bien-être" },
-    "Finanzas": { en: "Finances", pt: "Finanças", fr: "Finances" },
-    "Motivación": { en: "Motivation", pt: "Motivação", fr: "Motivation" },
-    "Recordatorio": { en: "Reminder", pt: "Lembrete", fr: "Rappel" },
     "ACCESOS RÁPIDOS": { en: "QUICK ACCESS", pt: "ACESSO RÁPIDO", fr: "ACCÈS RAPIDES" },
     "Ingresar a la Plataforma": { en: "Sign In", pt: "Entrar na Plataforma", fr: "Se Connecter" },
-    "Continuar con Google": { en: "Continue with Google", pt: "Continuar com Google", fr: "Continuer avec Google" },
-    "Cerrar Sesión": { en: "Sign Out", pt: "Encerrar Sessão", fr: "Déconnexion" }
+    "Continuar con Google": { en: "Continue with Google", pt: "Continuar com Google", fr: "Continuer avec Google" }
   };
 
-  // Inyectar hoja de estilos UX/UI Light Mode de alto contraste + Accesibilidad DUA/WCAG
-  function injectPolishCSS() {
-    if (document.getElementById("bds-ux-polish-v203")) return;
-    const st = document.createElement("style");
-    st.id = "bds-ux-polish-v203";
-    st.innerHTML = `
-      /* Accesibilidad DUA + Interacciones fluidas */
-      button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible {
-        outline: 2px solid #38bdf8 !important; outline-offset: 2px !important;
+  function getTheme() {
+    const v = localStorage.getItem(THEME_KEY) || localStorage.getItem("bds_theme_v187") || "dark";
+    return v === "light" ? "light" : "dark";
+  }
+
+  function applyTheme(mode) {
+    const t = mode === "light" ? "light" : "dark";
+    localStorage.setItem(THEME_KEY, t);
+    localStorage.setItem("bds_theme_v187", t);
+    if (typeof document !== "undefined") {
+      if (document.documentElement) document.documentElement.setAttribute("data-theme", t);
+      if (document.body) {
+        document.body.classList.toggle("bds-light", t === "light");
+        document.body.classList.toggle("bds-dark", t === "dark");
       }
+      const bTop = document.getElementById("bds-theme-btn");
+      if (bTop) bTop.innerText = t === "light" ? "🌙" : "☀️";
+      const bLg = document.getElementById("lg-theme");
+      if (bLg) bLg.innerText = t === "light" ? "🌙 Oscuro" : "☀️ Claro";
+    }
+    return t;
+  }
+
+  function toggleTheme() {
+    return applyTheme(getTheme() === "light" ? "dark" : "light");
+  }
+
+  function injectLightDarkCSS() {
+    if (typeof document === "undefined" || document.getElementById("bds-ux-polish-v212")) return;
+    const st = document.createElement("style");
+    st.id = "bds-ux-polish-v212";
+    st.innerHTML = `
+      button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid #38bdf8 !important; outline-offset: 2px !important; }
       button { transition: transform .08s ease, filter .12s ease; }
       button:active { transform: scale(0.98); }
-      table { border-radius: 8px; overflow: hidden; }
 
-      /* Modo Claro Completo de Alto Contraste (WCAG AA) */
-      body.bds-light, html[data-theme="light"] body {
-        background: #f1f5f9 !important; color: #0f172a !important;
+      /* MODO CLARO DE ALTO CONTRASTE (OVERRIDE COMPLETO DE ESTILOS OSCUROS) */
+      html[data-theme="light"], html[data-theme="light"] body, body.bds-light {
+        background: #eef2f6 !important; color: #0f172a !important;
       }
-      body.bds-light #bds-header, html[data-theme="light"] #bds-header,
-      body.bds-light #bds-subnav, html[data-theme="light"] #bds-subnav,
-      body.bds-light #bds-dock, html[data-theme="light"] #bds-dock {
-        background: rgba(255,255,255,0.97) !important;
-        border-color: #cbd5e1 !important;
+      body.bds-light #bds-login-v193 {
+        background: radial-gradient(circle at 50% 0%, #dbeafe 0%, #f1f5f9 75%) !important;
+      }
+      body.bds-light #bds-header, body.bds-light #bds-subnav, body.bds-light #bds-dock {
+        background: rgba(255,255,255,0.98) !important; border-color: #cbd5e1 !important; color: #0f172a !important;
+      }
+      body.bds-light .bds-card {
+        background: #ffffff !important; border-color: #cbd5e1 !important; color: #0f172a !important;
+        box-shadow: 0 4px 18px rgba(15,23,42,0.08) !important;
+      }
+      body.bds-light .bds-nav-btn {
+        background: #f1f5f9 !important; border-color: #cbd5e1 !important; color: #0f172a !important;
+      }
+      body.bds-light .bds-nav-btn.active {
+        background: #1d4ed8 !important; border-color: #1d4ed8 !important; color: #ffffff !important;
+      }
+      body.bds-light #bds-shell h1, body.bds-light #bds-shell h2, body.bds-light #bds-shell h3, body.bds-light #bds-shell h4,
+      body.bds-light #bds-shell b, body.bds-light #bds-login-v193 h1, body.bds-light #bds-login-v193 h2, body.bds-light #bds-login-v193 p, body.bds-light #bds-login-v193 label {
         color: #0f172a !important;
       }
-      body.bds-light .bds-card, html[data-theme="light"] .bds-card {
-        background: #ffffff !important;
-        border-color: #cbd5e1 !important;
-        color: #0f172a !important;
-        box-shadow: 0 4px 16px rgba(15,23,42,0.06) !important;
+      body.bds-light #bds-shell div[style*="background:#070d19"],
+      body.bds-light #bds-shell div[style*="background:#0b1322"],
+      body.bds-light #bds-shell form[style*="background:#070d19"],
+      body.bds-light #bds-shell div[style*="linear-gradient"] {
+        background: #f8fafc !important; color: #0f172a !important; border-color: #cbd5e1 !important;
       }
-      body.bds-light .bds-nav-btn, html[data-theme="light"] .bds-nav-btn {
-        background: #f8fafc !important;
-        border-color: #cbd5e1 !important;
-        color: #0f172a !important;
+      body.bds-light #bds-shell td[style*="background:#0b1322"],
+      body.bds-light #bds-shell td[style*="background:#070d19"],
+      body.bds-light #bds-shell td[style*="background:#060c17"] {
+        background: #ffffff !important; color: #0f172a !important; border-color: #cbd5e1 !important;
       }
-      body.bds-light .bds-nav-btn.active, html[data-theme="light"] .bds-nav-btn.active {
-        background: #1d4ed8 !important;
-        border-color: #1d4ed8 !important;
+      body.bds-light #bds-shell tr[style*="background:#131f33"] {
+        background: #e2e8f0 !important; color: #0f172a !important;
+      }
+      body.bds-light input, body.bds-light select, body.bds-light textarea {
+        background: #ffffff !important; color: #0f172a !important; border-color: #94a3b8 !important;
+      }
+      body.bds-light #bds-shell [style*="color:#fff"], body.bds-light #bds-shell [style*="color:#cbd5e1"], body.bds-light #bds-shell [style*="color:#e2e8f0"] {
+        color: #1e293b !important;
+      }
+      body.bds-light #bds-shell button[style*="background:#1d4ed8"],
+      body.bds-light #bds-shell button[style*="background:#059669"],
+      body.bds-light #bds-shell button[style*="background:#0f766e"],
+      body.bds-light #bds-shell button[style*="background:#7c3aed"],
+      body.bds-light #bds-shell button[style*="background:#dc2626"],
+      body.bds-light #bds-shell button[style*="background:#b45309"],
+      body.bds-light #bds-shell button[style*="background:#0284c7"],
+      body.bds-light #bds-shell button[style*="background:#1e3a8a"],
+      body.bds-light #bds-shell button.bds-quick-btn {
         color: #ffffff !important;
       }
-      body.bds-light .bds-card h1, body.bds-light .bds-card h2, body.bds-light .bds-card h3, body.bds-light .bds-card h4,
-      html[data-theme="light"] .bds-card h1, html[data-theme="light"] .bds-card h2, html[data-theme="light"] .bds-card h3 {
+      body.bds-light #bds-header [style*="color:#fff"], body.bds-light #bds-header [style*="color:#94a3b8"] {
         color: #0f172a !important;
-      }
-      body.bds-light input, body.bds-light select, body.bds-light textarea,
-      html[data-theme="light"] input, html[data-theme="light"] select, html[data-theme="light"] textarea {
-        background: #ffffff !important;
-        color: #0f172a !important;
-        border-color: #94a3b8 !important;
-      }
-      body.bds-light table tr[style*="background:#131f33"], html[data-theme="light"] table tr[style*="background:#131f33"] {
-        background: #e2e8f0 !important;
-        color: #0f172a !important;
-      }
-      body.bds-light div[style*="background:#070d19"], body.bds-light div[style*="background:#0b1322"],
-      html[data-theme="light"] div[style*="background:#070d19"], html[data-theme="light"] div[style*="background:#0b1322"] {
-        background: #f8fafc !important;
-        color: #0f172a !important;
-        border-color: #cbd5e1 !important;
-      }
-      body.bds-light div[style*="color:#cbd5e1"], body.bds-light span[style*="color:#cbd5e1"],
-      html[data-theme="light"] div[style*="color:#cbd5e1"] {
-        color: #334155 !important;
       }
     `;
     document.head.appendChild(st);
   }
 
-  // Motor de traducción incremental sobre nodos de texto (respeta emojis, data-no-i18n y formularios)
   function translateTree(lang) {
-    if (!lang || lang === "es" || !document.body) return;
+    if (!lang || lang === "es" || typeof document === "undefined" || !document.body) return;
     const keys = Object.keys(DICT_EXT).sort((a, b) => b.length - a.length);
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
     let node;
     while ((node = walker.nextNode())) {
-      const parent = node.parentElement;
-      if (!parent || parent.closest("[data-no-i18n='true']") || ["SCRIPT","STYLE","INPUT","TEXTAREA","CODE"].includes(parent.tagName)) continue;
+      const p = node.parentElement;
+      if (!p || p.closest("[data-no-i18n='true']") || ["SCRIPT","STYLE","INPUT","TEXTAREA","CODE"].includes(p.tagName)) continue;
       let txt = node.nodeValue;
       if (!txt || txt.trim().length < 3) continue;
       let changed = false;
       for (const es of keys) {
         const tr = DICT_EXT[es][lang];
-        if (tr && txt.includes(es) && !txt.includes(tr)) {
-          txt = txt.replace(es, tr);
-          changed = true;
-        }
+        if (tr && txt.includes(es) && !txt.includes(tr)) { txt = txt.replace(es, tr); changed = true; }
       }
       if (changed) node.nodeValue = txt;
     }
   }
 
-  // Precargar voces del sistema para que TTS responda al instante en ES / EN / PT / FR
   function warmVoices() {
     try {
-      if ("speechSynthesis" in window) {
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
         window.speechSynthesis.getVoices();
         window.speechSynthesis.onvoiceschanged = () => { try { window.speechSynthesis.getVoices(); } catch {} };
       }
     } catch {}
   }
 
-  // Envolver BDS_UI.applyLang si existe para traducir también los módulos nuevos v198–v203
-  function enhanceUI() {
-    injectPolishCSS();
+  function installUnifiedUI() {
+    injectLightDarkCSS();
     warmVoices();
-    if (window.BDS_UI && !window.BDS_UI.__v203Wrapped) {
-      const origApply = window.BDS_UI.applyLang;
-      window.BDS_UI.applyLang = function (lang) {
-        if (origApply) origApply(lang);
-        setTimeout(() => translateTree(lang), 60);
-      };
-      window.BDS_UI.__v203Wrapped = true;
+    // Asegurar que window.BDS_UI SIEMPRE exista y use nuestro motor confiable de Claro/Oscuro
+    const prev = window.BDS_UI || {};
+    const origApplyLang = prev.applyLang;
+    window.BDS_UI = {
+      ...prev,
+      getTheme,
+      applyTheme,
+      toggleTheme,
+      getLang: prev.getLang || (() => localStorage.getItem("bds_lang_v187") || "es"),
+      applyLang: function (lg) {
+        localStorage.setItem("bds_lang_v187", lg);
+        if (origApplyLang) origApplyLang(lg);
+        setTimeout(() => translateTree(lg), 60);
+      }
+    };
+    applyTheme(getTheme());
+
+    if (typeof MutationObserver !== "undefined" && document.body) {
+      let deb = null;
+      new MutationObserver(() => {
+        const curT = getTheme();
+        if (document.body.classList.contains("bds-light") !== (curT === "light")) applyTheme(curT);
+        const lg = window.BDS_UI.getLang();
+        if (lg !== "es") { clearTimeout(deb); deb = setTimeout(() => translateTree(lg), 120); }
+        const motBtn = document.getElementById("pr-mot-next");
+        if (motBtn && !document.getElementById("pr-mot-tts")) {
+          const b = document.createElement("button");
+          b.type = "button"; b.id = "pr-mot-tts";
+          b.style.cssText = "background:#1e3a8a;color:#93c5fd;border:1px solid #38bdf8;padding:4px 8px;border-radius:6px;font-size:10.5px;font-weight:700;cursor:pointer;";
+          b.innerText = "🔊 Escuchar";
+          b.onclick = () => {
+            const card = document.querySelector("#bds-shell .bds-card");
+            const txt = card ? card.innerText.replace(/\s+/g, " ").slice(0, 320) : "Bienvenido a pracTICA";
+            if (window.BDS_NATIVE) window.BDS_NATIVE.speak(txt);
+          };
+          motBtn.parentElement.insertBefore(b, motBtn);
+        }
+      }).observe(document.body, { childList: true, subtree: true });
     }
-    let deb = null;
-    const obs = new MutationObserver(() => {
-      const lg = window.BDS_UI && window.BDS_UI.getLang ? window.BDS_UI.getLang() : "es";
-      if (lg !== "es") {
-        clearTimeout(deb);
-        deb = setTimeout(() => translateTree(lg), 120);
-      }
-      // Inyectar botón de audio 🔊 junto a "✨ Motivación" para escuchar el saludo pracTICA en voz alta
-      const motBtn = document.getElementById("pr-mot-next");
-      if (motBtn && !document.getElementById("pr-mot-tts")) {
-        const b = document.createElement("button");
-        b.type = "button"; b.id = "pr-mot-tts";
-        b.title = "Escuchar saludo y motivación en voz alta";
-        b.style.cssText = "background:#1e3a8a;color:#93c5fd;border:1px solid #38bdf8;padding:4px 8px;border-radius:6px;font-size:10.5px;font-weight:700;cursor:pointer;";
-        b.innerText = "🔊 Escuchar";
-        b.onclick = () => {
-          const card = document.querySelector("#bds-shell .bds-card");
-          const txt = card ? card.innerText.replace(/\s+/g, " ").slice(0, 320) : "Bienvenido a pracTICA";
-          if (window.BDS_NATIVE) window.BDS_NATIVE.speak(txt);
-        };
-        motBtn.parentElement.insertBefore(b, motBtn);
-      }
-    });
-    if (document.body) obs.observe(document.body, { childList: true, subtree: true });
   }
 
-  window.BDS_POLISH_V203 = { DICT_EXT, translateTree, warmVoices };
-  window.addEventListener("DOMContentLoaded", enhanceUI);
+  window.BDS_POLISH_V203 = { DICT_EXT, translateTree, warmVoices, getTheme, applyTheme, toggleTheme };
+  if (typeof window !== "undefined") {
+    installUnifiedUI();
+    if (typeof window.addEventListener === "function") window.addEventListener("DOMContentLoaded", installUnifiedUI);
+  }
 })();

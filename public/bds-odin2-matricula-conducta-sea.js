@@ -162,12 +162,12 @@
         <div class="bds-card">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:9px;border-bottom:1px solid #1e293b;padding-bottom:11px;margin-bottom:13px;">
             <div>
-              <span style="background:#0f766e;color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:99px;">ODÍN 2.0 • QR SHA-256 • VALIDACIÓN ENCARGADO LEGAL • CONDUCTA REACC • SEA</span>
-              <h2 style="margin:4px 0 0;font-size:17px;color:#fff;">🎓 Matrícula Digital, CONDUCTA REACC y Consolidado SEA</h2>
+              <span style="background:#0f766e;color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:99px;">ODÍN 2.0 • QR SHA-256 • VALIDACIÓN ENCARGADO LEGAL • CONDUCTA REACCCC • SEA</span>
+              <h2 style="margin:4px 0 0;font-size:17px;color:#fff;">🎓 Matrícula Digital, CONDUCTA REACCCC y Consolidado SEA</h2>
             </div>
             <div style="display:flex;gap:5px;flex-wrap:wrap;">
               <button data-ot="matricula" class="od2-tab" style="background:${tab==='matricula'?'#1d4ed8':'#131f33'};color:#fff;border:1px solid #334155;padding:7px 10px;border-radius:7px;font-size:11.5px;font-weight:700;cursor:pointer;">🎓 Matrícula & Docs QR</button>
-              <button data-ot="conducta" class="od2-tab" style="background:${tab==='conducta'?'#1d4ed8':'#131f33'};color:#fff;border:1px solid #334155;padding:7px 10px;border-radius:7px;font-size:11.5px;font-weight:700;cursor:pointer;">⚖️ CONDUCTA REACC</button>
+              <button data-ot="conducta" class="od2-tab" style="background:${tab==='conducta'?'#1d4ed8':'#131f33'};color:#fff;border:1px solid #334155;padding:7px 10px;border-radius:7px;font-size:11.5px;font-weight:700;cursor:pointer;">⚖️ CONDUCTA REACCCC</button>
               <button data-ot="sea" class="od2-tab" style="background:${tab==='sea'?'#1d4ed8':'#131f33'};color:#fff;border:1px solid #334155;padding:7px 10px;border-radius:7px;font-size:11.5px;font-weight:700;cursor:pointer;">📊 Notas SEA (${gCfg.tipoDocente})</button>
             </div>
           </div>
@@ -237,7 +237,7 @@
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,310px),1fr));gap:14px;align-items:start;">
               ${puedeConducta ? `
                 <form id="od-cnd-f" style="background:#070d19;border:1px solid #f59e0b;border-radius:12px;padding:13px;display:flex;flex-direction:column;gap:8px;">
-                  <h3 style="margin:0;font-size:14.5px;color:#fbbf24;">⚖️ Registrar Boleta de Conducta según REAC (Base 100 pts)</h3>
+                  <h3 style="margin:0;font-size:14.5px;color:#fbbf24;">⚖️ Registrar Boleta de Conducta según REACC (Base 100 pts)</h3>
                   <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
                     <select id="oc-est" required style="background:#0b1322;color:#fff;border:1px solid #334155;padding:8px;border-radius:7px;font-size:12px;">
                       ${roster.map(e => `<option value="${e.email}|${e.nombre}|${e.seccion}">${e.nombre} (${e.seccion})</option>`).join("")}
@@ -264,7 +264,7 @@
               ` : ""}
 
               <div style="background:#070d19;border:1px solid #1e293b;border-radius:12px;padding:13px;">
-                <h3 style="margin:0 0 10px;font-size:14.5px;color:#38bdf8;">📋 Expediente y Nota de CONDUCTA REACC (${condsVis.length} registros)</h3>
+                <h3 style="margin:0 0 10px;font-size:14.5px;color:#38bdf8;">📋 Expediente y Nota de CONDUCTA REACCCC (${condsVis.length} registros)</h3>
                 <div style="display:flex;flex-direction:column;gap:8px;max-height:440px;overflow-y:auto;">
                   ${condsVis.map(c => {
                     const stC = calcularNotaConductaREA(c.estudianteEmail, c.anio, c.periodo);
@@ -317,7 +317,7 @@
               </div>
               <div style="font-size:11px;color:#94a3b8;margin-top:8px;">
                 ${gCfg.tipoDocente === "Docente Guía"
-                  ? "🧭 <b>Modo Docente Guía:</b> Consolida promedio académico, <b>Nota de CONDUCTA REACC</b> y estado de <b>Matrícula Validada por Encargado Legal</b> de toda su sección."
+                  ? "🧭 <b>Modo Docente Guía:</b> Consolida promedio académico, <b>Nota de CONDUCTA REACCCC</b> y estado de <b>Matrícula Validada por Encargado Legal</b> de toda su sección."
                   : "📘 <b>Modo Docente de Asignatura:</b> Muestra el desglose oficial para carga en SEA (Cotidiano " + pesos.cotidiano + "%, Tareas " + pesos.tareas + "%, Pruebas " + pesos.pruebas + "%, Proyecto " + pesos.proyecto + "%, Asistencia " + pesos.asistencia + "%)."}
               </div>
             </div>
@@ -331,7 +331,7 @@
                   <th style="padding:7px;">Pru. (${pesos.pruebas}%)</th>
                   <th style="padding:7px;">Proy. (${pesos.proyecto}%)</th>
                   <th style="padding:7px;">Nota SEA</th>
-                  <th style="padding:7px;">CONDUCTA REACC</th>
+                  <th style="padding:7px;">CONDUCTA REACCCC</th>
                   <th style="padding:7px;">Matrícula Encargado</th>
                 </tr>
                 ${roster.filter(r =>
@@ -406,7 +406,7 @@
         });
       }
 
-      // Eventos CONDUCTA REACC
+      // Eventos CONDUCTA REACCCC
       if (tab === "conducta") {
         if (document.getElementById("oc-cat")) document.getElementById("oc-cat").onchange = (e) => {
           const cat = CATEGORIAS_REA.find(x => x.id === e.target.value);
@@ -426,7 +426,7 @@
           const hash = (await sha256Hex(`${id}|${em}|${cat.id}|${pts}|${Date.now()}`)).slice(0, 16);
           arr.unshift({ id, anio: gCfg.anio, periodo: per, fecha: new Date().toISOString().slice(0, 10), estudianteNombre: nom, estudianteEmail: em, seccion: sec, categoriaId: cat.id, categoriaNom: cat.nom, puntosRebajo: pts, descripcion: desc, reportadoPor: sesion.nombre, tipoDocente: tipoDoc, asignatura: asig, enteradoEncargado: false, fechaEnterado: "", hash });
           saveConducta(arr);
-          if (window.BDS_NATIVE) window.BDS_NATIVE.notify("⚖️ Boleta de CONDUCTA REACC", `${nom} (${cat.nom}${pts>0?` -${pts} pts`:""}).`);
+          if (window.BDS_NATIVE) window.BDS_NATIVE.notify("⚖️ Boleta de CONDUCTA REACCCC", `${nom} (${cat.nom}${pts>0?` -${pts} pts`:""}).`);
           draw();
         };
         shell.querySelectorAll(".oc-ent").forEach(b => b.onclick = async () => {
@@ -464,7 +464,7 @@
         };
         document.getElementById("sea-pdf").onclick = async () => {
           const h = (await sha256Hex(`SEA-ACTA|${gCfg.tipoDocente}|${gCfg.seccionGuia}|${Date.now()}`)).slice(0, 18);
-          imprimirPDFQR(`ACTA CONSOLIDADA SEA (${gCfg.tipoDocente.toUpperCase()})`, [["Función Docente", `${gCfg.tipoDocente} • ${sesion.nombre}`],["Sección / Asignatura", `${gCfg.seccionGuia} • ${gCfg.asignaturaDoc}`],["Año / Periodo", `${gCfg.anio} • ${gCfg.periodo}`],["Estudiantes incluidos", `${roster.filter(r => gCfg.seccionGuia==="TODAS"||r.seccion===gCfg.seccionGuia).length} registros con Nota SEA + CONDUCTA REACC`]], h, generarQRSVG);
+          imprimirPDFQR(`ACTA CONSOLIDADA SEA (${gCfg.tipoDocente.toUpperCase()})`, [["Función Docente", `${gCfg.tipoDocente} • ${sesion.nombre}`],["Sección / Asignatura", `${gCfg.seccionGuia} • ${gCfg.asignaturaDoc}`],["Año / Periodo", `${gCfg.anio} • ${gCfg.periodo}`],["Estudiantes incluidos", `${roster.filter(r => gCfg.seccionGuia==="TODAS"||r.seccion===gCfg.seccionGuia).length} registros con Nota SEA + CONDUCTA REACCCC`]], h, generarQRSVG);
         };
       }
     }

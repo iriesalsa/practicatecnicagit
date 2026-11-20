@@ -7,6 +7,14 @@
   const BUHO_ICON = "/buho-oficial.png?v=229";
   let bc = null, realtimeTimer = null;
 
+    function bdsBuildSupabaseHeadersV231(cfg, extra) {
+    const h = { "Content-Type": "application/json", apikey: cfg.anonKey, ...(extra || {}) };
+    // Solo enviar Authorization: Bearer si es un JWT valido (3 partes), nunca con llaves sb_publishable_
+    if (cfg.anonKey && cfg.anonKey.split(".").length === 3 && cfg.anonKey.startsWith("eyJ")) {
+      h.Authorization = `Bearer ${cfg.anonKey}`;
+    }
+    return h;
+  }
   function getConfig() {
     try {
       const saved = JSON.parse(localStorage.getItem(CFG_KEY) || "{}");
@@ -67,7 +75,7 @@
     list.unshift(entry); localStorage.setItem(TOKENS_KEY, JSON.stringify(list.slice(0, 50)));
     const cfg = getConfig();
     if (cfg.configured && typeof fetch === "function") {
-      try { await fetch(`${cfg.url}/rest/v1/bds_push_tokens`, { method: "POST", headers: { "Content-Type": "application/json", apikey: cfg.anonKey, Authorization: `Bearer ${cfg.anonKey}`, Prefer: "resolution=merge-duplicates" }, body: JSON.stringify(entry) }); } catch {}
+      try { await fetch(`${cfg.url}/rest/v1/bds_push_tokens`, { method: "POST", headers: bdsBuildSupabaseHeadersV231(cfg, { Prefer: "resolution=merge-duplicates" }), body: JSON.stringify(entry) }); } catch {}
     }
     return { ok: true, entry };
   }
@@ -101,7 +109,7 @@
       try {
         const res = await fetch(`${cfg.url}/rest/v1/bds_asistencia_porton`, {
           method: "POST",
-          headers: { "Content-Type": "application/json", apikey: cfg.anonKey, Authorization: `Bearer ${cfg.anonKey}`, Prefer: "resolution=ignore-duplicates" },
+          headers: bdsBuildSupabaseHeadersV231(cfg, { Prefer: "resolution=ignore-duplicates" }),
           body: JSON.stringify({ id: item.id, fecha: item.fecha, hora: item.hora, tipo: item.tipo, estudiante: item.estudiante, carnet: item.carnet || "QR", seccion: item.seccion || "General", encargado_email: item.encargadoEmail || "sin-vinculo@institucion.com", oficial: item.oficial || "Vigilancia / Auxiliar", hash_sha256: item.hash || "SHA256" })
         });
         if (res && (res.ok || res.status === 409)) synced++; else remaining.push(item);

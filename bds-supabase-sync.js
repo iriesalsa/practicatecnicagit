@@ -25,7 +25,7 @@
     "bds_docente_pesos_rea_v190",
     "bds_agenda_escolar_v191",
     "bds_respaldos_notas_anios_v191",
-    "bds_chats_v184_c02", "bds_permisos_edus_v193", "bds_justificaciones_comp_v193", "bds_access_logs_v193", "bds_familia_links_v194", "bds_seguimiento_thor_v196", "bds_coope_cfg_v198", "bds_coope_prods_v198", "bds_coope_wallets_v198", "bds_coope_sales_v198", "bds_coope_recycle_v198", "bds_parental_ctrl_v198", "bds_moderation_logs_v198", "bds_practica_org_v198", "bds_practica_emo_v198", "bds_practica_fin_v198", "bds_motivacion_users_v201", "bds_odin2_matricula_v202", "bds_odin2_conducta_rea_v202", "bds_odin2_docente_guia_v202", "bds_instituciones_pagos_v203", "bds_checkin_emocional_v206"
+    "bds_chats_v184_c02", "bds_permisos_edus_v193", "bds_justificaciones_comp_v193", "bds_access_logs_v193", "bds_familia_links_v194", "bds_seguimiento_thor_v196", "bds_coope_cfg_v198", "bds_coope_prods_v198", "bds_coope_wallets_v198", "bds_coope_sales_v198", "bds_coope_recycle_v198", "bds_parental_ctrl_v198", "bds_moderation_logs_v198", "bds_practica_org_v198", "bds_practica_emo_v198", "bds_practica_fin_v198", "bds_motivacion_users_v201", "bds_odin2_matricula_v202", "bds_odin2_conducta_rea_v202", "bds_odin2_docente_guia_v202", "bds_instituciones_pagos_v203", "bds_checkin_emocional_v206", "bds_orientacion_reac_casos_v207", "bds_orientacion_reac_alertas_v207"
   ];
 
   function getCfg() {

@@ -41,8 +41,8 @@ window.addEventListener("error", function (ev) {
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v206.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v206.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v207.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v207.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -55,6 +55,7 @@ window.addEventListener("error", function (ev) {
     { rol: "Director(a)", ic: "🏛️", desc: "Dirección institucional, aprobación de permisos EDUS y justificaciones, horarios IA, comedor y reportes." },
     { rol: "Padre/Madre", ic: "👨‍👩‍👧‍👦", desc: "Seguimiento estudiantil, horarios, comedor QR, agenda y justificaciones." },
     { rol: "Encargada Comedor / Junta", ic: "🍽️", desc: "Escáner QR de comedor, becas PANEA, tiquetes SINPE/efectivo, menús A–E y cierre de caja." },
+        { rol: "Orientador(a)", ic: "🧭", desc: "Departamento de Orientación: alertas REAC de notas bajas/conducta, informes de debido proceso, DUA y familia." },
     { rol: "Auxiliar Administrativo", ic: "📋", desc: "Matrícula, horarios IA, justificaciones, comedor QR y validación documental." },
         { rol: "Supervisor(a) de Circuito", ic: "🧭", desc: "Supervisión de circuito educativo (solo lectura): dirección, horarios, comedor, permisos y reportes." },
     { rol: "Asesor(a) Regional / Nacional", ic: "📘", desc: "Asesoría pedagógica (solo lectura): seguimiento REA, Open Docs, biblioteca, horarios y reportes." },
@@ -72,7 +73,8 @@ window.addEventListener("error", function (ev) {
     permisos: "📝 Gestionar Permisos",
     justificaciones: "🎓 Gestionar Justificaciones",
     /* bds-odin2-v202 */ notas_rea: "📊 Notas MEP",
-    conducta_sea: "⚖️ Conducta & SEA",
+    conducta_sea: "⚖️ Conducta REAC & SEA",
+    orientacion_reac: "🧭 Orientación REAC",
     mis_notas: "📊 Mis Notas",
     familia: "👨‍👩‍👧‍👦 Familia",
     planeamiento_ia: "🤖 Planeamiento IA",
@@ -88,7 +90,7 @@ window.addEventListener("error", function (ev) {
     opendocs: "📖 Open Docs",
     biblioteca: "📚 Biblioteca",
     juegos: "🎮 Juegos",
-    /* bds-thor-v196-wired */ seguimiento: "📈 Seguimiento REA",
+    /* bds-thor-v196-wired */ seguimiento: "📈 Seguimiento REAC",
     habitos: "🔥 Hábitos",
     carnet_qr: "🪪 Carné QR",
     direccion: "📈 Dirección"
@@ -181,6 +183,12 @@ window.addEventListener("error", function (ev) {
         quick: ["comedor","permisos","carnet_qr"],
         cards: []
       },
+            "Orientador(a)": {
+        tabs: ["inicio","orientacion_reac","conducta_sea","horarios","justificaciones","agenda","reportes","biblioteca","carnet_qr"],
+        chats: true, identidad: false, admisionHome: false, mallaHome: false,
+        quick: ["orientacion_reac","conducta_sea","horarios","justificaciones","agenda"],
+        cards: ["biblioteca"]
+      },
       "Auxiliar Administrativo": {
         tabs: ["inicio","horarios","justificaciones","permisos","comedor","agenda","carnet_qr"],
         chats: true, identidad: false, admisionHome: false, mallaHome: false,
@@ -189,7 +197,7 @@ window.addEventListener("error", function (ev) {
       }
     };
     const cfg = MAP[rol] || MAP["Estudiante"];
-    const ex = (sesionActiva && Array.isArray(sesionActiva.extraRoles)) ? sesionActiva.extraRoles : []; const outTabs = cfg.tabs.slice(); if (!esVisitante && rol !== "Particular (MOPT / Admisión)") { if (!outTabs.includes("cooperativa")) outTabs.splice(2, 0, "cooperativa"); if (!outTabs.includes("practica_guia")) outTabs.splice(2, 0, "practica_guia"); /* bds-extra-roles-rbac-v200 */ if (ex.includes("Comedor") && !outTabs.includes("comedor")) outTabs.splice(2, 0, "comedor"); if (ex.includes("Cooperativa") && !outTabs.includes("cooperativa")) outTabs.splice(2, 0, "cooperativa"); if (ex.includes("Juegos") && !outTabs.includes("juegos")) outTabs.push("juegos"); if (ex.includes("Permisos")) { if (!outTabs.includes("permisos")) outTabs.push("permisos"); if (!outTabs.includes("justificaciones")) outTabs.push("justificaciones"); } if (ex.includes("ValidadorQR") && !outTabs.includes("carnet_qr")) outTabs.push("carnet_qr"); } if (rol === "Particular (MOPT / Admisión)" && !outTabs.includes("practica_guia")) outTabs.splice(1, 0, "practica_guia"); if (!esVisitante && rol !== "Particular (MOPT / Admisión)" && !outTabs.includes("conducta_sea")) outTabs.splice(2, 0, "conducta_sea"); cfg.tabs = Array.from(new Set(outTabs)).filter(k => Boolean(TAB_META[k]));
+    const ex = (sesionActiva && Array.isArray(sesionActiva.extraRoles)) ? sesionActiva.extraRoles : []; const outTabs = cfg.tabs.slice(); if (!esVisitante && rol !== "Particular (MOPT / Admisión)") { if (!outTabs.includes("cooperativa")) outTabs.splice(2, 0, "cooperativa"); if (!outTabs.includes("practica_guia")) outTabs.splice(2, 0, "practica_guia"); /* bds-extra-roles-rbac-v200 */ if (ex.includes("Comedor") && !outTabs.includes("comedor")) outTabs.splice(2, 0, "comedor"); if (ex.includes("Cooperativa") && !outTabs.includes("cooperativa")) outTabs.splice(2, 0, "cooperativa"); if (ex.includes("Juegos") && !outTabs.includes("juegos")) outTabs.push("juegos"); if (ex.includes("Permisos")) { if (!outTabs.includes("permisos")) outTabs.push("permisos"); if (!outTabs.includes("justificaciones")) outTabs.push("justificaciones"); } if (ex.includes("ValidadorQR") && !outTabs.includes("carnet_qr")) outTabs.push("carnet_qr"); } if (rol === "Particular (MOPT / Admisión)" && !outTabs.includes("practica_guia")) outTabs.splice(1, 0, "practica_guia"); if (!esVisitante && rol !== "Particular (MOPT / Admisión)" && !outTabs.includes("conducta_sea")) outTabs.splice(2, 0, "conducta_sea"); if (!esVisitante && ["SuperAdmin","Director(a)","Subdirector(a)","Asistente de Dirección","Orientador(a)","Docente MEP","Padre/Madre"].includes(rol) && !outTabs.includes("orientacion_reac")) outTabs.splice(2, 0, "orientacion_reac"); cfg.tabs = Array.from(new Set(outTabs)).filter(k => Boolean(TAB_META[k]));
     return cfg;
   }
 
@@ -199,9 +207,9 @@ window.addEventListener("error", function (ev) {
       institucionCorta: "CTP Mercedes Norte",
       regional: "Dirección Regional de Heredia",
       circuito: "Circuito 02",
-      escudo: "/escudo-ctpmn-oficial.jpeg?v=206",
-      mascota: "/buho-oficial.png?v=206",
-      logoMep: "/logo-mep-oficial.png?v=206"
+      escudo: "/escudo-ctpmn-oficial.jpeg?v=207",
+      mascota: "/buho-oficial.png?v=207",
+      logoMep: "/logo-mep-oficial.png?v=207"
     };
     if (!window.BDS_BRAND) return def;
     const b = window.BDS_BRAND.get();
@@ -765,7 +773,7 @@ window.addEventListener("error", function (ev) {
               <select id="ev-cant" style="background:#070d19;color:#fbbf24;border:1px solid #334155;padding:8px;border-radius:8px;font-size:12px;font-weight:800;">
                 ${[10,20,30,40,50,60].map(c => `<option value="${c}" ${cantidad===c?"selected":""}>${c} preg.</option>`).join("")}
               </select>
-              <button id="ev-go" style="background:#059669;color:#fff;border:none;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">🔀 Nuevo</button>
+              <button id="ev-go" style="background:#059669;color:#fff;border:none;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">🔀 Nuevo</button><button id="ev-hoja" title="Imprimir Folleto + Hoja de Respuestas Burbuja + Clave QR" style="background:#7c3aed;color:#fff;border:none;padding:8px 11px;border-radius:8px;font-size:11.5px;font-weight:700;cursor:pointer;">🖨️ Hoja Respuestas</button>
             </div>
           </div>
           ${modo === "simulacro" ? `<div style="margin-top:10px;padding-top:10px;border-top:1px solid #1e293b;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"><div style="font-size:13px;font-weight:800;color:#fbbf24;">⏱️ <span id="sim-clk" style="font-family:monospace;font-size:16px;">${String(Math.floor(secLeft / 60)).padStart(2, "0")}:${String(secLeft % 60).padStart(2, "0")}</span></div><div style="display:flex;gap:6px;"><button id="sim-pause" style="background:#b45309;color:#fff;border:none;padding:7px 12px;border-radius:7px;font-size:11.5px;font-weight:700;cursor:pointer;">${paused?"Reanudar":"Pausar"}</button><button id="sim-end" style="background:#059669;color:#fff;border:none;padding:7px 12px;border-radius:7px;font-size:11.5px;font-weight:800;cursor:pointer;">Calificar</button></div></div>` : ""}
@@ -805,7 +813,7 @@ window.addEventListener("error", function (ev) {
       document.getElementById("ev-area").onchange = (e) => { area = e.target.value; iniciarPrueba(); };
       document.getElementById("ev-diff").onchange = (e) => { diff = e.target.value; iniciarPrueba(); };
       document.getElementById("ev-cant").onchange = (e) => { cantidad = Number(e.target.value); iniciarPrueba(); };
-      document.getElementById("ev-go").onclick = iniciarPrueba;
+      document.getElementById("ev-go").onclick = iniciarPrueba; if (document.getElementById("ev-hoja")) document.getElementById("ev-hoja").onclick = () => { if (window.BDS_IMPRIMIR_HOJA_RESPUESTAS) window.BDS_IMPRIMIR_HOJA_RESPUESTAS(items, areaMeta ? areaMeta.name : area, sesionActiva, generarQRSVG, sha256Hex); };
       if (document.getElementById("sim-pause")) document.getElementById("sim-pause").onclick = () => { paused = !paused; draw(); };
       if (document.getElementById("sim-end")) document.getElementById("sim-end").onclick = () => { finished = true; draw(); };
       /* bds-tts-v195 */ if (document.getElementById("ev-tts")) document.getElementById("ev-tts").onclick = () => { if (window.BDS_NATIVE) window.BDS_NATIVE.speakQuestion(cur); else hablar(cur.audio || cur.q, cur.lang || "es-CR"); }; if (document.getElementById("ev-tts-stop")) document.getElementById("ev-tts-stop").onclick = () => { if (window.BDS_NATIVE) window.BDS_NATIVE.stopSpeak(); };
@@ -842,6 +850,7 @@ window.addEventListener("error", function (ev) {
       justificaciones: `<button onclick="window.bdsGo('justificaciones')" class="bds-quick-btn" style="background:#0d9488;">🎓 Gestionar Justificaciones</button>`,
       mis_notas: `<button onclick="window.bdsGo('mis_notas')" class="bds-quick-btn" style="background:#0284c7;">📊 Mis Notas (QR)</button>`,
       familia: `<button onclick="window.bdsGo('familia')" class="bds-quick-btn" style="background:#059669;">👨‍👩‍👧‍👦 Mis Hijos y Trámites</button>`,
+      orientacion_reac: `<button onclick="window.bdsGo('orientacion_reac')" class="bds-quick-btn" style="background:#0f766e;">🧭 Orientación & Alertas REAC</button>`,
       conducta_sea: `<button onclick="window.bdsGo('conducta_sea')" class="bds-quick-btn" style="background:#0f766e;">⚖️ Matrícula, Conducta REA & SEA</button>`,
       notas_rea: `<button onclick="window.bdsGo('notas_rea')" class="bds-quick-btn" style="background:#d97706;">📊 Notas MEP (35/35)</button>`,
       planeamiento_ia: `<button onclick="window.bdsGo('planeamiento_ia')" class="bds-quick-btn" style="background:#7c3aed;">🤖 Planeamiento IA</button>`,
@@ -1030,6 +1039,7 @@ window.addEventListener("error", function (ev) {
         else if ((destino === "permisos" || destino === "justificaciones" || destino === "carnet_qr") && window.BDS_RENDER_PERMISOS_JUSTIF) window.BDS_RENDER_PERMISOS_JUSTIF(shell, destino === "carnet_qr" ? "qr" : destino, { sesion: sesionActiva, sha256Hex, generarQRSVG });
         else if (destino === "mis_notas" && window.BDS_RENDER_MIS_NOTAS_ESTUDIANTE) window.BDS_RENDER_MIS_NOTAS_ESTUDIANTE(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
       else if (destino === "familia" && window.BDS_RENDER_PORTAL_FAMILIA) window.BDS_RENDER_PORTAL_FAMILIA(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
+      else if (destino === "orientacion_reac" && window.BDS_RENDER_ORIENTACION_REAC) window.BDS_RENDER_ORIENTACION_REAC(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
       else if (destino === "conducta_sea" && window.BDS_RENDER_ODIN2) window.BDS_RENDER_ODIN2(shell, subParam || "matricula", { sesion: sesionActiva, sha256Hex, generarQRSVG, ganarXP });
       else if (destino === "notas_rea" && window.BDS_RENDER_DOCENTE_REA_AUTO) window.BDS_RENDER_DOCENTE_REA_AUTO(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG, ganarXP });
         else if (destino === "planeamiento_ia" && window.BDS_RENDER_PLANEAMIENTO_IA) window.BDS_RENDER_PLANEAMIENTO_IA(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG, ganarXP });

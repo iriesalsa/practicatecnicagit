@@ -3,7 +3,7 @@
   const ASIST_KEY = "bds_docente_asistencia_log_v190";
   const PESOS_KEY = "bds_docente_pesos_rea_v190";
 
-  // Escala oficial de Asistencia según Reglamento de Evaluación de los Aprendizajes (REA — Decreto 45509-MEP)
+  // Escala oficial de Asistencia según Reglamento de Evaluación de los Aprendizajes y Conducta (REAC — Decreto 45509-MEP)
   function calcularAsistenciaREA(leccionesEfectivas, faltasInjustificadas, pesoAsistencia) {
     const ef = Math.max(1, Number(leccionesEfectivas || 1));
     const faltas = Math.max(0, Number(faltasInjustificadas || 0));

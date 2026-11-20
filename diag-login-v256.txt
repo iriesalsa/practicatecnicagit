@@ -1,0 +1,3 @@
+﻿906a019 chore(v253): limpieza de colisiones de scripts, triangulos activos y build vite
+ca07cbb chore(v253): respaldo antes de limpieza de colisiones
+11bcbe6 chore(v251): revision de calidad, sintaxis, build vite y sincronizacion

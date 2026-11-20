@@ -235,3 +235,31 @@
     if (typeof window.addEventListener === "function") window.addEventListener("DOMContentLoaded", installUnifiedUI);
   }
 })();
+
+/* bds-opts-pro-v217 */
+(function () {
+  if (typeof document === "undefined" || !document.head || document.getElementById("bds-opts-style-v217")) return;
+  const st = document.createElement("style");
+  st.id = "bds-opts-style-v217";
+  st.innerHTML = `
+    #bds-shell .bds-opt-btn,
+    #bds-shell button[data-opt],
+    #bds-shell button.opt-btn,
+    #bds-shell div[style*="grid-template-columns:1fr 1fr"] button,
+    #bds-shell div[style*="grid-template-columns: repeat(2"] button {
+      width: 100% !important;
+      min-height: 46px !important;
+      padding: 11px 14px !important;
+      font-size: 13.5px !important;
+      line-height: 1.4 !important;
+      text-align: left !important;
+      white-space: normal !important;
+      word-break: break-word !important;
+      box-sizing: border-box !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+    }
+  `;
+  document.head.appendChild(st);
+})();

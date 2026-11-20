@@ -190,3 +190,55 @@
 
   window.BDS_NATIVE = { isCapacitor, getPlatform, notify, showInAppToast, playChime, haptic, share, speak, speakQuestion, stopSpeak, getTtsRate, setTtsRate };
 })();
+
+/* bds-tts-latam-enus-v217 */
+(function () {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+
+  const LATAM_LANGS = ["es-419", "es-CR", "es-MX", "es-US", "es-CO", "es-AR", "es-CL", "es-PE"];
+
+  function pickBestVoice(langCode) {
+    const voices = window.speechSynthesis.getVoices() || [];
+    if (!voices.length) return null;
+    const target = String(langCode || "es-419").toLowerCase();
+
+    if (target.startsWith("en")) {
+      return (
+        voices.find(v => /en-us/i.test(v.lang) && /natural|neural|google|microsoft|samantha|ava|aria|guy/i.test(v.name)) ||
+        voices.find(v => /en-us/i.test(v.lang)) ||
+        voices.find(v => /^en/i.test(v.lang)) ||
+        null
+      );
+    }
+
+    // Prioridad estricta a Español Latinoamérica / Neutral (evitando es-ES cuando exista opción LATAM)
+    for (const code of LATAM_LANGS) {
+      const hit = voices.find(v => String(v.lang || "").toLowerCase() === code.toLowerCase());
+      if (hit) return hit;
+    }
+    const latamName = voices.find(v => /^es/i.test(v.lang) && !/es-es|españa|spain|jorge|monica|jordi|helena|paloma/i.test(`${v.lang} ${v.name}`));
+    if (latamName) return latamName;
+    const anyEs = voices.find(v => /^es/i.test(v.lang));
+    return anyEs || null;
+  }
+
+  const origSpeak = window.speechSynthesis.speak.bind(window.speechSynthesis);
+  window.speechSynthesis.speak = function (utterance) {
+    try {
+      if (utterance) {
+        const rawLang = String(utterance.lang || "");
+        const desiredLang = rawLang.toLowerCase().startsWith("en")
+          ? "en-US"
+          : (rawLang.toLowerCase().startsWith("fr") ? "fr-FR" : (rawLang.toLowerCase().startsWith("pt") ? "pt-BR" : "es-419"));
+        const chosen = pickBestVoice(desiredLang);
+        if (chosen) {
+          utterance.voice = chosen;
+          utterance.lang = chosen.lang || desiredLang;
+        } else if (!desiredLang.startsWith("en")) {
+          utterance.lang = "es-419";
+        }
+      }
+    } catch {}
+    return origSpeak(utterance);
+  };
+})();

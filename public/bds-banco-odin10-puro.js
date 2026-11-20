@@ -571,3 +571,25 @@
 
   activarOdin10Puro();
 })();
+/* bds-opts-guarantee-v217 */
+(function () {
+  const origGen = window.BDS_GENERAR_SIMULACRO;
+  if (typeof origGen === "function") {
+    window.BDS_GENERAR_SIMULACRO = function (area, cantidad, diff, subCat) {
+      const list = origGen.apply(this, arguments) || [];
+      return list.map((it, idx) => {
+        const clean = Array.isArray(it.o) && it.o.length >= 4 ? it.o.slice(0, 4) : [
+          it.e || "Opción correcta fundamentada en la unidad",
+          "Alternativa no correspondiente al concepto solicitado",
+          "Interpretación parcial fuera del contexto",
+          "Afirmación incorrecta respecto al tema"
+        ];
+        const cIdx = typeof it.c === "number" && it.c >= 0 && it.c < clean.length ? it.c : 0;
+        const optsValid = Array.isArray(it.opts) && it.opts.length === 4 && it.opts.every(x => x && String(x.txt || "").trim().length > 0)
+          ? it.opts
+          : clean.map((txt, i) => ({ txt: String(txt), ok: i === cIdx }));
+        return { ...it, o: clean, c: cIdx, opts: optsValid };
+      });
+    };
+  }
+})();

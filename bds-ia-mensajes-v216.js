@@ -97,7 +97,7 @@
     if (typeof document === "undefined" || !document.body) return;
     const shell = document.getElementById("bds-shell");
     if (!shell || document.getElementById("bds-cordial-ai-box")) return;
-    const isOrientacion = /orientación|orientacion|reac/i.test(shell.innerText || "");
+    const txtSh = shell.innerText || ""; const esPracticaOSimulacro = /escuchar todo|calificar/i.test(txtSh) && /\d+\s*\/\s*\d+/.test(txtSh); const isOrientacion = !esPracticaOSimulacro && /orientación|orientacion|debido proceso|informes y procesos/i.test(txtSh);
     if (!isOrientacion) return;
 
     const firstCard = shell.querySelector(".bds-card");

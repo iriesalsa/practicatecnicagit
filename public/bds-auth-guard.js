@@ -1252,7 +1252,7 @@ window.addEventListener("error", function (ev) {
     } catch (_) {}
     try {
       if (typeof window.location !== "undefined" && typeof window.location.reload === "function") {
-        if (window.BDS_ANTI_BOUNCE_V239) { window.BDS_ANTI_BOUNCE_V239.asegurarMenuVisible(); } else if (typeof window.location.reload === "function") { window.location.reload(); }
+        if (window.BDS_NUCLEO_V248 && typeof window.BDS_NUCLEO_V248.asegurarPanelYControles === "function") { window.BDS_NUCLEO_V248.asegurarPanelYControles(); } else if (window.BDS_ESTABILIDAD_V245 && typeof window.BDS_ESTABILIDAD_V245.stabilizeWorkspace === "function") { window.BDS_ESTABILIDAD_V245.stabilizeWorkspace(); } else if (window.BDS_ANTI_BOUNCE_V239 && typeof window.BDS_ANTI_BOUNCE_V239.asegurarMenuVisible === "function") { window.BDS_ANTI_BOUNCE_V239.asegurarMenuVisible(); }
       }
     } catch {}
   };

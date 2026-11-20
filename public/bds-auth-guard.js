@@ -41,8 +41,8 @@ window.addEventListener("error", function (ev) {
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v213.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v213.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v214.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v214.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -242,9 +242,9 @@ window.addEventListener("error", function (ev) {
       institucionCorta: "CTP Mercedes Norte",
       regional: "Dirección Regional de Heredia",
       circuito: "Circuito 02",
-      escudo: "/escudo-ctpmn-oficial.jpeg?v=213",
-      mascota: "/buho-oficial.png?v=213",
-      logoMep: "/logo-mep-oficial.png?v=213"
+      escudo: "/escudo-ctpmn-oficial.jpeg?v=214",
+      mascota: "/buho-oficial.png?v=214",
+      logoMep: "/logo-mep-oficial.png?v=214"
     };
     if (!window.BDS_BRAND) return def;
     const b = window.BDS_BRAND.get();

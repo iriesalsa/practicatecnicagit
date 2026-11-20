@@ -1,10 +1,8 @@
-self.addEventListener("install", (e) => e.waitUntil(self.skipWaiting()));
-self.addEventListener("activate", (e) => {
-  e.waitUntil(
-    caches.keys()
-      .then((ks) => Promise.all(ks.map((k) => caches.delete(k))))
-      .then(() => self.registration.unregister())
-      .then(() => self.clients.matchAll({ type: "window" }))
-      .then((clients) => clients.forEach((c) => { try { c.navigate(c.url); } catch (_) {} }))
-  );
+const CACHE_NAME = "bds-practicatecnica-v177-release";
+const ASSETS = ["/", "/index.html", "/buho-original.svg", "/escudo-ctpmn.svg", "/logo-mep.svg", "/bds-banco-mep.js", "/bds-juegos.js", "/bds-auth-guard.js"];
+self.addEventListener("install", (e) => { self.skipWaiting(); e.waitUntil(caches.open(CACHE_NAME).then((c) => c.addAll(ASSETS).catch(() => {}))); });
+self.addEventListener("activate", (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.map((k) => (k !== CACHE_NAME ? caches.delete(k) : null))))); self.clients.claim(); });
+self.addEventListener("fetch", (e) => {
+  if (e.request.method !== "GET") return;
+  e.respondWith(fetch(e.request).then((r) => { const cp = r.clone(); caches.open(CACHE_NAME).then((c) => c.put(e.request, cp)).catch(() => {}); return r; }).catch(() => caches.match(e.request).then((r) => r || caches.match("/index.html"))));
 });

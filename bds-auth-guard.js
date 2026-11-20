@@ -1,11 +1,3 @@
-if (!window.__BDS_AUTH_GUARD_LOADED_V238) {
-window.__BDS_AUTH_GUARD_LOADED_V238 = true;
-if (!window.__BDS_AUTH_GUARD_LOADED_V237) {
-window.__BDS_AUTH_GUARD_LOADED_V237 = true;
-if (!window.__BDS_AUTH_GUARD_LOADED_V236) {
-window.__BDS_AUTH_GUARD_LOADED_V236 = true;
-if (!window.__BDS_AUTH_GUARD_LOADED_V235) {
-window.__BDS_AUTH_GUARD_LOADED_V235 = true;
 /* bds-anti-blank-v193 */
 window.addEventListener("error", function (ev) {
   try {
@@ -49,8 +41,8 @@ window.addEventListener("error", function (ev) {
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v237.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v237.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v229.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v229.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -251,9 +243,9 @@ window.addEventListener("error", function (ev) {
       institucionCorta: "CTP Mercedes Norte",
       regional: "Dirección Regional de Heredia",
       circuito: "Circuito 02",
-      escudo: "/escudo-ctpmn-oficial.jpeg?v=244",
-      mascota: "/buho-oficial.png?v=244",
-      logoMep: "/logo-mep-oficial.png?v=244"
+      escudo: "/escudo-ctpmn-oficial.jpeg?v=229",
+      mascota: "/buho-oficial.png?v=229",
+      logoMep: "/logo-mep-oficial.png?v=229"
     };
     if (!window.BDS_BRAND) return def;
     const b = window.BDS_BRAND.get();
@@ -537,7 +529,7 @@ window.addEventListener("error", function (ev) {
             ${locked ? "Cuenta bloqueada tras 5 intentos fallidos. Comuníquese con soporte." : ""}
           </div>
 
-          <form id="lg-f" novalidate style="display:flex;flex-direction:column;gap:8px;">
+          <form id="lg-f" style="display:flex;flex-direction:column;gap:8px;">
             <div>
               <label style="display:block;font-size:11px;margin-bottom:3px;">Correo Institucional o Gmail</label>
               <input id="lg-m" type="email" placeholder="usuario@est.mep.go.cr" required autofocus ${locked?"disabled":""} style="width:100%;background:#070d19;border:1px solid #334155;border-radius:8px;padding:9px 11px;color:#fff;font-size:13px;min-height:40px;"/>
@@ -604,12 +596,10 @@ window.addEventListener("error", function (ev) {
         if (!esGoogle && pIn.value.length < 4) { err.style.display = "block"; err.innerText = "Ingrese una contraseña válida."; return; }
 
         let preUser = null;
-        if (window.BDS_TRAZABILIDAD && typeof window.BDS_TRAZABILIDAD.checkAccess === "function") {
-          try {
-            const chk = window.BDS_TRAZABILIDAD.checkAccess(mail);
-            if (chk && chk.ok === false && !esSuperAdmin(mail)) { err.style.display = "block"; err.innerText = chk.motivo || "Acceso restringido."; return; }
-            preUser = chk ? chk.user : null;
-          } catch (_) { preUser = null; }
+        if (window.BDS_TRAZABILIDAD) {
+          const chk = window.BDS_TRAZABILIDAD.checkAccess(mail);
+          if (!chk.ok) { err.style.display = "block"; err.innerText = chk.motivo; return; }
+          preUser = chk.user;
         }
 
         // Regla estricta de roles:
@@ -619,7 +609,7 @@ window.addEventListener("error", function (ev) {
         // 4) Todas las demás cuentas entran como Estudiante (o Particular si lo eligieron)
         let rolFinal = "Estudiante";
         let nombreFinal = nomIn || (window.BDS_MOTIVACION ? window.BDS_MOTIVACION.formatNameFromEmail(mail) : mail.split("@")[0]);
-        const _mHash236 = await sha256Hex(String(mail || "").trim().toLowerCase()); if (esSuperAdmin(mail) || _mHash236 === "72e4fb070f33d3ce2a74b70cb4c9553ab283a5aa839170ea297ce15ea5bf654b") {
+        if (esSuperAdmin(mail)) {
           rolFinal = "SuperAdmin";
           nombreFinal = "Ing. Max Salazar Sánchez";
         } else if (esDirectoraAutorizada(mail)) {
@@ -643,7 +633,7 @@ window.addEventListener("error", function (ev) {
           firma,
           qr: `PT-QR|v193|${mail}|${rolFinal}|${firma.slice(0, 16)}`
         };
-        setSesion(nueva); if (typeof window.__BDS_LAUNCH_APP_V237 === "function") { window.__BDS_LAUNCH_APP_V237(nueva); return; }
+        setSesion(nueva);
         if (window.BDS_TRAZABILIDAD && window.BDS_TRAZABILIDAD.logAcceso) {
           window.BDS_TRAZABILIDAD.logAcceso(nueva, esGoogle ? "Google" : "Correo/Clave");
         }
@@ -651,8 +641,8 @@ window.addEventListener("error", function (ev) {
         iniciarApp("inicio");
       }
 
-      document.getElementById("lg-f").onsubmit = (e) => { e.preventDefault(); Promise.resolve(procesarAcceso(false)).catch((ex) => { const er = document.getElementById("lg-err"); if (er) { er.style.display = "block"; er.innerText = "Error de acceso: " + (ex && ex.message ? ex.message : ex); } }); };
-      document.getElementById("lg-google").onclick = () => { Promise.resolve(procesarAcceso(true)).catch((ex) => { const er = document.getElementById("lg-err"); if (er) { er.style.display = "block"; er.innerText = "Error Google: " + (ex && ex.message ? ex.message : ex); } }); };
+      document.getElementById("lg-f").onsubmit = (e) => { e.preventDefault(); procesarAcceso(false); };
+      document.getElementById("lg-google").onclick = () => procesarAcceso(true);
       document.getElementById("lg-guest").onclick = async () => {
         const firma = await sha256Hex("VISITANTE|CTPMN-C02");
         const vis = { nombre: "Visitante", email: "visitante@practicatecnica.com", rol: "Visitante", rolReal: "Visitante", seccion: "Libre", visitante: true, firma, qr: `PT-QR|VISITANTE|${firma.slice(0, 14)}` };
@@ -1197,45 +1187,3 @@ window.addEventListener("error", function (ev) {
     else mostrarLogin("login");
   });
 })();
-}
-}
-}
-
-  window.__BDS_LAUNCH_APP_V237 = function (sesionObj) {
-    try {
-      if (sesionObj) {
-        window.__BDS_SESSION = sesionObj;
-        const j = JSON.stringify(sesionObj);
-        try { sessionStorage.setItem(SESSION_KEY, j); } catch {}
-        try { localStorage.setItem(SESSION_KEY, j); } catch {}
-        try { sessionStorage.setItem("bds_session_v184_ctpmn_c02", j); } catch {}
-        try { localStorage.setItem("bds_session_v184_ctpmn_c02", j); } catch {}
-      }
-      const loginBox = document.getElementById("bds-login-v193");
-      if (loginBox && loginBox.parentElement) {
-        try { loginBox.remove(); } catch {}
-      }
-      if (typeof window.bdsRenderApp === "function") {
-        window.bdsRenderApp();
-        return;
-      }
-      if (typeof iniciarApp === "function") {
-        iniciarApp("inicio", sesionObj && sesionObj.rol ? sesionObj.rol : "SuperAdmin");
-        return;
-      }
-      if (typeof draw === "function") {
-        draw();
-        return;
-      }
-    } catch (_) {}
-    try {
-      if (typeof window.location !== "undefined" && typeof window.location.reload === "function") {
-        if (window.BDS_ANTI_BOUNCE_V239) { window.BDS_ANTI_BOUNCE_V239.asegurarMenuVisible(); } else if (typeof window.location.reload === "function") { window.location.reload(); }
-      }
-    } catch {}
-  };
-
-window.__BDS_SA_HASH_V237 = "72e4fb070f33d3ce2a74b70cb4c9553ab283a5aa839170ea297ce15ea5bf654b";
-}
-
-window.__BDS_SA_HASH_V239 = "72e4fb070f33d3ce2a74b70cb4c9553ab283a5aa839170ea297ce15ea5bf654b";

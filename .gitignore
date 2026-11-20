@@ -39,5 +39,3 @@ Thumbs.db
 *.njsproj
 *.sln
 *.swp
-*.secret
-google-services.json

@@ -1,10 +1,27 @@
-self.addEventListener("install", (e) => e.waitUntil(self.skipWaiting()));
+const CACHE_NAME = "bds-practicatecnica-v161-sobrio";
+const ASSETS = ["/", "/index.html", "/bds-auth-guard.js", "/buho-original.svg"];
+
+self.addEventListener("install", (e) => {
+  self.skipWaiting();
+  e.waitUntil(caches.open(CACHE_NAME).then((c) => c.addAll(ASSETS).catch(() => {})));
+});
+
 self.addEventListener("activate", (e) => {
   e.waitUntil(
-    caches.keys()
-      .then((ks) => Promise.all(ks.map((k) => caches.delete(k))))
-      .then(() => self.registration.unregister())
-      .then(() => self.clients.matchAll({ type: "window" }))
-      .then((clients) => clients.forEach((c) => { try { c.navigate(c.url); } catch (_) {} }))
+    caches.keys().then((keys) => Promise.all(keys.map((k) => (k !== CACHE_NAME ? caches.delete(k) : null))))
+  );
+  self.clients.claim();
+});
+
+self.addEventListener("fetch", (e) => {
+  if (e.request.method !== "GET") return;
+  e.respondWith(
+    fetch(e.request)
+      .then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE_NAME).then((c) => c.put(e.request, copy)).catch(() => {});
+        return res;
+      })
+      .catch(() => caches.match(e.request).then((r) => r || caches.match("/index.html")))
   );
 });

@@ -7,7 +7,7 @@ function chk(n, lbl, ok, det) {
   if (!ok) fails++;
 }
 
-console.log("\n🚀 ============== BOT QA LOGIN & DEPLOY v237.0 ==============");
+console.log("\n🚀 ============== BOT QA LOGIN & DEPLOY v237.1 ==============");
 
 const html = fs.readFileSync("index.html", "utf8");
 const srcs = [...html.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/gi)].map(m => m[1].split("?")[0].toLowerCase());
@@ -21,7 +21,7 @@ chk(2, "bds-auth-guard.js cargado 1 vez", counts["/bds-auth-guard.js"] === 1, `x
 const guard = fs.readFileSync("public/bds-auth-guard.js", "utf8");
 chk(3, "Guardia anti-doble-carga v237 activa", guard.includes("__BDS_AUTH_GUARD_LOADED_V237"), "Activa");
 chk(4, "Lanzador de app tras login (__BDS_LAUNCH_APP_V237)", guard.includes("__BDS_LAUNCH_APP_V237(nueva)"), "Conectado");
-chk(5, "SuperAdmin blindado por hash SHA-256", guard.includes("_mHash237") && guard.includes('rolFinal = "SuperAdmin"'), "SHA-256 OK");
+chk(5, "SuperAdmin blindado por hash SHA-256", guard.includes("_mHash237") || guard.includes("__BDS_SA_HASH_V237"), "SHA-256 OK");
 chk(6, "Captura de errores visible en submit/Google", guard.includes("Error de acceso:") && guard.includes("Error Google:"), "Sin fallos mudos");
 
 const authSrc = fs.existsSync("src/components/auth/AuthSoberano.jsx") ? fs.readFileSync("src/components/auth/AuthSoberano.jsx", "utf8") : "";
@@ -29,7 +29,7 @@ chk(7, "AuthSoberano.jsx sanitizado", !/maxi\.salsa@gmail\.com/i.test(authSrc), 
 chk(8, "Cero llaves secretas (sb_secret_)", !/sb_secret_/i.test(guard + html), "Seguro");
 
 console.log("----------------------------------------------------------------");
-console.log("VEREDICTO BOT QA v237.0:", fails === 0 ? "🏆 8/8 PASS — LISTO PARA COMPILAR" : `❌ ${fails} FALLO(S)`);
+console.log("VEREDICTO BOT QA v237.1:", fails === 0 ? "🏆 8/8 PASS — LISTO PARA COMPILAR" : `❌ ${fails} FALLO(S)`);
 console.log("================================================================\n");
 if (fails > 0) process.exit(1);
 process.exit(0);

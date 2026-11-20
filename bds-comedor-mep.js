@@ -246,7 +246,7 @@
   window.BDS_RENDER_COMEDOR_MEP = function (shell, ctx) {
     const { sesion, sha256Hex, generarQRSVG, ganarXP } = ctx;
     const rol = sesion.rol;
-    const esOperador = ["SuperAdmin", "Encargada Comedor / Junta", "Auxiliar Administrativo"].includes(rol);
+    const esOperador = ["SuperAdmin", "Encargada Comedor / Junta", "Auxiliar Administrativo"].includes(rol) || (Array.isArray(sesion.extraRoles) && sesion.extraRoles.includes("Comedor"));
     const esDireccion = ["SuperAdmin", "Director(a)", "Ministro(a) MEP"].includes(rol);
 
     const tabsDisponibles = [

@@ -123,7 +123,20 @@
                   <span style="background:#059669;color:#fff;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700;">${tot}%</span>
                 </div>
                 <div style="font-size:11.5px;color:#94a3b8;margin:4px 0;">Sección ${h.seccion} • ${h.materia}</div>
-                <button data-hi="${i}" class="fam-prt" style="background:#1d4ed8;color:#fff;border:none;padding:6px 10px;border-radius:7px;font-size:11.5px;font-weight:700;cursor:pointer;">🖨️ Imprimir Notas con QR</button>
+                <button data-hi="${i}" class="fam-prt" style="background:#1d4ed8;color:#fff;border:none;padding:6px 10px;border-radius:7px;font-size:11.5px;font-weight:700;cursor:pointer;">🖨️ Imprimir Notas con QR</button>                ${(() => {
+                  const pMap = (() => { try { return JSON.parse(localStorage.getItem("bds_parental_ctrl_v198")) || {}; } catch { return {}; } })();
+                  const pr = pMap[(h.email || "").toLowerCase()] || { allowChat: true, allowCoope: true, dailyLimitCRC: 0 };
+                  const wC = window.BDS_COOPE_API ? window.BDS_COOPE_API.findWalletByQR(h.email) : null;
+                  return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid #1e293b;font-size:11px;">
+                    ${wC ? `<div style="color:#2dd4bf;margin-bottom:5px;">🏪 Saldo Coope: <b>₡${Number(wC.saldoCRC||0).toLocaleString("es-CR")}</b> • 🌿 <b>${wC.ecoPuntos||0} EcoMEPs</b></div>` : ""}
+                    <div style="color:#fbbf24;font-weight:700;margin-bottom:4px;">🛡️ Control Parental (Ley 8968 / Ley 7739):</div>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+                      <label style="cursor:pointer;"><input type="checkbox" data-pmail="${h.email}" data-pk="allowChat" class="pc-tg" ${pr.allowChat!==false?"checked":""}/> Chats</label>
+                      <label style="cursor:pointer;"><input type="checkbox" data-pmail="${h.email}" data-pk="allowCoope" class="pc-tg" ${pr.allowCoope!==false?"checked":""}/> Cooperativa</label>
+                      <input type="number" min="0" step="500" data-pmail="${h.email}" class="pc-lim" value="${pr.dailyLimitCRC||0}" title="Límite diario en colones (0 = sin límite)" placeholder="Límite ₡/día" style="width:92px;background:#0b1322;color:#fff;border:1px solid #334155;padding:3px 6px;border-radius:5px;font-size:11px;"/>
+                    </div>
+                  </div>`;
+                })()}
               </div>`;
             }).join("")}
           </div>
@@ -155,7 +168,7 @@
         </div>
       `;
 
-      shell.querySelectorAll(".fam-prt").forEach(bt => bt.onclick = async () => {
+      const savePR = (em, patch) => { let m = {}; try { m = JSON.parse(localStorage.getItem("bds_parental_ctrl_v198")) || {}; } catch {} const k = (em||"").toLowerCase(); m[k] = { allowChat: true, allowCoope: true, dailyLimitCRC: 0, ...(m[k]||{}), ...patch }; localStorage.setItem("bds_parental_ctrl_v198", JSON.stringify(m)); }; shell.querySelectorAll(".pc-tg").forEach(el => el.onchange = () => savePR(el.getAttribute("data-pmail"), { [el.getAttribute("data-pk")]: el.checked })); shell.querySelectorAll(".pc-lim").forEach(el => el.onchange = () => savePR(el.getAttribute("data-pmail"), { dailyLimitCRC: Math.max(0, Number(el.value||0)) })); shell.querySelectorAll(".fam-prt").forEach(bt => bt.onclick = async () => {
         const est = hijos[Number(bt.getAttribute("data-hi"))];
         const h = (await sha256Hex(`FAM-NOTA|${parentId}|${est.email}|${Date.now()}`)).slice(0, 18);
         imprimirBoletinEstudianteQR(est, pesos, generarQRSVG, h);

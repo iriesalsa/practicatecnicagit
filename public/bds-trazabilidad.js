@@ -68,6 +68,20 @@
     localStorage.setItem(AUDIT_KEY, JSON.stringify(logs.slice(0, 200)));
   }
 
+    function getExtraRoles(email) {
+    const mail = (email || "").toLowerCase().trim();
+    const u = loadUsers().find(x => (x.email || "").toLowerCase() === mail);
+    return (u && Array.isArray(u.extraRoles)) ? u.extraRoles : [];
+  }
+  function toggleExtraRole(uid, roleName) {
+    const arr = loadUsers();
+    const u = arr.find(x => x.id === uid);
+    if (!u) return;
+    if (!Array.isArray(u.extraRoles)) u.extraRoles = [];
+    if (u.extraRoles.includes(roleName)) u.extraRoles = u.extraRoles.filter(r => r !== roleName);
+    else u.extraRoles.push(roleName);
+    saveUsers(arr);
+  }
   function checkAccess(email) {
     const mail = (email || "").toLowerCase().trim();
     const u = loadUsers().find(x => x.email.toLowerCase() === mail);
@@ -117,13 +131,13 @@
             </div>
             <div style="overflow-x:auto;">
               <table style="width:100%;min-width:760px;border-collapse:collapse;font-size:12px;">
-                <tr style="background:#131f33;color:#38bdf8;"><th style="padding:8px;text-align:left;">Usuario</th><th style="padding:8px;text-align:left;">Rol RBAC</th><th style="padding:8px;">Estado</th><th style="padding:8px;text-align:left;">Plan / Vigencia</th><th style="padding:8px;">Control</th></tr>
+                <tr style="background:#131f33;color:#38bdf8;"><th style="padding:8px;text-align:left;">Usuario</th><th style="padding:8px;text-align:left;">Rol RBAC + Roles Extra</th><th style="padding:8px;">Estado</th><th style="padding:8px;text-align:left;">Plan / Vigencia</th><th style="padding:8px;">Control</th></tr>
                 ${list.map(u => {
                   const col = u.estado==="Activo"?"#059669":(u.estado==="Cortesía"?"#0284c7":(u.estado==="Desactivado"?"#b45309":"#dc2626"));
                   const prop = u.email === "maxi.salsa@gmail.com";
                   return `<tr>
                     <td style="padding:8px;border-bottom:1px solid #1e293b;"><b>${u.nombre}</b><br/><span style="font-size:10.5px;color:#94a3b8;">${u.email}</span></td>
-                    <td style="padding:8px;border-bottom:1px solid #1e293b;">${prop ? `<b style="color:#fbbf24;">👑 SuperAdmin</b>` : `<select data-uid="${u.id}" class="tz-rol" style="background:#070d19;color:#fff;border:1px solid #334155;padding:5px;border-radius:6px;font-size:11.5px;">${["Estudiante","Docente MEP","Director(a)","Particular (MOPT / Admisión)","Padre/Madre","Auxiliar Administrativo","Encargada Comedor / Junta","Guarda / Seguridad"].map(r => `<option ${u.rol===r?"selected":""}>${r}</option>`).join("")}</select>`}</td>
+                    <td style="padding:8px;border-bottom:1px solid #1e293b;">${prop ? `<b style="color:#fbbf24;">👑 SuperAdmin</b>` : `<select data-uid="${u.id}" class="tz-rol" style="background:#070d19;color:#fff;border:1px solid #334155;padding:5px;border-radius:6px;font-size:11.5px;">${["Estudiante","Docente MEP","Director(a)","Particular (MOPT / Admisión)","Padre/Madre","Auxiliar Administrativo","Encargada Comedor / Junta","Guarda / Seguridad"].map(r => `<option ${u.rol===r?"selected":""}>${r}</option>`).join("")}</select><div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap;"><button data-exr="Cooperativa" data-uid="${u.id}" class="tz-ex" style="background:${(u.extraRoles||[]).includes(\'Cooperativa\')?\'#059669\':\'#1e293b\'};color:#fff;border:1px solid #334155;padding:2px 6px;border-radius:5px;font-size:10px;cursor:pointer;">🏪 Coope</button><button data-exr="Comedor" data-uid="${u.id}" class="tz-ex" style="background:${(u.extraRoles||[]).includes(\'Comedor\')?\'#0284c7\':\'#1e293b\'};color:#fff;border:1px solid #334155;padding:2px 6px;border-radius:5px;font-size:10px;cursor:pointer;">🍽️ Comedor</button></div>`}</td>
                     <td style="padding:8px;border-bottom:1px solid #1e293b;text-align:center;"><span style="background:${col};color:#fff;padding:3px 9px;border-radius:99px;font-size:10.5px;font-weight:800;">${u.estado}</span></td>
                     <td style="padding:8px;border-bottom:1px solid #1e293b;"><b>${u.plan}</b><br/><span style="font-size:10.5px;color:#94a3b8;">Vence: ${u.vence}</span></td>
                     <td style="padding:8px;border-bottom:1px solid #1e293b;text-align:center;">${prop ? `<span style="color:#6ee7b7;font-weight:700;">Propietario</span>` : `<div style="display:flex;gap:4px;justify-content:center;flex-wrap:wrap;"><button data-act="cortesia" data-uid="${u.id}" class="tz-btn" style="background:#0284c7;color:#fff;border:none;padding:5px 8px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">🎁 Cortesía</button><button data-act="activar" data-uid="${u.id}" class="tz-btn" style="background:#059669;color:#fff;border:none;padding:5px 8px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">✅ Activar</button><button data-act="desactivar" data-uid="${u.id}" class="tz-btn" style="background:#b45309;color:#fff;border:none;padding:5px 8px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">⏸️ Pausar</button><button data-act="${u.estado==='Bloqueado'?'desbloquear':'bloquear'}" data-uid="${u.id}" class="tz-btn" style="background:${u.estado==='Bloqueado'?'#4f46e5':'#dc2626'};color:#fff;border:none;padding:5px 8px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">${u.estado==='Bloqueado'?'🔓 Desbloq.':'🚫 Bloquear'}</button></div>`}</td>
@@ -166,7 +180,7 @@
         await logEvento(sesion.nombre, email.trim().toLowerCase(), `ALTA (${rol})`, "Autorizado por SuperAdmin", sha256Hex);
         draw();
       };
-      shell.querySelectorAll(".tz-rol").forEach(sel => sel.onchange = async () => {
+      shell.querySelectorAll(".tz-ex").forEach(bx => bx.onclick = async () => { const uid = bx.getAttribute("data-uid"), er = bx.getAttribute("data-exr"); toggleExtraRole(uid, er); const u = loadUsers().find(x => x.id === uid); if (u) await logEvento(sesion.nombre, u.email, `ROL EXTRA (${er})`, "Asignación SuperAdmin", sha256Hex); draw(); }); shell.querySelectorAll(".tz-rol").forEach(sel => sel.onchange = async () => {
         const arr = loadUsers(), u = arr.find(x => x.id === sel.getAttribute("data-uid"));
         if (!u) return;
         const prev = u.rol; u.rol = sel.value; saveUsers(arr);
@@ -207,5 +221,5 @@
     draw();
   }
 
-  window.BDS_TRAZABILIDAD = { loadUsers, checkAccess, logAcceso, renderPanel };
+  window.BDS_TRAZABILIDAD = { loadUsers, checkAccess, logAcceso, getExtraRoles, toggleExtraRole, renderPanel };
 })();

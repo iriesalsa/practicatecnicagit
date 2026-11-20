@@ -1,3 +1,5 @@
+if (!window.__BDS_AUTH_GUARD_LOADED_V237) {
+window.__BDS_AUTH_GUARD_LOADED_V237 = true;
 if (!window.__BDS_AUTH_GUARD_LOADED_V236) {
 window.__BDS_AUTH_GUARD_LOADED_V236 = true;
 if (!window.__BDS_AUTH_GUARD_LOADED_V235) {
@@ -45,8 +47,8 @@ window.addEventListener("error", function (ev) {
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v236.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v236.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v237.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v237.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -247,9 +249,9 @@ window.addEventListener("error", function (ev) {
       institucionCorta: "CTP Mercedes Norte",
       regional: "Dirección Regional de Heredia",
       circuito: "Circuito 02",
-      escudo: "/escudo-ctpmn-oficial.jpeg?v=236",
-      mascota: "/buho-oficial.png?v=236",
-      logoMep: "/logo-mep-oficial.png?v=236"
+      escudo: "/escudo-ctpmn-oficial.jpeg?v=237",
+      mascota: "/buho-oficial.png?v=237",
+      logoMep: "/logo-mep-oficial.png?v=237"
     };
     if (!window.BDS_BRAND) return def;
     const b = window.BDS_BRAND.get();
@@ -639,7 +641,7 @@ window.addEventListener("error", function (ev) {
           firma,
           qr: `PT-QR|v193|${mail}|${rolFinal}|${firma.slice(0, 16)}`
         };
-        setSesion(nueva);
+        setSesion(nueva); if (typeof window.__BDS_LAUNCH_APP_V237 === "function") { window.__BDS_LAUNCH_APP_V237(nueva); return; }
         if (window.BDS_TRAZABILIDAD && window.BDS_TRAZABILIDAD.logAcceso) {
           window.BDS_TRAZABILIDAD.logAcceso(nueva, esGoogle ? "Google" : "Correo/Clave");
         }
@@ -1195,3 +1197,38 @@ window.addEventListener("error", function (ev) {
 })();
 }
 }
+}
+
+  window.__BDS_LAUNCH_APP_V237 = function (sesionObj) {
+    try {
+      if (sesionObj) {
+        window.__BDS_SESSION = sesionObj;
+        const j = JSON.stringify(sesionObj);
+        try { sessionStorage.setItem(SESSION_KEY, j); } catch {}
+        try { localStorage.setItem(SESSION_KEY, j); } catch {}
+        try { sessionStorage.setItem("bds_session_v184_ctpmn_c02", j); } catch {}
+        try { localStorage.setItem("bds_session_v184_ctpmn_c02", j); } catch {}
+      }
+      const loginBox = document.getElementById("bds-login-v193");
+      if (loginBox && loginBox.parentElement) {
+        try { loginBox.remove(); } catch {}
+      }
+      if (typeof window.bdsRenderApp === "function") {
+        window.bdsRenderApp();
+        return;
+      }
+      if (typeof iniciarApp === "function") {
+        iniciarApp("inicio", sesionObj && sesionObj.rol ? sesionObj.rol : "SuperAdmin");
+        return;
+      }
+      if (typeof draw === "function") {
+        draw();
+        return;
+      }
+    } catch (_) {}
+    try {
+      if (typeof window.location !== "undefined" && typeof window.location.reload === "function") {
+        window.location.reload();
+      }
+    } catch {}
+  };

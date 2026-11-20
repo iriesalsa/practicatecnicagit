@@ -1,0 +1,28 @@
+================ AUDITORIA FULL QA PRACTICATECNICA v250.0 ================
+Fecha: 2026-11-20 15:00:23
+
+[1] DEPENDENCIAS Y ENTORNO
+  package.json OK | deps: 1 | devDeps: 2 | scripts: test, dev, build, cap:android, cap:sync, cap:ios, qa:bot
+  node_modules presente: True | node: v26.13.1
+
+[2] INDEX.HTML — ENLACES Y DUPLICADOS
+  Total <script src>: 66 | Duplicados: 0
+  Enlaces locales rotos detectados: 0
+
+[3] MODULOS, FUNCIONES Y SINTAXIS
+  Archivos analizados: 171 | Declaraciones function aprox.: 574 | Errores sintaxis JS: 3
+    [SINTAXIS] src\data\bancos_items\bancoPracticasMep2026.js
+    [SINTAXIS] src\data\bancos_items\megaBancoEspecialidadesMep2026.js
+    [SINTAXIS] src\lib\supabase.js
+
+[4] UX/UI Y PUNTOS CRITICOS DE INTERFAZ
+  [Controles de triángulos ▲/▼] -> 12 archivo(s)
+  [Recargas location.reload()] -> 6 archivo(s)
+  [Manejo de errores try/catch] -> 88 archivo(s)
+  [Controles tipo range (sliders)] -> 9 archivo(s)
+  [Limpieza de storage/caches] -> 83 archivo(s)
+
+[5] GIT Y SITIO EN VIVO
+  Git rama: main | Commit: 2f4d48e chore(v249): verificacion verde local, build vite y push
+  Live https://www.practicatecnica.com -> HTTP 200 | Tamano: 11506 bytes
+==========================================================================

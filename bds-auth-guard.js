@@ -41,8 +41,8 @@ window.addEventListener("error", function (ev) {
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v210.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v210.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v211.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v211.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -56,6 +56,8 @@ window.addEventListener("error", function (ev) {
     { rol: "Padre/Madre", ic: "👨‍👩‍👧‍👦", desc: "Seguimiento estudiantil, horarios, comedor QR, agenda y justificaciones." },
     { rol: "Encargada Comedor / Junta", ic: "🍽️", desc: "Escáner QR de comedor, becas PANEA, tiquetes SINPE/efectivo, menús A–E y cierre de caja." },
         { rol: "Orientador(a)", ic: "🧭", desc: "Departamento de Orientación: alertas REAC de notas bajas/conducta, informes de debido proceso, DUA y familia." },
+        { rol: "Auxiliar de Vigilancia (Seguridad)", ic: "🛡️", desc: "Control de portón con escáner QR SHA-256 de salidas anticipadas, bitácora de visitantes y alertas de seguridad." },
+    { rol: "Conserje / Mantenimiento", ic: "🧹", desc: "Bitácora diaria de aseo, reportes de averías e insumos para Dirección/Junta, horarios y permisos personales." },
     { rol: "Auxiliar Administrativo", ic: "📋", desc: "Matrícula, horarios IA, justificaciones, comedor QR y validación documental." },
         { rol: "Supervisor(a) de Circuito", ic: "🧭", desc: "Supervisión de circuito educativo (solo lectura): dirección, horarios, comedor, permisos y reportes." },
     { rol: "Asesor(a) Regional / Nacional", ic: "📘", desc: "Asesoría pedagógica (solo lectura): seguimiento REA, Open Docs, biblioteca, horarios y reportes." },
@@ -93,6 +95,8 @@ window.addEventListener("error", function (ev) {
     juegos: "🎮 Juegos",
     /* bds-thor-v196-wired */ seguimiento: "📈 Seguimiento REAC",
     habitos: "🔥 Hábitos",
+    porton_seguridad: "🛡️ Portón & Seguridad",
+    conserjeria_mant: "🧹 Conserjería",
     carnet_qr: "🪪 Carné QR",
     direccion: "📈 Dirección"
   };
@@ -190,6 +194,18 @@ window.addEventListener("error", function (ev) {
         quick: ["orientacion_reac","conducta_sea","horarios","justificaciones","agenda"],
         cards: ["biblioteca"]
       },
+            "Auxiliar de Vigilancia (Seguridad)": {
+        tabs: ["inicio","porton_seguridad","horarios","permisos","justificaciones","agenda","carnet_qr"],
+        chats: true, identidad: false, admisionHome: false, mallaHome: false,
+        quick: ["porton_seguridad","permisos","horarios","carnet_qr"],
+        cards: []
+      },
+      "Conserje / Mantenimiento": {
+        tabs: ["inicio","conserjeria_mant","horarios","permisos","justificaciones","agenda","carnet_qr"],
+        chats: true, identidad: false, admisionHome: false, mallaHome: false,
+        quick: ["conserjeria_mant","permisos","horarios","carnet_qr"],
+        cards: []
+      },
       "Auxiliar Administrativo": {
         tabs: ["inicio","horarios","justificaciones","permisos","comedor","agenda","carnet_qr"],
         chats: true, identidad: false, admisionHome: false, mallaHome: false,
@@ -198,7 +214,7 @@ window.addEventListener("error", function (ev) {
       }
     };
     const cfg = MAP[rol] || MAP["Estudiante"];
-    const ex = (sesionActiva && Array.isArray(sesionActiva.extraRoles)) ? sesionActiva.extraRoles : []; const outTabs = cfg.tabs.slice(); if (!esVisitante && rol !== "Particular (MOPT / Admisión)") { if (!outTabs.includes("cooperativa")) outTabs.splice(2, 0, "cooperativa"); if (!outTabs.includes("practica_guia")) outTabs.splice(2, 0, "practica_guia"); /* bds-extra-roles-rbac-v200 */ if (ex.includes("Comedor") && !outTabs.includes("comedor")) outTabs.splice(2, 0, "comedor"); if (ex.includes("Cooperativa") && !outTabs.includes("cooperativa")) outTabs.splice(2, 0, "cooperativa"); if (ex.includes("Juegos") && !outTabs.includes("juegos")) outTabs.push("juegos"); if (ex.includes("Permisos")) { if (!outTabs.includes("permisos")) outTabs.push("permisos"); if (!outTabs.includes("justificaciones")) outTabs.push("justificaciones"); } if (ex.includes("ValidadorQR") && !outTabs.includes("carnet_qr")) outTabs.push("carnet_qr"); } if (rol === "Particular (MOPT / Admisión)" && !outTabs.includes("practica_guia")) outTabs.splice(1, 0, "practica_guia"); if (!esVisitante && rol !== "Particular (MOPT / Admisión)" && !outTabs.includes("conducta_sea")) outTabs.splice(2, 0, "conducta_sea"); if (!esVisitante && ["SuperAdmin","Director(a)","Subdirector(a)","Asistente de Dirección","Orientador(a)","Docente MEP","Padre/Madre"].includes(rol) && !outTabs.includes("orientacion_reac")) outTabs.splice(2, 0, "orientacion_reac"); if (!esVisitante && !outTabs.includes("antologias")) outTabs.push("antologias"); cfg.tabs = Array.from(new Set(outTabs)).filter(k => Boolean(TAB_META[k]));
+    const ex = (sesionActiva && Array.isArray(sesionActiva.extraRoles)) ? sesionActiva.extraRoles : []; const outTabs = cfg.tabs.slice(); if (!esVisitante && rol !== "Particular (MOPT / Admisión)") { if (!outTabs.includes("cooperativa")) outTabs.splice(2, 0, "cooperativa"); if (!outTabs.includes("practica_guia")) outTabs.splice(2, 0, "practica_guia"); /* bds-extra-roles-rbac-v200 */ if (ex.includes("Comedor") && !outTabs.includes("comedor")) outTabs.splice(2, 0, "comedor"); if (ex.includes("Cooperativa") && !outTabs.includes("cooperativa")) outTabs.splice(2, 0, "cooperativa"); if (ex.includes("Juegos") && !outTabs.includes("juegos")) outTabs.push("juegos"); if (ex.includes("Permisos")) { if (!outTabs.includes("permisos")) outTabs.push("permisos"); if (!outTabs.includes("justificaciones")) outTabs.push("justificaciones"); } if (ex.includes("ValidadorQR") && !outTabs.includes("carnet_qr")) outTabs.push("carnet_qr"); } if (rol === "Particular (MOPT / Admisión)" && !outTabs.includes("practica_guia")) outTabs.splice(1, 0, "practica_guia"); if (!esVisitante && rol !== "Particular (MOPT / Admisión)" && !outTabs.includes("conducta_sea")) outTabs.splice(2, 0, "conducta_sea"); if (!esVisitante && ["SuperAdmin","Director(a)","Subdirector(a)","Asistente de Dirección","Orientador(a)","Docente MEP","Padre/Madre"].includes(rol) && !outTabs.includes("orientacion_reac")) outTabs.splice(2, 0, "orientacion_reac"); if (!esVisitante && ["SuperAdmin","Director(a)","Subdirector(a)","Asistente de Dirección","Auxiliar Administrativo"].includes(rol)) { if (!outTabs.includes("porton_seguridad")) outTabs.push("porton_seguridad"); if (!outTabs.includes("conserjeria_mant")) outTabs.push("conserjeria_mant"); } if (!esVisitante && !outTabs.includes("antologias")) outTabs.push("antologias"); cfg.tabs = Array.from(new Set(outTabs)).filter(k => Boolean(TAB_META[k]));
     return cfg;
   }
 
@@ -208,9 +224,9 @@ window.addEventListener("error", function (ev) {
       institucionCorta: "CTP Mercedes Norte",
       regional: "Dirección Regional de Heredia",
       circuito: "Circuito 02",
-      escudo: "/escudo-ctpmn-oficial.jpeg?v=210",
-      mascota: "/buho-oficial.png?v=210",
-      logoMep: "/logo-mep-oficial.png?v=210"
+      escudo: "/escudo-ctpmn-oficial.jpeg?v=211",
+      mascota: "/buho-oficial.png?v=211",
+      logoMep: "/logo-mep-oficial.png?v=211"
     };
     if (!window.BDS_BRAND) return def;
     const b = window.BDS_BRAND.get();
@@ -865,6 +881,8 @@ window.addEventListener("error", function (ev) {
       antologias: `<button onclick="window.bdsGo('antologias')" class="bds-quick-btn" style="background:#7c3aed;">📖 Antologías & Libros PDF</button>`,
       opendocs: `<button onclick="window.bdsGo('opendocs')" class="bds-quick-btn" style="background:#0f766e;">📖 Open Docs</button>`,
       identidad: `<button onclick="window.BDS_BRAND && window.BDS_BRAND.openModal()" class="bds-quick-btn" style="background:#334155;">🛡️ Escudo y Logo</button>`,
+      porton_seguridad: `<button onclick="window.bdsGo('porton_seguridad')" class="bds-quick-btn" style="background:#1e3a8a;">🛡️ Control de Portón QR</button>`,
+      conserjeria_mant: `<button onclick="window.bdsGo('conserjeria_mant')" class="bds-quick-btn" style="background:#0f766e;">🧹 Conserjería & Mant.</button>`,
       carnet_qr: `<button onclick="window.bdsGo('carnet_qr')" class="bds-quick-btn" style="background:#1e40af;">🪪 Carné QR</button>`
     };
 
@@ -1048,7 +1066,9 @@ window.addEventListener("error", function (ev) {
         else if (destino === "cooperativa" && window.BDS_RENDER_COOPERATIVA) window.BDS_RENDER_COOPERATIVA(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG, ganarXP });
       else if (destino === "practica_guia" && window.BDS_RENDER_PRACTICA_GUIA) window.BDS_RENDER_PRACTICA_GUIA(shell, { sesion: sesionActiva, ganarXP });
       else if (destino === "comedor" && window.BDS_RENDER_COMEDOR_MEP) window.BDS_RENDER_COMEDOR_MEP(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG, ganarXP });
-        else if (destino === "agenda" && window.BDS_RENDER_AGENDA_HORARIO) window.BDS_RENDER_AGENDA_HORARIO(shell, { sesion: sesionActiva });
+        else if (destino === "porton_seguridad" && window.BDS_RENDER_PORTON_SEGURIDAD) window.BDS_RENDER_PORTON_SEGURIDAD(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
+      else if (destino === "conserjeria_mant" && window.BDS_RENDER_CONSERJERIA_MANT) window.BDS_RENDER_CONSERJERIA_MANT(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
+      else if (destino === "agenda" && window.BDS_RENDER_AGENDA_HORARIO) window.BDS_RENDER_AGENDA_HORARIO(shell, { sesion: sesionActiva });
         else if (destino === "reportes" && window.BDS_RENDER_REPORTES_RESPALDOS) window.BDS_RENDER_REPORTES_RESPALDOS(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
         else if (destino === "simulador_mopt" && window.BDS_RENDER_SIMULADOR_MOPT) window.BDS_RENDER_SIMULADOR_MOPT(shell, ganarXP);
         else if (destino === "admision" && window.BDS_RENDER_ADMISION) window.BDS_RENDER_ADMISION(shell, subParam || "ucr", ganarXP);

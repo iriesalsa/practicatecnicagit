@@ -131,8 +131,8 @@
     const { sesion, sha256Hex, generarQRSVG, ganarXP } = ctx;
     const rol = sesion.rol;
     const mail = (sesion.email || "").toLowerCase();
-    const puedeMatricular = ["SuperAdmin", "Director(a)", "Docente MEP", "Auxiliar Administrativo"].includes(rol);
-    const puedeConducta = ["SuperAdmin", "Director(a)", "Docente MEP", "Auxiliar Administrativo"].includes(rol);
+    const puedeMatricular = ["SuperAdmin", "Director(a)", "Subdirector(a)", "Asistente de Dirección", "Docente MEP", "Auxiliar Administrativo"].includes(rol);
+    const puedeConducta = ["SuperAdmin", "Director(a)", "Subdirector(a)", "Asistente de Dirección", "Docente MEP", "Auxiliar Administrativo"].includes(rol);
     const esEncargado = rol === "Padre/Madre";
     const esEstudiante = rol === "Estudiante";
 

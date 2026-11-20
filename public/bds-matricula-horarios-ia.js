@@ -273,7 +273,7 @@
 
   window.BDS_RENDER_MATRICULA_HORARIOS = function (shell, ctx) {
     const { sesion, sha256Hex, generarQRSVG } = ctx || {};
-    const puedeEditar = sesion && ["SuperAdmin", "Director(a)", "Auxiliar Administrativo"].includes(sesion.rol);
+    const puedeEditar = sesion && ["SuperAdmin", "Director(a)", "Subdirector(a)", "Asistente de Dirección", "Auxiliar Administrativo"].includes(sesion.rol);
     const geo = window.BDS_CR_GEO || { PROVINCIAS_DRE: { "Heredia": ["Dirección Regional de Heredia"] }, CIRCUITOS_CR: ["Circuito 02"], MODALIDADES_MEP: Object.keys(PLANTILLAS_MEP_2026) };
     let hor = loadHorario();
     let vista = "seccion"; // seccion | docente | aula

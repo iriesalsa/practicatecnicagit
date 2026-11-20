@@ -319,3 +319,43 @@
     draw();
   };
 })();
+
+/* bds-alerta-temprana-v204 */
+(function () {
+  function renderAlertaTempranaREA() {
+    if (typeof document === "undefined") return;
+    const shell = document.getElementById("bds-shell");
+    if (!shell || document.getElementById("bds-alerta-rea-banner")) return;
+    const tbl = shell.querySelector("table");
+    if (!tbl || !shell.querySelector(".rea-grade")) return;
+
+    let roster = [], pesos = { cotidiano: 35, tareas: 10, pruebas: 35, proyecto: 10, asistencia: 10 };
+    try { roster = JSON.parse(localStorage.getItem("bds_docente_roster_v190") || "[]"); } catch {}
+    try { const p = JSON.parse(localStorage.getItem("bds_docente_pesos_rea_v190") || "null"); if (p) pesos = p; } catch {}
+
+    let rNota = 0;
+    roster.forEach(e => {
+      const nf = ((Number(e.cotidiano || 0) * Number(pesos.cotidiano || 35)) +
+                  (Number(e.tareas || 0) * Number(pesos.tareas || 10)) +
+                  (Number(e.pruebas || 0) * Number(pesos.pruebas || 35)) +
+                  (Number(e.proyecto || 0) * Number(pesos.proyecto || 10))) / 100 + Number(pesos.asistencia || 10);
+      if (nf < 70) rNota++;
+    });
+
+    const hay = rNota > 0;
+    const div = document.createElement("div");
+    div.id = "bds-alerta-rea-banner";
+    div.style.cssText = `background:${hay ? "#451a03" : "#064e3b"};border:1px solid ${hay ? "#f59e0b" : "#10b981"};border-radius:9px;padding:8px 12px;margin-bottom:10px;font-size:11.5px;color:${hay ? "#fef3c7" : "#ecfdf5"};display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;`;
+    div.innerHTML = `<span><b>🚦 Alerta Temprana Docente (${roster.length} est.):</b> ${hay ? `⚠️ ${rNota} estudiante(s) en riesgo académico (<70%).` : "✅ Todo el grupo está sobre 70% de rendimiento."}</span>`;
+    tbl.parentElement.insertBefore(div, tbl);
+  }
+
+  if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
+    window.addEventListener("DOMContentLoaded", () => {
+      if (typeof MutationObserver !== "undefined" && document.body) {
+        new MutationObserver(() => renderAlertaTempranaREA()).observe(document.body, { childList: true, subtree: true });
+      }
+      setTimeout(renderAlertaTempranaREA, 400);
+    });
+  }
+})();

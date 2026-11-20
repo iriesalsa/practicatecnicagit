@@ -41,8 +41,8 @@ window.addEventListener("error", function (ev) {
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v205.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v205.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v206.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v206.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -50,6 +50,8 @@ window.addEventListener("error", function (ev) {
     { rol: "Estudiante", ic: "🎒", desc: "Prácticas, simulacros, admisión, juegos, horarios, comedor QR y carné digital." },
     { rol: "Particular (MOPT / Admisión)", ic: "🎯", desc: "Acceso particular (₡2,500/año o ₡3,500 vitalicio): MOPT, Admisión, 29 áreas, hábitos y juegos." },
     { rol: "Docente MEP", ic: "👨‍🏫", desc: "Notas MEP (35/35), asistencia automática REA, planeamiento IA, permisos, justificaciones y horarios." },
+        { rol: "Subdirector(a)", ic: "🏛️", desc: "Subdirección institucional: aprueba permisos de personal y estudiantes, horarios IA, comedor y reportes." },
+    { rol: "Asistente de Dirección", ic: "🗂️", desc: "Asistencia directiva: agiliza bandeja de permisos, justificaciones, horarios, agenda y expedientes." },
     { rol: "Director(a)", ic: "🏛️", desc: "Dirección institucional, aprobación de permisos EDUS y justificaciones, horarios IA, comedor y reportes." },
     { rol: "Padre/Madre", ic: "👨‍👩‍👧‍👦", desc: "Seguimiento estudiantil, horarios, comedor QR, agenda y justificaciones." },
     { rol: "Encargada Comedor / Junta", ic: "🍽️", desc: "Escáner QR de comedor, becas PANEA, tiquetes SINPE/efectivo, menús A–E y cierre de caja." },
@@ -131,6 +133,18 @@ window.addEventListener("error", function (ev) {
         quick: ["reportes","horarios","comedor","agenda"],
         cards: ["biblioteca"]
       },
+            "Subdirector(a)": {
+        tabs: ["inicio","direccion","horarios","permisos","justificaciones","conducta_sea","comedor","notas_rea","agenda","reportes","biblioteca","carnet_qr"],
+        chats: true, identidad: true, admisionHome: false, mallaHome: false,
+        quick: ["permisos","justificaciones","horarios","comedor","notas_rea","agenda","reportes"],
+        cards: ["biblioteca"]
+      },
+      "Asistente de Dirección": {
+        tabs: ["inicio","direccion","horarios","permisos","justificaciones","conducta_sea","comedor","agenda","reportes","carnet_qr"],
+        chats: true, identidad: false, admisionHome: false, mallaHome: false,
+        quick: ["permisos","justificaciones","horarios","agenda","reportes"],
+        cards: []
+      },
       "Director(a)": {
         tabs: ["inicio","direccion","horarios","permisos","justificaciones","comedor","notas_rea","agenda","reportes","biblioteca","carnet_qr"],
         chats: true, identidad: true, admisionHome: false, mallaHome: false,
@@ -185,9 +199,9 @@ window.addEventListener("error", function (ev) {
       institucionCorta: "CTP Mercedes Norte",
       regional: "Dirección Regional de Heredia",
       circuito: "Circuito 02",
-      escudo: "/escudo-ctpmn-oficial.jpeg?v=205",
-      mascota: "/buho-oficial.png?v=205",
-      logoMep: "/logo-mep-oficial.png?v=205"
+      escudo: "/escudo-ctpmn-oficial.jpeg?v=206",
+      mascota: "/buho-oficial.png?v=206",
+      logoMep: "/logo-mep-oficial.png?v=206"
     };
     if (!window.BDS_BRAND) return def;
     const b = window.BDS_BRAND.get();

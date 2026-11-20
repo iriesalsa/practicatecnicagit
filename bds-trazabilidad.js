@@ -7,6 +7,8 @@
     "Estudiante",
     "Docente MEP",
     "Director(a)",
+    "Subdirector(a)",
+    "Asistente de Dirección",
     "Supervisor(a) de Circuito",
     "Asesor(a) Regional / Nacional",
     "Viceministro(a) MEP",
@@ -116,7 +118,7 @@
     const old = document.getElementById("bds-tz-qr-modal"); if (old) old.remove();
     (async () => {
       const firma = sha256Hex ? (await sha256Hex(`PT-USR|${u.id}|${u.email}|${u.rol}|${(u.extraRoles || []).join(",")}`)).slice(0, 20) : "SHA256VERIFICADO";
-      const qrPayload = `PT-QR|v2033|${u.email}|${u.rol}|EX:${(u.extraRoles || []).join("+")}|${firma}`;
+      const qrPayload = `PT-QR|v206|${u.email}|${u.rol}|EX:${(u.extraRoles || []).join("+")}|${firma}`;
       const m = document.createElement("div");
       m.id = "bds-tz-qr-modal";
       m.style.cssText = "position:fixed;inset:0;background:rgba(2,6,23,0.9);z-index:299500;display:flex;align-items:center;justify-content:center;padding:16px;";
@@ -164,7 +166,7 @@
         <div class="bds-card">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid #1e293b;padding-bottom:11px;margin-bottom:12px;">
             <div>
-              <span style="background:#b45309;color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:99px;">SUPERTRAZABILIDAD RBAC • 12 ROLES + 5 ROLES EXTRA • QR SHA-256</span>
+              <span style="background:#b45309;color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:99px;">SUPERTRAZABILIDAD RBAC • 14 ROLES + 5 ROLES EXTRA • QR SHA-256</span>
               <h2 style="margin:4px 0 0;font-size:17px;color:#fff;">🛡️ Trazabilidad, Control de Cuentas, Roles Extra y Bitácora</h2>
             </div>
             <div style="display:flex;gap:5px;flex-wrap:wrap;">
@@ -181,7 +183,7 @@
 
           ${sub === "usuarios" ? `
             <form id="tz-new-f" style="background:#070d19;border:1px solid #1e3a8a;border-radius:11px;padding:11px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,165px),1fr));gap:7px;margin-bottom:12px;">
-              <input id="tzn-nom" type="text" required placeholder="Nombre completo (ej. Encargada Comedor)" style="background:#0b1322;border:1px solid #334155;color:#fff;padding:8px;border-radius:7px;font-size:12px;"/>
+              <input id="tzn-nom" type="text" required placeholder="Nombre completo" style="background:#0b1322;border:1px solid #334155;color:#fff;padding:8px;border-radius:7px;font-size:12px;"/>
               <input id="tzn-mail" type="email" required placeholder="usuario@est.mep.go.cr" style="background:#0b1322;border:1px solid #334155;color:#fff;padding:8px;border-radius:7px;font-size:12px;"/>
               <select id="tzn-rol" style="background:#0b1322;border:1px solid #334155;color:#fff;padding:8px;border-radius:7px;font-size:12px;">
                 ${ROLES_PRINCIPALES.map(r => `<option value="${r}">${r}</option>`).join("")}
@@ -227,9 +229,7 @@
                         <div style="display:flex;gap:4px;flex-wrap:wrap;">
                           ${ROLES_EXTRA_DEF.map(er => {
                             const on = exList.includes(er.id);
-                            const bgEx = on ? "#059669" : "#1e293b";
-                            const bdEx = on ? "#34d399" : "#334155";
-                            return `<button type="button" data-exr="${er.id}" data-uid="${u.id}" title="${er.desc}" class="tz-ex" style="background:${bgEx};color:#fff;border:1px solid ${bdEx};padding:2px 6px;border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;">${on ? "✓ " : ""}${er.lbl}</button>`;
+                            return `<button type="button" data-exr="${er.id}" data-uid="${u.id}" title="${er.desc}" class="tz-ex" style="background:${on ? '#059669' : '#1e293b'};color:#fff;border:1px solid ${on ? '#34d399' : '#334155'};padding:2px 6px;border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;">${on ? "✓ " : ""}${er.lbl}</button>`;
                           }).join("")}
                         </div>
                       `}

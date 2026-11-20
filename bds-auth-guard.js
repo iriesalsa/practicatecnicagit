@@ -251,9 +251,9 @@ window.addEventListener("error", function (ev) {
       institucionCorta: "CTP Mercedes Norte",
       regional: "Dirección Regional de Heredia",
       circuito: "Circuito 02",
-      escudo: "/escudo-ctpmn-oficial.jpeg?v=239",
-      mascota: "/buho-oficial.png?v=239",
-      logoMep: "/logo-mep-oficial.png?v=239"
+      escudo: "/escudo-ctpmn-oficial.jpeg?v=240",
+      mascota: "/buho-oficial.png?v=240",
+      logoMep: "/logo-mep-oficial.png?v=240"
     };
     if (!window.BDS_BRAND) return def;
     const b = window.BDS_BRAND.get();

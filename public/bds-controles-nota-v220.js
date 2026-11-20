@@ -241,3 +241,44 @@
     });
   }
 })();
+
+/* bds-no-wheel-on-inputs-v222 */
+(function () {
+  if (typeof window === "undefined" || typeof document === "undefined") return;
+
+  function bloquearWheelEnControles() {
+    const inputs = document.querySelectorAll('input[type="number"], .bds-stepper-input, .bds-stepper-box');
+    inputs.forEach((el) => {
+      if (el.getAttribute("data-bds-no-wheel") === "1") return;
+      el.setAttribute("data-bds-no-wheel", "1");
+      el.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        const targetInput = el.tagName === "INPUT" ? el : el.querySelector("input");
+        if (targetInput && document.activeElement === targetInput) {
+          targetInput.blur();
+        }
+        if (typeof window.scrollBy === "function") {
+          window.scrollBy({ top: e.deltaY || 0, left: e.deltaX || 0, behavior: "auto" });
+        }
+      }, { passive: false });
+    });
+  }
+
+  if (window.BDS_CONTROLES_NOTA_V220 && typeof window.BDS_CONTROLES_NOTA_V220.crearControlEditable === "function") {
+    const origCrear = window.BDS_CONTROLES_NOTA_V220.crearControlEditable;
+    window.BDS_CONTROLES_NOTA_V220.crearControlEditable = function (opts) {
+      const box = origCrear.apply(this, arguments);
+      setTimeout(bloquearWheelEnControles, 0);
+      return box;
+    };
+  }
+
+  if (typeof window.addEventListener === "function") {
+    window.addEventListener("DOMContentLoaded", () => {
+      bloquearWheelEnControles();
+      if (typeof MutationObserver !== "undefined" && document.body) {
+        new MutationObserver(() => bloquearWheelEnControles()).observe(document.body, { childList: true, subtree: true });
+      }
+    });
+  }
+})();

@@ -565,13 +565,13 @@
         if (!pool.length) pool = soloArea;
       }
 
-      const arr = pool.slice();
+      /* bds-norepeat-v193 */ window.__BDS_SEEN_Q = window.__BDS_SEEN_Q || {}; const seenKey = String(area || "ALL"); const seenSet = window.__BDS_SEEN_Q[seenKey] || new Set(); let fresh = pool.filter(x => !seenSet.has(x.q)); if (fresh.length < (Number(cantidad) || 20)) { seenSet.clear(); fresh = pool.slice(); } window.__BDS_SEEN_Q[seenKey] = seenSet; const arr = fresh.slice();
       for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [arr[i], arr[j]] = [arr[j], arr[i]];
       }
       const qty = Math.min(Number(cantidad) || 20, arr.length);
-      return arr.slice(0, qty).map(it => {
+      const picked = arr.slice(0, qty); picked.forEach(it => seenSet.add(it.q)); return picked.map(it => {
         const opts = (it.o || []).map((txt, idx) => ({ txt, ok: idx === (it.c || 0) }));
         for (let i = opts.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));

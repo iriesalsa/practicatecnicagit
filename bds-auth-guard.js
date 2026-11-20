@@ -1,22 +1,29 @@
-/* bds-anti-blank-v1901 */
+/* bds-anti-blank-v193 */
 window.addEventListener("error", function (ev) {
   try {
-    if (!document.getElementById("bds-shell") && !document.getElementById("bds-login-v184") && !document.getElementById("bds-paywall-v190")) {
+    if (!document.getElementById("bds-shell") && !document.getElementById("bds-login-v193") && !document.getElementById("bds-paywall-v190")) {
       var box = document.createElement("div");
       box.id = "bds-rescue-ui";
       box.style.cssText = "position:fixed;inset:0;background:#060c17;color:#f1f5f9;display:flex;align-items:center;justify-content:center;padding:20px;z-index:999999;font-family:Inter,sans-serif;";
       box.innerHTML = '<div style="max-width:420px;background:#0b1322;border:2px solid #38bdf8;border-radius:14px;padding:22px;text-align:center;">' +
         '<h2 style="margin:0 0 8px;color:#38bdf8;">Recuperación Automática</h2>' +
-        '<p style="font-size:13px;color:#cbd5e1;margin:0 0 14px;">Se detectó un dato en caché antiguo (' + (ev.message || 'error de carga') + '). Presiona el botón para reiniciar limpio.</p>' +
+        '<p style="font-size:13px;color:#cbd5e1;margin:0 0 14px;">Se detectó caché antiguo (' + (ev.message || 'error de carga') + '). Presione para recargar limpio.</p>' +
         '<button onclick="sessionStorage.clear();localStorage.removeItem(\'bds_session_v184_ctpmn_c02\');location.reload(true);" style="background:#059669;color:#fff;border:none;padding:11px 18px;border-radius:8px;font-weight:800;cursor:pointer;">🔄 Recargar Plataforma</button></div>';
       document.body.appendChild(box);
     }
   } catch (e) {}
 });
+
 (function () {
   var sesionActiva = null;
-  /* bds-pwa-detect-v191 */
   var bdsDeferredPrompt = null;
+
+  const SESSION_KEY = "bds_session_v184_ctpmn_c02";
+  const LOCK_KEY = "bds_lock_attempts_v184";
+  const XP_KEY = "bds_xp_profile_v184";
+  const CHAT_KEY = "bds_chats_v184_c02";
+  const SECCIONES = ["7-1","7-2","8-1","8-2","9-1","9-2","10-C","10-C-3","10-1","11-1","11-2","12-1","12-2"];
+
   function bdsIsAppInstalled() {
     return (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true;
   }
@@ -31,42 +38,144 @@ window.addEventListener("error", function (ev) {
     var btn = document.getElementById("bds-pwa-install-btn");
     if (btn) btn.style.display = "none";
   });
-  const SESSION_KEY = "bds_session_v180_ctpmn_c02";
-  const LOCK_KEY = "bds_lock_attempts_v180";
-  const TRIAL_KEY = "bds_trial_start_v180";
-  const XP_KEY = "bds_xp_profile_v180";
-  const CHAT_KEY = "bds_chats_v180_c02";
-
-  const NIVELES = [7, 8, 9, 10, 11, 12];
-  const SECCIONES = [];
-  NIVELES.forEach(n => [1, 2, 3, 4].forEach(g => SECCIONES.push(`${n}-${g}`)));
-
-  const ROLES = [
-    { rol: "Estudiante", sec: true, ic: "🎒", desc: "Prácticas guiadas, simulacros (10–60), tu horario A/B, justificaciones y juegos." },
-    { rol: "Docente MEP", sec: true, ic: "👨‍🏫", desc: "Horario de 20h propiedad, registro de notas Excel CSV, permisos y canales A/B." },
-    { rol: "Director(a)", sec: false, ic: "🏛️", desc: "Bandeja ejecutiva de aprobación 1-clic, horarios globales, actas CSV y auditoría QR." },
-    { rol: "Ministro(a) MEP", sec: false, ic: "🇨🇷", desc: "Supervisión macro de educación técnica, malla de 22 áreas y estándares DUA/Kaizen." },
-    { rol: "Auxiliar Administrativo", sec: false, ic: "📋", desc: "Control de justificaciones estudiantiles, tardías, horarios por sección y carnés QR." },
-    { rol: "Guarda / Seguridad", sec: false, ic: "🛡️", desc: "Escáner y validador criptográfico QR SHA-256 de portón y canal operativo de seguridad." },
-    { rol: "Conserje / Mantenimiento", sec: false, ic: "🛠️", desc: "Horarios de laboratorios/aulas por bloque, canal operativo 5S y credencial digital." },
-    { rol: "Encargada Comedor / Junta", sec: false, ic: "🍽️", desc: "Escáner QR de comedor, venta de tiquetes, aprobación SINPE, menús MEP A–E y cierre de caja." },
-    { rol: "Particular (MOPT / Admisión)", sec: false, ic: "🎯", desc: "Acceso particular (₡2,500/año o ₡3,500 vitalicio): MOPT, Admisión UCR/TEC/UNA, 29 áreas, juegos, hábitos y racha." },
-    { rol: "SuperAdmin", sec: false, ic: "👑", desc: "Control integral de la PWA, los 8 perfiles, seguridad RBAC, malla MEP y comunicaciones." }
-  ];
-
-  const IMG_BUHO = (window.BDS_BRAND ? window.BDS_BRAND.get().mascota : "/=183");
-  const IMG_ESCUDO = (window.BDS_BRAND ? window.BDS_BRAND.get().escudo : "/=183");
-  const IMG_MEP = (window.BDS_BRAND ? window.BDS_BRAND.get().logoMep : "/=183");
-  const GOOGLE_SVG = `<svg width="17" height="17" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>`;
-
-  const GROSERIAS = ["tonto","idiota","estupido","imbecil","malparido","mierda","puta","cabron","carajo","basura","pendejo","hijueputa","carepicha","playo","zorra"];
-  const filtrarObscenidades = (txt) => GROSERIAS.reduce((acc, w) => acc.replace(new RegExp(`\\b${w}\\b`, "gi"), "****"), txt);
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v192.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v192.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v193.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v193.js").catch(() => {});
     }).catch(() => {});
+  }
+
+  const ROLES_ALL = [
+    { rol: "Estudiante", ic: "🎒", desc: "Prácticas, simulacros, admisión, juegos, horarios, comedor QR y carné digital." },
+    { rol: "Particular (MOPT / Admisión)", ic: "🎯", desc: "Acceso particular (₡2,500/año o ₡3,500 vitalicio): MOPT, Admisión, 29 áreas, hábitos y juegos." },
+    { rol: "Docente MEP", ic: "👨‍🏫", desc: "Notas MEP (35/35), asistencia automática REA, planeamiento IA, permisos, justificaciones y horarios." },
+    { rol: "Director(a)", ic: "🏛️", desc: "Dirección institucional, aprobación de permisos EDUS y justificaciones, horarios IA, comedor y reportes." },
+    { rol: "Padre/Madre", ic: "👨‍👩‍👧‍👦", desc: "Seguimiento estudiantil, horarios, comedor QR, agenda y justificaciones." },
+    { rol: "Encargada Comedor / Junta", ic: "🍽️", desc: "Escáner QR de comedor, becas PANEA, tiquetes SINPE/efectivo, menús A–E y cierre de caja." },
+    { rol: "Auxiliar Administrativo", ic: "📋", desc: "Matrícula, horarios IA, justificaciones, comedor QR y validación documental." },
+    { rol: "SuperAdmin", ic: "👑", desc: "Control soberano total: trazabilidad y bitácora de accesos, instituciones CRUD, cortesías y auditoría." }
+  ];
+
+  // Etiquetas cortas, limpias y 100% sin paréntesis innecesarios ni null
+  const TAB_META = {
+    inicio: "🏠 Inicio",
+    trazabilidad: "🛡️ Trazabilidad",
+    instituciones: "🏛️ Instituciones",
+    horarios: "📅 Horarios",
+    permisos: "📝 Gestionar Permisos",
+    justificaciones: "🎓 Gestionar Justificaciones",
+    notas_rea: "📊 Notas MEP",
+    planeamiento_ia: "🤖 Planeamiento IA",
+    comedor: "🍽️ Comedor",
+    agenda: "📆 Agenda",
+    reportes: "🗂️ Respaldos",
+    practica: "🧭 Práctica",
+    simulacro: "⏱️ Simulacro",
+    admision: "🎓 Admisión",
+    simulador_mopt: "🚗 MOPT",
+    opendocs: "📖 Open Docs",
+    biblioteca: "📚 Biblioteca",
+    juegos: "🎮 Juegos",
+    habitos: "🔥 Hábitos",
+    carnet_qr: "🪪 Carné QR",
+    direccion: "📈 Dirección"
+  };
+
+  function getPermisosRol(rol, esVisitante) {
+    if (esVisitante) {
+      return {
+        tabs: ["practica", "juegos"],
+        chats: false, identidad: false, admisionHome: false, mallaHome: false,
+        quick: [], cards: ["practica", "juegos"]
+      };
+    }
+    const MAP = {
+      "SuperAdmin": {
+        tabs: ["inicio","trazabilidad","instituciones","horarios","permisos","justificaciones","notas_rea","planeamiento_ia","comedor","agenda","reportes","practica","simulacro","admision","simulador_mopt","opendocs","biblioteca","juegos","carnet_qr"],
+        chats: true, identidad: true, admisionHome: true, mallaHome: true,
+        quick: ["trazabilidad","instituciones","horarios","permisos","justificaciones","notas_rea","planeamiento_ia","comedor","simulador_mopt","identidad"],
+        cards: ["practica","simulacro","biblioteca","juegos"]
+      },
+      "Director(a)": {
+        tabs: ["inicio","direccion","horarios","permisos","justificaciones","comedor","notas_rea","agenda","reportes","biblioteca","carnet_qr"],
+        chats: true, identidad: true, admisionHome: false, mallaHome: false,
+        quick: ["permisos","justificaciones","horarios","comedor","notas_rea","agenda","reportes","identidad"],
+        cards: ["biblioteca"]
+      },
+      "Docente MEP": {
+        tabs: ["inicio","notas_rea","planeamiento_ia","horarios","permisos","justificaciones","comedor","agenda","reportes","practica","simulacro","admision","simulador_mopt","opendocs","biblioteca","juegos","carnet_qr"],
+        chats: true, identidad: false, admisionHome: true, mallaHome: true,
+        quick: ["notas_rea","planeamiento_ia","horarios","permisos","justificaciones","comedor"],
+        cards: ["practica","simulacro","biblioteca","juegos"]
+      },
+      "Estudiante": {
+        tabs: ["inicio","habitos","practica","simulacro","admision","simulador_mopt","juegos","horarios","comedor","agenda","justificaciones","opendocs","biblioteca","carnet_qr"],
+        chats: true, identidad: false, admisionHome: true, mallaHome: true,
+        quick: ["horarios","comedor","justificaciones","simulador_mopt","habitos","carnet_qr"],
+        cards: ["practica","simulacro","biblioteca","juegos"]
+      },
+      "Particular (MOPT / Admisión)": {
+        tabs: ["inicio","habitos","simulador_mopt","admision","practica","simulacro","opendocs","juegos"],
+        chats: false, identidad: false, admisionHome: true, mallaHome: true,
+        quick: ["simulador_mopt","habitos","opendocs"],
+        cards: ["practica","simulacro","juegos"]
+      },
+      "Padre/Madre": {
+        tabs: ["inicio","horarios","justificaciones","comedor","agenda","biblioteca"],
+        chats: true, identidad: false, admisionHome: false, mallaHome: false,
+        quick: ["horarios","justificaciones","comedor","agenda"],
+        cards: ["biblioteca"]
+      },
+      "Encargada Comedor / Junta": {
+        tabs: ["inicio","comedor","horarios","permisos","carnet_qr"],
+        chats: true, identidad: false, admisionHome: false, mallaHome: false,
+        quick: ["comedor","permisos","carnet_qr"],
+        cards: []
+      },
+      "Auxiliar Administrativo": {
+        tabs: ["inicio","horarios","justificaciones","permisos","comedor","agenda","carnet_qr"],
+        chats: true, identidad: false, admisionHome: false, mallaHome: false,
+        quick: ["horarios","justificaciones","comedor","carnet_qr"],
+        cards: []
+      }
+    };
+    const cfg = MAP[rol] || MAP["Estudiante"];
+    cfg.tabs = cfg.tabs.filter(k => Boolean(TAB_META[k]));
+    return cfg;
+  }
+
+  function brand() {
+    const def = {
+      institucion: "Colegio Técnico Profesional Mercedes Norte",
+      institucionCorta: "CTP Mercedes Norte",
+      regional: "Dirección Regional de Heredia",
+      circuito: "Circuito 02",
+      escudo: "/escudo-ctpmn-oficial.jpeg?v=193",
+      mascota: "/buho-oficial.png?v=193",
+      logoMep: "/logo-mep-oficial.png?v=193"
+    };
+    if (!window.BDS_BRAND) return def;
+    const b = window.BDS_BRAND.get();
+    return { ...def, ...b, mascota: b.mascota && !b.mascota.includes("gordito") ? b.mascota : def.mascota };
+  }
+
+  function normMail(c) { return (c || "").toLowerCase().trim(); }
+  function esSuperAdmin(correo) {
+    const c = normMail(correo);
+    return c === "maxi.salsa@gmail.com" || c === "max.salazar.sanchez@mep.go.cr";
+  }
+  function esDirectoraAutorizada(correo) {
+    const c = normMail(correo);
+    if (!/@(mep\.go\.cr|gmail\.com)$/.test(c)) return false;
+    const loc = c.split("@")[0].normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return loc.includes("laura") && loc.includes("ramon");
+  }
+  function validarCorreo(correo) {
+    const c = normMail(correo);
+    if (!/^[a-z0-9._%+-]+@(est\.mep\.go\.cr|mep\.go\.cr|gmail\.com)$/.test(c)) return false;
+    const loc = c.split("@")[0];
+    return loc.length >= 3 && !/(asdasd|qwerty|testtest|xxxx)/i.test(loc);
   }
 
   async function sha256Hex(texto) {
@@ -96,35 +205,16 @@ window.addEventListener("error", function (ev) {
         if (seed / 233280 > 0.47) rects += `<rect x="${c * cell}" y="${r * cell}" width="${cell + 0.25}" height="${cell + 0.25}" fill="#0f172a"/>`;
       }
     }
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${sz} ${sz}" width="${sz}" height="${sz}" style="background:#fff;border-radius:10px;padding:6px;box-sizing:border-box;"><rect width="${sz}" height="${sz}" fill="#fff" rx="8"/>${rects}<image href="${IMG_BUHO}" x="${sz*0.35}" y="${sz*0.35}" width="${sz*0.30}" height="${sz*0.30}"/></svg>`;
-  }
-
-  function esSuperAdmin(correo) {
-    const c = (correo || "").toLowerCase().trim();
-    return c === "maxi.salsa@gmail.com" || c === "max.salazar.sanchez@mep.go.cr";
-  }
-
-  function validarCorreo(correo) {
-    const c = (correo || "").toLowerCase().trim();
-    if (!/^[a-z0-9._%+-]+@(est\.mep\.go\.cr|mep\.go\.cr|gmail\.com)$/.test(c)) return false;
-    const local = c.split("@")[0];
-    if (local.length < 3 || /(asdasd|qwerty|asfsd|testtest|xxxx)/i.test(local)) return false;
-    return true;
-  }
-
-  function diasPrueba() {
-    let t = localStorage.getItem(TRIAL_KEY);
-    if (!t) { t = String(Date.now()); localStorage.setItem(TRIAL_KEY, t); }
-    return Math.max(0, 13 - Math.floor((Date.now() - Number(t)) / 86400000));
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${sz} ${sz}" width="${sz}" height="${sz}" style="background:#fff;border-radius:10px;padding:6px;box-sizing:border-box;"><rect width="${sz}" height="${sz}" fill="#fff" rx="8"/>${rects}<image href="${brand().mascota}" x="${sz*0.35}" y="${sz*0.35}" width="${sz*0.30}" height="${sz*0.30}"/></svg>`;
   }
 
   function getXP() {
     const hoy = new Date().toDateString();
     let d;
     try { d = JSON.parse(localStorage.getItem(XP_KEY)); } catch {}
-    if (!d) d = { xp: 100, racha: 1, ultimoDia: hoy, medallas: ["🦉 Búho Azul Original"] };
+    if (!d) d = { xp: 100, racha: 1, ultimoDia: hoy, medallas: ["🦉 Búho Azul"] };
     if (d.ultimoDia !== hoy) { d.racha += 1; d.ultimoDia = hoy; localStorage.setItem(XP_KEY, JSON.stringify(d)); }
-    d.nivel = d.xp >= 2000 ? "Leyenda Turing" : (d.xp >= 1200 ? "Arquitecto Senior" : (d.xp >= 600 ? "Especialista MEP" : (d.xp >= 250 ? "Técnico Avanzado" : "Aprendiz CTPMN")));
+    d.nivel = d.xp >= 2000 ? "Leyenda Turing" : (d.xp >= 1200 ? "Arquitecto Senior" : (d.xp >= 600 ? "Especialista MEP" : (d.xp >= 250 ? "Técnico Avanzado" : "Aprendiz")));
     return d;
   }
 
@@ -147,114 +237,71 @@ window.addEventListener("error", function (ev) {
   }
 
   function cerrarSesion() {
-    const keep = [LOCK_KEY, XP_KEY, CHAT_KEY, TRIAL_KEY, "bds_permisos_v180_c02", "bds_notas_excel_v180_c02"].map(k => [k, localStorage.getItem(k)]);
-    sessionStorage.clear(); localStorage.clear();
-    keep.forEach(([k, v]) => { if (v !== null) localStorage.setItem(k, v); });
+    sessionStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(SESSION_KEY);
+    sesionActiva = null;
     document.body.classList.remove("bds-authenticated");
-    ["bds-header","bds-subnav","bds-shell","bds-dock","bds-drawer","bds-chat-modal"].forEach(id => { const e = document.getElementById(id); if (e) e.remove(); });
+    ["bds-header","bds-subnav","bds-preview-bar","bds-shell","bds-dock","bds-drawer","bds-chat-modal","bds-paywall-v190"].forEach(id => { const e = document.getElementById(id); if (e) e.remove(); });
     mostrarLogin("login");
   }
 
   function setFavicon() {
     let l = document.querySelector("link[rel~='icon']");
     if (!l) { l = document.createElement("link"); l.rel = "icon"; document.head.appendChild(l); }
-    l.type = "image/svg+xml"; l.href = IMG_BUHO;
+    l.href = brand().mascota;
   }
 
   function inyectarEstilos() {
-    if (document.getElementById("bds-v180-css")) return;
+    if (document.getElementById("bds-v193-css")) return;
     const st = document.createElement("style");
-    st.id = "bds-v180-css";
+    st.id = "bds-v193-css";
     st.innerHTML = `
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
       *, *::before, *::after { box-sizing: border-box; }
       html, body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
         background: #060c17 !important; color: #f1f5f9 !important; margin: 0; padding: 0;
-        overflow-x: hidden; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
+        overflow-x: hidden; -webkit-font-smoothing: antialiased;
       }
       #root { display: none !important; }
-      /* bds-logos-universal-v183 */
       img[src*="logo-mep-oficial"], img[alt*="MEP"] {
-        background: #ffffff !important;
-        padding: 5px 11px !important;
-        border-radius: 9px !important;
-        object-fit: contain !important;
-        max-width: 100% !important;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.38) !important;
+        background: #ffffff !important; padding: 4px 9px !important; border-radius: 8px !important;
+        object-fit: contain !important; max-width: 100% !important;
       }
       img[src*="escudo-ctpmn-oficial"], img[alt*="Escudo"] {
-        background: #ffffff !important;
-        padding: 2px !important;
-        border-radius: 8px !important;
+        background: #ffffff !important; padding: 2px !important; border-radius: 7px !important;
         object-fit: contain !important;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.35) !important;
-      }
-      /* bds-logos-oficiales-css */
-      img[src*="logo-mep-oficial"] {
-        background: #ffffff !important;
-        padding: 5px 11px !important;
-        border-radius: 9px !important;
-        object-fit: contain !important;
-        max-width: 100% !important;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.38) !important;
-      }
-      img[src*="escudo-ctpmn-oficial"] {
-        background: #ffffff !important;
-        padding: 2px !important;
-        border-radius: 8px !important;
-        object-fit: contain !important;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.35) !important;
-      }
-      img[src*="logo-mep-oficial"] {
-        background: #ffffff !important;
-        padding: 5px 11px !important;
-        border-radius: 9px !important;
-        object-fit: contain !important;
-        max-width: 100% !important;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.38) !important;
-      }
-      img[src*="escudo-ctpmn-oficial"] {
-        background: #ffffff !important;
-        padding: 2px !important;
-        border-radius: 8px !important;
-        object-fit: contain !important;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.35) !important;
       }
       #bds-header {
         position: sticky; top: 0; z-index: 99990;
-        background: rgba(11,18,32,0.97); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        background: rgba(11,18,32,0.97); backdrop-filter: blur(12px);
         border-bottom: 1px solid #1e293b;
-        padding: max(8px, env(safe-area-inset-top)) 14px 8px;
-        display: flex; align-items: center; justify-content: space-between; gap: 8px;
+        padding: max(8px, env(safe-area-inset-top)) 10px 8px;
+        display: flex; align-items: center; justify-content: space-between; gap: 6px;
       }
       #bds-subnav {
-        position: sticky; top: 53px; z-index: 99985;
+        position: sticky; top: 52px; z-index: 99985;
         background: #0b1322; border-bottom: 1px solid #1e293b;
-        padding: 7px 14px; display: flex; gap: 7px; overflow-x: auto; white-space: nowrap;
-        -webkit-overflow-scrolling: touch; scrollbar-width: none;
+        padding: 7px 10px; display: flex; gap: 6px; overflow-x: auto; white-space: nowrap; scrollbar-width: none;
       }
       #bds-subnav::-webkit-scrollbar { display: none; }
       .bds-nav-btn {
         background: #131f33; border: 1px solid #26354d; color: #e2e8f0;
-        padding: 8px 13px; border-radius: 8px; font-size: 12px; font-weight: 700;
-        cursor: pointer; flex-shrink: 0; min-height: 38px; transition: all .15s;
+        padding: 7px 12px; border-radius: 8px; font-size: 12px; font-weight: 700;
+        cursor: pointer; flex-shrink: 0; min-height: 36px; transition: all .15s;
       }
       .bds-nav-btn.active, .bds-nav-btn:hover { background: #1d4ed8; border-color: #38bdf8; color: #fff; }
-      #bds-shell { max-width: 1240px; margin: 0 auto; padding: 14px 12px calc(92px + env(safe-area-inset-bottom)); }
-      .bds-card { background: #0b1322; border: 1px solid #1e293b; border-radius: 14px; padding: 16px; transition: border-color .15s, transform .15s; }
-      .bds-card:hover { border-color: #38bdf8; }
+      #bds-shell { max-width: 1220px; margin: 0 auto; padding: 12px 10px calc(92px + env(safe-area-inset-bottom)); }
+      .bds-card { background: #0b1322; border: 1px solid #1e293b; border-radius: 14px; padding: 15px; }
       .bds-quick-btn {
-        border: none; border-radius: 9px; padding: 10px 13px; font-size: 12px; font-weight: 800;
-        color: #fff; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; min-height: 42px;
-        transition: filter .15s, transform .15s;
+        border: none; border-radius: 9px; padding: 9px 13px; font-size: 12px; font-weight: 800;
+        color: #fff; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; min-height: 40px;
       }
-      .bds-quick-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
       #bds-dock {
         position: fixed; bottom: 0; left: 0; right: 0; z-index: 99992;
-        background: rgba(11,18,32,0.98); backdrop-filter: blur(12px);
-        border-top: 1px solid #1e293b; display: none; grid-template-columns: repeat(5, 1fr);
-        padding: 6px 4px max(6px, env(safe-area-inset-bottom));
+        background: rgba(11,18,32,0.98); border-top: 1px solid #1e293b;
+        display: none; grid-template-columns: repeat(5, 1fr);
+        padding: 5px 4px max(6px, env(safe-area-inset-bottom));
       }
       .bds-dock-b {
         background: none; border: none; color: #94a3b8; font-size: 10.5px; font-weight: 700;
@@ -262,66 +309,57 @@ window.addEventListener("error", function (ev) {
         cursor: pointer; padding: 5px 2px; min-height: 46px; border-radius: 8px;
       }
       .bds-dock-b.active { color: #38bdf8; background: rgba(29,78,216,0.22); }
-      @media (max-width: 820px) {
+      @media (max-width: 860px) {
         #bds-dock { display: grid; }
         .hide-sm { display: none !important; }
-        #bds-shell { padding: 12px 10px calc(94px + env(safe-area-inset-bottom)); }
+        #btn-ch { display: none !important; }
       }
-            /* bds-responsive-v187 */
       @media (max-width: 640px) {
-        #bds-header { padding: 8px 8px; gap: 4px; }
         #bds-shell { padding: 10px 8px 98px; }
-        .bds-card { padding: 12px; border-radius: 12px; }
-        .bds-quick-btn { width: 100%; justify-content: center; font-size: 13px; min-height: 44px; }
-        #bds-subnav { top: 50px; padding: 6px 8px; }
-        .bds-nav-btn { font-size: 12.5px; padding: 8px 12px; min-height: 40px; }
+        .bds-card { padding: 12px; }
+        .bds-quick-btn { flex: 1 1 calc(50% - 6px); justify-content: center; font-size: 12px; min-height: 44px; }
       }
-            /* bds-responsive-v187 */
-      @media (max-width: 640px) {
-        #bds-header { padding: 8px 8px; gap: 4px; }
-        #bds-shell { padding: 10px 8px 98px; }
-        .bds-card { padding: 12px; border-radius: 12px; }
-        .bds-quick-btn { width: 100%; justify-content: center; font-size: 13px; min-height: 44px; }
-        #bds-subnav { top: 50px; padding: 6px 8px; }
-        .bds-nav-btn { font-size: 12.5px; padding: 8px 12px; min-height: 40px; }
-      }
-      @media print {
-        #bds-header, #bds-subnav, #bds-dock, #bds-chat-modal { display: none !important; }
-        body, .bds-card { background: #fff !important; color: #000 !important; border-color: #ccc !important; }
-      }
+      @media print { #bds-header, #bds-subnav, #bds-preview-bar, #bds-dock, #bds-chat-modal { display: none !important; } }
     `;
     document.head.appendChild(st);
   }
 
-  // ==================== LOGIN SOBERANO ESTÉTICO ====================
+  const GOOGLE_SVG = `<svg width="17" height="17" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>`;
+  const GROSERIAS = ["tonto","idiota","estupido","imbecil","malparido","mierda","puta","cabron","carajo","basura","pendejo","hijueputa","carepicha","playo","zorra"];
+  const filtrarObscenidades = (txt) => GROSERIAS.reduce((acc, w) => acc.replace(new RegExp(`\\b${w}\\b`, "gi"), "****"), txt);
+
+  // ==================== LOGIN SOBERANO (ESTUDIANTE POR DEFECTO • LAURA RAMÓN DIRECTORA) ====================
   function mostrarLogin(vista = "login") {
     inyectarEstilos(); setFavicon();
-    const old = document.getElementById("bds-login-v180"); if (old) old.remove();
+    const old = document.getElementById("bds-login-v193"); if (old) old.remove();
     const gate = document.createElement("div");
-    gate.id = "bds-login-v180";
-    gate.style.cssText = "position:fixed;inset:0;background:radial-gradient(circle at 50% 0%,#0f2247 0%,#060c17 72%);z-index:300000;display:flex;align-items:flex-start;justify-content:center;padding:16px 14px;overflow-y:auto;min-height:100dvh;";
+    gate.id = "bds-login-v193";
+    gate.style.cssText = "position:fixed;inset:0;background:radial-gradient(circle at 50% 0%,#0f2247 0%,#060c17 72%);z-index:300000;display:flex;align-items:flex-start;justify-content:center;padding:14px 10px;overflow-y:auto;min-height:100dvh;";
 
     const getInt = () => parseInt(localStorage.getItem(LOCK_KEY) || "0", 10);
     const setInt = (n) => localStorage.setItem(LOCK_KEY, String(n));
 
     function draw() {
-      const intentos = getInt(), locked = intentos >= 5;
+      const b = brand();
+      const locked = getInt() >= 5;
+      const th = window.BDS_UI ? window.BDS_UI.getTheme() : "dark";
+      const lg = window.BDS_UI ? window.BDS_UI.getLang() : "es";
 
       if (vista === "recover") {
         gate.innerHTML = `
-          <div style="background:#0b1322;border:1px solid #1e293b;border-radius:16px;max-width:400px;width:100%;padding:26px;box-shadow:0 24px 60px rgba(0,0,0,0.85);">
-            <div style="text-align:center;margin-bottom:16px;">
-              <img src="${IMG_BUHO}" width="54" height="54" alt="Búho Azul Original"/>
-              <h2 style="margin:8px 0 2px;font-size:17px;color:#fff;">Recuperación de Acceso</h2>
+          <div class="bds-card" style="max-width:400px;width:100%;padding:22px;margin:auto 0;">
+            <div style="text-align:center;margin-bottom:14px;">
+              <img src="${b.mascota}" width="54" height="54" alt="Búho Azul" style="border-radius:50%;"/>
+              <h2 style="margin:8px 0 2px;font-size:17px;">Recuperación de Acceso</h2>
               <p style="margin:0;font-size:11.5px;color:#94a3b8;">Restablecimiento seguro de credencial institucional</p>
             </div>
             <div id="rc-msg" style="display:none;padding:9px;border-radius:8px;font-size:12px;margin-bottom:10px;text-align:center;font-weight:600;"></div>
             <form id="rc-f" style="display:flex;flex-direction:column;gap:10px;">
-              <input id="rc-m" type="email" placeholder="usuario@est.mep.go.cr" required style="width:100%;background:#070d19;border:1px solid #334155;border-radius:8px;padding:11px;color:#fff;font-size:13px;"/>
-              <input id="rc-p1" type="password" placeholder="Nueva contraseña (mínimo 6 caracteres)" required minlength="6" style="width:100%;background:#070d19;border:1px solid #334155;border-radius:8px;padding:11px;color:#fff;font-size:13px;"/>
-              <input id="rc-p2" type="password" placeholder="Confirmar nueva contraseña" required minlength="6" style="width:100%;background:#070d19;border:1px solid #334155;border-radius:8px;padding:11px;color:#fff;font-size:13px;"/>
-              <button type="submit" style="background:#1d4ed8;color:#fff;border:none;padding:11px;border-radius:8px;font-weight:700;cursor:pointer;min-height:44px;">Actualizar Credencial</button>
-              <button type="button" id="rc-bk" style="background:transparent;color:#94a3b8;border:1px solid #1e293b;padding:10px;border-radius:8px;font-weight:600;cursor:pointer;min-height:42px;">Volver al inicio</button>
+              <input id="rc-m" type="email" placeholder="usuario@est.mep.go.cr" required style="width:100%;background:#070d19;border:1px solid #334155;border-radius:8px;padding:10px;color:#fff;font-size:13px;"/>
+              <input id="rc-p1" type="password" placeholder="Nueva contraseña (mínimo 6 caracteres)" required minlength="6" style="width:100%;background:#070d19;border:1px solid #334155;border-radius:8px;padding:10px;color:#fff;font-size:13px;"/>
+              <input id="rc-p2" type="password" placeholder="Confirmar nueva contraseña" required minlength="6" style="width:100%;background:#070d19;border:1px solid #334155;border-radius:8px;padding:10px;color:#fff;font-size:13px;"/>
+              <button type="submit" style="background:#1d4ed8;color:#fff;border:none;padding:11px;border-radius:8px;font-weight:700;cursor:pointer;">Actualizar Credencial</button>
+              <button type="button" id="rc-bk" style="background:transparent;color:#94a3b8;border:1px solid #334155;padding:9px;border-radius:8px;font-weight:600;cursor:pointer;">Volver al inicio</button>
             </form>
           </div>
         `;
@@ -330,142 +368,189 @@ window.addEventListener("error", function (ev) {
           e.preventDefault();
           const m = document.getElementById("rc-m").value.trim(), p1 = document.getElementById("rc-p1").value, p2 = document.getElementById("rc-p2").value;
           const msg = document.getElementById("rc-msg"); msg.style.display = "block";
-          if (!validarCorreo(m) || p1 !== p2) { msg.style.background = "#450a0a"; msg.style.color = "#fca5a5"; msg.innerText = "Verifique que el correo sea válido y las contraseñas coincidan."; return; }
-          setInt(0); msg.style.background = "#064e3b"; msg.style.color = "#6ee7b7"; msg.innerText = "Credencial restablecida. Redirigiendo...";
-          setTimeout(() => { vista = "login"; draw(); }, 900);
+          if (!validarCorreo(m) || p1 !== p2) { msg.style.background = "#450a0a"; msg.style.color = "#fca5a5"; msg.innerText = "Verifique correo y coincidencia de contraseñas."; return; }
+          setInt(0); msg.style.background = "#064e3b"; msg.style.color = "#6ee7b7"; msg.innerText = "Credencial restablecida.";
+          setTimeout(() => { vista = "login"; draw(); }, 800);
         };
         return;
       }
 
       gate.innerHTML = `
-        <div style="background:#0b1322;border:1px solid #1e293b;border-radius:16px;max-width:420px;width:100%;padding:26px;box-shadow:0 24px 60px rgba(0,0,0,0.85);">
-          <div style="display:flex;justify-content:center;align-items:center;gap:14px;margin-bottom:10px;">
-            <img src="${IMG_ESCUDO}" width="48" height="56" alt="Escudo CTP Mercedes Norte"/>
-            <img src="${IMG_BUHO}" width="56" height="56" alt="Búho Azul Original"/>
-          </div>
-          <div style="text-align:center;margin-bottom:12px;">
-            <h1 style="margin:0;font-size:22px;font-weight:900;letter-spacing:-0.02em;color:#fff;">prac<span style="color:#2dd4bf;">TICA</span>tecnica.com</h1>
-            <p style="margin:3px 0 0;font-size:11.5px;color:#cbd5e1;font-weight:600;">Colegio Técnico Profesional Mercedes Norte</p>
-            <p style="margin:1px 0 0;font-size:10.5px;color:#38bdf8;font-weight:700;">Dirección Regional de Heredia • Circuito 02</p>
-          </div>
-
-          <div style="display:flex;justify-content:center;margin-bottom:12px;">
-            <img src="${IMG_MEP}" style="height:40px;max-width:100%;object-fit:contain;" alt="Ministerio de Educación Pública de Costa Rica"/>
+        <div class="bds-card" style="max-width:420px;width:100%;padding:20px;margin:auto 0;box-shadow:0 24px 60px rgba(0,0,0,0.65);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <select id="lg-lang" data-no-i18n="true" style="background:#131f33;color:#fff;border:1px solid #334155;border-radius:7px;padding:5px 8px;font-size:11px;font-weight:700;">
+              <option value="es" ${lg==="es"?"selected":""}>🌐 ES</option>
+              <option value="en" ${lg==="en"?"selected":""}>🇺🇸 EN</option>
+              <option value="pt" ${lg==="pt"?"selected":""}>🇧🇷 PT</option>
+              <option value="fr" ${lg==="fr"?"selected":""}>🇫🇷 FR</option>
+            </select>
+            <button type="button" id="lg-theme" style="background:#131f33;color:#fbbf24;border:1px solid #334155;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;">${th==="light"?"🌙 Oscuro":"☀️ Claro"}</button>
           </div>
 
-          <div style="background:#070d19;border:1px solid #1e3a8a;border-radius:9px;padding:8px 10px;margin-bottom:12px;font-size:11px;color:#93c5fd;text-align:center;line-height:1.45;">
-            🎁 <b>13 días de prueba gratuita</b> con Google / MEP • Plan anual: <b>SINPE ₡3,500</b> (+506 6090 6359) o <b>$4.99</b>.
+          <div style="display:flex;justify-content:center;align-items:center;gap:14px;margin-bottom:8px;">
+            <img src="${b.escudo}" width="48" height="54" alt="Escudo Institucional"/>
+            <img src="${b.mascota}" width="54" height="54" alt="Búho Azul" style="border-radius:50%;"/>
+          </div>
+          <div style="text-align:center;margin-bottom:10px;">
+            <h1 data-no-i18n="true" style="margin:0;font-size:21px;font-weight:900;">prac<span style="color:#2dd4bf;">TICA</span>tecnica.com</h1>
+            <p style="margin:3px 0 0;font-size:11.5px;font-weight:700;">${b.institucion}</p>
+            <p style="margin:1px 0 0;font-size:10.5px;color:#38bdf8;font-weight:700;">${b.regional} • ${b.circuito}</p>
           </div>
 
-          <div id="lg-err" style="display:${locked ? 'block' : 'none'};background:#450a0a;border:1px solid #7f1d1d;color:#fca5a5;padding:9px;border-radius:8px;font-size:12px;margin-bottom:10px;text-align:center;font-weight:600;">
-            ${locked ? "Cuenta bloqueada tras 5 intentos fallidos. Comuníquese con soporte o use Recuperar contraseña." : ""}
+          <div style="display:flex;justify-content:center;margin-bottom:10px;">
+            <img src="${b.logoMep}" style="height:38px;max-width:100%;" alt="MEP Costa Rica"/>
           </div>
 
-          <form id="lg-f" style="display:flex;flex-direction:column;gap:9px;">
+          <div style="background:#070d19;border:1px solid #1e3a8a;border-radius:9px;padding:8px 10px;margin-bottom:11px;font-size:11px;color:#93c5fd;text-align:center;">
+            🎁 <b>13 días Beta gratis</b> • Institución <b>₡19,100/año</b> (Est. ₡1,000 • Doc. ₡2,000) • Particular: <b>₡2,500/año</b> o <b>₡3,500 vitalicio</b>
+          </div>
+
+          <div id="lg-err" style="display:${locked?'block':'none'};background:#450a0a;border:1px solid #7f1d1d;color:#fca5a5;padding:9px;border-radius:8px;font-size:12px;margin-bottom:10px;text-align:center;font-weight:600;">
+            ${locked ? "Cuenta bloqueada tras 5 intentos fallidos. Comuníquese con soporte." : ""}
+          </div>
+
+          <form id="lg-f" style="display:flex;flex-direction:column;gap:8px;">
             <div>
-              <label style="display:block;font-size:11px;color:#cbd5e1;margin-bottom:3px;">Correo Institucional o Gmail</label>
-              <input id="lg-m" type="email" placeholder="usuario@est.mep.go.cr" required autofocus ${locked ? "disabled" : ""} style="width:100%;background:#070d19;border:1px solid #334155;border-radius:8px;padding:10px 12px;color:#fff;font-size:13px;min-height:42px;"/>
+              <label style="display:block;font-size:11px;margin-bottom:3px;">Correo Institucional o Gmail</label>
+              <input id="lg-m" type="email" placeholder="usuario@est.mep.go.cr" required autofocus ${locked?"disabled":""} style="width:100%;background:#070d19;border:1px solid #334155;border-radius:8px;padding:9px 11px;color:#fff;font-size:13px;min-height:40px;"/>
             </div>
             <div>
-              <label style="display:block;font-size:11px;color:#cbd5e1;margin-bottom:3px;">Nombre Completo</label>
-              <input id="lg-n" type="text" placeholder="Nombre y apellidos" required ${locked ? "disabled" : ""} style="width:100%;background:#070d19;border:1px solid #334155;border-radius:8px;padding:10px 12px;color:#fff;font-size:13px;min-height:42px;"/>
+              <label style="display:block;font-size:11px;margin-bottom:3px;">Nombre Completo</label>
+              <input id="lg-n" type="text" placeholder="Nombre y apellidos" required ${locked?"disabled":""} style="width:100%;background:#070d19;border:1px solid #334155;border-radius:8px;padding:9px 11px;color:#fff;font-size:13px;min-height:40px;"/>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
               <div>
-                <label style="display:block;font-size:11px;color:#cbd5e1;margin-bottom:3px;">Perfil</label>
-                <select id="lg-r" ${locked ? "disabled" : ""} style="width:100%;background:#070d19;border:1px solid #334155;border-radius:8px;padding:9px;color:#fff;font-size:12px;min-height:42px;">
-                  ${ROLES.map(r => `<option value="${r.rol}">${r.ic} ${r.rol}</option>`).join("")}
+                <label style="display:block;font-size:11px;margin-bottom:3px;">Modalidad de Ingreso</label>
+                <select id="lg-r" ${locked?"disabled":""} style="width:100%;background:#070d19;border:1px solid #334155;border-radius:8px;padding:8px;color:#fff;font-size:12px;min-height:40px;">
+                  <option value="Estudiante">🎒 Estudiante (Predeterminado)</option>
+                  <option value="Particular (MOPT / Admisión)">🎯 Particular (MOPT / Admisión)</option>
+                  <option value="AUTO">🔐 Rol Asignado (Dirección / Docente)</option>
                 </select>
               </div>
               <div id="lg-swrap">
-                <label style="display:block;font-size:11px;color:#cbd5e1;margin-bottom:3px;">Sección</label>
-                <select id="lg-s" ${locked ? "disabled" : ""} style="width:100%;background:#070d19;border:1px solid #334155;border-radius:8px;padding:9px;color:#fff;font-size:12px;min-height:42px;">
-                  ${SECCIONES.map(sc => `<option value="${sc}" ${sc==="10-3"?"selected":""}>Sección ${sc}</option>`).join("")}
+                <label style="display:block;font-size:11px;margin-bottom:3px;">Sección</label>
+                <select id="lg-s" ${locked?"disabled":""} style="width:100%;background:#070d19;border:1px solid #334155;border-radius:8px;padding:8px;color:#fff;font-size:12px;min-height:40px;">
+                  ${SECCIONES.map(sc => `<option value="${sc}" ${sc==="11-1"?"selected":""}>Sección ${sc}</option>`).join("")}
                 </select>
               </div>
             </div>
             <div style="position:relative;">
-              <label style="display:block;font-size:11px;color:#cbd5e1;margin-bottom:3px;">Contraseña</label>
-              <input id="lg-p" type="password" placeholder="Ingrese su contraseña" required minlength="4" ${locked ? "disabled" : ""} style="width:100%;background:#070d19;border:1px solid #334155;border-radius:8px;padding:10px 40px 10px 12px;color:#fff;font-size:13px;min-height:42px;"/>
-              <button type="button" id="lg-eye" aria-label="Mostrar contraseña" style="position:absolute;right:8px;top:27px;background:none;border:none;color:#94a3b8;cursor:pointer;font-size:15px;">👁️</button>
+              <label style="display:block;font-size:11px;margin-bottom:3px;">Contraseña</label>
+              <input id="lg-p" type="password" placeholder="Ingrese su contraseña" required minlength="4" ${locked?"disabled":""} style="width:100%;background:#070d19;border:1px solid #334155;border-radius:8px;padding:9px 38px 9px 11px;color:#fff;font-size:13px;min-height:40px;"/>
+              <button type="button" id="lg-eye" style="position:absolute;right:8px;top:25px;background:none;border:none;color:#94a3b8;cursor:pointer;">👁️</button>
             </div>
 
-            <button type="submit" ${locked ? "disabled" : ""} style="background:#1d4ed8;color:#fff;border:none;padding:11px;border-radius:8px;font-size:13.5px;font-weight:700;cursor:pointer;min-height:44px;margin-top:2px;">Ingresar a la Plataforma</button>
-            <button type="button" id="lg-google" ${locked ? "disabled" : ""} style="background:#fff;color:#0f172a;border:1px solid #cbd5e1;padding:10px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;">${GOOGLE_SVG} <span>Continuar con Google</span></button>
-            <button type="button" id="lg-guest" style="background:#131f33;color:#38bdf8;border:1px solid #26354d;padding:9px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;min-height:42px;">Practicar gratis sin cuenta (Exploración Básica)</button>
+            <button type="submit" ${locked?"disabled":""} style="background:#1d4ed8;color:#fff;border:none;padding:10px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;min-height:42px;">Ingresar a la Plataforma</button>
+            <button type="button" id="lg-google" ${locked?"disabled":""} style="background:#fff;color:#0f172a;border:1px solid #cbd5e1;padding:9px;border-radius:8px;font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;min-height:42px;">${GOOGLE_SVG} <span>Continuar con Google</span></button>
+            <button type="button" id="lg-guest" style="background:#131f33;color:#38bdf8;border:1px solid #26354d;padding:9px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;min-height:40px;">Practicar gratis sin cuenta (Básico + 10 Juegos)</button>
           </form>
 
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid #1e293b;font-size:11.5px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:11px;padding-top:9px;border-top:1px solid #1e293b;font-size:11.5px;">
             <button type="button" id="lg-rec" style="background:none;border:none;color:#94a3b8;cursor:pointer;padding:0;">¿Olvidó su contraseña?</button>
-            <span style="color:#64748b;font-weight:600;">PWA Multi-SO • v190.0</span>
+            <span data-no-i18n="true" style="color:#64748b;font-weight:600;">PWA v193.0</span>
           </div>
         </div>
       `;
 
+      document.getElementById("lg-theme").onclick = () => { if (window.BDS_UI) window.BDS_UI.toggleTheme(); draw(); };
+      document.getElementById("lg-lang").onchange = (e) => { if (window.BDS_UI) window.BDS_UI.applyLang(e.target.value); };
       const mIn = document.getElementById("lg-m"), pIn = document.getElementById("lg-p"), rSel = document.getElementById("lg-r"), sWrap = document.getElementById("lg-swrap");
       document.getElementById("lg-eye").onclick = () => { pIn.type = pIn.type === "password" ? "text" : "password"; };
       document.getElementById("lg-rec").onclick = () => { vista = "recover"; draw(); };
-
-      function syncSec() {
-        const obj = ROLES.find(x => x.rol === rSel.value);
-        sWrap.style.display = (esSuperAdmin(mIn.value) || (obj && !obj.sec)) ? "none" : "block";
-      }
-      rSel.onchange = syncSec;
-      mIn.oninput = () => { if (esSuperAdmin(mIn.value)) rSel.value = "SuperAdmin"; syncSec(); };
-      syncSec();
+      rSel.onchange = () => { sWrap.style.display = rSel.value === "Estudiante" ? "block" : "none"; };
 
       async function procesarAcceso(esGoogle) {
-        const mail = mIn.value.trim().toLowerCase();
-        const nom = document.getElementById("lg-n").value.trim();
+        let mail = normMail(mIn.value);
+        if (esGoogle && !mail) {
+          const gm = prompt("Ingrese su correo de Google (@gmail.com) o institucional (@mep.go.cr / @est.mep.go.cr):");
+          if (!gm) return;
+          mail = normMail(gm);
+          mIn.value = mail;
+        }
+        const nomIn = document.getElementById("lg-n").value.trim();
         const err = document.getElementById("lg-err");
         if (!validarCorreo(mail)) {
           const n = getInt() + 1; setInt(n);
-          err.style.display = "block";
-          err.innerText = `Correo inválido (${n}/5). Use una cuenta real @est.mep.go.cr, @mep.go.cr o @gmail.com.`;
-          if (n >= 5) draw();
-          return;
-        }
-        const isMax = esSuperAdmin(mail);
-        if (!isMax && rSel.value === "SuperAdmin") {
-          const n = getInt() + 1; setInt(n);
-          err.style.display = "block";
-          err.innerText = `El perfil SuperAdmin es exclusivo de administración (${n}/5).`;
+          err.style.display = "block"; err.innerText = `Correo inválido (${n}/5). Use @est.mep.go.cr, @mep.go.cr o @gmail.com.`;
           if (n >= 5) draw();
           return;
         }
         if (!esGoogle && pIn.value.length < 4) { err.style.display = "block"; err.innerText = "Ingrese una contraseña válida."; return; }
+
+        let preUser = null;
+        if (window.BDS_TRAZABILIDAD) {
+          const chk = window.BDS_TRAZABILIDAD.checkAccess(mail);
+          if (!chk.ok) { err.style.display = "block"; err.innerText = chk.motivo; return; }
+          preUser = chk.user;
+        }
+
+        // Regla estricta de roles:
+        // 1) Max -> SuperAdmin
+        // 2) Laura Ramón / Ramón Laura (@gmail.com o @mep.go.cr) -> Director(a)
+        // 3) Si SuperAdmin le asignó rol en Trazabilidad -> usa ese rol
+        // 4) Todas las demás cuentas entran como Estudiante (o Particular si lo eligieron)
+        let rolFinal = "Estudiante";
+        let nombreFinal = nomIn || mail.split("@")[0];
+        if (esSuperAdmin(mail)) {
+          rolFinal = "SuperAdmin";
+          if (!nomIn) nombreFinal = "Ing. Max Salazar Sánchez";
+        } else if (esDirectoraAutorizada(mail)) {
+          rolFinal = "Director(a)";
+          if (!nomIn) nombreFinal = "Directora Laura Ramón";
+        } else if (preUser && preUser.rol) {
+          rolFinal = preUser.rol;
+          if (!nomIn && preUser.nombre) nombreFinal = preUser.nombre;
+        } else if (rSel.value === "Particular (MOPT / Admisión)") {
+          rolFinal = "Particular (MOPT / Admisión)";
+        }
+
         setInt(0);
-        const rolFinal = isMax ? "SuperAdmin" : rSel.value;
         const secVal = document.getElementById("lg-s").value;
         const firma = await sha256Hex(`${mail}|${rolFinal}|${secVal}|CTPMN-C02`);
-        setSesion({ nombre: nom || mail.split("@")[0], email: mail, rol: rolFinal, seccion: secVal, visitante: false, firma, qr: `PT-QR|v186|${mail}|${rolFinal}|${firma.slice(0, 16)}` });
+        const nueva = {
+          nombre: nombreFinal,
+          email: mail,
+          rol: rolFinal,
+          rolReal: rolFinal,
+          seccion: secVal,
+          visitante: false,
+          firma,
+          qr: `PT-QR|v193|${mail}|${rolFinal}|${firma.slice(0, 16)}`
+        };
+        setSesion(nueva);
+        if (window.BDS_TRAZABILIDAD && window.BDS_TRAZABILIDAD.logAcceso) {
+          window.BDS_TRAZABILIDAD.logAcceso(nueva, esGoogle ? "Google" : "Correo/Clave");
+        }
         gate.remove();
         iniciarApp("inicio");
       }
 
       document.getElementById("lg-f").onsubmit = (e) => { e.preventDefault(); procesarAcceso(false); };
-      document.getElementById("lg-google").onclick = () => { if (!mIn.value.trim()) { const gm = prompt("Ingrese su correo de Google (@gmail.com) o institucional (@mep.go.cr / @est.mep.go.cr):"); if (!gm) return; mIn.value = gm.trim(); if (esSuperAdmin(gm)) rSel.value = "SuperAdmin"; } procesarAcceso(true); };
+      document.getElementById("lg-google").onclick = () => procesarAcceso(true);
       document.getElementById("lg-guest").onclick = async () => {
         const firma = await sha256Hex("VISITANTE|CTPMN-C02");
-        setSesion({ nombre: "Visitante (Repaso Gratuito)", email: "visitante@practicatecnica.com", rol: "Estudiante", seccion: "10-3", visitante: true, firma, qr: `CTPMN-C02|VISITANTE|10-3|${firma.slice(0, 24)}` });
+        const vis = { nombre: "Visitante", email: "visitante@practicatecnica.com", rol: "Visitante", rolReal: "Visitante", seccion: "Libre", visitante: true, firma, qr: `PT-QR|VISITANTE|${firma.slice(0, 14)}` };
+        setSesion(vis);
+        if (window.BDS_TRAZABILIDAD && window.BDS_TRAZABILIDAD.logAcceso) window.BDS_TRAZABILIDAD.logAcceso(vis, "Sin cuenta");
         gate.remove();
         iniciarApp("practica");
       };
+      if (window.BDS_UI && window.BDS_UI.getLang() !== "es") window.BDS_UI.applyLang(window.BDS_UI.getLang());
     }
 
     document.body.appendChild(gate);
     draw();
   }
 
-  // ==================== CHATS FLOTANTES PRO ====================
+  // ==================== CHATS FLOTANTES RESPONSIVE (MÓVIL Y DESKTOP REPARADO) ====================
   function toggleChats() {
+    if (!sesionActiva || sesionActiva.visitante) return;
     const old = document.getElementById("bds-chat-modal"); if (old) { old.remove(); return; }
-    const s = getSesion(), baseSec = s.seccion || "10-3";
+    const s = sesionActiva, baseSec = s.seccion || "11-1";
     const defCanales = [
-      { id: `c_${baseSec}_A`, nom: `Sección ${baseSec} • Subgrupo A (Esp. 1)`, msgs: [{ r: "Coordinación CTPMN", h: "07:30", t: `Bienvenidos al canal del Subgrupo A — Sección ${baseSec}.` }] },
-      { id: `c_${baseSec}_B`, nom: `Sección ${baseSec} • Subgrupo B (Esp. 2)`, msgs: [{ r: "Coordinación CTPMN", h: "07:35", t: `Canal activo para Subgrupo B — Sección ${baseSec}.` }] },
-      { id: "c_dir", nom: "🏛️ Dirección • Circuito 02", msgs: [{ r: "Dirección CTPMN", h: "07:00", t: "Avisos oficiales del CTP Mercedes Norte (Circuito 02)." }] },
-      { id: "c_adm", nom: "📋 Docentes, Auxiliares y Seguridad", msgs: [{ r: "Prefectura", h: "06:45", t: "Control de portón, tardías y bitácoras activas." }] }
+      { id: `c_${baseSec}_A`, nom: `Sección ${baseSec} • A`, msgs: [{ r: "Coordinación", h: "07:30", t: `Canal oficial Subgrupo A — Sección ${baseSec}.` }] },
+      { id: `c_${baseSec}_B`, nom: `Sección ${baseSec} • B`, msgs: [{ r: "Coordinación", h: "07:35", t: `Canal oficial Subgrupo B — Sección ${baseSec}.` }] },
+      { id: "c_dir", nom: "🏛️ Dirección", msgs: [{ r: "Dirección", h: "07:00", t: "Avisos oficiales institucionales." }] }
     ];
     const getChans = () => { try { const g = JSON.parse(localStorage.getItem(CHAT_KEY)); if (Array.isArray(g) && g.length) return g; } catch {} return defCanales; };
     const saveChans = (a) => localStorage.setItem(CHAT_KEY, JSON.stringify(a));
@@ -473,39 +558,29 @@ window.addEventListener("error", function (ev) {
     let chans = getChans(), actId = chans[0].id;
     const modal = document.createElement("div");
     modal.id = "bds-chat-modal";
-    modal.style.cssText = "position:fixed;top:58px;right:12px;z-index:260000;width:420px;max-width:calc(100vw - 24px);height:min(520px,calc(100vh - 120px));background:#0b141a;border:1px solid #00a884;border-radius:14px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,0.9);display:flex;flex-direction:column;";
+    modal.style.cssText = "position:fixed;top:56px;right:10px;left:auto;bottom:68px;z-index:298500;width:min(420px,calc(100vw - 20px));background:#0b141a;border:1.5px solid #00a884;border-radius:14px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,0.9);display:flex;flex-direction:column;";
 
     function draw() {
       chans = getChans();
       const cur = chans.find(x => x.id === actId) || chans[0]; actId = cur.id;
+      const puedeBorrar = ["SuperAdmin","Director(a)","Docente MEP"].includes(s.rol);
       modal.innerHTML = `
         <div style="background:#202c33;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:6px;border-bottom:1px solid #2a3942;">
-          <div style="min-width:0;">
-            <div style="font-size:13px;font-weight:800;color:#e9edef;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">💬 ${cur.nom}</div>
-            <div style="font-size:10px;color:#8696a0;">Filtro parental activo • ${s.rol}</div>
-          </div>
-          <div style="display:flex;gap:4px;flex-shrink:0;">
+          <div style="min-width:0;"><div style="font-size:13px;font-weight:800;color:#e9edef;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">💬 ${cur.nom}</div><div style="font-size:10px;color:#8696a0;">${s.nombre} • ${s.rol}</div></div>
+          <div style="display:flex;gap:4px;">
             <button id="ch-new" style="background:#00a884;color:#052e16;border:none;padding:5px 8px;border-radius:6px;font-size:11px;font-weight:800;cursor:pointer;">+ Nuevo</button>
-            <button id="ch-del" title="Eliminar canal" style="background:#7f1d1d;color:#fff;border:none;padding:5px 8px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">🗑️</button>
-            <button id="ch-cls" style="background:#334155;color:#fff;border:none;padding:5px 8px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">✕</button>
+            ${puedeBorrar ? `<button id="ch-del" style="background:#7f1d1d;color:#fff;border:none;padding:5px 8px;border-radius:6px;font-size:11px;cursor:pointer;">🗑️</button>` : ""}
+            <button id="ch-cls" style="background:#334155;color:#fff;border:none;padding:5px 9px;border-radius:6px;font-size:12px;font-weight:800;cursor:pointer;">✕</button>
           </div>
         </div>
         <div style="display:flex;gap:5px;padding:7px;background:#111b21;border-bottom:1px solid #222d34;overflow-x:auto;">
           ${chans.map(c => `<button data-cid="${c.id}" class="ch-tab" style="background:${c.id===actId?'#005c4b':'#202c33'};color:#e9edef;border:none;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">${c.nom}</button>`).join("")}
         </div>
         <div id="ch-list" style="flex:1;padding:12px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;">
-          ${cur.msgs.map(m => `
-            <div style="align-self:${m.r===s.nombre?'flex-end':'flex-start'};max-width:85%;background:${m.r===s.nombre?'#005c4b':'#202c33'};color:#e9edef;padding:8px 11px;border-radius:9px;font-size:12.5px;">
-              <div style="font-size:9.5px;color:#38bdf8;font-weight:700;margin-bottom:2px;">${m.r}</div>
-              ${m.img ? `<img src="${m.img}" style="max-width:100%;border-radius:6px;margin-bottom:4px;display:block;"/>` : ""}
-              ${m.file ? `<div style="background:rgba(0,0,0,0.25);padding:5px 7px;border-radius:5px;font-size:11px;margin-bottom:4px;">📎 ${m.file}</div>` : ""}
-              <div>${m.t}</div>
-              <div style="font-size:9px;color:#94a3b8;text-align:right;margin-top:3px;">${m.h} ✓✓</div>
-            </div>
-          `).join("")}
+          ${cur.msgs.map(m => `<div style="align-self:${m.r.startsWith(s.nombre)?'flex-end':'flex-start'};max-width:85%;background:${m.r.startsWith(s.nombre)?'#005c4b':'#202c33'};color:#e9edef;padding:8px 11px;border-radius:9px;font-size:12.5px;"><div style="font-size:9.5px;color:#38bdf8;font-weight:700;margin-bottom:2px;">${m.r}</div>${m.img?`<img src="${m.img}" style="max-width:100%;border-radius:6px;margin-bottom:4px;display:block;"/>`:""}${m.file?`<div style="font-size:11px;margin-bottom:4px;">📎 ${m.file}</div>`:""}<div>${m.t}</div><div style="font-size:9px;color:#94a3b8;text-align:right;margin-top:3px;">${m.h} ✓✓</div></div>`).join("")}
         </div>
         <form id="ch-f" style="padding:9px;background:#202c33;display:flex;gap:6px;align-items:center;">
-          <label title="Adjuntar imagen o archivo" style="cursor:pointer;background:#2a3942;color:#00a884;padding:8px 10px;border-radius:7px;font-size:14px;">📎<input id="ch-file" type="file" accept="image/*,.pdf,.docx,.xlsx" style="display:none;"/></label>
+          <label style="cursor:pointer;background:#2a3942;color:#00a884;padding:8px 10px;border-radius:7px;font-size:14px;">📎<input id="ch-file" type="file" accept="image/*,.pdf,.docx,.xlsx" style="display:none;"/></label>
           <input id="ch-in" type="text" placeholder="Escribe un mensaje..." required style="flex:1;background:#2a3942;border:none;color:#e9edef;padding:9px 10px;border-radius:7px;font-size:12.5px;outline:none;"/>
           <button type="submit" style="background:#00a884;color:#052e16;border:none;padding:9px 13px;border-radius:7px;font-weight:800;font-size:12px;cursor:pointer;">Enviar</button>
         </form>
@@ -514,22 +589,19 @@ window.addEventListener("error", function (ev) {
       document.getElementById("ch-cls").onclick = () => modal.remove();
       modal.querySelectorAll(".ch-tab").forEach(b => b.onclick = () => { actId = b.getAttribute("data-cid"); draw(); });
       document.getElementById("ch-new").onclick = () => {
-        const nom = prompt("Nombre del nuevo canal (ej: Sección 11-1 • Subgrupo A):");
-        if (nom && nom.trim()) {
-          const nc = { id: "c_" + Date.now(), nom: nom.trim(), msgs: [{ r: "Sistema", h: new Date().toLocaleTimeString("es-CR", { hour: "2-digit", minute: "2-digit" }), t: `Canal "${nom.trim()}" habilitado.` }] };
-          chans.push(nc); saveChans(chans); actId = nc.id; draw();
-        }
+        const nom = prompt("Nombre del nuevo canal:");
+        if (nom && nom.trim()) { const nc = { id: "c_" + Date.now(), nom: nom.trim(), msgs: [{ r: "Sistema", h: new Date().toLocaleTimeString("es-CR", { hour: "2-digit", minute: "2-digit" }), t: `Canal "${nom.trim()}" creado.` }] }; chans.push(nc); saveChans(chans); actId = nc.id; draw(); }
       };
-      document.getElementById("ch-del").onclick = () => {
-        if (chans.length <= 1) { alert("Debe permanecer al menos un canal activo."); return; }
-        if (confirm(`¿Eliminar el canal "${cur.nom}"?`)) { chans = chans.filter(x => x.id !== cur.id); saveChans(chans); actId = chans[0].id; draw(); }
+      if (document.getElementById("ch-del")) document.getElementById("ch-del").onclick = () => {
+        if (chans.length <= 1) return alert("Debe quedar al menos un canal.");
+        if (confirm(`¿Eliminar "${cur.nom}"?`)) { chans = chans.filter(x => x.id !== cur.id); saveChans(chans); actId = chans[0].id; draw(); }
       };
       document.getElementById("ch-file").onchange = (e) => {
         const f = e.target.files[0]; if (!f) return;
         const r = new FileReader();
         r.onload = (ev) => {
           const h = new Date().toLocaleTimeString("es-CR", { hour: "2-digit", minute: "2-digit" });
-          cur.msgs.push({ r: s.nombre, h, t: `Adjuntó ${f.name}`, img: f.type.startsWith("image/") ? ev.target.result : null, file: f.type.startsWith("image/") ? null : f.name });
+          cur.msgs.push({ r: `${s.nombre} (${s.rol})`, h, t: `Adjuntó ${f.name}`, img: f.type.startsWith("image/") ? ev.target.result : null, file: f.type.startsWith("image/") ? null : f.name });
           saveChans(chans); draw();
         };
         r.readAsDataURL(f);
@@ -538,24 +610,25 @@ window.addEventListener("error", function (ev) {
         e.preventDefault();
         const raw = document.getElementById("ch-in").value.trim(); if (!raw) return;
         const h = new Date().toLocaleTimeString("es-CR", { hour: "2-digit", minute: "2-digit" });
-        cur.msgs.push({ r: s.nombre, h, t: filtrarObscenidades(raw) });
+        cur.msgs.push({ r: `${s.nombre} (${s.rol})`, h, t: filtrarObscenidades(raw) });
         saveChans(chans); draw();
       };
     }
     document.body.appendChild(modal); draw();
   }
 
-  // ==================== MOTOR DE EVALUACIÓN (10–60 PREGUNTAS + CRONÓMETRO + IDIOMAS) ====================
+  // ==================== MOTOR DE PRÁCTICA Y SIMULACRO (0% MEZCLA + ANTI-REPETICIÓN) ====================
   let simTimer = null;
   function renderEvaluacion(shell, modoInicial, areaInicial) {
     if (simTimer) { clearInterval(simTimer); simTimer = null; }
     const malla = window.BDS_MALLA_MEP || [];
-    let modo = modoInicial || "guiada", area = areaInicial || "ALL", cantidad = 10, diff = "ALL";
-    let items = [], idx = 0, answers = {}, secLeft = 900, paused = false, finished = false;
+    const defArea = malla[0] ? malla[0].id : "web";
+    let modo = modoInicial || "guiada", area = (areaInicial && areaInicial !== "ALL") ? areaInicial : defArea, cantidad = 20, diff = "ALL";
+    let items = [], idx = 0, answers = {}, secLeft = 1800, paused = false, finished = false;
 
     function iniciarPrueba() {
       if (simTimer) { clearInterval(simTimer); simTimer = null; }
-      items = window.BDS_GENERAR_SIMULACRO(area, cantidad, diff);
+      items = window.BDS_GENERAR_SIMULACRO ? window.BDS_GENERAR_SIMULACRO(area, cantidad, diff) : [];
       idx = 0; answers = {}; paused = false; finished = false; secLeft = cantidad * 90;
       if (modo === "simulacro") {
         simTimer = setInterval(() => {
@@ -570,19 +643,7 @@ window.addEventListener("error", function (ev) {
       draw();
     }
 
-    function hablarTexto(txt, lang) {
-      try { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(txt); u.lang = lang || "en-US"; u.rate = 0.92; window.speechSynthesis.speak(u); } catch {}
-    }
-
-    function practicarSpeaking() {
-      const Rec = window.SpeechRecognition || window.webkitSpeechRecognition, box = document.getElementById("spk-fb");
-      if (!Rec) { if (box) box.innerText = "🎙️ Tu navegador no soporta micrófono directo; lee la frase en voz alta."; return; }
-      const r = new Rec(); r.lang = "en-US";
-      if (box) box.innerText = "🎙️ Escuchando... pronuncia ahora.";
-      r.onresult = (e) => { if (box) box.innerHTML = `✅ Detectado: <b>"${e.results[0][0].transcript}"</b> (+10 XP)`; ganarXP(10, "🎙️ Speaking Activo"); };
-      r.onerror = () => { if (box) box.innerText = "⚠️ Verifica permisos de micrófono."; };
-      r.start();
-    }
+    function hablar(txt, lang) { try { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(txt); u.lang = lang || "es-CR"; u.rate = 0.94; window.speechSynthesis.speak(u); } catch {} }
 
     function draw() {
       const areaMeta = malla.find(m => m.id === area), cur = items[idx];
@@ -590,76 +651,65 @@ window.addEventListener("error", function (ev) {
         if (simTimer) { clearInterval(simTimer); simTimer = null; }
         let okCnt = 0;
         items.forEach((it, i) => { if (answers[i] !== undefined && it.opts[answers[i]] && it.opts[answers[i]].ok) okCnt++; });
-        const pct = Math.round((okCnt / items.length) * 100), ucr = Math.round(200 + (okCnt / items.length) * 600);
+        const pct = Math.round((okCnt / Math.max(1, items.length)) * 100), ucr = Math.round(200 + (okCnt / Math.max(1, items.length)) * 600);
         if (pct >= 70) ganarXP(cantidad * 3, "⏱️ Simulacro Aprobado");
-
         shell.innerHTML = `
-          <div class="bds-card" style="max-width:860px;margin:0 auto;text-align:center;border-color:${pct>=70?'#10b981':'#f59e0b'};">
-            <span style="background:${pct>=70?'#059669':'#b45309'};color:#fff;font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px;">${pct>=70 ? "✅ APROBADO" : "⚠️ REFUERZO RECOMENDADO"}</span>
-            <h2 style="margin:10px 0 6px;color:#fff;">Acta Oficial — ${areaMeta ? areaMeta.name : "Toda la Malla MEP"}</h2>
-            <p style="font-size:15px;color:#cbd5e1;">Aciertos: <b style="color:#34d399;">${okCnt}/${items.length}</b> • Nota MEP: <b style="color:#38bdf8;">${pct}%</b> • Escala UCR/TEC: <b style="color:#fbbf24;">${ucr}/800 pts</b></p>
-            <div style="display:flex;justify-content:center;gap:10px;margin:14px 0;flex-wrap:wrap;">
-              <button id="sim-again" style="background:#1d4ed8;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer;margin-bottom:14px;">🔄 Nuevo Simulacro</button><div class="bds-sim-review-v189" style="text-align:left;max-height:360px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-top:8px;">${items.map((it, i) => { const r = answers[i]; const ok = r !== undefined && it.opts[r] && it.opts[r].ok; const corr = (it.opts.find(o => o.ok) || {}).txt || ""; return `<div style="background:#070d19;border-left:4px solid ${ok?'#10b981':'#ef4444'};padding:9px;border-radius:7px;font-size:12px;"><b>${i+1}. ${it.q}</b><div style="color:${ok?'#34d399':'#fca5a5'};">${ok?'✅ Correcta':'❌ Tu respuesta: ' + (r!==undefined&&it.opts[r]?it.opts[r].txt:'Sin responder')}</div><div style="color:#38bdf8;">Clave: ${corr}</div><div style="color:#94a3b8;font-size:11px;">${it.e || ""}</div></div>`; }).join("")}</div>
-              <button id="sim-rev" style="background:#131f33;color:#38bdf8;border:1px solid #334155;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer;">📖 Revisar Explicaciones</button>
-            </div>
-            <div id="rev-list" style="display:none;text-align:left;margin-top:14px;flex-direction:column;gap:8px;max-height:360px;overflow-y:auto;">
+          <div class="bds-card" style="max-width:840px;margin:0 auto;text-align:center;border-color:${pct>=70?'#10b981':'#f59e0b'};">
+            <h2>Acta Oficial — ${areaMeta ? areaMeta.name : "Evaluación"}</h2>
+            <p style="font-size:15px;">Aciertos: <b style="color:#34d399;">${okCnt}/${items.length}</b> • Nota: <b style="color:#38bdf8;">${pct}%</b> • Escala UCR/TEC: <b style="color:#fbbf24;">${ucr}/800</b></p>
+            <button id="sim-again" style="background:#1d4ed8;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer;margin-bottom:14px;">🔄 Nuevo Simulacro</button>
+            <div style="text-align:left;max-height:360px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;">
               ${items.map((it, i) => {
-                const chosen = answers[i], corr = it.opts.find(o => o.ok), bien = chosen !== undefined && it.opts[chosen] && it.opts[chosen].ok;
-                return `<div style="background:#070d19;border-left:4px solid ${bien?'#10b981':'#ef4444'};padding:10px;border-radius:8px;font-size:12px;"><b>${i+1}. ${it.q}</b><br/><span style="color:#34d399;">Correcta: ${corr.txt}</span> — <span style="color:#94a3b8;">${it.e}</span></div>`;
+                const r = answers[i], ok = r !== undefined && it.opts[r] && it.opts[r].ok;
+                const corr = (it.opts.find(o => o.ok) || {}).txt || "";
+                return `<div style="background:#070d19;border-left:4px solid ${ok?'#10b981':'#ef4444'};padding:9px;border-radius:7px;font-size:12px;"><b>${i+1}. ${it.q}</b><div style="color:${ok?'#34d399':'#fca5a5'};">${ok?'✅ Correcta':'❌ Tu respuesta: ' + (r!==undefined&&it.opts[r]?it.opts[r].txt:'Sin responder')}</div><div style="color:#38bdf8;">Clave: ${corr}</div><div style="color:#94a3b8;font-size:11px;">${it.e || ""}</div></div>`;
               }).join("")}
             </div>
           </div>
         `;
         document.getElementById("sim-again").onclick = iniciarPrueba;
-        document.getElementById("sim-rev").onclick = () => { const rl = document.getElementById("rev-list"); rl.style.display = rl.style.display === "none" ? "flex" : "none"; };
         return;
       }
 
       const mCur = cur ? (malla.find(m => m.id === cur.a) || { name: "MEP", color: "#0284c7" }) : { name: "MEP", color: "#0284c7" };
       const resp = answers[idx];
       shell.innerHTML = `
-        <div class="bds-card" style="margin-bottom:14px;">
+        <div class="bds-card" style="margin-bottom:12px;">
           <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;">
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
-              ${[["libre","📝 Práctica Libre"],["guiada","🧭 Práctica Guiada"],["simulacro","⏱️ Simulacro Oficial"]].map(([k, l]) => `<button data-m="${k}" class="m-sw" style="background:${modo===k?'#1d4ed8':'#131f33'};color:#fff;border:1px solid ${modo===k?'#38bdf8':'#26354d'};padding:8px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">${l}</button>`).join("")}
+              ${[["guiada","🧭 Guiada"],["libre","📝 Libre"],["simulacro","⏱️ Simulacro"]].map(([k, l]) => `<button data-m="${k}" class="m-sw" style="background:${modo===k?'#1d4ed8':'#131f33'};color:#fff;border:1px solid #334155;padding:7px 11px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">${l}</button>`).join("")}
             </div>
-            <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center;">
-              <select id="ev-area" style="background:#070d19;color:#fff;border:1px solid #334155;padding:8px 10px;border-radius:8px;font-size:12px;font-weight:600;max-width:240px;">
-                <option value="ALL" ${area==="ALL"?"selected":""}>🌎 Modo Mixto (Todas las 22 Áreas)</option>
-                ${malla.map(m => `<option value="${m.id}" ${area===m.id?"selected":""}>${m.name} (${m.cat})</option>`).join("")}
+            <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+              <select id="ev-area" style="background:#070d19;color:#fff;border:1px solid #334155;padding:8px;border-radius:8px;font-size:12px;max-width:220px;">
+                ${malla.map(m => `<option value="${m.id}" ${area===m.id?"selected":""}>${m.name}</option>`).join("")}
               </select>
-              <select id="ev-cant" style="background:#070d19;color:#fbbf24;border:1px solid #334155;padding:8px 10px;border-radius:8px;font-size:12px;font-weight:800;">
-                ${[10, 20, 30, 40, 50, 60].map(c => `<option value="${c}" ${cantidad===c?"selected":""}>${c} preguntas</option>`).join("")}
+              <select id="ev-diff" style="background:#070d19;color:#34d399;border:1px solid #334155;padding:8px;border-radius:8px;font-size:12px;font-weight:700;">
+                <option value="ALL" ${diff==="ALL"?"selected":""}>Todos los niveles</option>
+                <option value="Básico" ${diff==="Básico"?"selected":""}>Básico</option>
+                <option value="Medio" ${diff==="Medio"?"selected":""}>Medio</option>
+                <option value="Intermedio" ${diff==="Intermedio"?"selected":""}>Intermedio</option>
+                <option value="Avanzado" ${diff==="Avanzado"?"selected":""}>Avanzado</option>
               </select>
-              <select id="ev-diff" style="background:#070d19;color:#fff;border:1px solid #334155;padding:8px 10px;border-radius:8px;font-size:12px;">
-                <option value="ALL" ${diff==="ALL"?"selected":""}>Todas las dificultades</option>
-                <option value="Básico" ${diff==="Básico"?"selected":""}>🟢 Básico</option>
-                <option value="Intermedio" ${diff==="Intermedio"?"selected":""}>🟡 Intermedio</option>
-                <option value="Avanzado" ${diff==="Avanzado"?"selected":""}>🔴 Avanzado</option>
+              <select id="ev-cant" style="background:#070d19;color:#fbbf24;border:1px solid #334155;padding:8px;border-radius:8px;font-size:12px;font-weight:800;">
+                ${[10,20,30,40,50,60].map(c => `<option value="${c}" ${cantidad===c?"selected":""}>${c} preg.</option>`).join("")}
               </select>
-              <select id="ev-diff" style="background:#070d19;color:#34d399;border:1px solid #334155;padding:8px;border-radius:8px;font-size:12px;font-weight:700;"><option value="ALL" ${diff==="ALL"?"selected":""}>🎯 Todos los Niveles</option><option value="Básico" ${diff==="Básico"?"selected":""}>Básico</option><option value="Medio" ${diff==="Medio"?"selected":""}>Medio</option><option value="Intermedio" ${diff==="Intermedio"?"selected":""}>Intermedio</option><option value="Avanzado" ${diff==="Avanzado"?"selected":""}>Avanzado</option></select><button type="button" onclick="window.BDS_OPEN_AI_ITEMS && window.BDS_OPEN_AI_ITEMS()" style="background:#7c3aed;color:#fff;border:none;padding:8px 11px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">🤖 +Preguntas IA</button><select id="ev-diff" style="background:#070d19;color:#34d399;border:1px solid #334155;padding:8px;border-radius:8px;font-size:12px;font-weight:700;"><option value="ALL" ${diff==="ALL"?"selected":""}>🎯 Todos los Niveles</option><option value="Básico" ${diff==="Básico"?"selected":""}>Básico</option><option value="Medio" ${diff==="Medio"?"selected":""}>Medio</option><option value="Intermedio" ${diff==="Intermedio"?"selected":""}>Intermedio</option><option value="Avanzado" ${diff==="Avanzado"?"selected":""}>Avanzado</option></select><button type="button" onclick="window.BDS_OPEN_AI_ITEMS && window.BDS_OPEN_AI_ITEMS()" style="background:#7c3aed;color:#fff;border:none;padding:8px 11px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">🤖 +Preguntas IA</button><button id="ev-go" style="background:#059669;color:#fff;border:none;padding:8px 13px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">🔀 Generar</button>
+              <button id="ev-go" style="background:#059669;color:#fff;border:none;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">🔀 Nuevo</button>
             </div>
           </div>
-          ${modo === "simulacro" ? `
-            <div style="margin-top:12px;padding-top:10px;border-top:1px solid #1e293b;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-              <div style="font-size:13px;font-weight:800;color:#fbbf24;">⏱️ Cronómetro: <span id="sim-clk" style="font-family:monospace;font-size:16px;">${String(Math.floor(secLeft / 60)).padStart(2, "0")}:${String(secLeft % 60).padStart(2, "0")}</span></div>
-              <div style="display:flex;gap:6px;">
-                <button id="sim-pause" style="background:#b45309;color:#fff;border:none;padding:7px 12px;border-radius:7px;font-size:11.5px;font-weight:700;cursor:pointer;">${paused ? "▶️ Reanudar" : "⏸️ Pausar"}</button>
-                <button id="sim-end" style="background:#059669;color:#fff;border:none;padding:7px 12px;border-radius:7px;font-size:11.5px;font-weight:800;cursor:pointer;">✅ Entregar y Calificar</button>
-              </div>
-            </div>
-          ` : ""}
+          ${modo === "simulacro" ? `<div style="margin-top:10px;padding-top:10px;border-top:1px solid #1e293b;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"><div style="font-size:13px;font-weight:800;color:#fbbf24;">⏱️ <span id="sim-clk" style="font-family:monospace;font-size:16px;">${String(Math.floor(secLeft / 60)).padStart(2, "0")}:${String(secLeft % 60).padStart(2, "0")}</span></div><div style="display:flex;gap:6px;"><button id="sim-pause" style="background:#b45309;color:#fff;border:none;padding:7px 12px;border-radius:7px;font-size:11.5px;font-weight:700;cursor:pointer;">${paused?"Reanudar":"Pausar"}</button><button id="sim-end" style="background:#059669;color:#fff;border:none;padding:7px 12px;border-radius:7px;font-size:11.5px;font-weight:800;cursor:pointer;">Calificar</button></div></div>` : ""}
         </div>
 
-        ${paused ? `<div class="bds-card" style="text-align:center;padding:42px;color:#fbbf24;font-weight:800;">⏸️ Simulacro en pausa. Presiona Reanudar para continuar.</div>` : `
+        ${!cur ? `<div class="bds-card">No hay ítems en esta selección.</div>` : (paused ? `<div class="bds-card" style="text-align:center;padding:36px;color:#fbbf24;font-weight:800;">⏸️ Simulacro en pausa.</div>` : `
           <div class="bds-card" style="max-width:860px;margin:0 auto;">
-            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
-              <span style="background:${mCur.color};color:#fff;font-size:11px;font-weight:800;padding:3px 10px;border-radius:99px;">CTP Mercedes Norte • Circuito 02 • ${mCur.name}</span>
-              <span style="font-size:12px;font-weight:800;color:#38bdf8;">Ítem ${idx + 1} de ${items.length} • Nivel ${cur.d}</span>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
+              <span style="background:${mCur.color};color:#fff;font-size:11px;font-weight:800;padding:3px 10px;border-radius:99px;">${mCur.name}</span>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <button id="ev-tts" style="background:#131f33;color:#38bdf8;border:1px solid #334155;padding:4px 9px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">🔊 Audio</button>
+                <span style="font-size:12px;font-weight:800;color:#38bdf8;">${idx + 1} / ${items.length} • ${cur.d}</span>
+              </div>
             </div>
-            ${modo === "guiada" ? `<div style="background:#070d19;border-left:4px solid #10b981;padding:10px 13px;border-radius:8px;margin-bottom:12px;font-size:12.5px;color:#a7f3d0;"><b>🧭 Guía Socrática:</b> ${cur.g}</div>` : ""}
-            ${cur.audio ? `<div style="background:#0f172a;border:1px solid #2563eb;padding:10px 12px;border-radius:9px;margin-bottom:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><button id="btn-listen" style="background:#2563eb;color:#fff;border:none;padding:7px 12px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">🔊 Escuchar Audio</button>${cur.speak ? `<button id="btn-speak" style="background:#059669;color:#fff;border:none;padding:7px 12px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">🎙️ Practicar Speaking</button><span id="spk-fb" style="font-size:11.5px;color:#93c5fd;">"${cur.speak}"</span>` : ""}</div>` : ""}
-            <h3 style="margin:0 0 14px;font-size:16px;color:#fff;line-height:1.45;">${cur.q}</h3>
+            ${modo === "guiada" ? `<div style="background:#070d19;border-left:4px solid #10b981;padding:10px 12px;border-radius:8px;margin-bottom:12px;font-size:12.5px;color:#a7f3d0;"><b>🧭 Guía:</b> ${cur.g}</div>` : ""}
+            <h3 style="margin:0 0 14px;font-size:16px;line-height:1.45;">${cur.q}</h3>
             <div style="display:flex;flex-direction:column;gap:8px;">
               ${cur.opts.map((o, i) => {
                 let bg = "#131f33", bd = "#26354d";
@@ -668,33 +718,31 @@ window.addEventListener("error", function (ev) {
                   if (o.ok) { bg = "#064e3b"; bd = "#10b981"; }
                   else if (resp === i) { bg = "#7f1d1d"; bd = "#ef4444"; }
                 }
-                return `<button data-oi="${i}" class="ev-opt" style="text-align:left;background:${bg};border:1.5px solid ${bd};color:#fff;padding:12px 14px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;min-height:44px;">${String.fromCharCode(65 + i)}) ${o.txt}</button>`;
+                return `<button data-oi="${i}" class="ev-opt" style="text-align:left;background:${bg};border:1.5px solid ${bd};color:#fff;padding:11px 14px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;">${String.fromCharCode(65+i)}) ${o.txt}</button>`;
               }).join("")}
             </div>
-            ${modo !== "simulacro" && resp !== undefined ? `<div style="margin-top:12px;padding:11px;border-radius:8px;background:${cur.opts[resp].ok ? '#064e3b' : '#450a0a'};color:${cur.opts[resp].ok ? '#6ee7b7' : '#fca5a5'};font-size:12.5px;"><b>${cur.opts[resp].ok ? "✅ ¡Correcto! (+10 XP)" : "❌ Retroalimentación:"}</b> ${cur.e}</div>` : ""}
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:12px;border-top:1px solid #1e293b;">
+            ${modo !== "simulacro" && resp !== undefined ? `<div style="margin-top:12px;padding:11px;border-radius:8px;background:${cur.opts[resp].ok?'#064e3b':'#450a0a'};color:${cur.opts[resp].ok?'#6ee7b7':'#fca5a5'};font-size:12.5px;"><b>${cur.opts[resp].ok?"✅ ¡Correcto! (+10 XP)":"❌ Explicación:"}</b> ${cur.e}</div>` : ""}
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid #1e293b;">
               <button id="ev-prev" ${idx===0?"disabled":""} style="background:#1e293b;color:#fff;border:none;padding:9px 14px;border-radius:8px;font-weight:700;cursor:pointer;">← Anterior</button>
-              <span style="font-size:11.5px;color:#94a3b8;">Respondidas: ${Object.keys(answers).length}/${items.length}</span>
-              <button id="ev-next" style="background:#1d4ed8;color:#fff;border:none;padding:9px 14px;border-radius:8px;font-weight:800;cursor:pointer;">${idx>=items.length-1 ? "Finalizar" : "Siguiente →"}</button>
+              <button id="ev-next" style="background:#1d4ed8;color:#fff;border:none;padding:9px 14px;border-radius:8px;font-weight:800;cursor:pointer;">${idx>=items.length-1?"Finalizar":"Siguiente →"}</button>
             </div>
           </div>
-        `}
+        `)}
       `;
       shell.querySelectorAll(".m-sw").forEach(b => b.onclick = () => { modo = b.getAttribute("data-m"); iniciarPrueba(); });
       document.getElementById("ev-area").onchange = (e) => { area = e.target.value; iniciarPrueba(); };
-      document.getElementById("ev-cant").onchange = (e) => { cantidad = Number(e.target.value); iniciarPrueba(); }; if (document.getElementById("ev-diff")) document.getElementById("ev-diff").onchange = (e) => { diff = e.target.value; iniciarPrueba(); }; if (document.getElementById("ev-diff")) document.getElementById("ev-diff").onchange = (e) => { diff = e.target.value; iniciarPrueba(); };
       document.getElementById("ev-diff").onchange = (e) => { diff = e.target.value; iniciarPrueba(); };
+      document.getElementById("ev-cant").onchange = (e) => { cantidad = Number(e.target.value); iniciarPrueba(); };
       document.getElementById("ev-go").onclick = iniciarPrueba;
       if (document.getElementById("sim-pause")) document.getElementById("sim-pause").onclick = () => { paused = !paused; draw(); };
       if (document.getElementById("sim-end")) document.getElementById("sim-end").onclick = () => { finished = true; draw(); };
-      if (document.getElementById("btn-listen")) document.getElementById("btn-listen").onclick = () => hablarTexto(cur.audio, cur.lang || "en-US");
-      if (document.getElementById("btn-speak")) document.getElementById("btn-speak").onclick = practicarSpeaking;
-      if (!paused) {
+      if (document.getElementById("ev-tts")) document.getElementById("ev-tts").onclick = () => hablar(cur.audio || cur.q, cur.lang || "es-CR");
+      if (!paused && cur) {
         shell.querySelectorAll(".ev-opt").forEach(b => b.onclick = () => {
-          const chosen = Number(b.getAttribute("data-oi"));
+          const ch = Number(b.getAttribute("data-oi"));
           if (modo !== "simulacro" && answers[idx] !== undefined) return;
-          answers[idx] = chosen;
-          if (modo !== "simulacro" && cur.opts[chosen].ok) ganarXP(10);
+          answers[idx] = ch;
+          if (modo !== "simulacro" && cur.opts[ch].ok) ganarXP(10);
           draw();
         });
         document.getElementById("ev-prev").onclick = () => { if (idx > 0) { idx--; draw(); } };
@@ -704,338 +752,294 @@ window.addEventListener("error", function (ev) {
     iniciarPrueba();
   }
 
-  // ==================== BIBLIOTECA + ESTUDIO DE AFICHES MARCA BLANCA ====================
-  function renderBiblioteca(shell) {
-    const malla = window.BDS_MALLA_MEP || [];
-    let sub = "libros";
-    let afiche = { titulo: "Feria Técnica y Científica 2026", sub: "Colegio Técnico Profesional Mercedes Norte • Circuito 02", cuerpo: "Invitamos a toda la comunidad educativa a participar en la exposición de proyectos STEAM, Desarrollo Web y Ciberseguridad.", formato: "1080x1080", tema: "#0f2247" };
+  // ==================== INICIO CON SALUDO DEL BÚHO AZUL Y BOTONES LIMPIOS ====================
+  function renderInicio(shell, perms, onSwitchRole) {
+    const b = brand(), xp = getXP(), malla = window.BDS_MALLA_MEP || [];
+    const esRealSA = sesionActiva && sesionActiva.rolReal === "SuperAdmin";
+    const primerNom = (sesionActiva.nombre || "Usuario").replace(/^(Ing\.|Prof\.|Licda\.|Lic\.|Directora)\s+/i, "").split(" ")[0];
+    const saludoBuho = esSuperAdmin(sesionActiva.email)
+      ? "¡Hola Max, bienvenido! Qué bueno verte de nuevo. Todo el ecosistema está listo bajo tu control."
+      : (esDirectoraAutorizada(sesionActiva.email)
+          ? "¡Bienvenida, Directora Laura! Qué alegría tenerte de nuevo. Tu bandeja de permisos, justificaciones y gestión está lista."
+          : `¡Hola ${primerNom}, bienvenido(a)! Qué bueno verte de nuevo. ¡Sigamos sumando racha hoy!`);
 
-    function exportarPosterPNG() {
-      const [w, h] = afiche.formato.split("x").map(Number);
-      const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
-      const ctx = cv.getContext("2d");
-      const gr = ctx.createLinearGradient(0, 0, w, h); gr.addColorStop(0, afiche.tema); gr.addColorStop(1, "#060c17");
-      ctx.fillStyle = gr; ctx.fillRect(0, 0, w, h);
-      ctx.strokeStyle = "#38bdf8"; ctx.lineWidth = 10; ctx.strokeRect(28, 28, w - 56, h - 56);
-      ctx.fillStyle = "#38bdf8"; ctx.font = `800 ${Math.round(w*0.024)}px Inter, sans-serif`; ctx.textAlign = "center";
-      ctx.fillText("COLEGIO TÉCNICO PROFESIONAL MERCEDES NORTE • HEREDIA • CIRCUITO 02", w / 2, h * 0.14);
-      ctx.fillStyle = "#ffffff"; ctx.font = `900 ${Math.round(w*0.05)}px Inter, sans-serif`;
-      ctx.fillText(afiche.titulo, w / 2, h * 0.42, w * 0.84);
-      ctx.fillStyle = "#2dd4bf"; ctx.font = `700 ${Math.round(w*0.028)}px Inter, sans-serif`;
-      ctx.fillText(afiche.sub, w / 2, h * 0.54, w * 0.84);
-      ctx.fillStyle = "#e2e8f0"; ctx.font = `500 ${Math.round(w*0.024)}px Inter, sans-serif`;
-      ctx.fillText(afiche.cuerpo, w / 2, h * 0.68, w * 0.82);
-      const a = document.createElement("a"); a.download = `afiche-ctpmn-${afiche.formato}.png`; a.href = cv.toDataURL("image/png"); a.click();
-      ganarXP(20, "🎨 Marca Blanca");
-    }
+    const estBeta = window.BDS_SUSCRIPCION ? window.BDS_SUSCRIPCION.getEstadoCuenta(sesionActiva).etiqueta : "Beta activa";
 
-    function draw() {
-      shell.innerHTML = `
-        <div class="bds-card">
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;border-bottom:1px solid #1e293b;padding-bottom:12px;margin-bottom:14px;">
-            <div>
-              <span style="background:#059669;color:#fff;font-size:10px;font-weight:800;padding:3px 9px;border-radius:99px;">BIBLIOTECA MEP & ESTUDIO EDITORIAL MARCA BLANCA</span>
-              <h2 style="margin:5px 0 0;font-size:18px;color:#fff;">Libros Resúmenes y Afiches Institucionales (Cero Marcas de Agua)</h2>
-            </div>
-            <div style="display:flex;gap:6px;">
-              <button id="tb-lib" style="background:${sub==='libros'?'#1d4ed8':'#131f33'};color:#fff;border:1px solid #334155;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">📚 Libros (22 Materias)</button>
-              <button id="tb-cam" style="background:${sub==='campana'?'#1d4ed8':'#131f33'};color:#fff;border:1px solid #334155;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">🎨 Afiches Marca Blanca</button>
-            </div>
-          </div>
-          ${sub === "libros" ? `
-            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;">
-              ${malla.map(m => `
-                <div style="background:#070d19;border:1px solid #1e293b;border-top:3px solid ${m.color};border-radius:11px;padding:14px;display:flex;flex-direction:column;justify-content:space-between;">
-                  <div>
-                    <span style="font-size:10px;font-weight:800;color:${m.color};">${m.cat.toUpperCase()}</span>
-                    <h4 style="margin:5px 0 6px;color:#fff;font-size:14.5px;">📖 ${m.name}</h4>
-                    <p style="margin:0 0 10px;font-size:12px;color:#cbd5e1;line-height:1.45;">${m.libro}</p>
-                    <ul style="margin:0 0 12px;padding-left:16px;font-size:11.5px;color:#94a3b8;">${m.claves.map(k => `<li>${k}</li>`).join("")}</ul>
-                  </div>
-                  <button data-pa="${m.id}" class="lib-prac" style="background:#131f33;color:#38bdf8;border:1px solid #26354d;padding:8px;border-radius:7px;font-size:11.5px;font-weight:700;cursor:pointer;">Practicar ${m.name} →</button>
-                </div>
-              `).join("")}
-            </div>
-          ` : `
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px;">
-              <div style="display:flex;flex-direction:column;gap:10px;">
-                <input id="af-t" type="text" value="${afiche.titulo}" style="background:#070d19;border:1px solid #334155;color:#fff;padding:10px;border-radius:8px;font-size:13px;"/>
-                <input id="af-s" type="text" value="${afiche.sub}" style="background:#070d19;border:1px solid #334155;color:#fff;padding:10px;border-radius:8px;font-size:13px;"/>
-                <textarea id="af-c" rows="3" style="background:#070d19;border:1px solid #334155;color:#fff;padding:10px;border-radius:8px;font-size:12.5px;">${afiche.cuerpo}</textarea>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-                  <select id="af-fmt" style="background:#070d19;border:1px solid #334155;color:#fff;padding:9px;border-radius:8px;font-size:12px;">
-                    <option value="1080x1080" ${afiche.formato==="1080x1080"?"selected":""}>Instagram 1:1</option>
-                    <option value="1080x1920" ${afiche.formato==="1080x1920"?"selected":""}>WhatsApp Estado 9:16</option>
-                    <option value="1280x720" ${afiche.formato==="1280x720"?"selected":""}>WhatsApp / Web 16:9</option>
-                    <option value="1080x1350" ${afiche.formato==="1080x1350"?"selected":""}>Facebook / Mural 4:5</option>
-                  </select>
-                  <select id="af-bg" style="background:#070d19;border:1px solid #334155;color:#fff;padding:9px;border-radius:8px;font-size:12px;">
-                    <option value="#0f2247" ${afiche.tema==="#0f2247"?"selected":""}>Azul Institucional</option>
-                    <option value="#064e3b" ${afiche.tema==="#064e3b"?"selected":""}>Esmeralda Técnico</option>
-                    <option value="#7f1d1d" ${afiche.tema==="#7f1d1d"?"selected":""}>Vino CTP Mercedes Norte</option>
-                  </select>
-                </div>
-                <button id="af-dl" style="background:#059669;color:#fff;border:none;padding:11px;border-radius:8px;font-weight:800;cursor:pointer;">📥 Exportar PNG Marca Blanca</button>
-              </div>
-              <div style="background:linear-gradient(135deg,${afiche.tema},#060c17);border:2px solid #38bdf8;border-radius:14px;padding:20px;text-align:center;display:flex;flex-direction:column;justify-content:center;gap:10px;min-height:280px;">
-                <div style="display:flex;justify-content:center;gap:12px;align-items:center;"><img src="${IMG_ESCUDO}" height="44"/><img src="${IMG_MEP}" height="34"/></div>
-                <div style="font-size:10px;color:#38bdf8;font-weight:800;">COLEGIO TÉCNICO PROFESIONAL MERCEDES NORTE • CIRCUITO 02</div>
-                <h3 style="margin:0;color:#fff;font-size:19px;">${afiche.titulo}</h3>
-                <div style="font-size:13px;color:#2dd4bf;font-weight:700;">${afiche.sub}</div>
-                <p style="margin:0;font-size:12.5px;color:#e2e8f0;line-height:1.45;">${afiche.cuerpo}</p>
-              </div>
-            </div>
-          `}
-        </div>
-      `;
-      document.getElementById("tb-lib").onclick = () => { sub = "libros"; draw(); };
-      document.getElementById("tb-cam").onclick = () => { sub = "campana"; draw(); };
-      shell.querySelectorAll(".lib-prac").forEach(b => b.onclick = () => renderEvaluacion(shell, "guiada", b.getAttribute("data-pa")));
-      if (sub === "campana") {
-        document.getElementById("af-t").oninput = (e) => { afiche.titulo = e.target.value; draw(); document.getElementById("af-t").focus(); };
-        document.getElementById("af-s").oninput = (e) => { afiche.sub = e.target.value; draw(); document.getElementById("af-s").focus(); };
-        document.getElementById("af-c").oninput = (e) => { afiche.cuerpo = e.target.value; draw(); document.getElementById("af-c").focus(); };
-        document.getElementById("af-fmt").onchange = (e) => { afiche.formato = e.target.value; };
-        document.getElementById("af-bg").onchange = (e) => { afiche.tema = e.target.value; draw(); };
-        document.getElementById("af-dl").onclick = exportarPosterPNG;
-      }
-    }
-    draw();
-  }
+    const QUICK_DEF = {
+      trazabilidad: `<button onclick="window.bdsGo('trazabilidad')" class="bds-quick-btn" style="background:#b45309;">🛡️ Trazabilidad</button>`,
+      instituciones: `<button onclick="window.bdsGo('instituciones')" class="bds-quick-btn" style="background:#4f46e5;">🏛️ Instituciones</button>`,
+      horarios: `<button onclick="window.bdsGo('horarios')" class="bds-quick-btn" style="background:#0284c7;">📅 Horarios</button>`,
+      permisos: `<button onclick="window.bdsGo('permisos')" class="bds-quick-btn" style="background:#059669;">📝 Gestionar Permisos</button>`,
+      justificaciones: `<button onclick="window.bdsGo('justificaciones')" class="bds-quick-btn" style="background:#0d9488;">🎓 Gestionar Justificaciones</button>`,
+      notas_rea: `<button onclick="window.bdsGo('notas_rea')" class="bds-quick-btn" style="background:#d97706;">📊 Notas MEP (35/35)</button>`,
+      planeamiento_ia: `<button onclick="window.bdsGo('planeamiento_ia')" class="bds-quick-btn" style="background:#7c3aed;">🤖 Planeamiento IA</button>`,
+      comedor: `<button onclick="window.bdsGo('comedor')" class="bds-quick-btn" style="background:#15803d;">🍽️ Comedor</button>`,
+      agenda: `<button onclick="window.bdsGo('agenda')" class="bds-quick-btn" style="background:#1d4ed8;">📆 Agenda</button>`,
+      reportes: `<button onclick="window.bdsGo('reportes')" class="bds-quick-btn" style="background:#0369a1;">🗂️ Respaldos</button>`,
+      simulador_mopt: `<button onclick="window.bdsGo('simulador_mopt')" class="bds-quick-btn" style="background:#0284c7;">🚗 MOPT</button>`,
+      habitos: `<button onclick="window.bdsGo('habitos')" class="bds-quick-btn" style="background:#059669;">🔥 Hábitos</button>`,
+      opendocs: `<button onclick="window.bdsGo('opendocs')" class="bds-quick-btn" style="background:#0f766e;">📖 Open Docs</button>`,
+      identidad: `<button onclick="window.BDS_BRAND && window.BDS_BRAND.openModal()" class="bds-quick-btn" style="background:#334155;">🛡️ Escudo y Logo</button>`,
+      carnet_qr: `<button onclick="window.bdsGo('carnet_qr')" class="bds-quick-btn" style="background:#1e40af;">🪪 Carné QR</button>`
+    };
 
-  // ==================== INICIO CON ACCESOS ADMINISTRATIVOS 1-CLIC + 8 ROLES ====================
-  function renderInicio(shell, rolVista) {
-    const s = getSesion(), xp = getXP(), malla = window.BDS_MALLA_MEP || [];
-    const rol = rolVista || s.rol;
-    const rMeta = ROLES.find(r => r.rol === rol) || ROLES[0];
-    const rachaTxt = `${xp.racha} ${xp.racha === 1 ? "día" : "días"}`;
+    const CARD_DEF = {
+      practica: `<div class="bds-card" style="cursor:pointer;border-top:3px solid #10b981;" onclick="window.bdsGo('practica')"><h4 style="margin:0 0 4px;">🧭 Práctica</h4><p style="margin:0;font-size:11.5px;color:#94a3b8;">29 áreas puras con guía paso a paso y audio.</p></div>`,
+      simulacro: `<div class="bds-card" style="cursor:pointer;border-top:3px solid #f59e0b;" onclick="window.bdsGo('simulacro')"><h4 style="margin:0 0 4px;">⏱️ Simulacro</h4><p style="margin:0;font-size:11.5px;color:#94a3b8;">Exámenes 10–60 preguntas con nota al final.</p></div>`,
+      biblioteca: `<div class="bds-card" style="cursor:pointer;border-top:3px solid #38bdf8;" onclick="window.bdsGo('biblioteca')"><h4 style="margin:0 0 4px;">📚 Biblioteca</h4><p style="margin:0;font-size:11.5px;color:#94a3b8;">Manuales ilustrados y afiches marca blanca.</p></div>`,
+      juegos: `<div class="bds-card" style="cursor:pointer;border-top:3px solid #a855f7;" onclick="window.bdsGo('juegos')"><h4 style="margin:0 0 4px;">🎮 Juegos</h4><p style="margin:0;font-size:11.5px;color:#94a3b8;">10 juegos educativos para subir tu racha y XP.</p></div>`
+    };
 
     shell.innerHTML = `
-      <!-- Encabezado Institucional Sobrio con Logo MEP Estético -->
-      <div class="bds-card" style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;">
-        <div style="display:flex;align-items:center;gap:12px;min-width:240px;flex:1;">
-          <img src="${IMG_ESCUDO}" width="48" height="56" alt="Escudo CTP Mercedes Norte"/>
+      <!-- Saludo amigable del Búho Azul -->
+      <div class="bds-card" style="margin-bottom:12px;background:linear-gradient(135deg,#0f2247 0%,#0b1322 100%);border-color:#38bdf8;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:240px;">
+          <img src="${b.mascota}" width="54" height="54" alt="Búho Azul" style="border-radius:50%;flex-shrink:0;"/>
           <div>
-            <span style="background:#1d4ed8;color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:4px;">COLEGIO TÉCNICO PROFESIONAL MERCEDES NORTE • HEREDIA • CIRCUITO 02</span>
-            <h2 style="margin:5px 0 2px;font-size:18px;color:#fff;">Panel ${rol} — ${s.nombre}</h2>
-            <p style="margin:0;font-size:12px;color:#94a3b8;">${rMeta.desc}</p>
-            <p style="margin:3px 0 0;font-size:11.5px;color:#cbd5e1;">Nivel: <b style="color:#fbbf24;">${xp.nivel}</b> • Racha: <b>${rachaTxt}</b> • ${s.visitante ? "Modo Exploración" : `Prueba activa: ${diasPrueba()} días restantes`}</p>
+            <div style="font-size:11px;font-weight:800;color:#2dd4bf;">${b.institucion.toUpperCase()} • ${sesionActiva.rol.toUpperCase()} • ${estBeta}</div>
+            <div style="font-size:14.5px;font-weight:800;color:#fff;margin-top:3px;line-height:1.35;">“${saludoBuho}”</div>
+            <div style="font-size:11.5px;color:#94a3b8;margin-top:3px;">Nivel: <b style="color:#fbbf24;">${xp.nivel}</b> • Racha: <b>${xp.racha}d</b> • ⚡ <b>${xp.xp} XP</b></div>
           </div>
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
-          <img src="${IMG_MEP}" style="height:44px;max-width:240px;object-fit:contain;" alt="MEP Costa Rica"/>
-          <select id="rol-sw" style="background:#070d19;color:#38bdf8;border:1px solid #334155;padding:7px 11px;border-radius:8px;font-size:12px;font-weight:700;min-height:38px;">
-            ${ROLES.map(r => `<option value="${r.rol}" ${rol===r.rol?"selected":""}>${r.ic} Cambiar Vista: ${r.rol}</option>`).join("")}
-          </select>
+          <img src="${b.logoMep}" style="height:38px;max-width:210px;" alt="MEP Costa Rica"/>
+          ${esRealSA ? `
+            <select id="rol-sw" style="background:#070d19;color:#38bdf8;border:1px solid #334155;padding:7px 10px;border-radius:8px;font-size:12px;font-weight:700;">
+              ${ROLES_ALL.map(r => `<option value="${r.rol}" ${sesionActiva.rol===r.rol?"selected":""}>${r.ic} Vista: ${r.rol}</option>`).join("")}
+            </select>
+          ` : ""}
         </div>
       </div>
 
-      <!-- BARRA DE ACCESOS RÁPIDOS ADMINISTRATIVOS 1-CLIC (SIEMPRE VISIBLE EN PORTADA) -->
-      <div class="bds-card" style="margin-bottom:14px;background:linear-gradient(135deg,#0d192e 0%,#0b1322 100%);border-color:#1e3a8a;">
-        <div style="font-size:11px;font-weight:800;color:#38bdf8;letter-spacing:0.04em;margin-bottom:10px;">⚡ GESTIÓN ADMINISTRATIVA Y ACADÉMICA EN 1 CLIC (SUPERIOR A SICAI / SEA / PIAD):</div>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;">
-          <button onclick="window.bdsGo('admin','horarios')" class="bds-quick-btn" style="background:#0284c7;">📅 Horarios (Profes & Estudiantes)</button>
-          <button onclick="window.bdsGo('admin','permisos')" class="bds-quick-btn" style="background:#059669;">📝 Solicitar Permiso / Tardía Personal</button>
-          <button onclick="window.bdsGo('admin','justificaciones')" class="bds-quick-btn" style="background:#0d9488;">🎓 Justificar Estudiante → Docente</button>
-          <button onclick="window.bdsGo('admin','bandeja')" class="bds-quick-btn" style="background:#6d28d9;">🏛️ Bandeja Dirección (Aprobar 1-Clic)</button>
-          <button onclick="window.bdsGo('admin','notas')" class="bds-quick-btn" style="background:#b45309;">📊 Registro Notas & Excel CSV</button>
-          <button onclick="window.bdsGo('direccion')" class="bds-quick-btn" style="background:#4f46e5;">📈 Panel Dirección & Familia</button><button onclick="window.bdsGo('fase3')" class="bds-quick-btn" style="background:#7c3aed;">🏭 50 Especialidades & Planes</button><button onclick="window.BDS_BRAND && window.BDS_BRAND.openModal()" class="bds-quick-btn" style="background:#0f766e;">🛡️ Escudo / Mascota / Logo MEP</button><button onclick="window.bdsGo('admin','qr')" class="bds-quick-btn" style="background:#1e40af;">🪪 Carné & Escáner QR SHA-256</button>
-        </div>
-      </div>
-
-            <!-- BLOQUE ADMISIÓN UNIVERSITARIA UCR • TEC • UNA • UNED • UTN -->
-      <div class="bds-card" style="margin-bottom:14px;background:linear-gradient(135deg,#0c1d3d 0%,#0b1322 100%);border-color:#0284c7;">
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
-          <div style="font-size:11.5px;font-weight:800;color:#38bdf8;letter-spacing:0.03em;">🎓 ADMISIÓN UNIVERSITARIA Y PRUEBAS NACIONALES (SIMULACROS 10–60 + CALCULADORA DE NOTA):</div>
-          <button onclick="window.bdsGo('admision','ucr')" style="background:#0284c7;color:#fff;border:none;padding:6px 12px;border-radius:7px;font-size:11.5px;font-weight:800;cursor:pointer;">Abrir Centro de Admisión →</button>
-        </div>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;">
-          <button onclick="window.bdsGo('admision','ucr')" class="bds-quick-btn" style="background:#0284c7;">🏛️ UCR (PAA 200–800)</button>
-          <button onclick="window.bdsGo('admision','tec')" class="bds-quick-btn" style="background:#1d4ed8;">⚙️ TEC (Aptitud 200–800)</button>
-          <button onclick="window.bdsGo('admision','una')" class="bds-quick-btn" style="background:#dc2626;">🎓 UNA (PAA 0–900)</button>
-          <button onclick="window.bdsGo('admision','uned')" class="bds-quick-btn" style="background:#059669;">🌐 UNED (Diagnóstico)</button>
-          <button onclick="window.bdsGo('admision','utn')" class="bds-quick-btn" style="background:#ea580c;">🔧 UTN (Articulación CTP)</button>
-          <button onclick="window.bdsGo('admision','pne')" class="bds-quick-btn" style="background:#7c3aed;">🇨🇷 Pruebas Nacionales MEP</button>
-        </div>
-      </div>
-
-      <!-- 4 MÓDULOS PEDAGÓGICOS Y LÚDICOS -->
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin-bottom:16px;">
-        <div class="bds-card" style="cursor:pointer;border-top:3px solid #10b981;" onclick="window.bdsGo('practica')">
-          <h4 style="margin:0 0 4px;color:#fff;">🧭 Práctica Guiada & Libre</h4>
-          <p style="margin:0;font-size:11.5px;color:#94a3b8;">22 áreas MEP con pista socrática, audio Listening y Speaking.</p>
-        </div>
-        <div class="bds-card" style="cursor:pointer;border-top:3px solid #f59e0b;" onclick="window.bdsGo('simulacro')">
-          <h4 style="margin:0 0 4px;color:#fff;">⏱️ Simulacro 10–60 Preguntas</h4>
-          <p style="margin:0;font-size:11.5px;color:#94a3b8;">Cronómetro oficial, nota MEP (100%) y escala UCR/TEC (800).</p>
-        </div>
-        <div class="bds-card" style="cursor:pointer;border-top:3px solid #38bdf8;" onclick="window.bdsGo('biblioteca')">
-          <h4 style="margin:0 0 4px;color:#fff;">📚 Libros & Afiches Marca Blanca</h4>
-          <p style="margin:0;font-size:11.5px;color:#94a3b8;">Resúmenes curriculares y exportación PNG sin marcas de agua.</p>
-        </div>
-        <div class="bds-card" style="cursor:pointer;border-top:3px solid #a855f7;" onclick="window.bdsGo('juegos')">
-          <h4 style="margin:0 0 4px;color:#fff;">♟️ Ajedrez FIDE & 6 Juegos</h4>
-          <p style="margin:0;font-size:11.5px;color:#94a3b8;">Ajedrez legal vs IA, Damas, Memoria, Cálculo, Scrabble y MOPT.</p>
-        </div>
-      </div>
-
-      <h3 style="margin:0 0 10px;font-size:15px;color:#38bdf8;">📘 Malla Curricular Completa MEP (22 Materias y Especialidades)</h3>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:10px;margin-bottom:16px;">
-        ${malla.map(m => `
-          <div class="bds-card" style="cursor:pointer;border-left:4px solid ${m.color};padding:12px;" data-area="${m.id}">
-            <span style="font-size:9.5px;font-weight:800;color:${m.color};">${m.cat.toUpperCase()}</span>
-            <div style="font-size:13.5px;font-weight:700;color:#fff;margin-top:3px;">${m.name}</div>
+      ${perms.quick.length ? `
+        <div class="bds-card" style="margin-bottom:12px;">
+          <div style="font-size:11px;font-weight:800;color:#38bdf8;margin-bottom:8px;">⚡ ACCESOS RÁPIDOS</div>
+          <div style="display:flex;flex-wrap:wrap;gap:7px;">
+            ${perms.quick.map(k => QUICK_DEF[k] || "").join("")}
           </div>
-        `).join("")}
-      </div>
+        </div>
+      ` : ""}
 
-      <div class="bds-card" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;">
-        <div>
-          <h4 style="margin:0 0 6px;color:#fbbf24;">🏆 Reglas de XP, Racha y Medallas</h4>
-          <ul style="margin:0;padding-left:16px;font-size:12px;color:#cbd5e1;line-height:1.6;">
-            <li>+10 XP por ítem correcto, práctica oral o captura en ajedrez.</li>
-            <li>+30 a +180 XP por aprobar simulacros oficiales (≥70%).</li>
-            <li>Medallas desbloqueadas: <b>${xp.medallas.join(" • ")}</b></li>
-          </ul>
+      ${perms.admisionHome ? `
+        <div class="bds-card" style="margin-bottom:12px;border-color:#0284c7;">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+            <span style="font-size:12px;font-weight:800;color:#38bdf8;">🎓 Admisión Universitaria y PNE</span>
+            <button onclick="window.bdsGo('admision','ucr')" style="background:#0284c7;color:#fff;border:none;padding:6px 11px;border-radius:7px;font-size:11.5px;font-weight:800;cursor:pointer;">Abrir Admisión →</button>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <button onclick="window.bdsGo('admision','ucr')" class="bds-quick-btn" style="background:#0284c7;">UCR</button>
+            <button onclick="window.bdsGo('admision','tec')" class="bds-quick-btn" style="background:#1d4ed8;">TEC</button>
+            <button onclick="window.bdsGo('admision','una')" class="bds-quick-btn" style="background:#dc2626;">UNA</button>
+            <button onclick="window.bdsGo('admision','uned')" class="bds-quick-btn" style="background:#059669;">UNED</button>
+            <button onclick="window.bdsGo('admision','utn')" class="bds-quick-btn" style="background:#ea580c;">UTN</button>
+            <button onclick="window.bdsGo('admision','pne')" class="bds-quick-btn" style="background:#7c3aed;">PNE MEP</button>
+          </div>
         </div>
-        <div>
-          <h4 style="margin:0 0 6px;color:#34d399;">💳 Planes Oficiales Unificados</h4>
-          <p style="margin:0;font-size:12px;color:#cbd5e1;line-height:1.55;">
-            <b>Prueba gratuita:</b> 13 días con cuenta Google / MEP.<br/>
-            <b>Plan Anual Nacional:</b> <b>₡3,500</b> vía SINPE Móvil al <b>+506 6090 6359</b> (Banco Popular, Max Salazar Sánchez — Detalle: correo del usuario).<br/>
-            <b>Plan Internacional:</b> <b>$4.99 USD / año</b> vía PayPal.
-          </p>
+      ` : ""}
+
+      ${perms.cards.length ? `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:14px;">${perms.cards.map(k => CARD_DEF[k] || "").join("")}</div>` : ""}
+
+      ${perms.mallaHome ? `
+        <h3 style="margin:0 0 8px;font-size:14.5px;color:#38bdf8;">📘 Malla Curricular MEP (${malla.length} Áreas)</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:8px;">
+          ${malla.map(m => `<div class="bds-card" style="cursor:pointer;border-left:4px solid ${m.color};padding:11px;" data-area="${m.id}"><span style="font-size:9.5px;font-weight:800;color:${m.color};">${m.cat.toUpperCase()}</span><div style="font-size:13px;font-weight:700;margin-top:2px;">${m.name}</div></div>`).join("")}
         </div>
-      </div>
+      ` : ""}
     `;
 
-    document.getElementById("rol-sw").onchange = (e) => renderInicio(shell, e.target.value);
-    shell.querySelectorAll("[data-area]").forEach(el => {
-      el.onclick = () => { setNavActive("practica"); renderEvaluacion(shell, "guiada", el.getAttribute("data-area")); };
-    });
+    if (document.getElementById("rol-sw")) document.getElementById("rol-sw").onchange = (e) => onSwitchRole(e.target.value);
+    shell.querySelectorAll("[data-area]").forEach(el => { el.onclick = () => window.bdsGo("practica", el.getAttribute("data-area")); });
   }
 
-  function setNavActive(v) {
-    document.querySelectorAll("[data-v]").forEach(b => b.classList.toggle("active", b.getAttribute("data-v") === v));
-  }
+  // ==================== SHELL PRINCIPAL MOBILE-FIRST (CERO NULL + DOCK CHATS VIVO) ====================
+  function iniciarApp(vistaInicial = "inicio", rolAuditoria = null) {
+    const sBase = getSesion(); if (!sBase) { mostrarLogin("login"); return; }
+    const rolEfectivo = (sBase.rolReal === "SuperAdmin" && rolAuditoria) ? rolAuditoria : sBase.rol;
+    sesionActiva = { ...sBase, rol: rolEfectivo };
 
-  function abrirHamburguesa() {
-    const old = document.getElementById("bds-drawer"); if (old) { old.remove(); return; }
-    const drw = document.createElement("div");
-    drw.id = "bds-drawer";
-    drw.style.cssText = "position:fixed;inset:0;background:rgba(2,6,23,0.85);z-index:290000;display:flex;";
-    drw.innerHTML = `
-      <div style="width:295px;max-width:85vw;background:#0b1322;border-right:1px solid #1e293b;padding:16px;display:flex;flex-direction:column;gap:7px;overflow-y:auto;">
-        <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1e293b;padding-bottom:10px;">
-          <div style="display:flex;align-items:center;gap:8px;"><img src="${IMG_BUHO}" width="30" height="30"/><b style="color:#fff;">Menú CTPMN • C02</b></div>
-          <button id="dw-x" style="background:#7f1d1d;color:#fff;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;">✕</button>
-        </div>
-        ${[
-          ["inicio", null, "🏠 Inicio & 8 Roles"],
-          ["admin", "horarios", "📅 Horarios (Profes y Estudiantes)"],
-          ["admin", "permisos", "📝 Solicitar Permiso Personal"],
-          ["admin", "justificaciones", "🎓 Justificar Estudiante"],
-          ["admin", "bandeja", "🏛️ Bandeja Dirección (1-Clic)"],
-          ["admin", "notas", "📊 Registro de Notas Excel"],
-          ["admin", "qr", "🪪 Carné & Escáner QR SHA-256"],
-          ["practica", null, "🧭 Práctica Libre y Guiada"],
-          ["simulacro", null, "⏱️ Simulacro (10–60 Ítems)"],["admision", null, "🎓 Admisión UCR/TEC/UNA/UNED/UTN"],
-          ["opendocs","biblioteca", null, "📚 Libros & Afiches Marca Blanca"],
-          ["juegos", null, "♟️ Ajedrez FIDE & 6 Juegos"]
-        ].map(([k, p, l]) => `<button data-dw="${k}" data-dp="${p||''}" style="text-align:left;background:#131f33;color:#f1f5f9;border:1px solid #26354d;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;min-height:42px;">${l}</button>`).join("")}
-        <button id="dw-brand" style="text-align:left;background:#131f33;color:#2dd4bf;border:1px solid #0d9488;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;min-height:42px;">🛡️ Identidad (Escudo / Mascota / MEP)</button><button id="dw-chat" style="text-align:left;background:#064e3b;color:#6ee7b7;border:1px solid #10b981;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;min-height:42px;">💬 Chats Subgrupos A/B</button>
-        <button id="dw-out" style="margin-top:auto;background:#7f1d1d;color:#fecaca;border:none;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;min-height:42px;">🚪 Cerrar Sesión</button>
-      </div>
-    `;
-    document.body.appendChild(drw);
-    document.getElementById("dw-x").onclick = () => drw.remove();
-    document.getElementById("dw-brand").onclick = () => { drw.remove(); if (window.BDS_BRAND) window.BDS_BRAND.openModal(); }; document.getElementById("dw-chat").onclick = () => { drw.remove(); toggleChats(); };
-    document.getElementById("dw-out").onclick = () => { drw.remove(); cerrarSesion(); };
-    drw.querySelectorAll("[data-dw]").forEach(b => b.onclick = () => { drw.remove(); window.bdsGo(b.getAttribute("data-dw"), b.getAttribute("data-dp") || null); });
-  }
+    // Verificar bloqueo Beta 13 días
+    if (!sesionActiva.visitante && window.BDS_SUSCRIPCION && window.BDS_SUSCRIPCION.isLocked(sesionActiva)) {
+      inyectarEstilos(); setFavicon();
+      window.BDS_SUSCRIPCION.renderPaywall(sesionActiva, cerrarSesion);
+      return;
+    }
 
-  function iniciarApp(vistaInicial = "inicio") {
-    const s = getSesion(); if (!s) { mostrarLogin("login"); return; }
+    const perms = getPermisosRol(rolEfectivo, sesionActiva.visitante);
+    const b = brand(), xp = getXP();
+    const th = window.BDS_UI ? window.BDS_UI.getTheme() : "dark";
+    const lg = window.BDS_UI ? window.BDS_UI.getLang() : "es";
+
     document.body.classList.add("bds-authenticated");
-    if (sesionActiva && !sesionActiva.visitante && window.BDS_SUSCRIPCION && window.BDS_SUSCRIPCION.isLocked(sesionActiva)) { inyectarEstilos(); setFavicon(); window.BDS_SUSCRIPCION.renderPaywall(sesionActiva, cerrarSesion); return; }
     inyectarEstilos(); setFavicon();
-    ["bds-header","bds-subnav","bds-shell","bds-dock"].forEach(id => { const e = document.getElementById(id); if (e) e.remove(); });
-    const xp = getXP();
+    ["bds-header","bds-subnav","bds-preview-bar","bds-shell","bds-dock","bds-drawer"].forEach(id => { const e = document.getElementById(id); if (e) e.remove(); });
 
     const hdr = document.createElement("header");
     hdr.id = "bds-header";
     hdr.innerHTML = `
-      <div style="display:flex;align-items:center;gap:8px;min-width:0;">
-        <button id="btn-hm" aria-label="Menú" style="background:#131f33;color:#fff;border:1px solid #334155;width:38px;height:38px;border-radius:8px;font-size:18px;cursor:pointer;flex-shrink:0;">☰</button>
-        <img src="${IMG_ESCUDO}" width="26" height="30" alt="Escudo CTPMN" class="hide-sm"/>
-        <img src="${IMG_BUHO}" width="32" height="32" alt="Búho Azul" style="cursor:pointer;" onclick="window.bdsGo('inicio')"/>
-        <div style="min-width:0;cursor:pointer;" onclick="window.bdsGo('inicio')">
-          <div style="font-size:14px;font-weight:900;color:#fff;white-space:nowrap;">prac<span style="color:#2dd4bf;">TICA</span>tecnica.com</div>
-          <div style="font-size:10px;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">CTP Mercedes Norte • Circuito 02 • ${s.rol}</div>
+      <div style="display:flex;align-items:center;gap:7px;min-width:0;">
+        <button id="btn-hm" aria-label="Menú" style="background:#131f33;color:#fff;border:1px solid #334155;width:36px;height:36px;border-radius:8px;font-size:18px;cursor:pointer;flex-shrink:0;">☰</button>
+        <img src="${b.escudo}" width="24" height="28" alt="Escudo" class="hide-sm"/>
+        <img src="${b.mascota}" width="30" height="30" alt="Búho Azul" style="border-radius:50%;cursor:pointer;flex-shrink:0;" onclick="window.bdsGo('${perms.tabs[0]}')"/>
+        <div style="min-width:0;cursor:pointer;" onclick="window.bdsGo('${perms.tabs[0]}')">
+          <div data-no-i18n="true" style="font-size:13.5px;font-weight:900;white-space:nowrap;">prac<span style="color:#2dd4bf;">TICA</span>tecnica.com</div>
+          <div style="font-size:10px;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px;">${b.institucionCorta} • ${rolEfectivo}</div>
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-        <button id="bds-pwa-install-btn" style="display:none;background:#0f766e;color:#fff;border:none;padding:6px 9px;border-radius:7px;font-size:11px;font-weight:800;cursor:pointer;min-height:34px;align-items:center;gap:4px;">📲 Instalar</button><button id="bds-notif-btn" title="Notificaciones" style="position:relative;background:#131f33;color:#38bdf8;border:1px solid #334155;padding:6px 9px;border-radius:7px;font-size:13px;cursor:pointer;min-height:34px;">🔔<span id="bds-notif-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:#dc2626;color:#fff;font-size:9.5px;font-weight:900;min-width:16px;height:16px;border-radius:99px;align-items:center;justify-content:center;padding:0 4px;"></span></button><span id="bds-xp-pill" class="hide-sm" style="background:#131f33;border:1px solid #fbbf24;color:#fbbf24;padding:5px 9px;border-radius:7px;font-size:11px;font-weight:800;">🔥 ${xp.racha}d • ⚡ ${xp.xp} XP</span>
-        <button id="btn-ch" style="background:#064e3b;color:#6ee7b7;border:1px solid #10b981;padding:7px 11px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;min-height:36px;">💬 Chats</button>
-        <button id="btn-out" style="background:transparent;color:#fca5a5;border:1px solid #7f1d1d;padding:7px 11px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;min-height:36px;">Salir</button>
+      <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
+        <select id="bds-lang-sel" data-no-i18n="true" class="hide-sm" style="background:#131f33;color:#fff;border:1px solid #334155;padding:5px 6px;border-radius:7px;font-size:11px;font-weight:800;min-height:34px;">
+          <option value="es" ${lg==="es"?"selected":""}>ES</option>
+          <option value="en" ${lg==="en"?"selected":""}>EN</option>
+          <option value="pt" ${lg==="pt"?"selected":""}>PT</option>
+          <option value="fr" ${lg==="fr"?"selected":""}>FR</option>
+        </select>
+        <button id="bds-theme-btn" style="background:#131f33;color:#fbbf24;border:1px solid #334155;padding:6px 8px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;min-height:34px;">${th==="light"?"🌙":"☀️"}</button>
+        <button id="bds-pwa-install-btn" style="display:none;background:#0f766e;color:#fff;border:none;padding:6px 9px;border-radius:7px;font-size:11px;font-weight:800;cursor:pointer;min-height:34px;align-items:center;gap:4px;">📲 Instalar</button>
+        <button id="bds-notif-btn" title="Notificaciones" style="position:relative;background:#131f33;color:#38bdf8;border:1px solid #334155;padding:6px 8px;border-radius:7px;font-size:13px;cursor:pointer;min-height:34px;">🔔<span id="bds-notif-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:#dc2626;color:#fff;font-size:9px;font-weight:900;min-width:15px;height:15px;border-radius:99px;align-items:center;justify-content:center;padding:0 3px;"></span></button>
+        <span id="bds-xp-pill" class="hide-sm" data-no-i18n="true" style="background:#131f33;border:1px solid #fbbf24;color:#fbbf24;padding:5px 8px;border-radius:7px;font-size:11px;font-weight:800;">🔥 ${xp.racha}d • ⚡ ${xp.xp} XP</span>
+        ${perms.chats ? `<button id="btn-ch" style="background:#064e3b;color:#6ee7b7;border:1px solid #10b981;padding:6px 10px;border-radius:7px;font-size:11.5px;font-weight:700;cursor:pointer;min-height:34px;">💬 Chats</button>` : ""}
+        <button id="btn-out" style="background:transparent;color:#fca5a5;border:1px solid #7f1d1d;padding:6px 9px;border-radius:7px;font-size:11.5px;font-weight:700;cursor:pointer;min-height:34px;">Salir</button>
       </div>
     `;
 
     const sub = document.createElement("nav");
     sub.id = "bds-subnav";
-    sub.innerHTML = [
-      ["inicio","🏠 Inicio & 8 Roles"],
-      ["admin","📅 Horarios, Permisos & Dirección"],
-      ["practica","🧭 Práctica Guiada"],
-      ["simulacro","⏱️ Simulacro (10–60)"],["admision","🎓 Admisión UCR/TEC/UNA/UNED"],
-      ["opendocs","biblioteca","📚 Libros & Afiches"],
-      ["fase2","📋 Asistencia & CSP"],["fase3","📘 Planes & 50 Esp."],["fase4","🚦 MOPT, 6 Idiomas & Lab"],["fase5","📊 Libreta REA/SEA"],["juegos","♟️ Juegos & Ajedrez"]
-    ].map(([k, l]) => `<button data-v="${k}" class="bds-nav-btn">${l}</button>`).join("");
+    sub.innerHTML = perms.tabs.map(k => `<button data-v="${k}" class="bds-nav-btn">${TAB_META[k]}</button>`).join("");
 
     const shell = document.createElement("main");
     shell.id = "bds-shell";
 
+    // Dock inferior móvil limpio (5 botones exactos, Chats funcional)
+    const dockItems = sesionActiva.visitante
+      ? [
+          { v: "practica", ic: "🧭", lbl: "Práctica" },
+          { v: "juegos", ic: "🎮", lbl: "Juegos" },
+          { action: "planes", ic: "💎", lbl: "Planes" },
+          { action: "login", ic: "🎁", lbl: "Beta 13d" },
+          { action: "theme", ic: "🌓", lbl: "Tema" }
+        ]
+      : [
+          { v: "inicio", ic: "🏠", lbl: "Inicio" },
+          { v: perms.tabs.includes("horarios") ? "horarios" : "habitos", ic: perms.tabs.includes("horarios") ? "📅" : "🔥", lbl: perms.tabs.includes("horarios") ? "Horarios" : "Hábitos" },
+          { v: perms.tabs.includes("simulacro") ? "simulacro" : "permisos", ic: perms.tabs.includes("simulacro") ? "⏱️" : "📝", lbl: perms.tabs.includes("simulacro") ? "Simulacro" : "Permisos" },
+          { v: perms.tabs.includes("juegos") ? "juegos" : "comedor", ic: perms.tabs.includes("juegos") ? "🎮" : "🍽️", lbl: perms.tabs.includes("juegos") ? "Juegos" : "Comedor" },
+          perms.chats ? { action: "chats", ic: "💬", lbl: "Chats" } : { v: "simulador_mopt", ic: "🚗", lbl: "MOPT" }
+        ];
+
     const dock = document.createElement("nav");
     dock.id = "bds-dock";
-    dock.innerHTML = `
-      <button class="bds-dock-b" data-v="inicio"><span>🏠</span><span>Inicio</span></button>
-      <button class="bds-dock-b" data-v="admin"><span>📅</span><span>Gestión</span></button>
-      <button class="bds-dock-b" data-v="simulacro"><span>⏱️</span><span>Simulacro</span></button>
-      <button class="bds-dock-b" data-v="juegos"><span>♟️</span><span>Juegos</span></button>
-      <button class="bds-dock-b" id="dk-ch"><span>💬</span><span>Chats</span></button>
-    `;
+    dock.innerHTML = dockItems.map((it, i) => `<button class="bds-dock-b" ${it.v ? `data-v="${it.v}"` : `data-act="${it.action}"`} id="dk-${i}"><span style="font-size:17px;">${it.ic}</span><span>${it.lbl}</span></button>`).join("");
 
-    document.body.prepend(shell); document.body.prepend(sub); document.body.prepend(hdr); document.body.appendChild(dock);
+    document.body.prepend(shell);
+    if (sBase.rolReal === "SuperAdmin" && rolEfectivo !== "SuperAdmin") {
+      const pbar = document.createElement("div");
+      pbar.id = "bds-preview-bar";
+      pbar.style.cssText = "background:#b45309;color:#fff;padding:7px 12px;font-size:12px;font-weight:800;display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;";
+      pbar.innerHTML = `<span>👁️ Auditando rol: ${rolEfectivo}</span><button id="bds-back-sa" style="background:#0f172a;color:#fbbf24;border:none;padding:4px 10px;border-radius:6px;font-size:11.5px;font-weight:800;cursor:pointer;">👑 Volver a SuperAdmin</button>`;
+      document.body.prepend(pbar);
+      document.getElementById("bds-back-sa").onclick = () => iniciarApp("inicio", "SuperAdmin");
+    }
+    document.body.prepend(sub);
+    document.body.prepend(hdr);
+    document.body.appendChild(dock);
 
-    window.bdsGo = function (v, subParam) { /* bds-safe-go-v1901 */ try {
-      if (simTimer) { clearInterval(simTimer); simTimer = null; }
-      setNavActive(v);
-      if (v === "admin") {
-        if (window.BDS_RENDER_ADMIN_SUITE) window.BDS_RENDER_ADMIN_SUITE(shell, subParam || "horarios", { sesion: getSesion(), sha256Hex, generarQRSVG, ganarXP, IMG_ESCUDO, IMG_BUHO, IMG_MEP });
+    window.bdsGo = function (v, subParam) {
+      try {
+        if (simTimer) { clearInterval(simTimer); simTimer = null; }
+        const destino = perms.tabs.includes(v) ? v : perms.tabs[0];
+        document.querySelectorAll("[data-v]").forEach(btn => btn.classList.toggle("active", btn.getAttribute("data-v") === destino));
+
+        if (destino === "trazabilidad" && window.BDS_TRAZABILIDAD) window.BDS_TRAZABILIDAD.renderPanel(shell, { sesion: sesionActiva, sha256Hex });
+        else if (destino === "instituciones" && window.BDS_RENDER_INSTITUCIONES_CRUD) window.BDS_RENDER_INSTITUCIONES_CRUD(shell, { sesion: sesionActiva });
+        else if (destino === "horarios" && window.BDS_RENDER_MATRICULA_HORARIOS) window.BDS_RENDER_MATRICULA_HORARIOS(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
+        else if ((destino === "permisos" || destino === "justificaciones" || destino === "carnet_qr") && window.BDS_RENDER_PERMISOS_JUSTIF) window.BDS_RENDER_PERMISOS_JUSTIF(shell, destino === "carnet_qr" ? "qr" : destino, { sesion: sesionActiva, sha256Hex, generarQRSVG });
+        else if (destino === "notas_rea" && window.BDS_RENDER_DOCENTE_REA_AUTO) window.BDS_RENDER_DOCENTE_REA_AUTO(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG, ganarXP });
+        else if (destino === "planeamiento_ia" && window.BDS_RENDER_PLANEAMIENTO_IA) window.BDS_RENDER_PLANEAMIENTO_IA(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG, ganarXP });
+        else if (destino === "comedor" && window.BDS_RENDER_COMEDOR_MEP) window.BDS_RENDER_COMEDOR_MEP(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG, ganarXP });
+        else if (destino === "agenda" && window.BDS_RENDER_AGENDA_HORARIO) window.BDS_RENDER_AGENDA_HORARIO(shell, { sesion: sesionActiva });
+        else if (destino === "reportes" && window.BDS_RENDER_REPORTES_RESPALDOS) window.BDS_RENDER_REPORTES_RESPALDOS(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
+        else if (destino === "simulador_mopt" && window.BDS_RENDER_SIMULADOR_MOPT) window.BDS_RENDER_SIMULADOR_MOPT(shell, ganarXP);
+        else if (destino === "admision" && window.BDS_RENDER_ADMISION) window.BDS_RENDER_ADMISION(shell, subParam || "ucr", ganarXP);
+        else if (destino === "opendocs" && window.BDS_RENDER_OPENDOCS) window.BDS_RENDER_OPENDOCS(shell, { sesion: sesionActiva, generarQRSVG, sha256Hex });
+        else if (destino === "biblioteca" && window.BDS_RENDER_BIBLIOTECA_ILUSTRADA) window.BDS_RENDER_BIBLIOTECA_ILUSTRADA(shell, { malla: window.BDS_MALLA_MEP || [], ganarXP, subInicial: subParam || "manuales", abrirPractica: (m, a) => window.bdsGo(m === "simulacro" ? "simulacro" : "practica", a), IMG_ESCUDO: b.escudo, IMG_MEP: b.logoMep });
+        else if (destino === "juegos" && window.BDS_RENDER_SALA_JUEGOS) window.BDS_RENDER_SALA_JUEGOS(shell, ganarXP);
+        else if (destino === "habitos" && window.BDS_SUSCRIPCION) window.BDS_SUSCRIPCION.renderHabitos(shell, sesionActiva, getXP());
+        else if (destino === "direccion" && window.BDS_RENDER_DIRECCION_Y_FAMILIA) window.BDS_RENDER_DIRECCION_Y_FAMILIA(shell, sesionActiva);
+        else if (destino === "practica") renderEvaluacion(shell, "guiada", subParam);
+        else if (destino === "simulacro") renderEvaluacion(shell, "simulacro", subParam);
+        else renderInicio(shell, perms, (nuevoRol) => iniciarApp("inicio", nuevoRol));
+
+        if (sesionActiva && sesionActiva.visitante && window.BDS_SUSCRIPCION) window.BDS_SUSCRIPCION.prependGuestPromo(shell, cerrarSesion);
+        if (window.BDS_UI && window.BDS_UI.getLang() !== "es") window.BDS_UI.applyLang(window.BDS_UI.getLang());
+        window.scrollTo(0, 0);
+      } catch (errGo) {
+        console.error("bdsGo error:", errGo);
+        shell.innerHTML = `<div class="bds-card" style="text-align:center;padding:24px;border-color:#f59e0b;"><h3>⚠️ Módulo en recuperación</h3><p style="font-size:12.5px;color:#94a3b8;">${errGo.message || errGo}</p><button onclick="window.bdsGo('inicio')" style="background:#1d4ed8;color:#fff;border:none;padding:9px 16px;border-radius:8px;font-weight:800;cursor:pointer;">🏠 Volver al Inicio</button></div>`;
       }
-      else if (v === "practica") renderEvaluacion(shell, "guiada", subParam || "ALL");
-      else if (v === "simulacro") renderEvaluacion(shell, "simulacro", subParam || "ALL");
-      else if (v === "admision") { if (window.BDS_RENDER_ADMISION) window.BDS_RENDER_ADMISION(shell, subParam || "ucr", ganarXP); } else if (v === "biblioteca") { if (window.BDS_RENDER_BIBLIOTECA_ILUSTRADA) window.BDS_RENDER_BIBLIOTECA_ILUSTRADA(shell, { malla: window.BDS_MALLA_MEP || [], ganarXP, abrirPractica: (m, a) => { setNavActive(m === "simulacro" ? "simulacro" : "practica"); renderEvaluacion(shell, m, a); }, IMG_ESCUDO, IMG_MEP }); else renderBiblioteca(shell); }
-            else if (v === "fase2") { if (window.BDS_RENDER_FASE2) window.BDS_RENDER_FASE2(shell, subParam, { sesion: getSesion(), sha256Hex, generarQRSVG, ganarXP }); }
-      else if (v === "fase3") { if (window.BDS_RENDER_FASE3) window.BDS_RENDER_FASE3(shell); }
-      else if (v === "fase4") { if (window.BDS_RENDER_FASE4) window.BDS_RENDER_FASE4(shell, subParam, ganarXP); }
-      else if (v === "fase5") { if (window.BDS_RENDER_FASE5_REA) window.BDS_RENDER_FASE5_REA(shell, { sesion: getSesion() }); }
-      else if (v === "direccion") { if (window.BDS_RENDER_DIRECCION_Y_FAMILIA) window.BDS_RENDER_DIRECCION_Y_FAMILIA(shell, getSesion()); }
-      else if (v === "juegos") window.BDS_RENDER_SALA_JUEGOS(shell, ganarXP);
-      else renderInicio(shell);
-      if (window.BDS_BRAND) window.BDS_BRAND.applyTexts(); if (sesionActiva && sesionActiva.visitante && window.BDS_SUSCRIPCION) window.BDS_SUSCRIPCION.prependGuestPromo(shell, cerrarSesion); window.scrollTo(0, 0); } catch (errGo) { console.error("bdsGo error:", errGo); shell.innerHTML = `<div class="bds-card" style="text-align:center;padding:24px;border-color:#f59e0b;"><h3>⚠️ Módulo en recarga</h3><p style="font-size:12.5px;color:#94a3b8;">${errGo.message || errGo}</p><button onclick="window.bdsGo(\'inicio\')" style="background:#1d4ed8;color:#fff;border:none;padding:9px 16px;border-radius:8px;font-weight:800;cursor:pointer;">🏠 Volver al Inicio</button></div>`; }
     };
 
-    document.getElementById("btn-hm").onclick = abrirHamburguesa;
-    if (s.visitante) { ["btn-ch","dk-ch"].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = "none"; }); } else { document.getElementById("btn-ch").onclick = toggleChats; } /* bds-visitante-lock */
+    // Enlaces de botones del Header y Dock (incluyendo Chats móvil reparado)
+    document.getElementById("bds-theme-btn").onclick = () => {
+      if (window.BDS_UI) window.BDS_UI.toggleTheme();
+      const t = window.BDS_UI ? window.BDS_UI.getTheme() : "dark";
+      document.getElementById("bds-theme-btn").innerText = t === "light" ? "🌙" : "☀️";
+    };
+    if (document.getElementById("bds-lang-sel")) document.getElementById("bds-lang-sel").onchange = (e) => { if (window.BDS_UI) window.BDS_UI.applyLang(e.target.value); };
+    if (document.getElementById("bds-notif-btn")) {
+      document.getElementById("bds-notif-btn").onclick = () => { if (window.BDS_NOTIF) window.BDS_NOTIF.openNotifModal(); };
+      if (window.BDS_NOTIF) window.BDS_NOTIF.updateBellBadge();
+    }
+    if (document.getElementById("bds-pwa-install-btn")) {
+      const ib = document.getElementById("bds-pwa-install-btn");
+      if (bdsDeferredPrompt && !bdsIsAppInstalled()) ib.style.display = "inline-flex";
+      ib.onclick = async () => { if (!bdsDeferredPrompt) return; bdsDeferredPrompt.prompt(); await bdsDeferredPrompt.userChoice; bdsDeferredPrompt = null; ib.style.display = "none"; };
+    }
     document.getElementById("btn-out").onclick = cerrarSesion;
-    document.querySelectorAll("[data-v]").forEach(b => b.onclick = () => window.bdsGo(b.getAttribute("data-v")));
+    if (document.getElementById("btn-ch")) document.getElementById("btn-ch").onclick = toggleChats;
+
+    document.querySelectorAll("[data-v]").forEach(btn => { btn.onclick = () => window.bdsGo(btn.getAttribute("data-v")); });
+    dock.querySelectorAll("[data-act]").forEach(btn => {
+      btn.onclick = () => {
+        const a = btn.getAttribute("data-act");
+        if (a === "chats") toggleChats();
+        else if (a === "planes" && window.BDS_SUSCRIPCION) window.BDS_SUSCRIPCION.openPlanesModal(sesionActiva, cerrarSesion);
+        else if (a === "login") cerrarSesion();
+        else if (a === "theme" && window.BDS_UI) window.BDS_UI.toggleTheme();
+      };
+    });
+
+    // Menú lateral hamburguesa móvil y desktop
+    document.getElementById("btn-hm").onclick = () => {
+      const old = document.getElementById("bds-drawer"); if (old) { old.remove(); return; }
+      const drw = document.createElement("div");
+      drw.id = "bds-drawer";
+      drw.style.cssText = "position:fixed;inset:0;background:rgba(2,6,23,0.84);z-index:299000;display:flex;";
+      drw.innerHTML = `
+        <div class="bds-card" style="width:280px;max-width:84vw;height:100%;border-radius:0;display:flex;flex-direction:column;gap:6px;overflow-y:auto;">
+          <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1e293b;padding-bottom:10px;margin-bottom:4px;">
+            <div style="display:flex;align-items:center;gap:8px;"><img src="${b.mascota}" width="28" height="28" style="border-radius:50%;"/><b>${rolEfectivo}</b></div>
+            <button id="dw-x" style="background:#7f1d1d;color:#fff;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;">✕</button>
+          </div>
+          ${perms.tabs.map(k => `<button data-dw="${k}" style="text-align:left;background:#131f33;color:#f1f5f9;border:1px solid #26354d;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">${TAB_META[k]}</button>`).join("")}
+          ${perms.identidad ? `<button id="dw-id" style="text-align:left;background:#131f33;color:#2dd4bf;border:1px solid #0d9488;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">🛡️ Escudo y Logo</button>` : ""}
+          ${perms.chats ? `<button id="dw-ch" style="text-align:left;background:#064e3b;color:#6ee7b7;border:1px solid #10b981;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">💬 Chats</button>` : ""}
+          <button id="dw-out" style="margin-top:auto;background:#7f1d1d;color:#fecaca;border:none;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">🚪 Cerrar Sesión</button>
+        </div>
+      `;
+      document.body.appendChild(drw);
+      document.getElementById("dw-x").onclick = () => drw.remove();
+      document.getElementById("dw-out").onclick = () => { drw.remove(); cerrarSesion(); };
+      if (document.getElementById("dw-id")) document.getElementById("dw-id").onclick = () => { drw.remove(); if (window.BDS_BRAND) window.BDS_BRAND.openModal(); };
+      if (document.getElementById("dw-ch")) document.getElementById("dw-ch").onclick = () => { drw.remove(); toggleChats(); };
+      drw.querySelectorAll("[data-dw]").forEach(btn => { btn.onclick = () => { drw.remove(); window.bdsGo(btn.getAttribute("data-dw")); }; });
+    };
+
     window.bdsGo(vistaInicial);
   }
 
   window.addEventListener("DOMContentLoaded", () => {
     inyectarEstilos(); setFavicon();
-    if (location.hash.includes("verificar-horario/")) { const h = location.hash.split("verificar-horario/")[1]; const res = window.BDS_VERIFY_HASH ? window.BDS_VERIFY_HASH(h) : { ok: false }; alert(res.ok ? ("✅ Verificado CTPMN: " + res.rec.holder_name + " (" + res.rec.doc_type + ")") : "Hash no encontrado en verification_registry."); } const s = getSesion(); if (s && s.email) iniciarApp("inicio");
+    const s = getSesion();
+    if (s && s.email) iniciarApp(s.visitante ? "practica" : "inicio");
     else mostrarLogin("login");
   });
 })();

@@ -43,7 +43,7 @@
 
   function loadPesos() {
     try { const p = JSON.parse(localStorage.getItem(PESOS_KEY)); if (p && p.cotidiano !== undefined) return p; } catch {}
-    const def = { cotidiano: 45, tareas: 10, pruebas: 25, proyecto: 10, asistencia: 10, leccionesMeta: 20 };
+    /* bds-presets-rea-v193 */ const def = { cotidiano: 35, tareas: 10, pruebas: 35, proyecto: 10, asistencia: 10, leccionesMeta: 20 };
     localStorage.setItem(PESOS_KEY, JSON.stringify(def));
     return def;
   }
@@ -115,7 +115,7 @@
               </select>
               <button id="rea-qr" style="background:#059669;color:#fff;border:none;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">📷 Pasar Lista con Cámara QR</button>
             ` : ""}
-            <button id="rea-csv" style="margin-left:auto;background:#0f766e;color:#fff;border:none;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">📥 Exportar Excel CSV (SEA/CEA)</button>
+            <button id="rea-csv" style="margin-left:auto;background:#0f766e;color:#fff;border:none;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">📥 Exportar Registro Notas CSV</button>
           </div>
 
           ${tab === "asistencia" && puedeEditar ? `
@@ -152,7 +152,15 @@
           ${tab === "libreta" ? `
             <div style="background:#070d19;border:1px solid ${sumaPesos===100?'#10b981':'#ef4444'};border-radius:10px;padding:10px;margin-bottom:12px;">
               <div style="font-size:11.5px;font-weight:800;color:${sumaPesos===100?'#34d399':'#fca5a5'};margin-bottom:8px;">⚙️ Ponderación REA (Suma actual: ${sumaPesos}% ${sumaPesos===100?'✓':'— Debe sumar 100%'}) • Lecciones efectivas base: ${pesos.leccionesMeta}</div>
-              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:8px;font-size:11.5px;">
+                            <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px;">
+                <span style="font-size:11px;color:#38bdf8;font-weight:800;align-self:center;">Presets MEP por Especialidad:</span>
+                <button type="button" data-pr="35,10,35,10,10" class="rea-pre" style="background:#1d4ed8;color:#fff;border:none;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:800;cursor:pointer;">CTP Técnico (35 Cot / 10 Tar / 35 Pru / 10 Proy / 10 Asist)</button>
+                <button type="button" data-pr="45,10,25,10,10" class="rea-pre" style="background:#0f766e;color:#fff;border:none;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">Taller Técnico (45/10/25/10/10)</button>
+                <button type="button" data-pr="35,10,45,0,10" class="rea-pre" style="background:#7c3aed;color:#fff;border:none;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">Académico Diversif. (35/10/45/0/10)</button>
+                <button type="button" data-pr="50,10,30,0,10" class="rea-pre" style="background:#059669;color:#fff;border:none;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">Primaria I-II Ciclo (50/10/30/0/10)</button>
+                <button type="button" data-pr="40,10,40,0,10" class="rea-pre" style="background:#b45309;color:#fff;border:none;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">Nocturno / IPEC / CINDEA (40/10/40/0/10)</button>
+              </div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:8px;font-size:11.5px;">
                 ${[["cotidiano","Cotidiano %"],["tareas","Tareas %"],["pruebas","Pruebas %"],["proyecto","Proyecto %"],["asistencia","Asistencia %"],["leccionesMeta","Lec. Efectivas"]].map(([k, lbl]) => `
                   <div><label style="color:#94a3b8;display:block;font-size:10.5px;">${lbl}</label><input type="number" min="0" max="300" data-pk="${k}" class="rea-peso" value="${pesos[k]}" ${soloLectura?"disabled":""} style="width:100%;background:#0b1322;color:#fff;border:1px solid #334155;padding:6px;border-radius:6px;font-weight:800;"/></div>
                 `).join("")}
@@ -184,7 +192,7 @@
                     <td style="padding:8px;border-bottom:1px solid #1e293b;"><b>${e.nombre}</b><br/><span style="font-size:10.5px;color:#94a3b8;">${e.seccion} • ${e.materia}</span></td>
                     ${["cotidiano","tareas","pruebas","proyecto"].map(k => `
                       <td style="padding:6px;border-bottom:1px solid #1e293b;text-align:center;">
-                        <input type="number" min="0" max="100" data-eid="${e.id}" data-gk="${k}" class="rea-grade" value="${e[k] || 0}" ${soloLectura?"disabled":""} style="width:66px;background:#070d19;color:#fff;border:1px solid #334155;padding:6px;border-radius:6px;text-align:center;font-weight:700;"/>
+                        <input type="number" min="0" max="100" data-eid="${e.id}" data-gk="${k}" class="rea-grade" value="${e[k] || 0}" ${soloLectura?"disabled":""} style="width:62px;background:#070d19;color:#fff;border:1px solid #334155;padding:5px;border-radius:6px;text-align:center;font-weight:700;"/><div style="font-size:10px;color:#38bdf8;font-weight:700;margin-top:2px;">${((Number(e[k]||0)*Number(pesos[k]||0))/100).toFixed(1)} / ${pesos[k]}</div>
                       </td>
                     `).join("")}
                     <td style="padding:8px;border-bottom:1px solid #1e293b;text-align:center;font-weight:800;color:#38bdf8;">${rs.notaPonderada} <span style="font-size:10px;color:#94a3b8;">(${rs.pct}%)</span></td>
@@ -261,7 +269,7 @@
         draw();
       });
 
-      shell.querySelectorAll(".rea-peso").forEach(inp => inp.onchange = () => {
+      shell.querySelectorAll(".rea-pre").forEach(bt => bt.onclick = () => { if (soloLectura) return; const vals = bt.getAttribute("data-pr").split(",").map(Number); const p = loadPesos(); p.cotidiano = vals[0]; p.tareas = vals[1]; p.pruebas = vals[2]; p.proyecto = vals[3]; p.asistencia = vals[4]; savePesos(p); draw(); }); shell.querySelectorAll(".rea-peso").forEach(inp => inp.onchange = () => {
         const p = loadPesos();
         p[inp.getAttribute("data-pk")] = Math.max(0, Number(inp.value || 0));
         savePesos(p);

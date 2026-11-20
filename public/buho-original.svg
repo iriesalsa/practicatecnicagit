@@ -1,30 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="512" height="512">
-  <!-- Aro exterior azul marino profundo y círculo azul rey exacto -->
-  <circle cx="250" cy="250" r="244" fill="#050d26"/>
-  <circle cx="250" cy="250" r="204" fill="#002bff"/>
-  <!-- Pieza continua turquesa: cejas emplumadas con doble punta + puente central + pico afilado -->
-  <path d="M250 228
-           C232 184 184 156 128 134
-           C108 126 95 112 88 94
-           C86 122 94 146 116 164
-           C100 162 88 156 78 148
-           C88 178 112 198 148 206
-           C188 214 218 228 228 258
-           L208 292 L250 442 L292 292 L272 258
-           C282 228 312 214 352 206
-           C388 198 412 178 422 148
-           C412 156 400 162 384 164
-           C406 146 414 122 412 94
-           C405 112 392 126 372 134
-           C316 156 268 184 250 228 Z" fill="#00f5be"/>
-  <!-- Ojo izquierdo -->
-  <circle cx="164" cy="256" r="78" fill="#02050d"/>
-  <circle cx="164" cy="256" r="61" fill="#00f5be"/>
-  <circle cx="164" cy="256" r="39" fill="#02050d"/>
-  <circle cx="179" cy="241" r="11" fill="#ffffff"/>
-  <!-- Ojo derecho -->
-  <circle cx="336" cy="256" r="78" fill="#02050d"/>
-  <circle cx="336" cy="256" r="61" fill="#00f5be"/>
-  <circle cx="336" cy="256" r="39" fill="#02050d"/>
-  <circle cx="351" cy="241" r="11" fill="#ffffff"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <defs>
+    <linearGradient id="bgB" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0ea5e9"/><stop offset="100%" stop-color="#1d4ed8"/></linearGradient>
+    <linearGradient id="wingB" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1e40af"/><stop offset="100%" stop-color="#0f172a"/></linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="#0b1322" stroke="#38bdf8" stroke-width="4"/>
+  <path d="M30 46 L42 26 L54 38 L66 38 L78 26 L90 46 C94 74 82 96 60 98 C38 96 26 74 30 46 Z" fill="url(#bgB)"/>
+  <path d="M28 54 C20 68 24 84 36 88 L42 64 Z" fill="url(#wingB)"/>
+  <path d="M92 54 C100 68 96 84 84 88 L78 64 Z" fill="url(#wingB)"/>
+  <ellipse cx="60" cy="78" rx="18" ry="16" fill="#e0f2fe" opacity="0.92"/>
+  <circle cx="46" cy="52" r="11" fill="#ffffff"/><circle cx="74" cy="52" r="11" fill="#ffffff"/>
+  <circle cx="47" cy="52" r="6" fill="#0f172a"/><circle cx="73" cy="52" r="6" fill="#0f172a"/>
+  <circle cx="49" cy="50" r="2.2" fill="#38bdf8"/><circle cx="75" cy="50" r="2.2" fill="#38bdf8"/>
+  <polygon points="60,57 54,66 66,66" fill="#f59e0b"/>
 </svg>

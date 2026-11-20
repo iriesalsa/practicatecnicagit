@@ -16,7 +16,7 @@ if ($BundleWebOnly) {
     Write-Host "[Modo Bundle Local] server.url removido: la app empaquetará dist/ dentro del binario." -ForegroundColor Cyan
 }
 
-npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/ios @capacitor/camera @capacitor/haptics @capacitor/share @capacitor/status-bar --no-audit --no-fund
+npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/ios @capacitor/camera @capacitor/haptics @capacitor/share @capacitor/status-bar @capacitor/push-notifications @capacitor/local-notifications --no-audit --no-fund
 npm run build
 
 if (-not (Test-Path "android")) { npx cap add android }

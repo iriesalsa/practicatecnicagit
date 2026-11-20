@@ -10,6 +10,7 @@
     "Director(a)",
     "Subdirector(a)",
     "Asistente de Dirección",
+    "Secretaria / Secretario",
     "Supervisor(a) de Circuito",
     "Asesor(a) Regional / Nacional",
     "Viceministro(a) MEP",
@@ -191,7 +192,7 @@
         <div class="bds-card">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid #1e293b;padding-bottom:11px;margin-bottom:12px;">
             <div>
-              <span style="background:#b45309;color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:99px;">SUPERTRAZABILIDAD RBAC • 18 ROLES + 5 ROLES EXTRA • QR SHA-256</span>
+              <span style="background:#b45309;color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:99px;">SUPERTRAZABILIDAD RBAC • 19 ROLES + 5 ROLES EXTRA • QR SHA-256</span>
               <h2 style="margin:4px 0 0;font-size:17px;color:#fff;">🛡️ Trazabilidad, Admins (Daniel/Aarón), Roles Extra y Bitácora</h2>
             </div>
             <div style="display:flex;gap:5px;flex-wrap:wrap;">

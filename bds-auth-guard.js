@@ -41,8 +41,8 @@ window.addEventListener("error", function (ev) {
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v212.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v212.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v213.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v213.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -51,6 +51,7 @@ window.addEventListener("error", function (ev) {
     { rol: "Particular (MOPT / Admisión)", ic: "🎯", desc: "Acceso particular (₡2,500/año o ₡3,500 vitalicio): MOPT, Admisión, 29 áreas, hábitos y juegos." },
     { rol: "Docente MEP", ic: "👨‍🏫", desc: "Notas MEP (35/35), asistencia automática REA, planeamiento IA, permisos, justificaciones y horarios." },
         { rol: "Subdirector(a)", ic: "🏛️", desc: "Subdirección institucional: aprueba permisos de personal y estudiantes, horarios IA, comedor y reportes." },
+        { rol: "Secretaria / Secretario", ic: "🗂️", desc: "Secretaría institucional: emisión de constancias/egresos, cruce de notas, expedientes, permisos, horarios y agenda." },
     { rol: "Asistente de Dirección", ic: "🗂️", desc: "Asistencia directiva: agiliza bandeja de permisos, justificaciones, horarios, agenda y expedientes." },
     { rol: "Director(a)", ic: "🏛️", desc: "Dirección institucional, aprobación de permisos EDUS y justificaciones, horarios IA, comedor y reportes." },
     { rol: "Padre/Madre", ic: "👨‍👩‍👧‍👦", desc: "Seguimiento estudiantil, horarios, comedor QR, agenda y justificaciones." },
@@ -76,6 +77,7 @@ window.addEventListener("error", function (ev) {
     llaves_aulas: "🔑 Llaves & Aulas",
     idiomas_lab: "🗣️ Idiomas (4 Skills)",
     asignacion_acad: "🧩 Asignación Grupos",
+    admin_sim_cruce: "🗂️ Secretaría & Cruce",
     permisos: "📝 Gestionar Permisos",
     justificaciones: "🎓 Gestionar Justificaciones",
     /* bds-odin2-v202 */ notas_rea: "📊 Notas MEP",
@@ -156,6 +158,12 @@ window.addEventListener("error", function (ev) {
         quick: ["permisos","justificaciones","horarios","comedor","notas_rea","agenda","reportes"],
         cards: ["biblioteca"]
       },
+            "Secretaria / Secretario": {
+        tabs: ["inicio","admin_sim_cruce","horarios","permisos","justificaciones","asignacion_acad","agenda","reportes","carnet_qr"],
+        chats: true, identidad: false, admisionHome: false, mallaHome: false,
+        quick: ["admin_sim_cruce","permisos","justificaciones","horarios","agenda"],
+        cards: []
+      },
       "Asistente de Dirección": {
         tabs: ["inicio","direccion","horarios","permisos","justificaciones","conducta_sea","comedor","agenda","reportes","carnet_qr"],
         chats: true, identidad: false, admisionHome: false, mallaHome: false,
@@ -224,7 +232,7 @@ window.addEventListener("error", function (ev) {
       }
     };
     const cfg = MAP[rol] || MAP["Estudiante"];
-    const ex = (sesionActiva && Array.isArray(sesionActiva.extraRoles)) ? sesionActiva.extraRoles : []; const outTabs = cfg.tabs.slice(); if (!esVisitante && rol !== "Particular (MOPT / Admisión)") { if (!outTabs.includes("cooperativa")) outTabs.splice(2, 0, "cooperativa"); if (!outTabs.includes("practica_guia")) outTabs.splice(2, 0, "practica_guia"); /* bds-extra-roles-rbac-v200 */ if (ex.includes("Comedor") && !outTabs.includes("comedor")) outTabs.splice(2, 0, "comedor"); if (ex.includes("Cooperativa") && !outTabs.includes("cooperativa")) outTabs.splice(2, 0, "cooperativa"); if (ex.includes("Juegos") && !outTabs.includes("juegos")) outTabs.push("juegos"); if (ex.includes("Permisos")) { if (!outTabs.includes("permisos")) outTabs.push("permisos"); if (!outTabs.includes("justificaciones")) outTabs.push("justificaciones"); } if (ex.includes("ValidadorQR") && !outTabs.includes("carnet_qr")) outTabs.push("carnet_qr"); } if (rol === "Particular (MOPT / Admisión)" && !outTabs.includes("practica_guia")) outTabs.splice(1, 0, "practica_guia"); if (!esVisitante && rol !== "Particular (MOPT / Admisión)" && !outTabs.includes("conducta_sea")) outTabs.splice(2, 0, "conducta_sea"); if (!esVisitante && ["SuperAdmin","Director(a)","Subdirector(a)","Asistente de Dirección","Orientador(a)","Docente MEP","Padre/Madre"].includes(rol) && !outTabs.includes("orientacion_reac")) outTabs.splice(2, 0, "orientacion_reac"); if (!esVisitante && ["SuperAdmin","Director(a)","Subdirector(a)","Asistente de Dirección","Auxiliar Administrativo"].includes(rol)) { if (!outTabs.includes("porton_seguridad")) outTabs.push("porton_seguridad"); if (!outTabs.includes("conserjeria_mant")) outTabs.push("conserjeria_mant"); } if (!esVisitante && !outTabs.includes("idiomas_lab")) outTabs.push("idiomas_lab"); if (!esVisitante && ["SuperAdmin","Admin","Director(a)","Subdirector(a)","Asistente de Dirección","Auxiliar Administrativo","Auxiliar de Vigilancia (Seguridad)","Conserje / Mantenimiento","Docente MEP","Orientador(a)"].includes(rol) && !outTabs.includes("llaves_aulas")) outTabs.splice(3, 0, "llaves_aulas"); if (!esVisitante && ["SuperAdmin","Admin","Director(a)","Subdirector(a)","Asistente de Dirección","Auxiliar Administrativo","Docente MEP"].includes(rol) && !outTabs.includes("asignacion_acad")) outTabs.splice(3, 0, "asignacion_acad"); if (!esVisitante && !outTabs.includes("antologias")) outTabs.push("antologias"); cfg.tabs = Array.from(new Set(outTabs)).filter(k => Boolean(TAB_META[k]));
+    const ex = (sesionActiva && Array.isArray(sesionActiva.extraRoles)) ? sesionActiva.extraRoles : []; const outTabs = cfg.tabs.slice(); if (!esVisitante && rol !== "Particular (MOPT / Admisión)") { if (!outTabs.includes("cooperativa")) outTabs.splice(2, 0, "cooperativa"); if (!outTabs.includes("practica_guia")) outTabs.splice(2, 0, "practica_guia"); /* bds-extra-roles-rbac-v200 */ if (ex.includes("Comedor") && !outTabs.includes("comedor")) outTabs.splice(2, 0, "comedor"); if (ex.includes("Cooperativa") && !outTabs.includes("cooperativa")) outTabs.splice(2, 0, "cooperativa"); if (ex.includes("Juegos") && !outTabs.includes("juegos")) outTabs.push("juegos"); if (ex.includes("Permisos")) { if (!outTabs.includes("permisos")) outTabs.push("permisos"); if (!outTabs.includes("justificaciones")) outTabs.push("justificaciones"); } if (ex.includes("ValidadorQR") && !outTabs.includes("carnet_qr")) outTabs.push("carnet_qr"); } if (rol === "Particular (MOPT / Admisión)" && !outTabs.includes("practica_guia")) outTabs.splice(1, 0, "practica_guia"); if (!esVisitante && rol !== "Particular (MOPT / Admisión)" && !outTabs.includes("conducta_sea")) outTabs.splice(2, 0, "conducta_sea"); if (!esVisitante && ["SuperAdmin","Director(a)","Subdirector(a)","Asistente de Dirección","Orientador(a)","Docente MEP","Padre/Madre"].includes(rol) && !outTabs.includes("orientacion_reac")) outTabs.splice(2, 0, "orientacion_reac"); if (!esVisitante && ["SuperAdmin","Director(a)","Subdirector(a)","Asistente de Dirección","Auxiliar Administrativo"].includes(rol)) { if (!outTabs.includes("porton_seguridad")) outTabs.push("porton_seguridad"); if (!outTabs.includes("conserjeria_mant")) outTabs.push("conserjeria_mant"); } if (!esVisitante && !outTabs.includes("idiomas_lab")) outTabs.push("idiomas_lab"); if (!esVisitante && ["SuperAdmin","Admin","Director(a)","Subdirector(a)","Asistente de Dirección","Auxiliar Administrativo","Auxiliar de Vigilancia (Seguridad)","Conserje / Mantenimiento","Docente MEP","Orientador(a)"].includes(rol) && !outTabs.includes("llaves_aulas")) outTabs.splice(3, 0, "llaves_aulas"); if (!esVisitante && ["SuperAdmin","Admin","Director(a)","Subdirector(a)","Asistente de Dirección","Secretaria / Secretario","Auxiliar Administrativo","Docente MEP"].includes(rol)) { if (!outTabs.includes("asignacion_acad")) outTabs.splice(3, 0, "asignacion_acad"); if (!outTabs.includes("admin_sim_cruce")) outTabs.splice(3, 0, "admin_sim_cruce"); } if (!esVisitante && !outTabs.includes("antologias")) outTabs.push("antologias"); cfg.tabs = Array.from(new Set(outTabs)).filter(k => Boolean(TAB_META[k]));
     return cfg;
   }
 
@@ -234,9 +242,9 @@ window.addEventListener("error", function (ev) {
       institucionCorta: "CTP Mercedes Norte",
       regional: "Dirección Regional de Heredia",
       circuito: "Circuito 02",
-      escudo: "/escudo-ctpmn-oficial.jpeg?v=212",
-      mascota: "/buho-oficial.png?v=212",
-      logoMep: "/logo-mep-oficial.png?v=212"
+      escudo: "/escudo-ctpmn-oficial.jpeg?v=213",
+      mascota: "/buho-oficial.png?v=213",
+      logoMep: "/logo-mep-oficial.png?v=213"
     };
     if (!window.BDS_BRAND) return def;
     const b = window.BDS_BRAND.get();
@@ -874,6 +882,7 @@ window.addEventListener("error", function (ev) {
       instituciones: `<button onclick="window.bdsGo('instituciones')" class="bds-quick-btn" style="background:#4f46e5;">🏛️ Instituciones</button>`,
       llaves_aulas: `<button onclick="window.bdsGo('llaves_aulas')" class="bds-quick-btn" style="background:#b45309;">🔑 Llaves & Aula 13</button>`,
       idiomas_lab: `<button onclick="window.bdsGo('idiomas_lab')" class="bds-quick-btn" style="background:#0284c7;">🗣️ Idiomas 4 Skills</button>`,
+      admin_sim_cruce: `<button onclick="window.bdsGo('admin_sim_cruce')" class="bds-quick-btn" style="background:#0f766e;">🗂️ Secretaría, Constancias y Cruce</button>`,
       asignacion_acad: `<button onclick="window.bdsGo('asignacion_acad')" class="bds-quick-btn" style="background:#0f766e;">🧩 Asignación Grupos</button>`,
       horarios: `<button onclick="window.bdsGo('horarios')" class="bds-quick-btn" style="background:#0284c7;">📅 Horarios</button>`,
       permisos: `<button onclick="window.bdsGo('permisos')" class="bds-quick-btn" style="background:#059669;">📝 Gestionar Permisos</button>`,
@@ -1070,6 +1079,7 @@ window.addEventListener("error", function (ev) {
         else if (destino === "instituciones" && window.BDS_RENDER_INSTITUCIONES_CRUD) window.BDS_RENDER_INSTITUCIONES_CRUD(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
         else if (destino === "llaves_aulas" && window.BDS_RENDER_LLAVES_AULAS) window.BDS_RENDER_LLAVES_AULAS(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
       else if (destino === "idiomas_lab" && window.BDS_RENDER_IDIOMAS_LAB) window.BDS_RENDER_IDIOMAS_LAB(shell, { sesion: sesionActiva, ganarXP });
+      else if (destino === "admin_sim_cruce" && window.BDS_RENDER_ADMIN_SIM_CRUCE) window.BDS_RENDER_ADMIN_SIM_CRUCE(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
       else if (destino === "asignacion_acad" && window.BDS_RENDER_ASIGNACION_ACAD) window.BDS_RENDER_ASIGNACION_ACAD(shell, { sesion: sesionActiva });
       else if (destino === "horarios" && window.BDS_RENDER_MATRICULA_HORARIOS) window.BDS_RENDER_MATRICULA_HORARIOS(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
         else if ((destino === "permisos" || destino === "justificaciones" || destino === "carnet_qr") && window.BDS_RENDER_PERMISOS_JUSTIF) window.BDS_RENDER_PERMISOS_JUSTIF(shell, destino === "carnet_qr" ? "qr" : destino, { sesion: sesionActiva, sha256Hex, generarQRSVG });

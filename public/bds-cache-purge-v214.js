@@ -43,3 +43,46 @@
     window.addEventListener("DOMContentLoaded", registrarEscuchaSW);
   }
 })();
+
+/* bds-chrome-normal-sw-reset-v223 */
+(function () {
+  if (typeof window === "undefined" || typeof navigator === "undefined") return;
+  const CURRENT_SW = "/sw-bds-v223.js?v=223";
+  const RESET_FLAG = "bds_sw_reset_once_v223";
+
+  async function syncServiceWorkers() {
+    if (!("serviceWorker" in navigator)) return;
+    try {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      let removedOld = false;
+      for (const r of regs) {
+        const scriptUrl = (r.active && r.active.scriptURL) || (r.installing && r.installing.scriptURL) || (r.waiting && r.waiting.scriptURL) || "";
+        if (scriptUrl && !scriptUrl.includes("sw-bds-v223.js")) {
+          await r.unregister().catch(() => {});
+          removedOld = true;
+        }
+      }
+      if (typeof caches !== "undefined" && caches.keys) {
+        const keys = await caches.keys();
+        await Promise.all(
+          keys
+            .filter((k) => k.startsWith("bds-practica-") && !k.includes("v223"))
+            .map((k) => caches.delete(k))
+        );
+      }
+      await navigator.serviceWorker.register(CURRENT_SW).catch(() => {});
+
+      const alreadyReloaded = sessionStorage.getItem(RESET_FLAG) === "1";
+      if (removedOld && !alreadyReloaded) {
+        sessionStorage.setItem(RESET_FLAG, "1");
+        window.location.reload();
+      }
+    } catch {}
+  }
+
+  if (typeof window.addEventListener === "function") {
+    window.addEventListener("load", () => {
+      syncServiceWorkers();
+    });
+  }
+})();

@@ -1,0 +1,42 @@
+================ REVISION INTEGRAL PRACTICATECNICA v247.0 ================
+Fecha: 2026-11-20 14:56:24
+
+[1] DEPLOY Y REPOSITORIO GIT
+  Rama: main | Ultimo commit: 306afc7 chore(v245): punto de control antes de estabilizacion total (20261120-1435) | Cambios pendientes: 0
+  Live dominio: HTTP 200 | Bytes: 11506 | Scripts: 66 | Duplicados: 0
+
+[2] MODULOS CREADOS EN PUBLIC/ Y SRC/
+  Total archivos .js/.jsx analizados: 157
+  Modulos recientes en public/ (ultimos 20 por fecha):
+    - bds-auth-guard.js (99954 B | 2026-11-20 14:35)
+    - bds-estabilidad-v245.js (10110 B | 2026-11-20 14:35)
+    - sw-bds-v245.js (808 B | 2026-11-20 14:35)
+    - bds-unidad-v244.js (10400 B | 2026-11-20 14:32)
+    - bds-nave-base-v243.js (9360 B | 2026-11-20 14:32)
+    - bds-tri-v242.js (2641 B | 2026-11-20 14:27)
+    - bds-reac-triangulos-v241.js (5598 B | 2026-11-20 14:25)
+    - bds-panel-v240.js (6350 B | 2026-11-20 14:24)
+    - bds-anti-bounce-v239.js (2949 B | 2026-11-20 14:21)
+    - sw-bds-v237.js (252 B | 2026-11-20 14:14)
+    - sw-bds-v236.js (252 B | 2026-11-20 14:09)
+    - sw-bds-v235.js (274 B | 2026-11-20 14:02)
+    - sw-bds-v195.js (429 B | 2026-11-20 13:52)
+    - sw-bds-v191.js (429 B | 2026-11-20 13:52)
+    - sw-bds-v190.js (429 B | 2026-11-20 13:52)
+    - sw-bds-v1901.js (429 B | 2026-11-20 13:52)
+    - sw-bds-v1902.js (429 B | 2026-11-20 13:52)
+    - sw-bds-v196.js (429 B | 2026-11-20 13:52)
+    - sw-bds-v198.js (429 B | 2026-11-20 13:52)
+    - sw-bds-v197.js (429 B | 2026-11-20 13:52)
+
+[3] FUNCIONES / REFERENCIAS: HORARIOS, PERMISOS, PLAN, ROLES Y SUPABASE
+  [Horarios] -> 18 archivo(s): public\bds-admin-mep.js, public\bds-agenda-notif.js, public\bds-auth-guard.js, public\bds-banco-mep.js, public\bds-banco-x10.js, public\bds-comedor-mep.js, public\bds-familia-notas.js, public\bds-fase2-ops.js ... (+10 mas)
+  [Supabase] -> 6 archivo(s): public\bds-asistencia-porton-v228.js, public\bds-banco-x10.js, public\bds-realtime-push-v229.js, public\bds-supabase-auto-v231.js, public\bds-supabase-sync.js, src\lib\supabase.js
+  [REAC/Tri] -> 140 archivo(s): public\bds-admin-mep.js, public\bds-admision.js, public\bds-agenda-notif.js, public\bds-all-in-one-v700.js, public\bds-anti-bounce-v239.js, public\bds-antologias-ilustradas.js, public\bds-asignacion-academica.js, public\bds-asistencia-porton-v228.js ... (+132 mas)
+  [Plan/Pago] -> 27 archivo(s): public\bds-admision.js, public\bds-all-in-one-v700.js, public\bds-antologias-ilustradas.js, public\bds-asistencia-porton-v228.js, public\bds-auth-guard.js, public\bds-banco-mep.js, public\bds-banco-odin10-puro.js, public\bds-banco-thor-50x.js ... (+19 mas)
+  [Permisos] -> 66 archivo(s): public\bds-acerca-de.js, public\bds-admin-mep.js, public\bds-admision.js, public\bds-agenda-notif.js, public\bds-all-in-one-v700.js, public\bds-antologias-ilustradas.js, public\bds-asignacion-academica.js, public\bds-asistencia-porton-v228.js ... (+58 mas)
+
+[4] CHEQUEO DE SEGURIDAD
+  Referencias sb_secret_: 0 
+  Referencias correo personal en codigo: 6 (bds-acerca-de.js, bds-asignacion-academica.js, bds-auth-guard.js, bds-motivacion-seguimiento.js, bds-suscripcion-beta.js, bds-trazabilidad.js)
+==========================================================================

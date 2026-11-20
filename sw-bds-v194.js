@@ -1,9 +1,10 @@
-const CACHE_NAME = "bds-practicatecnica-v194-qa-total";
-self.addEventListener("install", () => self.skipWaiting());
+self.addEventListener("install", (e) => e.waitUntil(self.skipWaiting()));
 self.addEventListener("activate", (e) => {
-  e.waitUntil(caches.keys().then((ks) => Promise.all(ks.map((k) => caches.delete(k)))).then(() => self.clients.claim()));
-});
-self.addEventListener("fetch", (e) => {
-  if (e.request.method !== "GET") return;
-  e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+  e.waitUntil(
+    caches.keys()
+      .then((ks) => Promise.all(ks.map((k) => caches.delete(k))))
+      .then(() => self.registration.unregister())
+      .then(() => self.clients.matchAll({ type: "window" }))
+      .then((clients) => clients.forEach((c) => { try { c.navigate(c.url); } catch (_) {} }))
+  );
 });

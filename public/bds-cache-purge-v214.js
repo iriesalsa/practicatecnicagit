@@ -11,7 +11,7 @@
       }
       if (!silencioso && typeof window !== "undefined" && window.location) {
         const u = new URL(window.location.href);
-        u.searchParams.set("v214_sync", String(Date.now()));
+        u.searchParams.set("v215_sync", String(Date.now()));
         window.location.replace(u.toString());
       }
       return true;
@@ -25,14 +25,14 @@
 
   function registrarEscuchaSW() {
     if (typeof navigator === "undefined" || !navigator.serviceWorker) return;
-    navigator.serviceWorker.register("/sw-bds-v214.js?v=214").then((reg) => {
+    navigator.serviceWorker.register("/sw-bds-v215.js?v=215").then((reg) => {
       reg.update().catch(() => {});
     }).catch(() => {});
 
     navigator.serviceWorker.addEventListener("message", (event) => {
       if (event.data && event.data.type === "BDS_SW_UPDATED") {
         if (typeof window !== "undefined" && window.BDS_NATIVE && window.BDS_NATIVE.showInAppToast) {
-          window.BDS_NATIVE.showInAppToast("🔄 Versión v214.0 Lista", "Caché actualizada en este dispositivo.");
+          window.BDS_NATIVE.showInAppToast("🔄 Versión v215.0 Lista", "Caché actualizada en este dispositivo.");
         }
       }
     });

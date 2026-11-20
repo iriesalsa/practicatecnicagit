@@ -1,5 +1,7 @@
 (function () {
   const THEME_KEY = "bds_theme_mode_v212";
+  const LANG_KEY = "bds_lang_v187";
+
   const DICT_EXT = {
     "Inicio": { en: "Home", pt: "Início", fr: "Accueil" },
     "Trazabilidad": { en: "Traceability", pt: "Rastreabilidade", fr: "Traçabilité" },
@@ -17,6 +19,7 @@
     "Portón & Seguridad": { en: "Gate Security", pt: "Portaria QR", fr: "Sécurité Portail" },
     "Conserjería": { en: "Maintenance", pt: "Manutenção", fr: "Entretien" },
     "Antologías & Libros": { en: "Books & Anthologies", pt: "Livros e Antologias", fr: "Livres & Anthologies" },
+    "Secretaría & Cruce": { en: "Records & Cross-Check", pt: "Secretaria e Cruzamento", fr: "Secrétariat & Croisement" },
     "Planeamiento IA": { en: "AI Lesson Plans", pt: "Planejamento IA", fr: "Plans de Cours IA" },
     "Cooperativa": { en: "School Co-op", pt: "Cooperativa", fr: "Coopérative" },
     "Práctica Guía": { en: "Práctica Guide", pt: "Guia Práctica", fr: "Guide Práctica" },
@@ -34,6 +37,7 @@
     "Dirección": { en: "Administration", pt: "Direção", fr: "Direction" },
     "Familia": { en: "Family", pt: "Família", fr: "Famille" },
     "Chats": { en: "Chats", pt: "Chats", fr: "Discussions" },
+    "Planes": { en: "Plans", pt: "Planos", fr: "Forfaits" },
     "Salir": { en: "Sign Out", pt: "Sair", fr: "Déconnexion" },
     "Instalar": { en: "Install", pt: "Instalar", fr: "Installer" },
     "Escuchar Todo": { en: "Listen All", pt: "Ouvir Tudo", fr: "Tout Écouter" },
@@ -43,8 +47,15 @@
     "Productos": { en: "Products", pt: "Produtos", fr: "Produits" },
     "ACCESOS RÁPIDOS": { en: "QUICK ACCESS", pt: "ACESSO RÁPIDO", fr: "ACCÈS RAPIDES" },
     "Ingresar a la Plataforma": { en: "Sign In", pt: "Entrar na Plataforma", fr: "Se Connecter" },
-    "Continuar con Google": { en: "Continue with Google", pt: "Continuar com Google", fr: "Continuer avec Google" }
+    "Continuar con Google": { en: "Continue with Google", pt: "Continuar com Google", fr: "Continuer avec Google" },
+    "Enviar Solicitud con QR SHA-256": { en: "Submit Request with QR SHA-256", pt: "Enviar Solicitação com QR SHA-256", fr: "Envoyer la Demande avec QR SHA-256" },
+    "Enviar Justificación con QR SHA-256": { en: "Submit Justification with QR SHA-256", pt: "Enviar Justificativa com QR SHA-256", fr: "Envoyer le Justificatif avec QR SHA-256" }
   };
+
+  function getLang() {
+    const l = localStorage.getItem(LANG_KEY) || "es";
+    return ["es", "en", "pt", "fr"].includes(l) ? l : "es";
+  }
 
   function getTheme() {
     const v = localStorage.getItem(THEME_KEY) || localStorage.getItem("bds_theme_v187") || "dark";
@@ -74,7 +85,7 @@
   }
 
   function injectLightDarkCSS() {
-    if (typeof document === "undefined" || document.getElementById("bds-ux-polish-v212")) return;
+    if (typeof document === "undefined" || !document.head || document.getElementById("bds-ux-polish-v212")) return;
     const st = document.createElement("style");
     st.id = "bds-ux-polish-v212";
     st.innerHTML = `
@@ -82,7 +93,6 @@
       button { transition: transform .08s ease, filter .12s ease; }
       button:active { transform: scale(0.98); }
 
-      /* MODO CLARO DE ALTO CONTRASTE (OVERRIDE COMPLETO DE ESTILOS OSCUROS) */
       html[data-theme="light"], html[data-theme="light"] body, body.bds-light {
         background: #eef2f6 !important; color: #0f172a !important;
       }
@@ -145,7 +155,8 @@
   }
 
   function translateTree(lang) {
-    if (!lang || lang === "es" || typeof document === "undefined" || !document.body) return;
+    const activeLang = lang || getLang();
+    if (!activeLang || activeLang === "es" || typeof document === "undefined" || !document.body || typeof document.createTreeWalker !== "function" || typeof NodeFilter === "undefined") return;
     const keys = Object.keys(DICT_EXT).sort((a, b) => b.length - a.length);
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
     let node;
@@ -153,10 +164,10 @@
       const p = node.parentElement;
       if (!p || p.closest("[data-no-i18n='true']") || ["SCRIPT","STYLE","INPUT","TEXTAREA","CODE"].includes(p.tagName)) continue;
       let txt = node.nodeValue;
-      if (!txt || txt.trim().length < 3) continue;
+      if (!txt || txt.trim().length < 2) continue;
       let changed = false;
       for (const es of keys) {
-        const tr = DICT_EXT[es][lang];
+        const tr = DICT_EXT[es][activeLang];
         if (tr && txt.includes(es) && !txt.includes(tr)) { txt = txt.replace(es, tr); changed = true; }
       }
       if (changed) node.nodeValue = txt;
@@ -175,7 +186,6 @@
   function installUnifiedUI() {
     injectLightDarkCSS();
     warmVoices();
-    // Asegurar que window.BDS_UI SIEMPRE exista y use nuestro motor confiable de Claro/Oscuro
     const prev = window.BDS_UI || {};
     const origApplyLang = prev.applyLang;
     window.BDS_UI = {
@@ -183,22 +193,25 @@
       getTheme,
       applyTheme,
       toggleTheme,
-      getLang: prev.getLang || (() => localStorage.getItem("bds_lang_v187") || "es"),
+      getLang,
       applyLang: function (lg) {
-        localStorage.setItem("bds_lang_v187", lg);
-        if (origApplyLang) origApplyLang(lg);
-        setTimeout(() => translateTree(lg), 60);
+        const chosen = ["es", "en", "pt", "fr"].includes(lg) ? lg : "es";
+        localStorage.setItem(LANG_KEY, chosen);
+        if (origApplyLang) origApplyLang(chosen);
+        translateTree(chosen);
+        setTimeout(() => translateTree(chosen), 80);
       }
     };
     applyTheme(getTheme());
+    if (getLang() !== "es") translateTree(getLang());
 
     if (typeof MutationObserver !== "undefined" && document.body) {
       let deb = null;
       new MutationObserver(() => {
         const curT = getTheme();
         if (document.body.classList.contains("bds-light") !== (curT === "light")) applyTheme(curT);
-        const lg = window.BDS_UI.getLang();
-        if (lg !== "es") { clearTimeout(deb); deb = setTimeout(() => translateTree(lg), 120); }
+        const lg = getLang();
+        if (lg !== "es") { clearTimeout(deb); deb = setTimeout(() => translateTree(lg), 90); }
         const motBtn = document.getElementById("pr-mot-next");
         if (motBtn && !document.getElementById("pr-mot-tts")) {
           const b = document.createElement("button");
@@ -216,7 +229,7 @@
     }
   }
 
-  window.BDS_POLISH_V203 = { DICT_EXT, translateTree, warmVoices, getTheme, applyTheme, toggleTheme };
+  window.BDS_POLISH_V203 = { DICT_EXT, translateTree, warmVoices, getTheme, applyTheme, toggleTheme, getLang };
   if (typeof window !== "undefined") {
     installUnifiedUI();
     if (typeof window.addEventListener === "function") window.addEventListener("DOMContentLoaded", installUnifiedUI);

@@ -1,6 +1,34 @@
 <!DOCTYPE html>
 <html lang="es" translate="no" class="dark notranslate">
   <head>
+<!-- bds-sw-purge-v236-start -->
+  <script>
+  (function () {
+    try {
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function (regs) {
+          if (!regs || !regs.length) return;
+          Promise.all(regs.map(function (r) { return r.unregister().catch(function () {}); }))
+            .then(function () {
+              if (typeof caches !== "undefined" && caches.keys) {
+                return caches.keys().then(function (ks) {
+                  return Promise.all(ks.map(function (k) { return caches.delete(k); }));
+                });
+              }
+            })
+            .then(function () {
+              if (!sessionStorage.getItem("bds_purged_v236")) {
+                sessionStorage.setItem("bds_purged_v236", "1");
+                window.location.reload();
+              }
+            });
+        }).catch(function () {});
+      }
+    } catch (_) {}
+  })();
+  </script>
+<!-- bds-sw-purge-v236-end -->
+
     <meta charset="UTF-8" />
     <meta name="google" content="notranslate" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -61,12 +89,12 @@
     }
   })();
 </script>
-  <link rel="icon" type="image/svg+xml" href="/buho-original.svg?v=235" />
+  <link rel="icon" type="image/svg+xml" href="/buho-original.svg?v=236" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <meta name="theme-color" content="#0b1322" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <link rel="stylesheet" href="/bds-print-reports-v700.css?v=235" />
-  <link rel="stylesheet" href="/bds-ux-responsive-v710.css?v=235" />
+  <link rel="stylesheet" href="/bds-print-reports-v700.css?v=236" />
+  <link rel="stylesheet" href="/bds-ux-responsive-v710.css?v=236" />
 <!-- bds-seo-v225-start -->
   <meta name="description" content="Plataforma educativa y de práctica técnica con ejercicios de inglés, desarrollo web, electrónica industrial, especialidades técnicas, libros ilustrados y simuladores." />
   <meta name="keywords" content="plataforma educativa, ejercicios de ingles, educacion tecnica, especialidades tecnicas, desarrollo web, electronica industrial, practica tecnica, simuladores educativos" />
@@ -141,64 +169,64 @@
 </head>
   <body class="bg-slate-950 text-slate-100 antialiased notranslate" translate="no">
     <div id="root"></div>
-                  <script src="/bds-identidad.js?v=235"></script>
-  <script src="/bds-banco-mep.js?v=235"></script>
-  <script src="/bds-banco-x10.js?v=235"></script>
-  <script src="/bds-banco-thor-50x.js?v=235"></script>
-  <script src="/bds-banco-odin10-puro.js?v=235"></script>
-  <script src="/bds-seguimiento-thor.js?v=235"></script>
-  <script src="/bds-opendocs.js?v=235"></script>
-  <script src="/bds-admision.js?v=235"></script>
-  <script src="/bds-biblioteca-ilustrada.js?v=235"></script>
-  <script src="/bds-juegos.js?v=235"></script>
-  <script src="/bds-juegos-extra.js?v=235"></script>
-  <script src="/bds-admin-mep.js?v=235"></script>
-  <script src="/bds-fase2-ops.js?v=235"></script>
-  <script src="/bds-fase3-mep50.js?v=235"></script>
-  <script src="/bds-fase4-lab.js?v=235"></script>
-  <script src="/bds-fase5-rea.js?v=235"></script>
-    <script src="/bds-qr-camera.js?v=235"></script>
-  <script src="/bds-comedor-mep.js?v=235"></script>
-      <script src="/bds-matricula-horarios-ia.js?v=235"></script>
-  <script src="/bds-planeamiento-ia.js?v=235"></script>
-  <script src="/bds-simulador-vial-mopt.js?v=235"></script>
-    <script src="/bds-instituciones-crud.js?v=235"></script>
-  <script src="/bds-agenda-notif.js?v=235"></script>
-  <script src="/bds-reportes-respaldos.js?v=235"></script>
-    <script src="/bds-permisos-justif.js?v=235"></script>
-  <script src="/bds-familia-notas.js?v=235"></script>
-  <script src="/bds-chats.js?v=235"></script>
-    <script src="/bds-acerca-de.js?v=235"></script>
-  <script src="/bds-cooperativa.js?v=235"></script>
-  <script src="/bds-practica-guia.js?v=235"></script>
-    <script src="/bds-trazabilidad.js?v=235"></script>
-  <script src="/bds-motivacion-seguimiento.js?v=235"></script>
-  <script src="/bds-odin2-matricula-conducta-sea.js?v=235"></script>
-    <script src="/bds-i18n-ux-polish.js?v=235"></script>
-    <script src="/bds-orientacion-reac.js?v=235"></script>
-  <script src="/bds-hoja-respuestas.js?v=235"></script>
-  <script src="/bds-seguridad-cr.js?v=235"></script>
-  <script src="/bds-antologias-ilustradas.js?v=235"></script>
-  <script src="/bds-vial-road-guard.js?v=235"></script>
-    <script src="/bds-porton-mantenimiento.js?v=235"></script>
-  <script src="/bds-llaves-aulas.js?v=235"></script>
-  <script src="/bds-idiomas-4skills.js?v=235"></script>
-  <script src="/bds-asignacion-academica.js?v=235"></script>
-    <script src="/bds-simulador-admin-v213.js?v=235"></script>
-  <script src="/bds-nomina-real-seed.js?v=235"></script>
-  <script src="/bds-cache-purge-v214.js?v=235"></script>
-  <script src="/bds-ia-mensajes-v216.js?v=235"></script>
-  <script src="/bds-controles-nota-v220.js?v=235"></script>
-  <script src="/bds-neutralidad-personal-v227.js?v=235"></script>
-      <script src="/bds-asistencia-porton-v228.js?v=235"></script>
-  <script src="/bds-sea-bibliotecas-v228.js?v=235"></script>
-  <script src="/bds-ciberseguridad-nirvana-v228.js?v=235"></script>
-      <script src="/bds-crypto-vault-v231.js?v=235"></script>
-  <script src="/bds-supabase-auto-v231.js?v=235"></script>
-<script src="/bds-realtime-push-v229.js?v=235"></script>
-  <script src="/bds-auth-guard.js?v=235"></script>
-<script src="/bds-mega-suite.js?v=235"></script>
-<script src="/bds-sea-mep.js?v=235"></script>
-  <script src="/bds-all-in-one-v700.js?v=235" defer></script>
+                  <script src="/bds-identidad.js?v=236"></script>
+  <script src="/bds-banco-mep.js?v=236"></script>
+  <script src="/bds-banco-x10.js?v=236"></script>
+  <script src="/bds-banco-thor-50x.js?v=236"></script>
+  <script src="/bds-banco-odin10-puro.js?v=236"></script>
+  <script src="/bds-seguimiento-thor.js?v=236"></script>
+  <script src="/bds-opendocs.js?v=236"></script>
+  <script src="/bds-admision.js?v=236"></script>
+  <script src="/bds-biblioteca-ilustrada.js?v=236"></script>
+  <script src="/bds-juegos.js?v=236"></script>
+  <script src="/bds-juegos-extra.js?v=236"></script>
+  <script src="/bds-admin-mep.js?v=236"></script>
+  <script src="/bds-fase2-ops.js?v=236"></script>
+  <script src="/bds-fase3-mep50.js?v=236"></script>
+  <script src="/bds-fase4-lab.js?v=236"></script>
+  <script src="/bds-fase5-rea.js?v=236"></script>
+    <script src="/bds-qr-camera.js?v=236"></script>
+  <script src="/bds-comedor-mep.js?v=236"></script>
+      <script src="/bds-matricula-horarios-ia.js?v=236"></script>
+  <script src="/bds-planeamiento-ia.js?v=236"></script>
+  <script src="/bds-simulador-vial-mopt.js?v=236"></script>
+    <script src="/bds-instituciones-crud.js?v=236"></script>
+  <script src="/bds-agenda-notif.js?v=236"></script>
+  <script src="/bds-reportes-respaldos.js?v=236"></script>
+    <script src="/bds-permisos-justif.js?v=236"></script>
+  <script src="/bds-familia-notas.js?v=236"></script>
+  <script src="/bds-chats.js?v=236"></script>
+    <script src="/bds-acerca-de.js?v=236"></script>
+  <script src="/bds-cooperativa.js?v=236"></script>
+  <script src="/bds-practica-guia.js?v=236"></script>
+    <script src="/bds-trazabilidad.js?v=236"></script>
+  <script src="/bds-motivacion-seguimiento.js?v=236"></script>
+  <script src="/bds-odin2-matricula-conducta-sea.js?v=236"></script>
+    <script src="/bds-i18n-ux-polish.js?v=236"></script>
+    <script src="/bds-orientacion-reac.js?v=236"></script>
+  <script src="/bds-hoja-respuestas.js?v=236"></script>
+  <script src="/bds-seguridad-cr.js?v=236"></script>
+  <script src="/bds-antologias-ilustradas.js?v=236"></script>
+  <script src="/bds-vial-road-guard.js?v=236"></script>
+    <script src="/bds-porton-mantenimiento.js?v=236"></script>
+  <script src="/bds-llaves-aulas.js?v=236"></script>
+  <script src="/bds-idiomas-4skills.js?v=236"></script>
+  <script src="/bds-asignacion-academica.js?v=236"></script>
+    <script src="/bds-simulador-admin-v213.js?v=236"></script>
+  <script src="/bds-nomina-real-seed.js?v=236"></script>
+  <script src="/bds-cache-purge-v214.js?v=236"></script>
+  <script src="/bds-ia-mensajes-v216.js?v=236"></script>
+  <script src="/bds-controles-nota-v220.js?v=236"></script>
+  <script src="/bds-neutralidad-personal-v227.js?v=236"></script>
+      <script src="/bds-asistencia-porton-v228.js?v=236"></script>
+  <script src="/bds-sea-bibliotecas-v228.js?v=236"></script>
+  <script src="/bds-ciberseguridad-nirvana-v228.js?v=236"></script>
+      <script src="/bds-crypto-vault-v231.js?v=236"></script>
+  <script src="/bds-supabase-auto-v231.js?v=236"></script>
+<script src="/bds-realtime-push-v229.js?v=236"></script>
+  <script src="/bds-auth-guard.js?v=236"></script>
+<script src="/bds-mega-suite.js?v=236"></script>
+<script src="/bds-sea-mep.js?v=236"></script>
+  <script src="/bds-all-in-one-v700.js?v=236" defer></script>
 </body>
 </html>

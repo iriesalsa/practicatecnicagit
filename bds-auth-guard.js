@@ -41,8 +41,8 @@ window.addEventListener("error", function (ev) {
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v229.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v229.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v213.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v213.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -102,7 +102,6 @@ window.addEventListener("error", function (ev) {
     /* bds-thor-v196-wired */ seguimiento: "📈 Seguimiento REAC",
     habitos: "🔥 Hábitos",
     porton_seguridad: "🛡️ Portón & Seguridad",
-    asistencia_porton: "🚪 Entrada/Salida & Familias",
     conserjeria_mant: "🧹 Conserjería",
     carnet_qr: "🪪 Carné QR",
     direccion: "📈 Dirección"
@@ -233,7 +232,7 @@ window.addEventListener("error", function (ev) {
       }
     };
     const cfg = MAP[rol] || MAP["Estudiante"];
-    const ex = (sesionActiva && Array.isArray(sesionActiva.extraRoles)) ? sesionActiva.extraRoles : []; const outTabs = cfg.tabs.slice(); if (!esVisitante && rol !== "Particular (MOPT / Admisión)") { if (!outTabs.includes("cooperativa")) outTabs.splice(2, 0, "cooperativa"); if (!outTabs.includes("practica_guia")) outTabs.splice(2, 0, "practica_guia"); /* bds-extra-roles-rbac-v200 */ if (ex.includes("Comedor") && !outTabs.includes("comedor")) outTabs.splice(2, 0, "comedor"); if (ex.includes("Cooperativa") && !outTabs.includes("cooperativa")) outTabs.splice(2, 0, "cooperativa"); if (ex.includes("Juegos") && !outTabs.includes("juegos")) outTabs.push("juegos"); if (ex.includes("Permisos")) { if (!outTabs.includes("permisos")) outTabs.push("permisos"); if (!outTabs.includes("justificaciones")) outTabs.push("justificaciones"); } if (ex.includes("ValidadorQR") && !outTabs.includes("carnet_qr")) outTabs.push("carnet_qr"); } if (rol === "Particular (MOPT / Admisión)" && !outTabs.includes("practica_guia")) outTabs.splice(1, 0, "practica_guia"); if (!esVisitante && rol !== "Particular (MOPT / Admisión)" && !outTabs.includes("conducta_sea")) outTabs.splice(2, 0, "conducta_sea"); if (!esVisitante && ["SuperAdmin","Director(a)","Subdirector(a)","Asistente de Dirección","Orientador(a)","Docente MEP","Padre/Madre"].includes(rol) && !outTabs.includes("orientacion_reac")) outTabs.splice(2, 0, "orientacion_reac"); if (!esVisitante && ["SuperAdmin","Admin","Director(a)","Subdirector(a)","Asistente de Dirección","Auxiliar Administrativo","Auxiliar de Vigilancia (Seguridad)","Orientador(a)","Docente MEP","Padre/Madre"].includes(rol) && !outTabs.includes("asistencia_porton")) outTabs.splice(2, 0, "asistencia_porton"); if (!esVisitante && ["SuperAdmin","Director(a)","Subdirector(a)","Asistente de Dirección","Auxiliar Administrativo"].includes(rol)) { if (!outTabs.includes("porton_seguridad")) outTabs.push("porton_seguridad"); if (!outTabs.includes("conserjeria_mant")) outTabs.push("conserjeria_mant"); } if (!esVisitante && !outTabs.includes("idiomas_lab")) outTabs.push("idiomas_lab"); if (!esVisitante && ["SuperAdmin","Admin","Director(a)","Subdirector(a)","Asistente de Dirección","Auxiliar Administrativo","Auxiliar de Vigilancia (Seguridad)","Conserje / Mantenimiento","Docente MEP","Orientador(a)"].includes(rol) && !outTabs.includes("llaves_aulas")) outTabs.splice(3, 0, "llaves_aulas"); if (!esVisitante && ["SuperAdmin","Admin","Director(a)","Subdirector(a)","Asistente de Dirección","Secretaria / Secretario","Auxiliar Administrativo","Docente MEP"].includes(rol)) { if (!outTabs.includes("asignacion_acad")) outTabs.splice(3, 0, "asignacion_acad"); if (!outTabs.includes("admin_sim_cruce")) outTabs.splice(3, 0, "admin_sim_cruce"); } if (!esVisitante && !outTabs.includes("antologias")) outTabs.push("antologias"); /* bds-perm-all-roles-v215 */ if (!esVisitante && rol !== "Particular (MOPT / Admisión)") { if (!outTabs.includes("permisos")) outTabs.push("permisos"); if (!outTabs.includes("justificaciones")) outTabs.push("justificaciones"); } cfg.tabs = Array.from(new Set(outTabs)).filter(k => Boolean(TAB_META[k]));
+    const ex = (sesionActiva && Array.isArray(sesionActiva.extraRoles)) ? sesionActiva.extraRoles : []; const outTabs = cfg.tabs.slice(); if (!esVisitante && rol !== "Particular (MOPT / Admisión)") { if (!outTabs.includes("cooperativa")) outTabs.splice(2, 0, "cooperativa"); if (!outTabs.includes("practica_guia")) outTabs.splice(2, 0, "practica_guia"); /* bds-extra-roles-rbac-v200 */ if (ex.includes("Comedor") && !outTabs.includes("comedor")) outTabs.splice(2, 0, "comedor"); if (ex.includes("Cooperativa") && !outTabs.includes("cooperativa")) outTabs.splice(2, 0, "cooperativa"); if (ex.includes("Juegos") && !outTabs.includes("juegos")) outTabs.push("juegos"); if (ex.includes("Permisos")) { if (!outTabs.includes("permisos")) outTabs.push("permisos"); if (!outTabs.includes("justificaciones")) outTabs.push("justificaciones"); } if (ex.includes("ValidadorQR") && !outTabs.includes("carnet_qr")) outTabs.push("carnet_qr"); } if (rol === "Particular (MOPT / Admisión)" && !outTabs.includes("practica_guia")) outTabs.splice(1, 0, "practica_guia"); if (!esVisitante && rol !== "Particular (MOPT / Admisión)" && !outTabs.includes("conducta_sea")) outTabs.splice(2, 0, "conducta_sea"); if (!esVisitante && ["SuperAdmin","Director(a)","Subdirector(a)","Asistente de Dirección","Orientador(a)","Docente MEP","Padre/Madre"].includes(rol) && !outTabs.includes("orientacion_reac")) outTabs.splice(2, 0, "orientacion_reac"); if (!esVisitante && ["SuperAdmin","Director(a)","Subdirector(a)","Asistente de Dirección","Auxiliar Administrativo"].includes(rol)) { if (!outTabs.includes("porton_seguridad")) outTabs.push("porton_seguridad"); if (!outTabs.includes("conserjeria_mant")) outTabs.push("conserjeria_mant"); } if (!esVisitante && !outTabs.includes("idiomas_lab")) outTabs.push("idiomas_lab"); if (!esVisitante && ["SuperAdmin","Admin","Director(a)","Subdirector(a)","Asistente de Dirección","Auxiliar Administrativo","Auxiliar de Vigilancia (Seguridad)","Conserje / Mantenimiento","Docente MEP","Orientador(a)"].includes(rol) && !outTabs.includes("llaves_aulas")) outTabs.splice(3, 0, "llaves_aulas"); if (!esVisitante && ["SuperAdmin","Admin","Director(a)","Subdirector(a)","Asistente de Dirección","Secretaria / Secretario","Auxiliar Administrativo","Docente MEP"].includes(rol)) { if (!outTabs.includes("asignacion_acad")) outTabs.splice(3, 0, "asignacion_acad"); if (!outTabs.includes("admin_sim_cruce")) outTabs.splice(3, 0, "admin_sim_cruce"); } if (!esVisitante && !outTabs.includes("antologias")) outTabs.push("antologias"); cfg.tabs = Array.from(new Set(outTabs)).filter(k => Boolean(TAB_META[k]));
     return cfg;
   }
 
@@ -243,9 +242,9 @@ window.addEventListener("error", function (ev) {
       institucionCorta: "CTP Mercedes Norte",
       regional: "Dirección Regional de Heredia",
       circuito: "Circuito 02",
-      escudo: "/escudo-ctpmn-oficial.jpeg?v=229",
-      mascota: "/buho-oficial.png?v=229",
-      logoMep: "/logo-mep-oficial.png?v=229"
+      escudo: "/escudo-ctpmn-oficial.jpeg?v=213",
+      mascota: "/buho-oficial.png?v=213",
+      logoMep: "/logo-mep-oficial.png?v=213"
     };
     if (!window.BDS_BRAND) return def;
     const b = window.BDS_BRAND.get();
@@ -904,7 +903,6 @@ window.addEventListener("error", function (ev) {
       antologias: `<button onclick="window.bdsGo('antologias')" class="bds-quick-btn" style="background:#7c3aed;">📖 Antologías & Libros PDF</button>`,
       opendocs: `<button onclick="window.bdsGo('opendocs')" class="bds-quick-btn" style="background:#0f766e;">📖 Open Docs</button>`,
       identidad: `<button onclick="window.BDS_BRAND && window.BDS_BRAND.openModal()" class="bds-quick-btn" style="background:#334155;">🛡️ Escudo y Logo</button>`,
-      asistencia_porton: `<button onclick="window.bdsGo('asistencia_porton')" class="bds-quick-btn" style="background:#059669;">🚪 Entrada/Salida & Familias (₡1,000)</button>`,
       porton_seguridad: `<button onclick="window.bdsGo('porton_seguridad')" class="bds-quick-btn" style="background:#1e3a8a;">🛡️ Control de Portón QR</button>`,
       conserjeria_mant: `<button onclick="window.bdsGo('conserjeria_mant')" class="bds-quick-btn" style="background:#0f766e;">🧹 Conserjería & Mant.</button>`,
       carnet_qr: `<button onclick="window.bdsGo('carnet_qr')" class="bds-quick-btn" style="background:#1e40af;">🪪 Carné QR</button>`
@@ -1094,8 +1092,7 @@ window.addEventListener("error", function (ev) {
         else if (destino === "cooperativa" && window.BDS_RENDER_COOPERATIVA) window.BDS_RENDER_COOPERATIVA(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG, ganarXP });
       else if (destino === "practica_guia" && window.BDS_RENDER_PRACTICA_GUIA) window.BDS_RENDER_PRACTICA_GUIA(shell, { sesion: sesionActiva, ganarXP });
       else if (destino === "comedor" && window.BDS_RENDER_COMEDOR_MEP) window.BDS_RENDER_COMEDOR_MEP(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG, ganarXP });
-        else if (destino === "asistencia_porton" && window.BDS_RENDER_ASISTENCIA_PORTON) window.BDS_RENDER_ASISTENCIA_PORTON(shell, { sesion: sesionActiva, sha256Hex });
-      else if (destino === "porton_seguridad" && window.BDS_RENDER_PORTON_SEGURIDAD) window.BDS_RENDER_PORTON_SEGURIDAD(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
+        else if (destino === "porton_seguridad" && window.BDS_RENDER_PORTON_SEGURIDAD) window.BDS_RENDER_PORTON_SEGURIDAD(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
       else if (destino === "conserjeria_mant" && window.BDS_RENDER_CONSERJERIA_MANT) window.BDS_RENDER_CONSERJERIA_MANT(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
       else if (destino === "agenda" && window.BDS_RENDER_AGENDA_HORARIO) window.BDS_RENDER_AGENDA_HORARIO(shell, { sesion: sesionActiva });
         else if (destino === "reportes" && window.BDS_RENDER_REPORTES_RESPALDOS) window.BDS_RENDER_REPORTES_RESPALDOS(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });

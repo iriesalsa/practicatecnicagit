@@ -1,24 +1,23 @@
 {
-    "description":  "Plataforma educativa y práctica técnica con trazabilidad curricular, libros ilustrados y simuladores.",
-    "short_name":  "pracTICA",
-    "background_color":  "#060c17",
-    "icons":  [
-                  {
-                      "purpose":  "any",
-                      "type":  "image/svg+xml",
-                      "sizes":  "192x192",
-                      "src":  "/=224"
-                  },
-                  {
-                      "purpose":  "any maskable",
-                      "type":  "image/svg+xml",
-                      "sizes":  "512x512",
-                      "src":  "/=224"
-                  }
-              ],
-    "theme_color":  "#0f2247",
-    "display":  "standalone",
-    "name":  "pracTICAtecnica.com",
-    "scope":  "/",
-    "start_url":  "/"
+  "name": "pracTICAtecnica.com — Plataforma Educativa Universal",
+  "short_name": "pracTICAtecnica",
+  "description": "Plataforma educativa multiplataforma (Android, iOS, Windows, macOS) con prácticas MEP, MOPT, Admisión, Comedor QR y Gestión Institucional.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#060c17",
+  "theme_color": "#0b1220",
+  "lang": "es-CR",
+  "categories": ["education", "productivity", "utilities"],
+  "icons": [
+    { "src": "/buho-oficial.png", "sizes": "192x192", "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "/buho-oficial.png", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Práctica Guiada", "short_name": "Práctica", "url": "/#practica" },
+    { "name": "Simulador MOPT", "short_name": "MOPT", "url": "/#mopt" },
+    { "name": "Comedor QR", "short_name": "Comedor", "url": "/#comedor" }
+  ]
 }

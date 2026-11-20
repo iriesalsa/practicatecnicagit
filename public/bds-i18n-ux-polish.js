@@ -1,7 +1,5 @@
 (function () {
   const THEME_KEY = "bds_theme_mode_v212";
-  const LANG_KEY = "bds_lang_v187";
-
   const DICT_EXT = {
     "Inicio": { en: "Home", pt: "Início", fr: "Accueil" },
     "Trazabilidad": { en: "Traceability", pt: "Rastreabilidade", fr: "Traçabilité" },
@@ -19,7 +17,6 @@
     "Portón & Seguridad": { en: "Gate Security", pt: "Portaria QR", fr: "Sécurité Portail" },
     "Conserjería": { en: "Maintenance", pt: "Manutenção", fr: "Entretien" },
     "Antologías & Libros": { en: "Books & Anthologies", pt: "Livros e Antologias", fr: "Livres & Anthologies" },
-    "Secretaría & Cruce": { en: "Records & Cross-Check", pt: "Secretaria e Cruzamento", fr: "Secrétariat & Croisement" },
     "Planeamiento IA": { en: "AI Lesson Plans", pt: "Planejamento IA", fr: "Plans de Cours IA" },
     "Cooperativa": { en: "School Co-op", pt: "Cooperativa", fr: "Coopérative" },
     "Práctica Guía": { en: "Práctica Guide", pt: "Guia Práctica", fr: "Guide Práctica" },
@@ -37,7 +34,6 @@
     "Dirección": { en: "Administration", pt: "Direção", fr: "Direction" },
     "Familia": { en: "Family", pt: "Família", fr: "Famille" },
     "Chats": { en: "Chats", pt: "Chats", fr: "Discussions" },
-    "Planes": { en: "Plans", pt: "Planos", fr: "Forfaits" },
     "Salir": { en: "Sign Out", pt: "Sair", fr: "Déconnexion" },
     "Instalar": { en: "Install", pt: "Instalar", fr: "Installer" },
     "Escuchar Todo": { en: "Listen All", pt: "Ouvir Tudo", fr: "Tout Écouter" },
@@ -47,15 +43,8 @@
     "Productos": { en: "Products", pt: "Produtos", fr: "Produits" },
     "ACCESOS RÁPIDOS": { en: "QUICK ACCESS", pt: "ACESSO RÁPIDO", fr: "ACCÈS RAPIDES" },
     "Ingresar a la Plataforma": { en: "Sign In", pt: "Entrar na Plataforma", fr: "Se Connecter" },
-    "Continuar con Google": { en: "Continue with Google", pt: "Continuar com Google", fr: "Continuer avec Google" },
-    "Enviar Solicitud con QR SHA-256": { en: "Submit Request with QR SHA-256", pt: "Enviar Solicitação com QR SHA-256", fr: "Envoyer la Demande avec QR SHA-256" },
-    "Enviar Justificación con QR SHA-256": { en: "Submit Justification with QR SHA-256", pt: "Enviar Justificativa com QR SHA-256", fr: "Envoyer le Justificatif avec QR SHA-256" }
+    "Continuar con Google": { en: "Continue with Google", pt: "Continuar com Google", fr: "Continuer avec Google" }
   };
-
-  function getLang() {
-    const l = localStorage.getItem(LANG_KEY) || "es";
-    return ["es", "en", "pt", "fr"].includes(l) ? l : "es";
-  }
 
   function getTheme() {
     const v = localStorage.getItem(THEME_KEY) || localStorage.getItem("bds_theme_v187") || "dark";
@@ -85,7 +74,7 @@
   }
 
   function injectLightDarkCSS() {
-    if (typeof document === "undefined" || !document.head || document.getElementById("bds-ux-polish-v212")) return;
+    if (typeof document === "undefined" || document.getElementById("bds-ux-polish-v212")) return;
     const st = document.createElement("style");
     st.id = "bds-ux-polish-v212";
     st.innerHTML = `
@@ -93,6 +82,7 @@
       button { transition: transform .08s ease, filter .12s ease; }
       button:active { transform: scale(0.98); }
 
+      /* MODO CLARO DE ALTO CONTRASTE (OVERRIDE COMPLETO DE ESTILOS OSCUROS) */
       html[data-theme="light"], html[data-theme="light"] body, body.bds-light {
         background: #eef2f6 !important; color: #0f172a !important;
       }
@@ -155,8 +145,7 @@
   }
 
   function translateTree(lang) {
-    const activeLang = lang || getLang();
-    if (!activeLang || activeLang === "es" || typeof document === "undefined" || !document.body || typeof document.createTreeWalker !== "function" || typeof NodeFilter === "undefined") return;
+    if (!lang || lang === "es" || typeof document === "undefined" || !document.body) return;
     const keys = Object.keys(DICT_EXT).sort((a, b) => b.length - a.length);
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
     let node;
@@ -164,10 +153,10 @@
       const p = node.parentElement;
       if (!p || p.closest("[data-no-i18n='true']") || ["SCRIPT","STYLE","INPUT","TEXTAREA","CODE"].includes(p.tagName)) continue;
       let txt = node.nodeValue;
-      if (!txt || txt.trim().length < 2) continue;
+      if (!txt || txt.trim().length < 3) continue;
       let changed = false;
       for (const es of keys) {
-        const tr = DICT_EXT[es][activeLang];
+        const tr = DICT_EXT[es][lang];
         if (tr && txt.includes(es) && !txt.includes(tr)) { txt = txt.replace(es, tr); changed = true; }
       }
       if (changed) node.nodeValue = txt;
@@ -186,6 +175,7 @@
   function installUnifiedUI() {
     injectLightDarkCSS();
     warmVoices();
+    // Asegurar que window.BDS_UI SIEMPRE exista y use nuestro motor confiable de Claro/Oscuro
     const prev = window.BDS_UI || {};
     const origApplyLang = prev.applyLang;
     window.BDS_UI = {
@@ -193,25 +183,22 @@
       getTheme,
       applyTheme,
       toggleTheme,
-      getLang,
+      getLang: prev.getLang || (() => localStorage.getItem("bds_lang_v187") || "es"),
       applyLang: function (lg) {
-        const chosen = ["es", "en", "pt", "fr"].includes(lg) ? lg : "es";
-        localStorage.setItem(LANG_KEY, chosen);
-        if (origApplyLang) origApplyLang(chosen);
-        translateTree(chosen);
-        setTimeout(() => translateTree(chosen), 80);
+        localStorage.setItem("bds_lang_v187", lg);
+        if (origApplyLang) origApplyLang(lg);
+        setTimeout(() => translateTree(lg), 60);
       }
     };
     applyTheme(getTheme());
-    if (getLang() !== "es") translateTree(getLang());
 
     if (typeof MutationObserver !== "undefined" && document.body) {
       let deb = null;
       new MutationObserver(() => {
         const curT = getTheme();
         if (document.body.classList.contains("bds-light") !== (curT === "light")) applyTheme(curT);
-        const lg = getLang();
-        if (lg !== "es") { clearTimeout(deb); deb = setTimeout(() => translateTree(lg), 90); }
+        const lg = window.BDS_UI.getLang();
+        if (lg !== "es") { clearTimeout(deb); deb = setTimeout(() => translateTree(lg), 120); }
         const motBtn = document.getElementById("pr-mot-next");
         if (motBtn && !document.getElementById("pr-mot-tts")) {
           const b = document.createElement("button");
@@ -229,241 +216,9 @@
     }
   }
 
-  window.BDS_POLISH_V203 = { DICT_EXT, translateTree, warmVoices, getTheme, applyTheme, toggleTheme, getLang };
+  window.BDS_POLISH_V203 = { DICT_EXT, translateTree, warmVoices, getTheme, applyTheme, toggleTheme };
   if (typeof window !== "undefined") {
     installUnifiedUI();
     if (typeof window.addEventListener === "function") window.addEventListener("DOMContentLoaded", installUnifiedUI);
   }
-})();
-
-/* bds-opts-pro-v217 */
-(function () {
-  if (typeof document === "undefined" || !document.head || document.getElementById("bds-opts-style-v217")) return;
-  const st = document.createElement("style");
-  st.id = "bds-opts-style-v217";
-  st.innerHTML = `
-    #bds-shell .bds-opt-btn,
-    #bds-shell button[data-opt],
-    #bds-shell button.opt-btn,
-    #bds-shell div[style*="grid-template-columns:1fr 1fr"] button,
-    #bds-shell div[style*="grid-template-columns: repeat(2"] button {
-      width: 100% !important;
-      min-height: 46px !important;
-      padding: 11px 14px !important;
-      font-size: 13.5px !important;
-      line-height: 1.4 !important;
-      text-align: left !important;
-      white-space: normal !important;
-      word-break: break-word !important;
-      box-sizing: border-box !important;
-      display: flex !important;
-      align-items: center !important;
-      gap: 8px !important;
-    }
-  `;
-  document.head.appendChild(st);
-})();
-
-/* bds-escuchar-real-v218 */
-(function () {
-  if (typeof window === "undefined" || typeof document === "undefined") return;
-
-  let hablando = false;
-  let estadoTexto = "";
-
-  function getTextoSaludoLimpio() {
-    const quoteEl = document.querySelector("#bds-shell .bds-card blockquote, #bds-shell .bds-card p[style*='font-weight'], #bds-shell .bds-card div[style*='font-size:15'], #bds-shell .bds-card div[style*='font-size:16']");
-    if (quoteEl && quoteEl.innerText && quoteEl.innerText.trim().length > 8) {
-      return quoteEl.innerText.replace(/\s+/g, " ").trim().slice(0, 360);
-    }
-    const cards = Array.from(document.querySelectorAll("#bds-shell .bds-card"));
-    const mainCard = cards.find(c => !c.id || c.id !== "bds-mi-dia-v204");
-    if (mainCard) {
-      return mainCard.innerText
-        .replace(/Vista:\s*SuperAdmin/gi, "")
-        .replace(/\s+/g, " ")
-        .trim()
-        .slice(0, 360);
-    }
-    return "Bienvenido a pracTICAtecnica.com";
-  }
-
-  function actualizarEstadoBoton(btn) {
-    if (!btn) return;
-    btn.innerText = hablando ? "⏹ Detener" : "🔊 Escuchar";
-    btn.style.background = hablando ? "#b45309" : "#1e3a8a";
-    btn.style.color = "#ffffff";
-    btn.style.borderColor = hablando ? "#fbbf24" : "#38bdf8";
-
-    let stBox = document.getElementById("bds-tts-status-v218");
-    if (!stBox && btn.parentElement && btn.parentElement.parentElement) {
-      stBox = document.createElement("div");
-      stBox.id = "bds-tts-status-v218";
-      stBox.style.cssText = "width:100%;font-size:11px;color:#93c5fd;margin-top:6px;display:none;";
-      btn.parentElement.parentElement.appendChild(stBox);
-    }
-    if (stBox) {
-      stBox.style.display = estadoTexto ? "block" : "none";
-      stBox.innerText = estadoTexto;
-    }
-  }
-
-  function detenerAudio() {
-    hablando = false;
-    estadoTexto = "";
-    try {
-      if ("speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
-      }
-    } catch {}
-    actualizarEstadoBoton(document.getElementById("pr-mot-tts"));
-  }
-
-  function alternarEscuchar(btn) {
-    if (hablando) {
-      detenerAudio();
-      return;
-    }
-    const texto = getTextoSaludoLimpio();
-    if (!("speechSynthesis" in window) || typeof SpeechSynthesisUtterance === "undefined") {
-      estadoTexto = "⚠️ Este navegador o dispositivo no tiene síntesis de voz (TTS) habilitada.";
-      actualizarEstadoBoton(btn);
-      return;
-    }
-
-    try {
-      window.speechSynthesis.cancel();
-      const utter = new SpeechSynthesisUtterance(texto);
-      utter.lang = "es-419";
-      utter.rate = 0.96;
-      utter.pitch = 1.0;
-
-      const voices = window.speechSynthesis.getVoices() || [];
-      const latam = voices.find(v => /^(es-419|es-cr|es-mx|es-us|es-co|es-ar|es-cl|es-pe)/i.test(v.lang || "")) ||
-                    voices.find(v => /^es/i.test(v.lang || "") && !/es-es|españa|spain|jorge|monica|jordi|helena|paloma/i.test(`${v.lang} ${v.name}`)) ||
-                    voices.find(v => /^es/i.test(v.lang || ""));
-      if (latam) {
-        utter.voice = latam;
-        utter.lang = latam.lang || "es-419";
-      }
-
-      hablando = true;
-      estadoTexto = `🔊 Reproduciendo en voz ${utter.lang}: "${texto.slice(0, 75)}${texto.length > 75 ? "..." : ""}"`;
-      actualizarEstadoBoton(btn);
-
-      utter.onend = () => { detenerAudio(); };
-      utter.onerror = () => {
-        hablando = false;
-        estadoTexto = "⚠️ No se pudo reproducir el audio. Revisa el volumen del dispositivo o los permisos de audio del navegador.";
-        actualizarEstadoBoton(btn);
-      };
-
-      window.speechSynthesis.speak(utter);
-
-      // Respaldo si el navegador bloquea speechSynthesis silenciosamente
-      setTimeout(() => {
-        if (hablando && !window.speechSynthesis.speaking && !window.speechSynthesis.pending) {
-          hablando = false;
-          estadoTexto = "💡 Si no escuchas audio, toca el ícono de volumen del dispositivo o prueba en Chrome/Edge con voces instaladas.";
-          actualizarEstadoBoton(btn);
-        }
-      }, 1200);
-    } catch {
-      hablando = false;
-      estadoTexto = "⚠️ Error al iniciar la lectura de audio.";
-      actualizarEstadoBoton(btn);
-    }
-  }
-
-  function mejorarBotonYEstilos() {
-    if (!document.getElementById("bds-ux-v218-css") && document.head) {
-      const st = document.createElement("style");
-      st.id = "bds-ux-v218-css";
-      st.innerHTML = `
-        #bds-subnav {
-          max-height: 124px;
-          overflow-y: auto;
-          scrollbar-width: thin;
-        }
-        .bds-nav-btn {
-          padding: 6px 10px !important;
-          font-size: 11.5px !important;
-          line-height: 1.25 !important;
-        }
-        #bds-shell .bds-card {
-          border-radius: 14px !important;
-        }
-        #pr-mot-tts {
-          cursor: pointer !important;
-          user-select: none;
-        }
-      `;
-      document.head.appendChild(st);
-    }
-
-    const motBtn = document.getElementById("pr-mot-next");
-    if (motBtn) {
-      let b = document.getElementById("pr-mot-tts");
-      if (!b) {
-        b = document.createElement("button");
-        b.type = "button";
-        b.id = "pr-mot-tts";
-        b.style.cssText = "background:#1e3a8a;color:#ffffff;border:1px solid #38bdf8;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;";
-        motBtn.parentElement.insertBefore(b, motBtn);
-      }
-      b.onclick = (e) => {
-        if (e) e.preventDefault();
-        alternarEscuchar(b);
-      };
-      actualizarEstadoBoton(b);
-    }
-  }
-
-  window.BDS_ESCUCHAR_V218 = { alternarEscuchar, detenerAudio, getTextoSaludoLimpio };
-  if (typeof window.addEventListener === "function") {
-    window.addEventListener("DOMContentLoaded", () => {
-      mejorarBotonYEstilos();
-      if (typeof MutationObserver !== "undefined" && document.body) {
-        new MutationObserver(() => mejorarBotonYEstilos()).observe(document.body, { childList: true, subtree: true });
-      }
-    });
-  }
-})();
-
-/* bds-anti-blank-guard-v219 */
-(function () {
-  if (typeof window === "undefined" || typeof document === "undefined") return;
-
-  function mostrarRecuperacion(msg) {
-    if (!document.body || document.getElementById("bds-rescue-banner-v219")) return;
-    const bar = document.createElement("div");
-    bar.id = "bds-rescue-banner-v219";
-    bar.style.cssText = "position:fixed;bottom:14px;right:14px;z-index:300999;background:#1e293b;color:#f8fafc;border:1.5px solid #38bdf8;border-radius:10px;padding:10px 14px;font-size:12px;box-shadow:0 8px 24px rgba(0,0,0,.45);display:flex;align-items:center;gap:10px;max-width:92vw;";
-    bar.innerHTML = `<span>⚠️ Aviso de carga: ${String(msg || "Recuperación activa").slice(0, 90)}</span><button id="bds-rescue-reload" style="background:#059669;color:#fff;border:none;padding:6px 10px;border-radius:7px;font-weight:700;cursor:pointer;">🔄 Recargar</button>`;
-    document.body.appendChild(bar);
-    const btn = document.getElementById("bds-rescue-reload");
-    if (btn) btn.onclick = () => {
-      if (window.BDS_CACHE_PURGE && typeof window.BDS_CACHE_PURGE.limpiarCacheYActualizar === "function") {
-        window.BDS_CACHE_PURGE.limpiarCacheYActualizar(false);
-      } else {
-        window.location.reload();
-      }
-    };
-  }
-
-  window.addEventListener("error", (ev) => {
-    const detalle = (ev && ev.message) ? ev.message : "Error de script detectado";
-    mostrarRecuperacion(detalle);
-  });
-
-  // Si tras 3 segundos el root o shell está vacío, mostrar aviso de recarga limpia
-  setTimeout(() => {
-    try {
-      const root = document.getElementById("root") || document.getElementById("app") || document.body;
-      const visibleLen = root ? (root.innerText || "").trim().length : 0;
-      if (visibleLen < 10) {
-        mostrarRecuperacion("La vista tardó en renderizar. Pulsa Recargar para limpiar caché.");
-      }
-    } catch {}
-  }, 3000);
 })();

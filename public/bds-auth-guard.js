@@ -41,8 +41,8 @@ window.addEventListener("error", function (ev) {
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v199.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v199.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v202.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v202.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -65,7 +65,8 @@ window.addEventListener("error", function (ev) {
     horarios: "📅 Horarios",
     permisos: "📝 Gestionar Permisos",
     justificaciones: "🎓 Gestionar Justificaciones",
-    notas_rea: "📊 Notas MEP",
+    /* bds-odin2-v202 */ notas_rea: "📊 Notas MEP",
+    conducta_sea: "⚖️ Conducta & SEA",
     mis_notas: "📊 Mis Notas",
     familia: "👨‍👩‍👧‍👦 Familia",
     planeamiento_ia: "🤖 Planeamiento IA",
@@ -146,7 +147,7 @@ window.addEventListener("error", function (ev) {
       }
     };
     const cfg = MAP[rol] || MAP["Estudiante"];
-    const ex = (sesionActiva && Array.isArray(sesionActiva.extraRoles)) ? sesionActiva.extraRoles : []; const outTabs = cfg.tabs.slice(); if (!esVisitante && rol !== "Particular (MOPT / Admisión)") { if (!outTabs.includes("cooperativa")) outTabs.splice(2, 0, "cooperativa"); if (!outTabs.includes("practica_guia")) outTabs.splice(2, 0, "practica_guia"); if (ex.includes("Comedor") && !outTabs.includes("comedor")) outTabs.splice(2, 0, "comedor"); } if (rol === "Particular (MOPT / Admisión)" && !outTabs.includes("practica_guia")) outTabs.splice(1, 0, "practica_guia"); cfg.tabs = Array.from(new Set(outTabs)).filter(k => Boolean(TAB_META[k]));
+    const ex = (sesionActiva && Array.isArray(sesionActiva.extraRoles)) ? sesionActiva.extraRoles : []; const outTabs = cfg.tabs.slice(); if (!esVisitante && rol !== "Particular (MOPT / Admisión)") { if (!outTabs.includes("cooperativa")) outTabs.splice(2, 0, "cooperativa"); if (!outTabs.includes("practica_guia")) outTabs.splice(2, 0, "practica_guia"); if (ex.includes("Comedor") && !outTabs.includes("comedor")) outTabs.splice(2, 0, "comedor"); } if (rol === "Particular (MOPT / Admisión)" && !outTabs.includes("practica_guia")) outTabs.splice(1, 0, "practica_guia"); if (!esVisitante && rol !== "Particular (MOPT / Admisión)" && !outTabs.includes("conducta_sea")) outTabs.splice(2, 0, "conducta_sea"); cfg.tabs = Array.from(new Set(outTabs)).filter(k => Boolean(TAB_META[k]));
     return cfg;
   }
 
@@ -156,9 +157,9 @@ window.addEventListener("error", function (ev) {
       institucionCorta: "CTP Mercedes Norte",
       regional: "Dirección Regional de Heredia",
       circuito: "Circuito 02",
-      escudo: "/escudo-ctpmn-oficial.jpeg?v=199",
-      mascota: "/buho-oficial.png?v=199",
-      logoMep: "/logo-mep-oficial.png?v=199"
+      escudo: "/escudo-ctpmn-oficial.jpeg?v=202",
+      mascota: "/buho-oficial.png?v=202",
+      logoMep: "/logo-mep-oficial.png?v=202"
     };
     if (!window.BDS_BRAND) return def;
     const b = window.BDS_BRAND.get();
@@ -470,7 +471,7 @@ window.addEventListener("error", function (ev) {
 
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:11px;padding-top:9px;border-top:1px solid #1e293b;font-size:11.5px;">
             <button type="button" id="lg-rec" style="background:none;border:none;color:#94a3b8;cursor:pointer;padding:0;">¿Olvidó su contraseña?</button>
-            <span data-no-i18n="true" style="color:#64748b;font-weight:600;">PWA v199.0 • BDS Devs</span>
+            <span data-no-i18n="true" style="color:#64748b;font-weight:600;">pracTICA Odín 2.0 (v202)</span>
           </div>
         </div>
       `;
@@ -513,7 +514,7 @@ window.addEventListener("error", function (ev) {
         // 3) Si SuperAdmin le asignó rol en Trazabilidad -> usa ese rol
         // 4) Todas las demás cuentas entran como Estudiante (o Particular si lo eligieron)
         let rolFinal = "Estudiante";
-        let nombreFinal = nomIn || mail.split("@")[0];
+        let nombreFinal = nomIn || (window.BDS_MOTIVACION ? window.BDS_MOTIVACION.formatNameFromEmail(mail) : mail.split("@")[0]);
         if (esSuperAdmin(mail)) {
           rolFinal = "SuperAdmin";
           nombreFinal = "Ing. Max Salazar Sánchez";
@@ -777,12 +778,9 @@ window.addEventListener("error", function (ev) {
   function renderInicio(shell, perms, onSwitchRole) {
     const b = brand(), xp = getXP(), malla = window.BDS_MALLA_MEP || [];
     const esRealSA = sesionActiva && sesionActiva.rolReal === "SuperAdmin";
-    const primerNom = (sesionActiva.nombre || "Usuario").replace(/^(Ing\.|Prof\.|Licda\.|Lic\.|Directora)\s+/i, "").split(" ")[0];
-    const saludoBuho = esSuperAdmin(sesionActiva.email)
-      ? "¡Hola Ing. Max Salazar Sánchez, bienvenido! Qué bueno verte de nuevo. Todo el ecosistema está listo bajo tu control."
-      : (esDirectoraAutorizada(sesionActiva.email)
-          ? "¡Bienvenida, Directora Laura Ramón Elizondo! Qué alegría tenerte de nuevo. Tu bandeja de permisos, justificaciones y gestión está lista."
-          : `¡Hola ${primerNom}, bienvenido(a)! Qué bueno verte de nuevo. ¡Sigamos sumando racha hoy!`);
+        const salObj = window.BDS_MOTIVACION ? window.BDS_MOTIVACION.buildSaludoPersonalizado(sesionActiva, xp, window.__BDS_MOT_IDX || 0) : { textoCompleto: `Bienvenido(a) a pracTICA, ${sesionActiva.nombre || "Usuario"}.` };
+    const saludoBuho = salObj.textoCompleto;
+    const tarjetaSeguimientoHtml = window.BDS_MOTIVACION ? window.BDS_MOTIVACION.renderTarjetaSeguimiento(sesionActiva) : "";
 
     const estBeta = window.BDS_SUSCRIPCION ? window.BDS_SUSCRIPCION.getEstadoCuenta(sesionActiva).etiqueta : "Beta activa";
 
@@ -794,6 +792,7 @@ window.addEventListener("error", function (ev) {
       justificaciones: `<button onclick="window.bdsGo('justificaciones')" class="bds-quick-btn" style="background:#0d9488;">🎓 Gestionar Justificaciones</button>`,
       mis_notas: `<button onclick="window.bdsGo('mis_notas')" class="bds-quick-btn" style="background:#0284c7;">📊 Mis Notas (QR)</button>`,
       familia: `<button onclick="window.bdsGo('familia')" class="bds-quick-btn" style="background:#059669;">👨‍👩‍👧‍👦 Mis Hijos y Trámites</button>`,
+      conducta_sea: `<button onclick="window.bdsGo('conducta_sea')" class="bds-quick-btn" style="background:#0f766e;">⚖️ Matrícula, Conducta REA & SEA</button>`,
       notas_rea: `<button onclick="window.bdsGo('notas_rea')" class="bds-quick-btn" style="background:#d97706;">📊 Notas MEP (35/35)</button>`,
       planeamiento_ia: `<button onclick="window.bdsGo('planeamiento_ia')" class="bds-quick-btn" style="background:#7c3aed;">🤖 Planeamiento IA</button>`,
       cooperativa: `<button onclick="window.bdsGo('cooperativa')" class="bds-quick-btn" style="background:#0f766e;">🏪 Cooperativa & EcoMEPs</button>`,
@@ -836,6 +835,8 @@ window.addEventListener("error", function (ev) {
         </div>
       </div>
 
+      ${tarjetaSeguimientoHtml}
+
       ${perms.quick.length ? `
         <div class="bds-card" style="margin-bottom:12px;">
           <div style="font-size:11px;font-weight:800;color:#38bdf8;margin-bottom:8px;">⚡ ACCESOS RÁPIDOS</div>
@@ -872,7 +873,7 @@ window.addEventListener("error", function (ev) {
       ` : ""}
     `;
 
-    if (document.getElementById("rol-sw")) document.getElementById("rol-sw").onchange = (e) => onSwitchRole(e.target.value);
+    if (document.getElementById("rol-sw")) document.getElementById("rol-sw").onchange = (e) => onSwitchRole(e.target.value); if (document.getElementById("pr-mot-next")) document.getElementById("pr-mot-next").onclick = () => { window.__BDS_MOT_IDX = (window.__BDS_MOT_IDX || 0) + 1; renderInicio(shell, perms, onSwitchRole); }; if (document.getElementById("pr-mot-push")) document.getElementById("pr-mot-push").onclick = () => { if (window.BDS_NATIVE) window.BDS_NATIVE.notify("🦉 Recordatorio pracTICA", salObj.frase); };
     shell.querySelectorAll("[data-area]").forEach(el => { el.onclick = () => window.bdsGo("practica", el.getAttribute("data-area")); });
   }
 
@@ -880,7 +881,7 @@ window.addEventListener("error", function (ev) {
   function iniciarApp(vistaInicial = "inicio", rolAuditoria = null) {
     const sBase = getSesion(); if (!sBase) { mostrarLogin("login"); return; }
     const rolEfectivo = (sBase.rolReal === "SuperAdmin" && rolAuditoria) ? rolAuditoria : sBase.rol;
-    const exRoles = (window.BDS_TRAZABILIDAD && window.BDS_TRAZABILIDAD.getExtraRoles) ? window.BDS_TRAZABILIDAD.getExtraRoles(sBase.email) : (sBase.extraRoles || []); sesionActiva = { ...sBase, rol: rolEfectivo, extraRoles: exRoles };
+    const exRoles = (window.BDS_TRAZABILIDAD && window.BDS_TRAZABILIDAD.getExtraRoles) ? window.BDS_TRAZABILIDAD.getExtraRoles(sBase.email) : (sBase.extraRoles || []); sesionActiva = { ...sBase, rol: rolEfectivo, extraRoles: exRoles }; if (window.BDS_MOTIVACION && !sesionActiva.visitante) window.BDS_MOTIVACION.trackSession(sesionActiva);
 
     // Verificar bloqueo Beta 13 días
     if (!sesionActiva.visitante && window.BDS_SUSCRIPCION && window.BDS_SUSCRIPCION.isLocked(sesionActiva)) {
@@ -979,6 +980,7 @@ window.addEventListener("error", function (ev) {
         else if ((destino === "permisos" || destino === "justificaciones" || destino === "carnet_qr") && window.BDS_RENDER_PERMISOS_JUSTIF) window.BDS_RENDER_PERMISOS_JUSTIF(shell, destino === "carnet_qr" ? "qr" : destino, { sesion: sesionActiva, sha256Hex, generarQRSVG });
         else if (destino === "mis_notas" && window.BDS_RENDER_MIS_NOTAS_ESTUDIANTE) window.BDS_RENDER_MIS_NOTAS_ESTUDIANTE(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
       else if (destino === "familia" && window.BDS_RENDER_PORTAL_FAMILIA) window.BDS_RENDER_PORTAL_FAMILIA(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG });
+      else if (destino === "conducta_sea" && window.BDS_RENDER_ODIN2) window.BDS_RENDER_ODIN2(shell, subParam || "matricula", { sesion: sesionActiva, sha256Hex, generarQRSVG, ganarXP });
       else if (destino === "notas_rea" && window.BDS_RENDER_DOCENTE_REA_AUTO) window.BDS_RENDER_DOCENTE_REA_AUTO(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG, ganarXP });
         else if (destino === "planeamiento_ia" && window.BDS_RENDER_PLANEAMIENTO_IA) window.BDS_RENDER_PLANEAMIENTO_IA(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG, ganarXP });
         else if (destino === "cooperativa" && window.BDS_RENDER_COOPERATIVA) window.BDS_RENDER_COOPERATIVA(shell, { sesion: sesionActiva, sha256Hex, generarQRSVG, ganarXP });

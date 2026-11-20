@@ -429,3 +429,41 @@
     });
   }
 })();
+
+/* bds-anti-blank-guard-v219 */
+(function () {
+  if (typeof window === "undefined" || typeof document === "undefined") return;
+
+  function mostrarRecuperacion(msg) {
+    if (!document.body || document.getElementById("bds-rescue-banner-v219")) return;
+    const bar = document.createElement("div");
+    bar.id = "bds-rescue-banner-v219";
+    bar.style.cssText = "position:fixed;bottom:14px;right:14px;z-index:300999;background:#1e293b;color:#f8fafc;border:1.5px solid #38bdf8;border-radius:10px;padding:10px 14px;font-size:12px;box-shadow:0 8px 24px rgba(0,0,0,.45);display:flex;align-items:center;gap:10px;max-width:92vw;";
+    bar.innerHTML = `<span>⚠️ Aviso de carga: ${String(msg || "Recuperación activa").slice(0, 90)}</span><button id="bds-rescue-reload" style="background:#059669;color:#fff;border:none;padding:6px 10px;border-radius:7px;font-weight:700;cursor:pointer;">🔄 Recargar</button>`;
+    document.body.appendChild(bar);
+    const btn = document.getElementById("bds-rescue-reload");
+    if (btn) btn.onclick = () => {
+      if (window.BDS_CACHE_PURGE && typeof window.BDS_CACHE_PURGE.limpiarCacheYActualizar === "function") {
+        window.BDS_CACHE_PURGE.limpiarCacheYActualizar(false);
+      } else {
+        window.location.reload();
+      }
+    };
+  }
+
+  window.addEventListener("error", (ev) => {
+    const detalle = (ev && ev.message) ? ev.message : "Error de script detectado";
+    mostrarRecuperacion(detalle);
+  });
+
+  // Si tras 3 segundos el root o shell está vacío, mostrar aviso de recarga limpia
+  setTimeout(() => {
+    try {
+      const root = document.getElementById("root") || document.getElementById("app") || document.body;
+      const visibleLen = root ? (root.innerText || "").trim().length : 0;
+      if (visibleLen < 10) {
+        mostrarRecuperacion("La vista tardó en renderizar. Pulsa Recargar para limpiar caché.");
+      }
+    } catch {}
+  }, 3000);
+})();

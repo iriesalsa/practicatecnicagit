@@ -41,8 +41,8 @@ window.addEventListener("error", function (ev) {
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v223.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v223.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v224.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v224.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -242,9 +242,9 @@ window.addEventListener("error", function (ev) {
       institucionCorta: "CTP Mercedes Norte",
       regional: "Dirección Regional de Heredia",
       circuito: "Circuito 02",
-      escudo: "/escudo-ctpmn-oficial.jpeg?v=223",
-      mascota: "/buho-oficial.png?v=223",
-      logoMep: "/logo-mep-oficial.png?v=223"
+      escudo: "/escudo-ctpmn-oficial.jpeg?v=224",
+      mascota: "/buho-oficial.png?v=224",
+      logoMep: "/logo-mep-oficial.png?v=224"
     };
     if (!window.BDS_BRAND) return def;
     const b = window.BDS_BRAND.get();
@@ -1183,4 +1183,26 @@ window.addEventListener("error", function (ev) {
     if (s && s.email) iniciarApp(s.visitante ? "practica" : "inicio");
     else mostrarLogin("login");
   });
+})();
+
+/* bds-identidad-practica-v224 */
+(function () {
+  if (typeof window === "undefined" || typeof document === "undefined") return;
+
+  function aplicarIdentidadPracTICA() {
+    try {
+      if (!document.title || !document.title.includes("pracTICAtecnica.com")) {
+        document.title = "pracTICAtecnica.com — Plataforma Educativa";
+      }
+      const b = window.BDS_BRAND ? window.BDS_BRAND.get() : null;
+      if (b && (!b.nombre || !b.nombre.includes("pracTICA"))) {
+        b.nombre = "pracTICAtecnica.com";
+      }
+    } catch {}
+  }
+
+  if (typeof window.addEventListener === "function") {
+    window.addEventListener("DOMContentLoaded", aplicarIdentidadPracTICA);
+    window.addEventListener("load", aplicarIdentidadPracTICA);
+  }
 })();

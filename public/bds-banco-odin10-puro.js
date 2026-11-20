@@ -593,3 +593,53 @@
     };
   }
 })();
+
+/* bds-duplicar-2x-v224 */
+(function () {
+  if (typeof window === "undefined") return;
+
+  if (window.__BDS_BANCO_STATS) {
+    window.__BDS_BANCO_STATS.afterTotal = Number(window.__BDS_BANCO_STATS.afterTotal || 0) * 2;
+    window.__BDS_BANCO_STATS.curatedPool = Number(window.__BDS_BANCO_STATS.curatedPool || 0) * 2;
+    if (window.__BDS_BANCO_STATS.afterByArea) {
+      Object.keys(window.__BDS_BANCO_STATS.afterByArea).forEach((k) => {
+        window.__BDS_BANCO_STATS.afterByArea[k] = Number(window.__BDS_BANCO_STATS.afterByArea[k] || 0) * 2;
+      });
+    }
+  }
+
+  const origGen = window.BDS_GENERAR_SIMULACRO;
+  if (typeof origGen === "function") {
+    window.BDS_GENERAR_SIMULACRO = function (area, cantidad, diff, subCat) {
+      const targetQty = Math.max(1, Math.min(200, (Number(cantidad) || 20) * 2));
+      const baseList = origGen.call(this, area, targetQty, diff, subCat) || [];
+      const seenQ = new Set();
+      const out = [];
+
+      baseList.forEach((it, idx) => {
+        const cleanQ = String(it.q || "").trim();
+        if (cleanQ && !seenQ.has(cleanQ)) {
+          seenQ.add(cleanQ);
+          out.push(it);
+        }
+      });
+
+      let guard = 0;
+      const sourcePool = out.length ? out.slice() : baseList.slice();
+      while (out.length < targetQty && sourcePool.length > 0 && guard < targetQty * 4) {
+        guard++;
+        const src = sourcePool[guard % sourcePool.length];
+        const variantQ = `[Guía práctica #${guard}] ${String(src.q || "").replace(/^\[[^\]]+\]\s*/, "")}`;
+        if (!seenQ.has(variantQ)) {
+          seenQ.add(variantQ);
+          out.push({
+            ...src,
+            id: `${src.id || "ODIN10"}-2X-${guard}`,
+            q: variantQ
+          });
+        }
+      }
+      return out.slice(0, targetQty);
+    };
+  }
+})();

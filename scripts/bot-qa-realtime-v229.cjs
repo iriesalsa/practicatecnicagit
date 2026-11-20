@@ -82,4 +82,5 @@ global.sessionStorage = { _m: {}, getItem(k){ return this._m[k]||null; }, setIte
   console.log("VEREDICTO BOT QA CONSOLIDADO v229.1:", fails === 0 ? "🏆 10/10 PASS — CALIDAD BDS PRODUCCIÓN" : `❌ ${fails} FALLO(S)`);
   console.log("================================================================\n");
   if (fails > 0) process.exit(1);
+  process.exit(0);
 })();

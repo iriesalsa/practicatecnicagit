@@ -41,8 +41,8 @@ window.addEventListener("error", function (ev) {
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v234.js")) r.unregister(); });
-      navigator.serviceWorker.register("/sw-bds-v234.js").catch(() => {});
+      regs.forEach(r => { if (!r.active || !r.active.scriptURL.includes("sw-bds-v235.js")) r.unregister(); });
+      navigator.serviceWorker.register("/sw-bds-v235.js").catch(() => {});
     }).catch(() => {});
   }
 
@@ -243,9 +243,9 @@ window.addEventListener("error", function (ev) {
       institucionCorta: "CTP Mercedes Norte",
       regional: "Dirección Regional de Heredia",
       circuito: "Circuito 02",
-      escudo: "/escudo-ctpmn-oficial.jpeg?v=234",
-      mascota: "/buho-oficial.png?v=234",
-      logoMep: "/logo-mep-oficial.png?v=234"
+      escudo: "/escudo-ctpmn-oficial.jpeg?v=235",
+      mascota: "/buho-oficial.png?v=235",
+      logoMep: "/logo-mep-oficial.png?v=235"
     };
     if (!window.BDS_BRAND) return def;
     const b = window.BDS_BRAND.get();
@@ -641,8 +641,8 @@ window.addEventListener("error", function (ev) {
         iniciarApp("inicio");
       }
 
-      document.getElementById("lg-f").onsubmit = (e) => { e.preventDefault(); procesarAcceso(false); };
-      document.getElementById("lg-google").onclick = () => procesarAcceso(true);
+      document.getElementById("lg-f").onsubmit = (e) => { e.preventDefault(); Promise.resolve(procesarAcceso(false)).catch((ex) => { const er = document.getElementById("lg-err"); if (er) { er.style.display = "block"; er.innerText = "Error de acceso: " + (ex && ex.message ? ex.message : ex); } }); };
+      document.getElementById("lg-google").onclick = () => { Promise.resolve(procesarAcceso(true)).catch((ex) => { const er = document.getElementById("lg-err"); if (er) { er.style.display = "block"; er.innerText = "Error Google: " + (ex && ex.message ? ex.message : ex); } }); };
       document.getElementById("lg-guest").onclick = async () => {
         const firma = await sha256Hex("VISITANTE|CTPMN-C02");
         const vis = { nombre: "Visitante", email: "visitante@practicatecnica.com", rol: "Visitante", rolReal: "Visitante", seccion: "Libre", visitante: true, firma, qr: `PT-QR|VISITANTE|${firma.slice(0, 14)}` };

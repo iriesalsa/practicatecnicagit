@@ -11,10 +11,8 @@
       <stop offset="100%" stop-color="#b45309"/>
     </linearGradient>
   </defs>
-  <!-- Anillo exterior fino -->
-  <circle cx="100" cy="100" r="88" fill="none" stroke="url(#tpmnGold)" stroke-width="2.5" opacity="0.85"/>
+  <circle cx="100" cy="100" r="88" fill="none" stroke="url(#tpmnGold)" stroke-width="2.5" opacity="0.9"/>
   <circle cx="100" cy="100" r="72" fill="none" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.7"/>
-  <!-- Puntas secundarias diagonales -->
   <polygon points="100,100 144,56 112,100" fill="#991b1b"/>
   <polygon points="100,100 144,56 100,88" fill="#fca5a5"/>
   <polygon points="100,100 144,144 100,112" fill="#991b1b"/>
@@ -23,7 +21,6 @@
   <polygon points="100,100 56,144 100,112" fill="#fca5a5"/>
   <polygon points="100,100 56,56 100,88" fill="#991b1b"/>
   <polygon points="100,100 56,56 88,100" fill="#fca5a5"/>
-  <!-- Puntas cardinales principales (N, E, S, O) -->
   <polygon points="100,10 116,84 100,100" fill="url(#tpmnRed)"/>
   <polygon points="100,10 84,84 100,100" fill="#ffffff"/>
   <polygon points="190,100 116,116 100,100" fill="url(#tpmnRed)"/>
@@ -32,9 +29,7 @@
   <polygon points="100,190 116,116 100,100" fill="#ffffff"/>
   <polygon points="10,100 84,84 100,100" fill="url(#tpmnRed)"/>
   <polygon points="10,100 84,116 100,100" fill="#ffffff"/>
-  <!-- Centro dorado -->
   <circle cx="100" cy="100" r="14" fill="url(#tpmnGold)" stroke="#7f1d1d" stroke-width="2.5"/>
   <circle cx="100" cy="100" r="5" fill="#7f1d1d"/>
-  <!-- Siglas institucionales limpias -->
-  <text x="100" y="104" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, sans-serif" font-size="8" font-weight="900">N</text>
+  <text x="100" y="104" text-anchor="middle" fill="#ffffff" font-family="system-ui, sans-serif" font-size="8" font-weight="900">N</text>
 </svg>

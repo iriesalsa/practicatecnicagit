@@ -1,14 +1,13 @@
 (function () {
   "use strict";
-  if (window.__BDS_QR_VERIF_V89__) return;
-  window.__BDS_QR_VERIF_V89__ = true;
+  if (window.__BDS_QR_VERIF_V96__) return;
+  window.__BDS_QR_VERIF_V96__ = true;
 
-  // Remover barra flotante estorbosa de versiones anteriores si existiera
   var viejaBarra = document.getElementById("bds-v86-dua-bar");
   if (viejaBarra && viejaBarra.parentNode) viejaBarra.parentNode.removeChild(viejaBarra);
   try { if ("speechSynthesis" in window) window.speechSynthesis.cancel(); } catch (_e) {}
 
-  var STORAGE_KEY = "bds_qr_canjeados_v89";
+  var STORAGE_KEY = "bds_qr_canjeados_v96";
   var streamActual = null;
   var scanTimer = null;
 
@@ -18,7 +17,7 @@
       .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   }
 
-  function leerUsados() {
+  function leerUsadosLocal() {
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
       var obj = raw ? JSON.parse(raw) : {};
@@ -26,13 +25,59 @@
     } catch (_e) { return {}; }
   }
 
-  function marcarUsado(token) {
+  function marcarUsadoLocal(token) {
     if (!token) return;
     try {
-      var map = leerUsados();
+      var map = leerUsadosLocal();
       map[token] = new Date().toISOString();
       localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
     } catch (_e) {}
+  }
+
+  function getSbConfig() {
+    var sbUrl = window.BDS_SUPABASE_URL || window.SUPABASE_URL || "";
+    var sbKey = window.BDS_SUPABASE_ANON_KEY || window.SUPABASE_ANON_KEY || "";
+    if (!sbUrl || !sbKey || typeof fetch !== "function") return null;
+    return { url: String(sbUrl).replace(/\/+$/, ""), key: String(sbKey) };
+  }
+
+  async function consultarCanjeRemoto(token) {
+    var cfg = getSbConfig();
+    if (!cfg || !token) return false;
+    try {
+      var q = cfg.url + "/rest/v1/qr_canjes_unico?token_uso=eq." + encodeURIComponent(token) + "&select=token_uso&limit=1";
+      var r = await fetch(q, {
+        method: "GET",
+        headers: { "apikey": cfg.key, "Authorization": "Bearer " + cfg.key }
+      });
+      if (!r.ok) return false;
+      var rows = await r.json();
+      return Array.isArray(rows) && rows.length > 0;
+    } catch (_e) {
+      return false;
+    }
+  }
+
+  async function registrarCanjeRemoto(payload) {
+    var cfg = getSbConfig();
+    if (!cfg) return { synced: false, msg: "Local" };
+    try {
+      var r = await fetch(cfg.url + "/rest/v1/qr_canjes_unico", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": cfg.key,
+          "Authorization": "Bearer " + cfg.key,
+          "Prefer": "return=minimal"
+        },
+        body: JSON.stringify(payload)
+      });
+      if (r.ok) return { synced: true, msg: "Sincronizado en BD" };
+      if (r.status === 409) return { synced: true, conflict: true, msg: "Ya canjeado en BD" };
+      return { synced: false, msg: "Local (BD " + r.status + ")" };
+    } catch (_e) {
+      return { synced: false, msg: "Local (sin red)" };
+    }
   }
 
   async function sha256Hex(texto) {
@@ -48,7 +93,7 @@
 
   function parsearQr(rawText) {
     var txt = String(rawText || "").trim();
-    var rol = "ESTUDIANTE";
+    var rol = "COMEDOR";
     var titularId = "";
     var paseId = "";
     var detalle = "";
@@ -61,7 +106,7 @@
     if (txt.charAt(0) === "{") {
       try {
         var obj = JSON.parse(txt);
-        rol = String(obj.rol || obj.role || obj.tipo || "ESTUDIANTE").toUpperCase();
+        rol = String(obj.rol || obj.role || obj.tipo || "COMEDOR").toUpperCase();
         titularId = String(obj.titularId || obj.titular || obj.cedula || obj.carne || "");
         paseId = String(obj.paseId || obj.id || obj.codigo || obj.matricula || obj.factura || obj.compra || "");
         detalle = String(obj.detalle || obj.ref || obj.nota || obj.monto || "");
@@ -103,6 +148,8 @@
   async function verificarQrCompleto(rawText, titularPresente, consumirUso) {
     var parsed = parsearQr(rawText);
     var hashCalculado = await sha256Hex(parsed.baseCarga || rawText);
+    var codigoCorto = hashCalculado ? hashCalculado.slice(0, 12).toUpperCase() : "SIN-HASH";
+
     var coincide = false;
     if (parsed.hashDeclarado) {
       if (parsed.hashDeclarado.length === 64) coincide = (parsed.hashDeclarado === hashCalculado);
@@ -112,10 +159,17 @@
     var titularIngresado = String(titularPresente || "").trim();
     var titularCoincide = !titularIngresado || (titularIngresado.toLowerCase() === String(parsed.titularId || "").toLowerCase());
     var tokenUso = (parsed.rol + "::" + parsed.titularId + "::" + parsed.paseId + "::" + (hashCalculado || rawText)).toLowerCase();
-    var usados = leerUsados();
-    var yaUsado = Boolean(usados[tokenUso]);
 
+    var usadosLocal = leerUsadosLocal();
+    var yaUsado = Boolean(usadosLocal[tokenUso]);
+    if (!yaUsado && parsed.titularId && parsed.paseId) {
+      yaUsado = await consultarCanjeRemoto(tokenUso);
+      if (yaUsado) marcarUsadoLocal(tokenUso);
+    }
+
+    var syncEstado = "Local";
     var estadoTexto = "INCOMPLETO: requiere Rol, Titular ID y Pase/Folio.";
+
     if (!parsed.titularId || !parsed.paseId) {
       estadoTexto = "INCOMPLETO: un QR intransferible requiere Titular ID y Pase/Folio.";
     } else if (parsed.hashDeclarado && !coincide) {
@@ -123,11 +177,25 @@
     } else if (!titularCoincide) {
       estadoTexto = "BLOQUEADO: pertenece a otro titular (" + parsed.titularId + ").";
     } else if (yaUsado) {
-      estadoTexto = "YA CANJEADO: este QR \u00fanico ya fue usado.";
+      estadoTexto = "YA CANJEADO: este QR \u00fanico ya fue utilizado.";
+      syncEstado = "Registrado como usado";
     } else if (coincide) {
       if (consumirUso) {
-        marcarUsado(tokenUso);
-        estadoTexto = "APROBADO Y CANJEADO (" + parsed.rol + " \u2022 " + parsed.titularId + ").";
+        marcarUsadoLocal(tokenUso);
+        var rem = await registrarCanjeRemoto({
+          token_uso: tokenUso,
+          rol: parsed.rol,
+          titular_id: parsed.titularId,
+          pase_id: parsed.paseId,
+          codigo_corto: codigoCorto,
+          hash_sha256: hashCalculado
+        });
+        syncEstado = rem.msg || "Local";
+        if (rem.conflict) {
+          estadoTexto = "YA CANJEADO EN BD: bloqueado por uso previo en otro equipo.";
+        } else {
+          estadoTexto = "APROBADO Y CANJEADO (" + parsed.rol + " \u2022 " + parsed.titularId + ").";
+        }
       } else {
         estadoTexto = "V\u00c1LIDO E INTRANSFERIBLE: listo para canjear.";
       }
@@ -141,8 +209,9 @@
       coincide: coincide,
       titularCoincide: titularCoincide,
       yaUsado: yaUsado,
+      syncEstado: syncEstado,
       estadoTexto: estadoTexto,
-      codigoCorto: hashCalculado ? hashCalculado.slice(0, 12).toUpperCase() : "SIN-HASH"
+      codigoCorto: codigoCorto
     };
   }
 
@@ -166,9 +235,7 @@
         var bmp = await createImageBitmap(file);
         var det = new window.BarcodeDetector({ formats: ["qr_code"] });
         var codes = await det.detect(bmp);
-        if (codes && codes.length > 0 && codes[0].rawValue) {
-          return String(codes[0].rawValue);
-        }
+        if (codes && codes.length > 0 && codes[0].rawValue) return String(codes[0].rawValue);
       } catch (_e) {}
     }
     return "";
@@ -190,7 +257,7 @@
     var btn = document.createElement("button");
     btn.id = "bds-v89-qr-btn";
     btn.type = "button";
-    btn.setAttribute("aria-label", "Abrir caja rapida de QR unicos para comedor, cooperativa, compras y notas");
+    btn.setAttribute("aria-label", "Abrir caja rapida de QR unicos sincronizados");
     btn.style.cssText =
       "position:fixed;left:12px;bottom:118px;z-index:2147483635;" +
       "background:#1e293b;color:#f8fafc;border:2px solid #fbbf24;border-radius:999px;" +
@@ -221,7 +288,7 @@
         '<div style="background:#f8fafc;border:1.5px solid #94a3b8;border-radius:12px;padding:11px;font-size:12.5px;color:#0f172a">' +
         '<div><strong>Resultado:</strong> ' + esc(ver.estadoTexto) + '</div>' +
         '<div style="margin-top:4px"><strong>Tipo/Rol:</strong> ' + esc(ver.parsed.rol) + ' | <strong>Titular ID:</strong> ' + esc(ver.parsed.titularId || "-") + ' | <strong>Folio/ID:</strong> ' + esc(ver.parsed.paseId || "-") + '</div>' +
-        '<div style="margin-top:4px"><strong>Detalle:</strong> ' + esc(ver.parsed.detalle || "-") + '</div>' +
+        '<div style="margin-top:4px"><strong>Detalle:</strong> ' + esc(ver.parsed.detalle || "-") + ' | <strong>Respaldo:</strong> ' + esc(ver.syncEstado) + '</div>' +
         '<div style="margin-top:4px"><strong>C\u00f3digo:</strong> ' + esc(ver.codigoCorto) + '</div>' +
         '<div style="margin-top:4px;word-break:break-all"><strong>Verificaci\u00f3n:</strong> ' + esc(ver.hashCalculado) + '</div>' +
         '</div>';
@@ -268,7 +335,7 @@
             } catch (_e) {}
           }, 400);
         } else {
-          state.camMsg = "C\u00e1mara abierta; para lectura r\u00e1pida en PC use pist\u00f3n/lector o pegue el c\u00f3digo y pulse Enter.";
+          state.camMsg = "C\u00e1mara abierta; para lectura r\u00e1pida en PC use lector/teclado o pegue el c\u00f3digo y pulse Enter.";
           renderModal();
         }
       } catch (_err) {
@@ -281,7 +348,7 @@
       modal.innerHTML =
         '<div style="max-width:680px;margin:10px auto;background:#ffffff;color:#0f172a;border-radius:16px;border:2px solid #64748b;overflow:hidden">' +
         '<div style="background:#0f172a;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center">' +
-        '<strong style="font-size:14px">QR \u00danico \u2022 Comedor, Cooperativa, Compras y Notas</strong>' +
+        '<strong style="font-size:14px">QR \u00danico Sincronizado \u2022 Comedor, Cooperativa, Compras y Notas</strong>' +
         '<button id="bds-v89-close" type="button" style="background:#b91c1c;color:#fff;border:none;border-radius:8px;padding:6px 11px;font-weight:800;cursor:pointer">Cerrar</button>' +
         '</div>' +
         '<div style="padding:13px">' +
@@ -397,14 +464,15 @@
       refrescarNuevoQr();
     };
 
-    window.BDSQrVerifV89 = {
+    window.BDSQrVerifV96 = {
       open: function () { modal.style.display = "block"; refrescarNuevoQr(); },
       close: function () { detenerCamara(); modal.style.display = "none"; },
       signAndVerify: async function (rol, titularId, paseId, detalle) {
         var g = await generarQrUnico(rol, titularId, paseId, detalle);
         var v = await verificarQrCompleto(g.qrPayload, titularId, false);
         return { valid: v.coincide && v.titularCoincide, sha256Len: v.hashCalculado.length, rol: v.parsed.rol };
-      }
+      },
+      qrSyncReady: true
     };
   }
 

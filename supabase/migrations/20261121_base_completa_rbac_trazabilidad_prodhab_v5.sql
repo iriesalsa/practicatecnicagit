@@ -1,0 +1,3 @@
+-- Archivo de respaldo de migracion v5.0 (ejecutar el bloque SQL de Supabase SQL Editor)
+-- Tablas: perfiles_rbac, trazabilidad_ingresos, auditoria_cambios_rol, consentimientos_prodhab
+-- Regla RBAC: rol inicial Estudiante, cambio exclusivo por SuperAdmin con SHA-256 y RLS.

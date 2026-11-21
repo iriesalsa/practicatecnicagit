@@ -1,38 +1,29 @@
-const CACHE_NAME = "practicatecnica-bds-v410";
+const CACHE_NAME = "practicatecnica-bds-v500";
 const CORE_ASSETS = [
   "/",
   "/index.html",
   "/manifest.webmanifest",
   "/buho-azul-circular.svg",
-  "/bds-responsive-pro.css?v=400",
-  "/bds-responsive-pro.js?v=400",
-  "/bds-trazabilidad-rbac-ux.js?v=410"
+  "/bds-responsive-pro.css?v=500",
+  "/bds-responsive-pro.js?v=500",
+  "/bds-trazabilidad-rbac-ux.js?v=500"
 ];
-
-self.addEventListener("install", (event) => {
+self.addEventListener("install", (e) => {
   self.skipWaiting();
-  event.waitUntil(caches.open(CACHE_NAME).then((c) => c.addAll(CORE_ASSETS).catch(() => {})));
+  e.waitUntil(caches.open(CACHE_NAME).then((c) => c.addAll(CORE_ASSETS).catch(() => {})));
 });
-
-self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))))
-      .then(() => self.clients.claim())
-  );
+self.addEventListener("activate", (e) => {
+  e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))).then(() => self.clients.claim()));
 });
-
-self.addEventListener("fetch", (event) => {
-  if (event.request.method !== "GET") return;
-  event.respondWith(
-    fetch(event.request)
-      .then((res) => {
-        if (res && res.status === 200 && res.type === "basic") {
-          const clone = res.clone();
-          caches.open(CACHE_NAME).then((c) => c.put(event.request, clone)).catch(() => {});
-        }
-        return res;
-      })
-      .catch(() => caches.match(event.request))
+self.addEventListener("fetch", (e) => {
+  if (e.request.method !== "GET") return;
+  e.respondWith(
+    fetch(e.request).then((res) => {
+      if (res && res.status === 200 && res.type === "basic") {
+        const cl = res.clone();
+        caches.open(CACHE_NAME).then((c) => c.put(e.request, cl)).catch(() => {});
+      }
+      return res;
+    }).catch(() => caches.match(e.request))
   );
 });

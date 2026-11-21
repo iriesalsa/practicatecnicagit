@@ -39,6 +39,3 @@ Thumbs.db
 *.njsproj
 *.sln
 *.swp
-_backup_src_*
-_archivo_sw_obsoletos_*
-auditoria-*.txt

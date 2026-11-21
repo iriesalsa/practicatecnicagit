@@ -1,10 +1,11 @@
 (function () {
   "use strict";
-  if (window.__BDS_SUITE_V60_LOADED__) return;
-  window.__BDS_SUITE_V60_LOADED__ = true;
+  if (window.__BDS_SUITE_V61_LOADED__) return;
+  window.__BDS_SUITE_V61_LOADED__ = true;
 
   var DOMINIOS = ["gmail.com", "mep.go.cr", "est.mep.go.cr"];
   var ROLES = ["Estudiante", "Padre/Madre", "Auxiliar", "Docente", "Jefatura", "SuperAdmin"];
+  var MAX_INTENTOS = 5;
   var K_PERFILES = "pt_v6_perfiles_rbac";
   var K_INGRESOS = "pt_v6_trazabilidad";
   var K_AUDITORIA = "pt_v6_auditoria_roles";
@@ -12,14 +13,24 @@
   var K_SESION = "pt_v6_sesion_id";
   var K_SA = "pt_v6_superadmin";
   var K_QR_LOGS = "pt_v6_qr_bitacora";
-  var K_QR_CARNES = "pt_v6_qr_carnes";
+  var K_AUTH_FAILS = "pt_v6_auth_fails";
+
+  // Sanitizador estricto anti-XSS para cualquier texto dinamico en DOM
+  function escHtml(v) {
+    return String(v == null ? "" : v)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
 
   var BUHO_SVG =
     '<svg viewBox="0 0 128 128" width="28" height="28" aria-label="B\u00faho Azul Circular" style="display:block;flex-shrink:0">' +
-    '<defs><radialGradient id="bdsOwlV6Ui" cx="50%" cy="38%" r="60%">' +
+    '<defs><radialGradient id="bdsOwlV61" cx="50%" cy="38%" r="60%">' +
     '<stop offset="0%" stop-color="#3b82f6"/><stop offset="65%" stop-color="#1d4ed8"/><stop offset="100%" stop-color="#1e3a8a"/>' +
     '</radialGradient></defs>' +
-    '<circle cx="64" cy="64" r="60" fill="url(#bdsOwlV6Ui)" stroke="#93c5fd" stroke-width="4"/>' +
+    '<circle cx="64" cy="64" r="60" fill="url(#bdsOwlV61)" stroke="#93c5fd" stroke-width="4"/>' +
     '<path d="M24 44 Q42 26 64 42 Q86 26 104 44" fill="none" stroke="#dbeafe" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>' +
     '<circle cx="44" cy="63" r="18" fill="#ffffff"/><circle cx="84" cy="63" r="18" fill="#ffffff"/>' +
     '<circle cx="46" cy="63" r="9" fill="#0f172a"/><circle cx="82" cy="63" r="9" fill="#0f172a"/>' +
@@ -43,7 +54,7 @@
     { id: "id", mat: "Franc\u00e9s / Alem\u00e1n / Portugu\u00e9s", niv: "Ciclo Diversificado", lang: "es-CR", cont: "Conectores multiling\u00fces", saber: "FR: Ensuite, De plus | DE: Danach, Deshalb=Darum | PT: Em seguida, Portanto=Por conseguinte.", des: "Identifica conectores de secuencia, causa y conclusi\u00f3n en audios.", audio: "En frances ensuite es despues. En aleman deshalb equivale a darum. En portugues em seguida es logo depois y portanto es por conseguinte." },
     { id: "es", mat: "Espa\u00f1ol", niv: "10.\u00b0-12.\u00b0 MEP", lang: "es-CR", cont: "Comprensi\u00f3n inferencial y conectores", saber: "Consecutivos (por lo tanto = por consiguiente) y adversativos (sin embargo = no obstante).", des: "Eval\u00faa coherencia textual e intenci\u00f3n comunicativa.", audio: "Por lo tanto y por consiguiente introducen consecuencia. Sin embargo y no obstante introducen contraste." },
     { id: "ma", mat: "Matem\u00e1ticas", niv: "10.\u00b0-12.\u00b0 MEP", lang: "es-CR", cont: "Funci\u00f3n Lineal y Probabilidad", saber: "C(x) = m\u00b7x + b (b fijo, m tarifa por hora), descuentos y P(A) = fav / total.", des: "Modela problemas de costos, facturaci\u00f3n y probabilidad.", audio: "En la funcion lineal C de x igual a m por x mas b, b es el cargo fijo y m la tasa por unidad." },
-    { id: "ti", mat: "Desarrollo Web y Ciberseguridad", niv: "10.\u00b0-12.\u00b0 ETP", lang: "es-CR", cont: "RBAC, RLS, Cookies HttpOnly, SHA-256 y PRODHAB", saber: "Rol inicial Estudiante, cambio exclusivo por SuperAdmin, cookies HttpOnly contra XSS y Ley N.\u00b0 8968.", des: "Aplica m\u00ednimo privilegio e integridad criptogr\u00e1fica en aplicaciones web.", audio: "Por minimo privilegio toda cuenta nueva inicia como Estudiante y solo SuperAdmin cambia roles. HttpOnly protege sesiones contra XSS." }
+    { id: "ti", mat: "Desarrollo Web y Ciberseguridad", niv: "10.\u00b0-12.\u00b0 ETP", lang: "es-CR", cont: "RBAC, RLS, Anti-XSS, CSP, SHA-256 y PRODHAB", saber: "Rol inicial Estudiante, cambio exclusivo por SuperAdmin, CSP + cookies HttpOnly contra XSS y Ley N.\u00b0 8968.", des: "Aplica m\u00ednimo privilegio, sanitizaci\u00f3n DOM e integridad criptogr\u00e1fica.", audio: "Por minimo privilegio toda cuenta nueva inicia como Estudiante y solo SuperAdmin cambia roles. CSP y HttpOnly protegen contra ataques XSS." }
   ];
 
   var PRACTICAS = [
@@ -103,7 +114,7 @@
       x += 2;
     }
     var tw = x + 14;
-    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + tw + ' 96" style="width:100%;max-width:400px;height:auto;background:#fff;border:1.5px solid #94a3b8;border-radius:10px;display:block;margin:0 auto"><rect width="' + tw + '" height="96" fill="#fff"/>' + rects.join("") + '<text x="' + (tw / 2) + '" y="89" text-anchor="middle" fill="#0f172a" font-family="monospace" font-size="13" font-weight="800">' + limpio + '</text></svg>';
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + tw + ' 96" style="width:100%;max-width:400px;height:auto;background:#fff;border:1.5px solid #94a3b8;border-radius:10px;display:block;margin:0 auto"><rect width="' + tw + '" height="96" fill="#fff"/>' + rects.join("") + '<text x="' + (tw / 2) + '" y="89" text-anchor="middle" fill="#0f172a" font-family="monospace" font-size="13" font-weight="800">' + escHtml(limpio) + '</text></svg>';
   }
 
   function opcionesNivel(it, niv) {
@@ -141,6 +152,57 @@
       if (claro) html.classList.add("bds-light-aaa"); else html.classList.remove("bds-light-aaa");
     } catch (_e) {}
   }
+
+  // Bloqueo de selectores publicos de rol (todo nuevo usuario inicia como Estudiante)
+  function bloquearSelectoresRolPublicos() {
+    try {
+      document.querySelectorAll("select").forEach(function (sel) {
+        if (sel.closest("#bds-v6-modal")) return;
+        var txt = (sel.textContent || "").toLowerCase();
+        if (txt.indexOf("superadmin") !== -1 || (txt.indexOf("jefatura") !== -1 && txt.indexOf("docente") !== -1 && txt.indexOf("estudiante") !== -1)) {
+          for (var i = 0; i < sel.options.length; i++) {
+            if ((sel.options[i].value || sel.options[i].text).toLowerCase().indexOf("estudiante") !== -1) {
+              sel.selectedIndex = i; break;
+            }
+          }
+          sel.disabled = true;
+          sel.title = "Rol inicial obligatorio: Estudiante. Solo SuperAdmin puede cambiar roles.";
+        }
+      });
+    } catch (_e) {}
+  }
+
+  // Blindaje antifraude (5 intentos fallidos + solo @gmail.com / @mep.go.cr / @est.mep.go.cr)
+  document.addEventListener("submit", function (ev) {
+    try {
+      var form = ev.target;
+      if (!form || !form.querySelector || form.closest("#bds-v6-modal")) return;
+      var pass = form.querySelector("input[type='password']");
+      var mail = form.querySelector("input[type='email'], input[name*='mail' i], input[placeholder*='correo' i], input[placeholder*='mep' i]");
+      if (!pass || !mail) return;
+
+      var fails = Number(localStorage.getItem(K_AUTH_FAILS) || "0");
+      if (fails >= MAX_INTENTOS) {
+        ev.preventDefault();
+        ev.stopImmediatePropagation();
+        mail.setCustomValidity("Acceso bloqueado tras 5 intentos fallidos. Contacta al administrador de soporte.");
+        mail.reportValidity();
+        return;
+      }
+
+      if (!mailOk(mail.value)) {
+        ev.preventDefault();
+        ev.stopImmediatePropagation();
+        var next = fails + 1;
+        localStorage.setItem(K_AUTH_FAILS, String(next));
+        mail.setCustomValidity("Solo se permiten correos @gmail.com, @mep.go.cr o @est.mep.go.cr (" + next + "/" + MAX_INTENTOS + ").");
+        mail.reportValidity();
+        setTimeout(function () { mail.setCustomValidity(""); }, 3200);
+      } else {
+        localStorage.setItem(K_AUTH_FAILS, "0");
+      }
+    } catch (_e) {}
+  }, true);
 
   function activarMoptTactil(canvas) {
     try {
@@ -196,7 +258,6 @@
   function montarInterfazFlotante() {
     if (document.getElementById("bds-v6-btn-centro")) return;
 
-    // Boton derecho: Centro BDS (Atlas MEP, Practicas, Trazabilidad/RBAC, PRODHAB)
     var bCentro = document.createElement("button");
     bCentro.id = "bds-v6-btn-centro";
     bCentro.type = "button";
@@ -204,7 +265,6 @@
     bCentro.innerHTML = BUHO_SVG + "<span>Centro BDS</span>";
     document.body.appendChild(bCentro);
 
-    // Boton izquierdo: QR / Barras Camara Nativa
     var bQr = document.createElement("button");
     bQr.id = "bds-v6-btn-qr";
     bQr.type = "button";
@@ -275,13 +335,12 @@
           return;
         } catch (_e1) { await stopCam(); }
       }
-      // Fallback offline html5-qrcode
       function runH5() {
         if (!window.Html5Qrcode) { ui.err = "Usa foto o lector USB abajo."; render(); return; }
         ui.camOn = true; render();
         var q = new window.Html5Qrcode("bds-v6-h5");
         html5Ref = q;
-        q.start({ facingMode: "environment" }, { fps: 10, qrbox: 220 }, function (t) { validarQr(t, "QR/BARCODE"); }, function () {}).catch(function (e) { ui.err = "Permiso de c\u00e1mara requerido (" + e + ")."; stopCam(); render(); });
+        q.start({ facingMode: "environment" }, { fps: 10, qrbox: 220 }, function (t) { validarQr(t, "QR/BARCODE"); }, function () {}).catch(function (e) { ui.err = "Permiso de c\u00e1mara requerido (" + escHtml(e) + ")."; stopCam(); render(); });
       }
       if (window.Html5Qrcode) { runH5(); return; }
       var sc = document.createElement("script"); sc.src = "/vendor/html5-qrcode.min.js"; sc.onload = runH5; sc.onerror = runH5; document.head.appendChild(sc);
@@ -294,11 +353,11 @@
         if (ui.qTab === "cam") {
           body =
             '<div style="background:#fff;border:1.5px solid #94a3b8;border-radius:14px;padding:12px;margin-bottom:12px"><div style="font-size:12px;font-weight:800;margin-bottom:8px">Punto de control:</div><div style="display:flex;flex-wrap:wrap;gap:6px">' +
-            MODULOS_QR.map(function (m) { return '<button data-qm="' + m + '" type="button" style="padding:7px 12px;border-radius:999px;font-size:12px;font-weight:800;cursor:pointer;border:2px solid #047857;background:' + (ui.qMod === m ? '#047857;color:#fff' : '#fff;color:#047857') + '">' + m + '</button>'; }).join("") + '</div></div>' +
+            MODULOS_QR.map(function (m) { return '<button data-qm="' + escHtml(m) + '" type="button" style="padding:7px 12px;border-radius:999px;font-size:12px;font-weight:800;cursor:pointer;border:2px solid #047857;background:' + (ui.qMod === m ? '#047857;color:#fff' : '#fff;color:#047857') + '">' + escHtml(m) + '</button>'; }).join("") + '</div></div>' +
             '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:12px">' +
             '<div style="background:#fff;border:1.5px solid #94a3b8;border-radius:14px;padding:12px">' +
             (!ui.camOn ? '<button id="bds-v6-cam-go" type="button" style="width:100%;background:#1e40af;color:#fff;border:none;border-radius:10px;padding:11px;font-weight:800;cursor:pointer">Activar C\u00e1mara Nativa QR / Barras</button>' : '<button id="bds-v6-cam-stop" type="button" style="width:100%;background:#b91c1c;color:#fff;border:none;border-radius:10px;padding:10px;font-weight:800;cursor:pointer">Detener C\u00e1mara</button>') +
-            (ui.err ? '<div style="margin-top:8px;padding:8px;border-radius:8px;background:#fef3c7;color:#451a03;font-size:12px;font-weight:700">' + ui.err + '</div>' : '') +
+            (ui.err ? '<div style="margin-top:8px;padding:8px;border-radius:8px;background:#fef3c7;color:#451a03;font-size:12px;font-weight:700">' + escHtml(ui.err) + '</div>' : '') +
             '<div style="margin-top:10px;background:#0f172a;border-radius:10px;overflow:hidden;min-height:190px;display:flex;align-items:center;justify-content:center">' +
             '<video id="bds-v6-vid" playsinline muted style="' + (ui.camOn && !html5Ref ? 'width:100%;max-height:280px;object-fit:cover;display:block' : 'display:none') + '"></video>' +
             '<div id="bds-v6-h5" style="width:100%"></div>' +
@@ -306,51 +365,51 @@
             '</div></div>' +
             '<div style="background:#fff;border:1.5px solid #94a3b8;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px">' +
             '<form id="bds-v6-usb" style="display:flex;gap:6px;flex-wrap:wrap"><input id="bds-v6-usb-in" placeholder="Lector USB o pegar QR/SHA-256..." style="flex:1;min-width:170px;padding:9px;border:2px solid #475569;border-radius:8px;font-size:13px"/><button type="submit" style="background:#0f172a;color:#fff;border:none;border-radius:8px;padding:9px 12px;font-weight:800;cursor:pointer">Validar</button></form>' +
-            (ui.lastQr ? '<div style="padding:12px;border-radius:10px;font-size:12px;background:' + (ui.lastQr.estado === "AUTORIZADO" ? '#dcfce7;border:2px solid #15803d;color:#14532d' : '#fef3c7;border:2px solid #b45309;color:#451a03') + '"><strong style="font-size:14px">' + ui.lastQr.estado + ' (' + ui.lastQr.mod + ')</strong><br/>' + ui.lastQr.nom + ' &bull; ' + ui.lastQr.rol + ' &bull; ID: ' + ui.lastQr.id + '<br/><span style="font-family:monospace;word-break:break-all">SHA-256: ' + ui.lastQr.sha + '</span></div>' : '<div style="font-size:12px;color:#475569">Resultado de validaci\u00f3n en tiempo real aqu\u00ed.</div>') +
+            (ui.lastQr ? '<div style="padding:12px;border-radius:10px;font-size:12px;background:' + (ui.lastQr.estado === "AUTORIZADO" ? '#dcfce7;border:2px solid #15803d;color:#14532d' : '#fef3c7;border:2px solid #b45309;color:#451a03') + '"><strong style="font-size:14px">' + escHtml(ui.lastQr.estado) + ' (' + escHtml(ui.lastQr.mod) + ')</strong><br/>' + escHtml(ui.lastQr.nom) + ' &bull; ' + escHtml(ui.lastQr.rol) + ' &bull; ID: ' + escHtml(ui.lastQr.id) + '<br/><span style="font-family:monospace;word-break:break-all">SHA-256: ' + escHtml(ui.lastQr.sha) + '</span></div>' : '<div style="font-size:12px;color:#475569">Resultado de validaci\u00f3n en tiempo real aqu\u00ed.</div>') +
             '</div></div>';
         } else if (ui.qTab === "carnet") {
           body =
             '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:12px">' +
             '<form id="bds-v6-gen" style="background:#fff;border:1.5px solid #94a3b8;border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px">' +
             '<strong style="font-size:15px">Generar Carn\u00e9 Code-39 + SHA-256</strong>' +
-            '<select id="bds-v6-gp" style="padding:8px;border:2px solid #475569;border-radius:8px">' + PERFILES_QR.map(function (p) { return '<option>' + p + '</option>'; }).join("") + '</select>' +
+            '<select id="bds-v6-gp" style="padding:8px;border:2px solid #475569;border-radius:8px">' + PERFILES_QR.map(function (p) { return '<option>' + escHtml(p) + '</option>'; }).join("") + '</select>' +
             '<input id="bds-v6-gi" required placeholder="C\u00e9dula o TIM (Ej. EST-1101)" style="padding:8px;border:2px solid #475569;border-radius:8px"/>' +
             '<input id="bds-v6-gn" required placeholder="Nombre completo" style="padding:8px;border:2px solid #475569;border-radius:8px"/>' +
-            '<select id="bds-v6-gm" style="padding:8px;border:2px solid #475569;border-radius:8px">' + MODULOS_QR.map(function (m) { return '<option>' + m + '</option>'; }).join("") + '</select>' +
+            '<select id="bds-v6-gm" style="padding:8px;border:2px solid #475569;border-radius:8px">' + MODULOS_QR.map(function (m) { return '<option>' + escHtml(m) + '</option>'; }).join("") + '</select>' +
             '<button type="submit" style="background:#1e40af;color:#fff;border:none;border-radius:8px;padding:10px;font-weight:800;cursor:pointer">Emitir Carn\u00e9</button></form>' +
             '<div style="background:#fff;border:1.5px solid #94a3b8;border-radius:14px;padding:14px">' +
-            (ui.carne ? '<div style="font-weight:900;margin-bottom:8px">' + ui.carne.nom + ' (' + ui.carne.rol + ')</div>' + barcodeSvg(ui.carne.bar) + '<div style="margin-top:8px;font-family:monospace;font-size:11px;word-break:break-all">' + ui.carne.payload + '</div><button id="bds-v6-test-c" type="button" style="margin-top:10px;width:100%;background:#047857;color:#fff;border:none;border-radius:8px;padding:9px;font-weight:800;cursor:pointer">Probar validaci\u00f3n</button>' : '<span style="font-size:12px;color:#475569">Genera un carn\u00e9 para escanearlo con tu c\u00e1mara.</span>') +
+            (ui.carne ? '<div style="font-weight:900;margin-bottom:8px">' + escHtml(ui.carne.nom) + ' (' + escHtml(ui.carne.rol) + ')</div>' + barcodeSvg(ui.carne.bar) + '<div style="margin-top:8px;font-family:monospace;font-size:11px;word-break:break-all">' + escHtml(ui.carne.payload) + '</div><button id="bds-v6-test-c" type="button" style="margin-top:10px;width:100%;background:#047857;color:#fff;border:none;border-radius:8px;padding:9px;font-weight:800;cursor:pointer">Probar validaci\u00f3n</button>' : '<span style="font-size:12px;color:#475569">Genera un carn\u00e9 para escanearlo con tu c\u00e1mara.</span>') +
             '</div></div>';
         } else {
           body = '<div style="background:#fff;border:1.5px solid #94a3b8;border-radius:14px;padding:14px;overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="border-bottom:2px solid #cbd5e1;text-align:left"><th style="padding:6px">Hora</th><th style="padding:6px">Punto</th><th style="padding:6px">Estado</th><th style="padding:6px">Perfil</th><th style="padding:6px">Persona</th></tr></thead><tbody>' +
-            (logs.length ? logs.map(function (l) { return '<tr style="border-bottom:1px solid #e2e8f0"><td style="padding:6px">' + l.hora + '</td><td style="padding:6px">' + l.mod + '</td><td style="padding:6px;font-weight:800">' + l.estado + '</td><td style="padding:6px">' + l.rol + '</td><td style="padding:6px">' + l.nom + '</td></tr>'; }).join("") : '<tr><td colspan="5" style="padding:10px">Sin registros a\u00fan.</td></tr>') + '</tbody></table></div>';
+            (logs.length ? logs.map(function (l) { return '<tr style="border-bottom:1px solid #e2e8f0"><td style="padding:6px">' + escHtml(l.hora) + '</td><td style="padding:6px">' + escHtml(l.mod) + '</td><td style="padding:6px;font-weight:800">' + escHtml(l.estado) + '</td><td style="padding:6px">' + escHtml(l.rol) + '</td><td style="padding:6px">' + escHtml(l.nom) + '</td></tr>'; }).join("") : '<tr><td colspan="5" style="padding:10px">Sin registros a\u00fan.</td></tr>') + '</tbody></table></div>';
         }
       } else if (ui.tab === "atlas") {
         body = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:12px">' +
           ATLAS_MEP.map(function (a) {
-            return '<div style="background:#fff;border:1.5px solid #94a3b8;border-radius:14px;padding:14px"><div style="font-size:11px;font-weight:900;color:#1e40af">' + a.mat + ' &bull; ' + a.niv + '</div><div style="font-weight:900;font-size:15px;margin:4px 0">' + a.cont + '</div><div style="font-size:12px;margin-bottom:6px"><strong>Saber esencial:</strong> ' + a.saber + '</div><div style="font-size:12px;margin-bottom:10px"><strong>Desempe\u00f1o:</strong> ' + a.des + '</div><button data-aplay="' + a.id + '" type="button" style="background:#c2410c;color:#fff;border:none;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:800;cursor:pointer">&#9654; Escuchar repaso</button></div>';
+            return '<div style="background:#fff;border:1.5px solid #94a3b8;border-radius:14px;padding:14px"><div style="font-size:11px;font-weight:900;color:#1e40af">' + escHtml(a.mat) + ' &bull; ' + escHtml(a.niv) + '</div><div style="font-weight:900;font-size:15px;margin:4px 0">' + escHtml(a.cont) + '</div><div style="font-size:12px;margin-bottom:6px"><strong>Saber esencial:</strong> ' + escHtml(a.saber) + '</div><div style="font-size:12px;margin-bottom:10px"><strong>Desempe\u00f1o:</strong> ' + escHtml(a.des) + '</div><button data-aplay="' + escHtml(a.id) + '" type="button" style="background:#c2410c;color:#fff;border:none;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:800;cursor:pointer">&#9654; Escuchar repaso</button></div>';
           }).join("") + '</div>';
       } else if (ui.tab === "practicas") {
         var it = PRACTICAS[ui.pIdx] || PRACTICAS[0], pr = opcionesNivel(it, ui.nivel);
         body =
           '<div style="background:#fff;border:1.5px solid #94a3b8;border-radius:14px;padding:12px;margin-bottom:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><strong style="font-size:13px">' + (ui.nivel === "macro" ? "Macroevaluaci\u00f3n (A-B-C-D)" : "Microevaluaci\u00f3n (A-B-C)") + '</strong><div style="display:flex;gap:6px"><button data-pn="macro" type="button" style="padding:6px 10px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;border:2px solid #1e40af;background:' + (ui.nivel === "macro" ? '#1e40af;color:#fff' : '#fff;color:#1e40af') + '">Macro (A-D)</button><button data-pn="micro" type="button" style="padding:6px 10px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;border:2px solid #4338ca;background:' + (ui.nivel === "micro" ? '#4338ca;color:#fff' : '#fff;color:#4338ca') + '">Micro (A-C)</button></div></div>' +
-          '<div style="background:#fff;border:1.5px solid #94a3b8;border-radius:14px;padding:16px"><div style="font-size:12px;font-weight:800;color:#1e40af">' + it.area + ' (' + (ui.pIdx + 1) + '/' + PRACTICAS.length + ')</div><h3 style="margin:6px 0">' + it.q + '</h3><p style="background:#f1f5f9;padding:10px;border-radius:10px;font-size:14px">' + it.ctx + '</p><button id="bds-v6-pplay" type="button" style="margin-bottom:12px;background:#c2410c;color:#fff;border:none;border-radius:999px;padding:8px 14px;font-size:12px;font-weight:800;cursor:pointer">&#9654; Escuchar pregunta</button>' +
-          pr.ops.map(function (o) { return '<button data-pop="' + o.l + '" type="button" style="width:100%;text-align:left;padding:10px;margin-bottom:6px;border-radius:10px;cursor:pointer;font-weight:700;border:2px solid ' + (ui.pSel === o.l ? '#1e40af;background:#dbeafe' : '#94a3b8;background:#fff') + '"><strong>' + o.l + '.</strong> ' + o.t + '</button>'; }).join("") +
-          (ui.pSel ? '<div style="margin-top:8px;padding:10px;border-radius:8px;background:#dcfce7;color:#14532d;font-size:13px;font-weight:700">' + (ui.pSel === pr.ok ? "Correcto. " : "Sugerida: " + pr.ok + ". ") + it.exp + '</div>' : '') +
+          '<div style="background:#fff;border:1.5px solid #94a3b8;border-radius:14px;padding:16px"><div style="font-size:12px;font-weight:800;color:#1e40af">' + escHtml(it.area) + ' (' + (ui.pIdx + 1) + '/' + PRACTICAS.length + ')</div><h3 style="margin:6px 0">' + escHtml(it.q) + '</h3><p style="background:#f1f5f9;padding:10px;border-radius:10px;font-size:14px">' + escHtml(it.ctx) + '</p><button id="bds-v6-pplay" type="button" style="margin-bottom:12px;background:#c2410c;color:#fff;border:none;border-radius:999px;padding:8px 14px;font-size:12px;font-weight:800;cursor:pointer">&#9654; Escuchar pregunta</button>' +
+          pr.ops.map(function (o) { return '<button data-pop="' + escHtml(o.l) + '" type="button" style="width:100%;text-align:left;padding:10px;margin-bottom:6px;border-radius:10px;cursor:pointer;font-weight:700;border:2px solid ' + (ui.pSel === o.l ? '#1e40af;background:#dbeafe' : '#94a3b8;background:#fff') + '"><strong>' + escHtml(o.l) + '.</strong> ' + escHtml(o.t) + '</button>'; }).join("") +
+          (ui.pSel ? '<div style="margin-top:8px;padding:10px;border-radius:8px;background:#dcfce7;color:#14532d;font-size:13px;font-weight:700">' + (ui.pSel === pr.ok ? "Correcto. " : "Sugerida: " + escHtml(pr.ok) + ". ") + escHtml(it.exp) + '</div>' : '') +
           '<div style="display:flex;justify-content:space-between;margin-top:12px"><button id="bds-v6-pprev" type="button" style="padding:8px 14px;border-radius:8px;border:2px solid #475569;background:#fff;font-weight:800;cursor:pointer">Anterior</button><button id="bds-v6-pnext" type="button" style="padding:8px 14px;border-radius:8px;border:none;background:#1e40af;color:#fff;font-weight:800;cursor:pointer">Siguiente</button></div></div>';
       } else if (ui.tab === "traza") {
         var ing = leerJ(K_INGRESOS, []), perfs = leerJ(K_PERFILES, []), sa = localStorage.getItem(K_SA) === "1";
         body =
           '<div style="background:#fff;border:1.5px solid #94a3b8;border-radius:14px;padding:14px;margin-bottom:12px">' +
           '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px"><strong>RBAC: Todos inician como Estudiante (Cambio exclusivo SuperAdmin)</strong><button id="bds-v6-sa" type="button" style="padding:7px 12px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;border:none;background:' + (sa ? '#15803d' : '#1e40af') + ';color:#fff">' + (sa ? 'SuperAdmin ACTIVO' : 'Activar SuperAdmin') + '</button></div>' +
-          (ui.aviso ? '<div style="margin-bottom:8px;padding:8px;border-radius:8px;background:#dbeafe;color:#1e3a8a;font-size:12px;font-weight:700">' + ui.aviso + '</div>' : '') +
+          (ui.aviso ? '<div style="margin-bottom:8px;padding:8px;border-radius:8px;background:#dbeafe;color:#1e3a8a;font-size:12px;font-weight:700">' + escHtml(ui.aviso) + '</div>' : '') +
           '<form id="bds-v6-add" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"><input id="bds-v6-mail" type="email" required placeholder="usuario@est.mep.go.cr o usuario@gmail.com" style="flex:1;min-width:200px;padding:8px;border:2px solid #475569;border-radius:8px"/><button type="submit" style="background:#0f172a;color:#fff;border:none;border-radius:8px;padding:8px 12px;font-weight:800;cursor:pointer">+ Registrar Estudiante</button></form>' +
           '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="border-bottom:2px solid #cbd5e1;text-align:left"><th style="padding:6px">Correo</th><th style="padding:6px">Rol</th><th style="padding:6px">Cambiar (SuperAdmin)</th></tr></thead><tbody>' +
-          (perfs.length ? perfs.map(function (p) { return '<tr style="border-bottom:1px solid #e2e8f0"><td style="padding:6px;font-weight:700">' + p.correo + '</td><td style="padding:6px">' + p.rol + '</td><td style="padding:6px"><select data-rm="' + p.correo + '" ' + (sa ? '' : 'disabled ') + 'style="padding:5px;border:1.5px solid #475569;border-radius:6px">' + ROLES.map(function (rn) { return '<option' + (p.rol === rn ? ' selected' : '') + '>' + rn + '</option>'; }).join("") + '</select></td></tr>'; }).join("") : '<tr><td colspan="3" style="padding:8px">Sin cuentas registradas a\u00fan.</td></tr>') + '</tbody></table></div></div>' +
+          (perfs.length ? perfs.map(function (p) { return '<tr style="border-bottom:1px solid #e2e8f0"><td style="padding:6px;font-weight:700">' + escHtml(p.correo) + '</td><td style="padding:6px">' + escHtml(p.rol) + '</td><td style="padding:6px"><select data-rm="' + escHtml(p.correo) + '" ' + (sa ? '' : 'disabled ') + 'style="padding:5px;border:1.5px solid #475569;border-radius:6px">' + ROLES.map(function (rn) { return '<option' + (p.rol === rn ? ' selected' : '') + '>' + escHtml(rn) + '</option>'; }).join("") + '</select></td></tr>'; }).join("") : '<tr><td colspan="3" style="padding:8px">Sin cuentas registradas a\u00fan.</td></tr>') + '</tbody></table></div></div>' +
           '<div style="background:#fff;border:1.5px solid #94a3b8;border-radius:14px;padding:14px;overflow-x:auto"><strong style="font-size:14px">Ingresos: Total ' + ing.length + ' | Con cuenta: ' + ing.filter(function (x) { return x.tipo === "con_cuenta"; }).length + ' | Sin cuenta: ' + ing.filter(function (x) { return x.tipo === "sin_cuenta"; }).length + ' | Activos: ' + ing.filter(function (x) { return x.activo; }).length + '</strong></div>';
       } else {
         var ph = leerJ(K_PRODHAB, null);
-        body = '<div style="background:#fff;border:1.5px solid #94a3b8;border-radius:14px;padding:16px;font-size:13px"><h3 style="margin:0 0 8px">Cumplimiento PRODHAB (Ley N.\u00b0 8968 CR) &amp; Seguridad BDS</h3><p>Datos usados solo con fines educativos en pracTICAtecnica.com. Derechos ARCO garantizados. RBAC con rol base Estudiante, RLS en Supabase y sellos SHA-256.</p>' + (ph ? '<div style="padding:10px;border-radius:8px;background:#dcfce7;color:#14532d;font-weight:700">Consentimiento registrado (' + ph.fecha + ') &bull; SHA-256: ' + ph.sha.slice(0, 20) + '...</div>' : '<button id="bds-v6-ph" type="button" style="background:#15803d;color:#fff;border:none;border-radius:8px;padding:10px 14px;font-weight:800;cursor:pointer">Aceptar Consentimiento PRODHAB (SHA-256)</button>') + '</div>';
+        body = '<div style="background:#fff;border:1.5px solid #94a3b8;border-radius:14px;padding:16px;font-size:13px"><h3 style="margin:0 0 8px">Cumplimiento PRODHAB (Ley N.\u00b0 8968 CR) &amp; Ciberseguridad BDS</h3><p>Datos usados solo con fines educativos en pracTICAtecnica.com. Derechos ARCO garantizados. Defensa activa: CSP, HSTS, COOP, Anti-XSS DOM, bloqueo a 5 intentos, RBAC (rol base Estudiante), RLS en Supabase y sellos SHA-256.</p>' + (ph ? '<div style="padding:10px;border-radius:8px;background:#dcfce7;color:#14532d;font-weight:700">Consentimiento registrado (' + escHtml(ph.fecha) + ') &bull; SHA-256: ' + escHtml(ph.sha.slice(0, 20)) + '...</div>' : '<button id="bds-v6-ph" type="button" style="background:#15803d;color:#fff;border:none;border-radius:8px;padding:10px 14px;font-weight:800;cursor:pointer">Aceptar Consentimiento PRODHAB (SHA-256)</button>') + '</div>';
       }
 
       var headerBtns = ui.modo === "qr"
@@ -360,12 +419,12 @@
         : '<button data-ct="atlas" type="button" style="padding:7px 10px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;border:2px solid #1e40af;background:' + (ui.tab === "atlas" ? '#1e40af;color:#fff' : '#fff;color:#1e40af') + '">Atlas MEP</button>' +
           '<button data-ct="practicas" type="button" style="padding:7px 10px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;border:2px solid #1e40af;background:' + (ui.tab === "practicas" ? '#1e40af;color:#fff' : '#fff;color:#1e40af') + '">Pr\u00e1cticas</button>' +
           '<button data-ct="traza" type="button" style="padding:7px 10px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;border:2px solid #0f172a;background:' + (ui.tab === "traza" ? '#0f172a;color:#fff' : '#fff;color:#0f172a') + '">Trazabilidad &amp; RBAC</button>' +
-          '<button data-ct="legal" type="button" style="padding:7px 10px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;border:2px solid #15803d;background:' + (ui.tab === "legal" ? '#15803d;color:#fff' : '#fff;color:#15803d') + '">PRODHAB</button>';
+          '<button data-ct="legal" type="button" style="padding:7px 10px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;border:2px solid #15803d;background:' + (ui.tab === "legal" ? '#15803d;color:#fff' : '#fff;color:#15803d') + '">PRODHAB &amp; Ciber</button>';
 
       modal.innerHTML =
         '<div style="max-width:1040px;margin:8px auto;background:#f1f5f9;color:#0f172a;border-radius:18px;border:2px solid #94a3b8;overflow:hidden">' +
         '<div style="background:#fff;border-bottom:2px solid #cbd5e1;padding:10px 14px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px">' +
-        '<div style="display:flex;align-items:center;gap:8px">' + BUHO_SVG + '<strong style="font-size:14px">pracTICAtecnica.com &bull; Suite BDS v6.0</strong></div>' +
+        '<div style="display:flex;align-items:center;gap:8px">' + BUHO_SVG + '<strong style="font-size:14px">pracTICAtecnica.com &bull; Blindaje BDS v6.1</strong></div>' +
         '<div style="display:flex;flex-wrap:wrap;gap:6px">' + headerBtns + '<button id="bds-v6-close" type="button" style="padding:7px 11px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;border:none;background:#b91c1c;color:#fff">Cerrar</button></div></div>' +
         '<div style="padding:14px">' + body + '</div></div>';
 
@@ -440,6 +499,7 @@
     } catch (_e) {}
 
     syncContrasteClaro();
+    bloquearSelectoresRolPublicos();
     latidoTrazabilidad("Inicio");
     montarInterfazFlotante();
     document.querySelectorAll("canvas").forEach(activarMoptTactil);
@@ -447,6 +507,7 @@
 
     var obs = new MutationObserver(function () {
       syncContrasteClaro();
+      bloquearSelectoresRolPublicos();
       document.querySelectorAll("canvas").forEach(activarMoptTactil);
     });
     obs.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "data-theme"] });

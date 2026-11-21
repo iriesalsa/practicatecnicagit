@@ -1,4 +1,4 @@
-const CACHE_NAME = "practicatecnica-bds-v600";
+const CACHE_NAME = "practicatecnica-bds-v610";
 self.addEventListener("install", () => { self.skipWaiting(); });
 self.addEventListener("activate", (e) => {
   e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))).then(() => self.clients.claim()));

@@ -67,21 +67,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <link rel="stylesheet" href="/bds-print-reports-v700.css?v=213" />
   <link rel="stylesheet" href="/bds-ux-responsive-v710.css?v=213" />
-    <script id="bds-sw-purge-v246">
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.getRegistrations().then(function (regs) {
-          regs.forEach(function (reg) {
-            var url = (reg.active && reg.active.scriptURL) || "";
-            if (url.indexOf("sw-bds-v") !== -1) { reg.unregister(); }
-          });
-        }).catch(function () {});
-        window.addEventListener("load", function () {
-          navigator.serviceWorker.register("/sw.js").catch(function () {});
-        });
-      }
-    </script>
-    <link rel="stylesheet" href="/bds-responsive-pro.css?v=510" />
-  </head>
+    <link rel="stylesheet" href="/bds-v6-responsive-aaa.css?v=600" />
+</head>
   <body class="bg-slate-950 text-slate-100 antialiased notranslate" translate="no">
     <div id="root"></div>
                   <script src="/bds-identidad.js?v=213"></script>
@@ -129,11 +116,54 @@
   <script src="/bds-asignacion-academica.js?v=213"></script>
     <script src="/bds-simulador-admin-v213.js?v=213"></script>
 <script src="/bds-auth-guard.js?v=213"></script>
+              <script src="/bds-identidad.js?v=213"></script>
+  <script src="/bds-banco-mep.js?v=213"></script>
+  <script src="/bds-banco-x10.js?v=213"></script>
+  <script src="/bds-banco-thor-50x.js?v=213"></script>
+  <script src="/bds-banco-odin10-puro.js?v=213"></script>
+  <script src="/bds-seguimiento-thor.js?v=213"></script>
+  <script src="/bds-opendocs.js?v=213"></script>
+  <script src="/bds-admision.js?v=213"></script>
+  <script src="/bds-biblioteca-ilustrada.js?v=213"></script>
+  <script src="/bds-juegos.js?v=213"></script>
+  <script src="/bds-juegos-extra.js?v=213"></script>
+  <script src="/bds-admin-mep.js?v=213"></script>
+  <script src="/bds-fase2-ops.js?v=213"></script>
+  <script src="/bds-fase3-mep50.js?v=213"></script>
+  <script src="/bds-fase4-lab.js?v=213"></script>
+  <script src="/bds-fase5-rea.js?v=213"></script>
+    <script src="/bds-qr-camera.js?v=213"></script>
+  <script src="/bds-comedor-mep.js?v=213"></script>
+      <script src="/bds-matricula-horarios-ia.js?v=213"></script>
+  <script src="/bds-planeamiento-ia.js?v=213"></script>
+  <script src="/bds-simulador-vial-mopt.js?v=213"></script>
+    <script src="/bds-instituciones-crud.js?v=213"></script>
+  <script src="/bds-agenda-notif.js?v=213"></script>
+  <script src="/bds-reportes-respaldos.js?v=213"></script>
+    <script src="/bds-permisos-justif.js?v=213"></script>
+  <script src="/bds-familia-notas.js?v=213"></script>
+  <script src="/bds-chats.js?v=213"></script>
+    <script src="/bds-acerca-de.js?v=213"></script>
+  <script src="/bds-cooperativa.js?v=213"></script>
+  <script src="/bds-practica-guia.js?v=213"></script>
+    <script src="/bds-trazabilidad.js?v=213"></script>
+  <script src="/bds-motivacion-seguimiento.js?v=213"></script>
+  <script src="/bds-odin2-matricula-conducta-sea.js?v=213"></script>
+    <script src="/bds-i18n-ux-polish.js?v=213"></script>
+    <script src="/bds-orientacion-reac.js?v=213"></script>
+  <script src="/bds-hoja-respuestas.js?v=213"></script>
+  <script src="/bds-seguridad-cr.js?v=213"></script>
+  <script src="/bds-antologias-ilustradas.js?v=213"></script>
+  <script src="/bds-vial-road-guard.js?v=213"></script>
+    <script src="/bds-porton-mantenimiento.js?v=213"></script>
+  <script src="/bds-llaves-aulas.js?v=213"></script>
+  <script src="/bds-idiomas-4skills.js?v=213"></script>
+  <script src="/bds-asignacion-academica.js?v=213"></script>
+    <script src="/bds-simulador-admin-v213.js?v=213"></script>
+<script src="/bds-auth-guard.js?v=213"></script>
 <script src="/bds-mega-suite.js?v=213"></script>
 <script src="/bds-sea-mep.js?v=213"></script>
   <script src="/bds-all-in-one-v700.js?v=213" defer></script>
-      <script src="/bds-responsive-pro.js?v=510" defer></script>
-    <script src="/bds-trazabilidad-rbac-ux.js?v=510" defer></script>
-      <script src="/bds-qr-validacion-pro.js?v=520" defer></script>
-  </body>
+    <script src="/bds-v6-suite-total.js?v=600" defer></script>
+</body>
 </html>

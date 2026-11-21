@@ -1,0 +1,65 @@
+/* BDS DEVS v6.0 - RESPONSIVE SEGURO + CONTRASTE AAA MODO CLARO */
+html, body { max-width: 100%; overflow-x: hidden; -webkit-text-size-adjust: 100%; }
+*, *::before, *::after { box-sizing: border-box; }
+#root, #app { display: block !important; visibility: visible !important; opacity: 1 !important; min-height: 100vh; }
+img, video, canvas, iframe { max-width: 100%; }
+canvas { touch-action: none; }
+main { padding-bottom: 96px; }
+
+@media (max-width: 768px) {
+  header, [role="banner"] { height: auto !important; min-height: 54px; padding: 8px 10px !important; }
+  header > div { flex-wrap: wrap !important; gap: 6px !important; align-items: center !important; justify-content: space-between !important; min-width: 0 !important; }
+  header button { flex-shrink: 0 !important; white-space: nowrap !important; min-height: 34px; font-size: 12px !important; }
+  header nav { width: 100% !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+}
+
+@media (max-width: 640px) {
+  input, select, textarea { width: 100% !important; max-width: 100% !important; min-width: 0 !important; font-size: 15px !important; }
+  form .grid, form [class*="grid-cols-"],
+  div[class*="grid-cols-"]:has(> input, > select, > textarea, > div > input, > div > select) {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+  }
+  div[class*="flex"]:has(> input, > select):not([class*="flex-col"]) {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+  section, article, form { max-width: 100% !important; min-width: 0 !important; overflow-wrap: anywhere; }
+}
+
+/* Contraste WCAG AAA cuando la app esta en modo claro */
+html.bds-light-aaa, html.bds-light-aaa body {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+  color-scheme: light !important;
+}
+html.bds-light-aaa header, html.bds-light-aaa nav {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #94a3b8 !important;
+}
+html.bds-light-aaa [class*="bg-slate-9"], html.bds-light-aaa [class*="bg-slate-8"],
+html.bds-light-aaa [class*="bg-gray-9"], html.bds-light-aaa [class*="bg-[#0"] {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #94a3b8 !important;
+}
+html.bds-light-aaa h1, html.bds-light-aaa h2, html.bds-light-aaa h3, html.bds-light-aaa p,
+html.bds-light-aaa label, html.bds-light-aaa li, html.bds-light-aaa td, html.bds-light-aaa th {
+  color: #0f172a !important;
+}
+html.bds-light-aaa [class*="text-slate-3"], html.bds-light-aaa [class*="text-slate-4"],
+html.bds-light-aaa [class*="text-gray-3"], html.bds-light-aaa [class*="text-gray-4"] {
+  color: #1e293b !important;
+}
+html.bds-light-aaa button[class*="bg-blue-"], html.bds-light-aaa button[class*="bg-emerald-"],
+html.bds-light-aaa button[class*="bg-green-"], html.bds-light-aaa button[class*="bg-red-"],
+html.bds-light-aaa button[class*="bg-orange-"], html.bds-light-aaa button[class*="bg-indigo-"] {
+  color: #ffffff !important;
+}
+html.bds-light-aaa input, html.bds-light-aaa select, html.bds-light-aaa textarea {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border: 2px solid #475569 !important;
+}

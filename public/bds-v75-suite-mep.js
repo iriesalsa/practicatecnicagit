@@ -9,20 +9,20 @@
       .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   }
 
-  // Normaliza etiquetas REAC -> REA 2026 en nodos de texto visibles (sin tocar React)
+  // Normaliza etiquetas REAC -> REAC en nodos de texto visibles (sin tocar React)
   function normalizarRea2026EnDom() {
     try {
       var walk = document.createTreeWalker(document.body || document.documentElement, NodeFilter.SHOW_TEXT, null);
       var node;
       while ((node = walk.nextNode())) {
         var val = node.nodeValue;
-        if (!val || val.indexOf("REAC") === -1) continue;
+        if (!val || val.indexOf("REA") === -1) continue;
         var next = val
-          .replace(/\bSeguimiento\s+REAC(?:\s+2026)?\b/g, "Seguimiento REA 2026")
-          .replace(/\bOrientaci[oó]n\s+REAC(?:\s+2026)?\b/g, "Orientaci\u00f3n REA 2026")
-          .replace(/\bNotas\s+REAC(?:\s+2026)?\b/g, "Notas REA 2026")
-          .replace(/\bREAC\s+2026\b/g, "REA 2026")
-          .replace(/\bREAC\b/g, "REA 2026");
+          .replace(/\bSeguimiento\s+REA(?:\s+2026)?\b/g, "Seguimiento REAC")
+          .replace(/\bOrientaci[oó]n\s+REA(?:\s+2026)?\b/g, "Orientaci\u00f3n REAC")
+          .replace(/\bNotas\s+REA(?:\s+2026)?\b/g, "Notas REAC")
+          .replace(/\bREA\s+2026\b/g, "REAC 2026")
+          .replace(/\bREA\b/g, "REAC");
         if (next !== val) node.nodeValue = next;
       }
     } catch (_e) {}
@@ -83,7 +83,7 @@
       '</div>' +
       '<div style="padding:18px;font-size:14px;line-height:1.55;color:#1e293b">' +
       '<p style="margin:0 0 10px">Has presionado el bot\u00f3n <strong>Atr\u00e1s</strong> del navegador.</p>' +
-      '<p style="margin:0 0 12px">Para resguardar tu cuenta institucional y tus registros conforme a la normativa educativa <strong>REA 2026 (MEP)</strong> y la <strong>Ley N.\u00b0 8968 (PRODHAB)</strong>, ind\u00edcanos qu\u00e9 deseas hacer:</p>' +
+      '<p style="margin:0 0 12px">Para resguardar tu cuenta institucional y tus registros conforme a la normativa educativa <strong>REAC (Reglamento de Evaluaci\u00f3n de los Aprendizajes y la Conducta)</strong> y la <strong>Ley N.\u00b0 8968 (PRODHAB)</strong>, ind\u00edcanos qu\u00e9 deseas hacer:</p>' +
       '<div style="background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:12px;padding:12px;font-size:12.5px;color:#334155">' +
       '<div style="margin-bottom:6px">&bull; <strong>Cerrar sesi\u00f3n (Salir / Log out):</strong> finaliza la sesi\u00f3n activa en este dispositivo y protege el acceso a tu cuenta.</div>' +
       '<div>&bull; <strong>Continuar en la sesi\u00f3n:</strong> permanece en la plataforma sin interrumpir tu trabajo actual.</div>' +
@@ -182,13 +182,13 @@
   }
 
   var MANUALES = [
-    { id: "dir", file: "Manual-Direccion-Jefatura-REA2026.html", tit: "Manual de Direcci\u00f3n y Jefatura", sub: "REA 2026, RBAC y Trazabilidad", audio: "Manual de Direccion y Jefatura conforme a la normativa REA dos mil veintiseis.", secs: [
-      { h: "1. Supervisi\u00f3n REA 2026", p: "Gestione seguimiento acad\u00e9mico, orientaci\u00f3n, secretar\u00eda, grupos y aulas bajo criterios oficiales REA 2026." },
+    { id: "dir", file: "Manual-Direccion-Jefatura-REA2026.html", tit: "Manual de Direcci\u00f3n y Jefatura", sub: "REAC, RBAC y Trazabilidad", audio: "Manual de Direccion y Jefatura conforme a la normativa REA dos mil veintiseis.", secs: [
+      { h: "1. Supervisi\u00f3n REAC", p: "Gestione seguimiento acad\u00e9mico, orientaci\u00f3n, secretar\u00eda, grupos y aulas bajo criterios oficiales REAC." },
       { h: "2. Seguridad y Cierre de Sesi\u00f3n", p: "Al dar Atr\u00e1s, un modal formal permite confirmar si desea cerrar sesi\u00f3n o continuar trabajando." }
     ]},
-    { id: "doc", file: "Manual-Docente-REA2026.html", tit: "Manual de Usuario Docente", sub: "DUA, Evaluaci\u00f3n REA 2026, Idiomas y Simuladores", audio: "Manual Docente con estrategias DUA, audio latino neutral y evaluacion REA dos mil veintiseis.", secs: [
+    { id: "doc", file: "Manual-Docente-REA2026.html", tit: "Manual de Usuario Docente", sub: "DUA, Evaluaci\u00f3n REAC, Idiomas y Simuladores", audio: "Manual Docente con estrategias DUA, audio latino neutral y evaluacion REA dos mil veintiseis.", secs: [
       { h: "1. Mediaci\u00f3n DUA Inclusiva", p: "Combine audio latino neutral (0.82x o 1.0x), modo claro/oscuro y pr\u00e1cticas adaptadas." },
-      { h: "2. Evaluaci\u00f3n REA 2026", p: "Aplique pr\u00e1cticas, retroalimentaci\u00f3n formativa y seguimiento continuo." }
+      { h: "2. Evaluaci\u00f3n REAC", p: "Aplique pr\u00e1cticas, retroalimentaci\u00f3n formativa y seguimiento continuo." }
     ]},
     { id: "est", file: "Manual-Estudiante-REA2026.html", tit: "Manual de Usuario Estudiantil", sub: "Gu\u00eda clara para estudiar a tu ritmo con DUA", audio: "Manual Estudiantil. Practica con audio, idiomas y juegos a tu propio ritmo.", secs: [
       { h: "1. Tu espacio de aprendizaje", p: "Elige tu idioma, alterna modo claro u oscuro y escucha cualquier texto con voz neutral." },
@@ -240,7 +240,7 @@
       md.innerHTML =
         '<div style="max-width:860px;margin:10px auto;background:#f1f5f9;color:#0f172a;border-radius:18px;border:2px solid #94a3b8;overflow:hidden">' +
         '<div style="background:#fff;padding:12px 16px;border-bottom:2px solid #cbd5e1;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px">' +
-        '<strong style="font-size:15px">Manuales Ilustrados &amp; DUA \u2022 REA 2026</strong>' +
+        '<strong style="font-size:15px">Manuales Ilustrados &amp; DUA \u2022 REAC</strong>' +
         '<button id="bds-v75-man-close" type="button" style="background:#b91c1c;color:#fff;border:none;border-radius:8px;padding:7px 12px;font-weight:800;cursor:pointer">Cerrar</button></div>' +
         '<div style="padding:14px"><div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">' +
         MANUALES.map(function (m) {

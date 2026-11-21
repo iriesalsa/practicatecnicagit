@@ -12,21 +12,30 @@ export function esCorreoInstitucionalValido(correo) {
 }
 
 function leerIntentos() {
-  try {
-    return Number(window.localStorage.getItem(LOCK_KEY) || "0");
-  } catch (_e) {
-    return 0;
-  }
+  try { return Number(window.localStorage.getItem(LOCK_KEY) || "0"); } catch (_e) { return 0; }
 }
 
 function guardarIntentos(n) {
-  try {
-    window.localStorage.setItem(LOCK_KEY, String(n));
-  } catch (_e) {}
+  try { window.localStorage.setItem(LOCK_KEY, String(n)); } catch (_e) {}
+}
+
+export function BuhoAzulOriginal({ className = "h-10 w-10" }) {
+  return (
+    <svg viewBox="0 0 64 64" className={className} role="img" aria-label="B\u00faho Azul pracTICAtecnica.com">
+      <circle cx="32" cy="32" r="30" fill="#1d4ed8" />
+      <path d="M18 22 L24 14 L32 20 L40 14 L46 22 L46 42 C46 50 40 54 32 54 C24 54 18 50 18 42 Z" fill="#2563eb" stroke="#93c5fd" strokeWidth="2" />
+      <circle cx="25" cy="30" r="6" fill="#ffffff" />
+      <circle cx="39" cy="30" r="6" fill="#ffffff" />
+      <circle cx="25" cy="30" r="2.8" fill="#0f172a" />
+      <circle cx="39" cy="30" r="2.8" fill="#0f172a" />
+      <polygon points="32,33 28,39 36,39" fill="#f59e0b" />
+      <path d="M23 44 Q32 49 41 44" fill="none" stroke="#bfdbfe" strokeWidth="2.5" strokeLinecap="round" />
+    </svg>
+  );
 }
 
 export function AccesoRestringidoGate({ onAutorizado, onModoPrueba }) {
-  const [vista, setVista] = useState("login"); // login | recover
+  const [vista, setVista] = useState("login");
   const [correo, setCorreo] = useState("");
   const [rol, setRol] = useState("Estudiante");
   const [clave, setClave] = useState("");
@@ -70,7 +79,7 @@ export function AccesoRestringidoGate({ onAutorizado, onModoPrueba }) {
       correo: correo.trim().toLowerCase(),
       rol,
       modo: "completo",
-      metodo: "correo-institucional"
+      metodo: "correo-autorizado"
     });
   }
 
@@ -78,7 +87,7 @@ export function AccesoRestringidoGate({ onAutorizado, onModoPrueba }) {
     setOkMsg("");
     if (isLocked) return;
     if (!esCorreoInstitucionalValido(correo)) {
-      setError("Escribe primero tu correo @gmail.com o @mep.go.cr para validar con Google OAuth.");
+      setError("Escribe tu correo @gmail.com o @mep.go.cr para continuar con Google OAuth.");
       return;
     }
     guardarIntentos(0);
@@ -97,37 +106,35 @@ export function AccesoRestringidoGate({ onAutorizado, onModoPrueba }) {
     setError("");
     setOkMsg("");
     if (!esCorreoInstitucionalValido(correo)) {
-      setError("Usa un correo autorizado (@gmail.com, @mep.go.cr o @est.mep.go.cr) para recuperar tu clave.");
+      setError("Usa un correo @gmail.com, @mep.go.cr o @est.mep.go.cr para recuperar tu clave.");
       return;
     }
     if (nuevaClave.length < 8 || nuevaClave !== confirmarClave) {
-      setError("La nueva clave debe tener m\u00ednimo 8 caracteres y coincidir en ambos campos.");
+      setError("La nueva contrase\u00f1a debe tener m\u00ednimo 8 caracteres y coincidir.");
       return;
     }
-    setOkMsg("Solicitud de verificaci\u00f3n preparada para " + correo.trim().toLowerCase() + ". Revisa tu bandeja oficial.");
+    setOkMsg("Enlace de verificaci\u00f3n preparado para " + correo.trim().toLowerCase() + ".");
     setNuevaClave("");
     setConfirmarClave("");
   }
 
   return (
     <div className="mx-auto my-6 max-w-xl rounded-2xl border border-slate-200 bg-white p-6 shadow-lg sm:p-8">
-      <div className="mb-5">
-        <span className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
-          pracTICAtecnica.com &bull; BDS Devs
-        </span>
-        <h1 className="mt-3 text-2xl font-extrabold text-slate-900">
-          {vista === "login" ? "Acceso Seguro Gmail / MEP" : "Recuperar contrase\u00f1a"}
-        </h1>
-        <p className="mt-1.5 text-sm text-slate-600">
-          {vista === "login"
-            ? "Ingreso exclusivo con cuentas @gmail.com, @mep.go.cr o @est.mep.go.cr."
-            : "Restablece tu acceso institucional verificando tu correo autorizado."}
-        </p>
+      <div className="mb-5 flex items-center gap-3">
+        <BuhoAzulOriginal className="h-12 w-12 shrink-0" />
+        <div>
+          <span className="inline-block rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-bold text-blue-700">
+            pracTICAtecnica.com &bull; BDS Devs
+          </span>
+          <h1 className="mt-1 text-xl font-extrabold text-slate-900 sm:text-2xl">
+            {vista === "login" ? "Acceso Exclusivo Gmail / MEP" : "Recuperar contrase\u00f1a"}
+          </h1>
+        </div>
       </div>
 
       {isLocked ? (
         <div role="alert" className="mb-5 rounded-xl border border-red-300 bg-red-50 p-4 text-xs font-semibold text-red-800">
-          Cuenta bloqueada por seguridad tras {MAX_INTENTOS} intentos fallidos consecutivos. Comun\u00edcate con el administrador de soporte de pracTICAtecnica.com para desbloquear el acceso.
+          Acceso bloqueado por seguridad tras {MAX_INTENTOS} intentos fallidos consecutivos. Comun\u00edcate con el administrador de soporte de pracTICAtecnica.com para desbloquear tu cuenta.
         </div>
       ) : null}
 
@@ -135,7 +142,7 @@ export function AccesoRestringidoGate({ onAutorizado, onModoPrueba }) {
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label htmlFor="bds-correo-v333" className="block text-sm font-semibold text-slate-800">
-              Correo autorizado
+              Correo autorizado (@gmail.com o @mep.go.cr)
             </label>
             <input
               id="bds-correo-v333"
@@ -152,7 +159,7 @@ export function AccesoRestringidoGate({ onAutorizado, onModoPrueba }) {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <label htmlFor="bds-rol-v333" className="block text-sm font-semibold text-slate-800">
-                Rol institucional
+                Rol RBAC
               </label>
               <select
                 id="bds-rol-v333"
@@ -273,12 +280,12 @@ export function AccesoRestringidoGate({ onAutorizado, onModoPrueba }) {
 
       <div className="mt-6 border-t border-slate-200 pt-5">
         <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
-          Prueba gratuita limitada (solo vista previa + publicidad oficial)
+          Prueba gratuita limitada (solo vista previa + publicidad propia)
         </p>
         <div className="mt-2 rounded-xl border border-amber-200 bg-amber-50 p-3.5 text-xs text-amber-950">
           <p className="font-bold">pracTICAtecnica.com &mdash; Desarrollado por BDS Devs</p>
           <p className="mt-1">
-            Entrena idiomas, matem\u00e1ticas y especialidad t\u00e9cnica con audio real, QR SHA-256, Cooperativa y Comedor. La prueba gratuita limita las funciones avanzadas y muestra anuncios propios de nuestra plataforma.
+            Entrena idiomas, matem\u00e1ticas y especialidad t\u00e9cnica con audio, QR SHA-256, Cooperativa y Comedor. La prueba gratuita limita las funciones avanzadas y muestra publicidad oficial nuestra.
           </p>
         </div>
         <button

@@ -22,19 +22,14 @@ export function CooperativaPOS() {
   const [facturaEmitida, setFacturaEmitida] = useState(null);
   const [mostrarEscaner, setMostrarEscaner] = useState(false);
 
-  const total = useMemo(
-    () => carrito.reduce((acc, item) => acc + item.precio * item.cantidad, 0),
-    [carrito]
-  );
+  const total = useMemo(() => carrito.reduce((acc, item) => acc + item.precio * item.cantidad, 0), [carrito]);
 
   function agregarArticulo(prod) {
     if (prod.stock <= 0) return;
     setCarrito((prev) => {
       const existe = prev.find((i) => i.id === prod.id);
       if (existe) {
-        return prev.map((i) =>
-          i.id === prod.id ? { ...i, cantidad: Math.min(prod.stock, i.cantidad + 1) } : i
-        );
+        return prev.map((i) => (i.id === prod.id ? { ...i, cantidad: Math.min(prod.stock, i.cantidad + 1) } : i));
       }
       return [...prev, { ...prod, cantidad: 1 }];
     });
@@ -87,10 +82,7 @@ export function CooperativaPOS() {
         <UniversalQrScanner
           titulo="Identificar comprador en Cooperativa (QR / Carnet)"
           descripcion="Escanea el QR del estudiante o docente para ligar la factura a su cuenta."
-          onCodigoLeido={(info) => {
-            setCompradorQr(info);
-            setMostrarEscaner(false);
-          }}
+          onCodigoLeido={(info) => { setCompradorQr(info); setMostrarEscaner(false); }}
         />
       ) : null}
 

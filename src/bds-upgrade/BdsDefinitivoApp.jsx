@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { AccesoRestringidoGate, esCorreoInstitucionalValido } from "./auth/AccesoRestringidoGate";
 import { PracticaDesktopResponsiveView } from "./ui/PracticaDesktopResponsiveView";
-const LegacyApp = null;
 
 const STORAGE_KEY = "practicatecnica_bds_sesion_v333";
 
@@ -41,13 +40,7 @@ export function BdsDefinitivoApp() {
     );
   }
 
-  return (
-    <PracticaDesktopResponsiveView
-      sesion={sesion}
-      onCerrarSesion={cerrarSesion}
-      LegacyAppComponent={LegacyApp}
-    />
-  );
+  return <PracticaDesktopResponsiveView sesion={sesion} onCerrarSesion={cerrarSesion} />;
 }
 
 export default BdsDefinitivoApp;

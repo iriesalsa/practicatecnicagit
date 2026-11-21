@@ -51,6 +51,26 @@ export function interpretarCodigoQr(rawText) {
   };
 }
 
+function cargarHtml5QrcodeRuntime() {
+  return new Promise((resolve) => {
+    if (typeof window === "undefined") { resolve(null); return; }
+    if (window.Html5Qrcode) { resolve(window.Html5Qrcode); return; }
+    const existing = document.getElementById("bds-html5-qrcode-script");
+    if (existing) {
+      existing.addEventListener("load", () => resolve(window.Html5Qrcode || null), { once: true });
+      existing.addEventListener("error", () => resolve(null), { once: true });
+      return;
+    }
+    const script = document.createElement("script");
+    script.id = "bds-html5-qrcode-script";
+    script.src = "/vendor/html5-qrcode.min.js";
+    script.async = true;
+    script.onload = () => resolve(window.Html5Qrcode || null);
+    script.onerror = () => resolve(null);
+    document.head.appendChild(script);
+  });
+}
+
 export function UniversalQrScanner({
   titulo = "Esc\u00e1ner QR y C\u00f3digos de Barras (SHA-256)",
   descripcion = "Lee con c\u00e1mara o lector USB los QR de estudiantes, padres de familia y docentes (permisos, justificaciones, horarios y notas).",
@@ -84,19 +104,13 @@ export function UniversalQrScanner({
   }
 
   async function detenerCamara() {
-    if (rafRef.current) {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
-    }
+    if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
     }
     if (html5QrRef.current) {
-      try {
-        await html5QrRef.current.stop();
-        await html5QrRef.current.clear();
-      } catch (_e) {}
+      try { await html5QrRef.current.stop(); await html5QrRef.current.clear(); } catch (_e) {}
       html5QrRef.current = null;
     }
     setCamaraActiva(false);
@@ -108,17 +122,17 @@ export function UniversalQrScanner({
     await detenerCamara();
 
     if (typeof navigator === "undefined" || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      setErrorMsg("El navegador requiere HTTPS o localhost para abrir la c\u00e1mara. Puedes usar lector USB abajo.");
+      setErrorMsg("La c\u00e1mara requiere HTTPS o localhost. Puedes usar lector USB en el campo derecho.");
       return;
     }
 
-    try {
-      const mod = await import("html5-qrcode");
-      if (mod && mod.Html5Qrcode) {
-        const html5Qr = new mod.Html5Qrcode(readerDivId.current);
+    const Html5QrcodeCtor = await cargarHtml5QrcodeRuntime();
+    if (Html5QrcodeCtor) {
+      try {
+        const html5Qr = new Html5QrcodeCtor(readerDivId.current);
         html5QrRef.current = html5Qr;
         setCamaraActiva(true);
-        setModoMotor("C\u00e1mara HD (QR + C\u00f3digo de Barras)");
+        setModoMotor("C\u00e1mara HD Offline (QR + C\u00f3digo de Barras)");
         await html5Qr.start(
           { facingMode: "environment" },
           { fps: 10, qrbox: { width: 250, height: 250 } },
@@ -126,8 +140,10 @@ export function UniversalQrScanner({
           () => {}
         );
         return;
+      } catch (_errHtml5) {
+        html5QrRef.current = null;
       }
-    } catch (_errHtml5) {}
+    }
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -158,11 +174,11 @@ export function UniversalQrScanner({
         };
         rafRef.current = requestAnimationFrame(scanLoop);
       } else {
-        setModoMotor("C\u00e1mara activa sin BarcodeDetector");
-        setErrorMsg("Usa Chrome/Edge o lector USB en el campo derecho.");
+        setModoMotor("C\u00e1mara activa (usa Chrome/Edge o lector USB)");
+        setErrorMsg("Tu navegador no expone BarcodeDetector; usa Chrome/Edge o pistola USB abajo.");
       }
     } catch (err) {
-      setErrorMsg("No se pudo abrir la c\u00e1mara: revisa permisos del navegador. " + err.message);
+      setErrorMsg("No se pudo abrir la c\u00e1mara: verifica permisos del navegador. " + err.message);
       setCamaraActiva(false);
     }
   }
@@ -223,7 +239,7 @@ export function UniversalQrScanner({
           />
           {!camaraActiva ? (
             <div className="flex h-48 items-center justify-center px-4 text-center text-xs text-slate-400">
-              Presiona "Activar c\u00e1mara QR / Barras" para escanear permisos, carnets, horarios, notas o firmas SHA-256.
+              Presiona "Activar c\u00e1mara QR / Barras" para leer carnets, permisos, horarios, notas o SHA-256.
             </div>
           ) : null}
         </div>

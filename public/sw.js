@@ -1,11 +1,17 @@
-const CACHE_NAME = "practicatecnica-bds-v333";
-const CORE_ASSETS = ["/", "/index.html", "/manifest.webmanifest"];
+const CACHE_NAME = "practicatecnica-bds-v410";
+const CORE_ASSETS = [
+  "/",
+  "/index.html",
+  "/manifest.webmanifest",
+  "/buho-azul-circular.svg",
+  "/bds-responsive-pro.css?v=400",
+  "/bds-responsive-pro.js?v=400",
+  "/bds-trazabilidad-rbac-ux.js?v=410"
+];
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS).catch(() => {}))
-  );
+  event.waitUntil(caches.open(CACHE_NAME).then((c) => c.addAll(CORE_ASSETS).catch(() => {})));
 });
 
 self.addEventListener("activate", (event) => {

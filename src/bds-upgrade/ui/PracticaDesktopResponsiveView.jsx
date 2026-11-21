@@ -9,21 +9,27 @@ import { ComedorQRControl } from "../comedor/ComedorQRControl";
 
 export function PracticaDesktopResponsiveView({ sesion, onCerrarSesion }) {
   const [moduloActivo, setModuloActivo] = useState("practica");
+  const [nivelEvaluacion, setNivelEvaluacion] = useState("macro"); // macro (A-D) | micro (A-C)
   const [materiaActiva, setMateriaActiva] = useState(MATERIAS_ORDENADAS[0]);
   const [indice, setIndice] = useState(0);
   const [seleccion, setSeleccion] = useState(null);
 
   const esPrueba = sesion && sesion.modo === "prueba";
   const itemsMateria = useMemo(() => {
-    const ordenados = obtenerItemsPorMateria(materiaActiva);
+    const ordenados = obtenerItemsPorMateria(materiaActiva, nivelEvaluacion);
     return esPrueba ? ordenados.slice(0, 1) : ordenados;
-  }, [materiaActiva, esPrueba]);
+  }, [materiaActiva, nivelEvaluacion, esPrueba]);
 
   const itemActual = itemsMateria[indice] || itemsMateria[0] || null;
 
   function cambiarMateria(nueva) {
     setMateriaActiva(nueva);
     setIndice(0);
+    setSeleccion(null);
+  }
+
+  function cambiarNivel(nuevoNivel) {
+    setNivelEvaluacion(nuevoNivel);
     setSeleccion(null);
   }
 
@@ -35,7 +41,7 @@ export function PracticaDesktopResponsiveView({ sesion, onCerrarSesion }) {
             <BuhoAzulOriginal className="h-9 w-9 shrink-0" />
             <div className="min-w-0">
               <p className="truncate text-sm font-extrabold text-slate-900 sm:text-base">
-                pracTICAtecnica.com &bull; Suite BDS v3.33
+                pracTICAtecnica.com &bull; Suite BDS v3.34
               </p>
               <p className="text-xs text-slate-500">
                 {esPrueba
@@ -80,7 +86,7 @@ export function PracticaDesktopResponsiveView({ sesion, onCerrarSesion }) {
       <main className="mx-auto max-w-6xl px-4 py-6 pb-14 sm:px-6">
         {esPrueba ? (
           <div className="mb-5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-xs text-amber-950">
-            <strong>Publicidad oficial pracTICAtecnica.com (BDS Devs):</strong> Est\u00e1s en la prueba gratuita limitada (1 muestra por materia). Inicia sesi\u00f3n con tu cuenta <strong>@gmail.com</strong> o <strong>@mep.go.cr / @est.mep.go.cr</strong> para desbloquear los 24 \u00edtems con audio, QR SHA-256, Cooperativa y Comedor.
+            <strong>Publicidad oficial pracTICAtecnica.com (BDS Devs):</strong> Est\u00e1s en la prueba gratuita limitada (1 muestra por materia). Inicia sesi\u00f3n con tu cuenta <strong>@gmail.com</strong> o <strong>@mep.go.cr / @est.mep.go.cr</strong> para desbloquear todos los \u00edtems, audio, QR SHA-256, Cooperativa y Comedor.
           </div>
         ) : null}
 
@@ -90,6 +96,41 @@ export function PracticaDesktopResponsiveView({ sesion, onCerrarSesion }) {
 
         {moduloActivo === "practica" ? (
           <div>
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm">
+              <div className="text-xs font-semibold text-slate-700">
+                Est\u00e1ndar de evaluaci\u00f3n:
+                <span className="ml-1.5 text-blue-700">
+                  {nivelEvaluacion === "macro"
+                    ? "Macroevaluaci\u00f3n (4 opciones: A, B, C, D)"
+                    : "Microevaluaci\u00f3n (3 opciones: A, B, C)"}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => cambiarNivel("macro")}
+                  className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition ${
+                    nivelEvaluacion === "macro"
+                      ? "bg-blue-700 text-white"
+                      : "border border-slate-300 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  Macroevaluaci\u00f3n (A-B-C-D)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => cambiarNivel("micro")}
+                  className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition ${
+                    nivelEvaluacion === "micro"
+                      ? "bg-indigo-700 text-white"
+                      : "border border-slate-300 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  Microevaluaci\u00f3n (A-B-C)
+                </button>
+              </div>
+            </div>
+
             <div className="mb-5 flex flex-wrap gap-2">
               {MATERIAS_ORDENADAS.map((materia) => (
                 <button
@@ -123,10 +164,10 @@ export function PracticaDesktopResponsiveView({ sesion, onCerrarSesion }) {
                 <section className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-6 sm:p-6">
                   <div>
                     <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-slate-500">
-                      Opciones verificadas (calidad BDS)
+                      {nivelEvaluacion === "macro" ? "Opciones Macroevaluaci\u00f3n (A, B, C, D)" : "Opciones Microevaluaci\u00f3n (A, B, C)"}
                     </h2>
                     <div className="space-y-3">
-                      {itemActual.opciones.map((op) => {
+                      {itemActual.opcionesNivel.map((op) => {
                         const elegida = seleccion === op.letra;
                         return (
                           <button
@@ -151,7 +192,7 @@ export function PracticaDesktopResponsiveView({ sesion, onCerrarSesion }) {
                     {seleccion ? (
                       <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs sm:text-sm">
                         <p className="font-bold text-slate-900">
-                          {seleccion === itemActual.correcta ? "Respuesta correcta." : `Respuesta sugerida: ${itemActual.correcta}.`}
+                          {seleccion === itemActual.correctaNivel ? "Respuesta correcta." : `Respuesta sugerida: ${itemActual.correctaNivel}.`}
                         </p>
                         <p className="mt-1 text-slate-700">{itemActual.explicacion}</p>
                       </div>

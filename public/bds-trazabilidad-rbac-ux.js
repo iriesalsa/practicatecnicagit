@@ -1,23 +1,23 @@
 (function () {
   "use strict";
-  if (window.__BDS_SUITE_TOTAL_V50__) return;
-  window.__BDS_SUITE_TOTAL_V50__ = true;
+  if (window.__BDS_SUITE_ULTRA_V51__) return;
+  window.__BDS_SUITE_ULTRA_V51__ = true;
 
   var ROLES = ["Estudiante", "Padre/Madre", "Auxiliar", "Docente", "Jefatura", "SuperAdmin"];
   var DOMINIOS = ["gmail.com", "mep.go.cr", "est.mep.go.cr"];
-  var KEY_PERFILES = "pt_bds_perfiles_rbac_v50";
-  var KEY_INGRESOS = "pt_bds_trazabilidad_v50";
-  var KEY_AUDITORIA = "pt_bds_auditoria_roles_v50";
-  var KEY_PRODHAB = "pt_bds_prodhab_v50";
-  var KEY_SESION = "pt_bds_sesion_actual_v50";
-  var KEY_SA_MODE = "pt_bds_superadmin_v50";
+  var KEY_PERFILES = "pt_bds_perfiles_rbac_v51";
+  var KEY_INGRESOS = "pt_bds_trazabilidad_v51";
+  var KEY_AUDITORIA = "pt_bds_auditoria_roles_v51";
+  var KEY_PRODHAB = "pt_bds_prodhab_v51";
+  var KEY_SESION = "pt_bds_sesion_actual_v51";
+  var KEY_SA_MODE = "pt_bds_superadmin_v51";
 
   var BUHO_CIRCULAR =
     '<svg viewBox="0 0 128 128" width="32" height="32" aria-label="B\u00faho Azul Circular" style="display:block;flex-shrink:0">' +
-    '<defs><radialGradient id="bdsOwlV5Btn" cx="50%" cy="38%" r="60%">' +
+    '<defs><radialGradient id="bdsOwlV51Btn" cx="50%" cy="38%" r="60%">' +
     '<stop offset="0%" stop-color="#3b82f6"/><stop offset="65%" stop-color="#1d4ed8"/><stop offset="100%" stop-color="#1e3a8a"/>' +
     '</radialGradient></defs>' +
-    '<circle cx="64" cy="64" r="60" fill="url(#bdsOwlV5Btn)" stroke="#93c5fd" stroke-width="4"/>' +
+    '<circle cx="64" cy="64" r="60" fill="url(#bdsOwlV51Btn)" stroke="#93c5fd" stroke-width="4"/>' +
     '<path d="M24 44 Q42 26 64 42 Q86 26 104 44" fill="none" stroke="#dbeafe" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>' +
     '<circle cx="44" cy="63" r="18" fill="#ffffff"/><circle cx="84" cy="63" r="18" fill="#ffffff"/>' +
     '<circle cx="46" cy="63" r="9" fill="#0f172a"/><circle cx="82" cy="63" r="9" fill="#0f172a"/>' +
@@ -69,67 +69,66 @@
       '<text x="260" y="170" text-anchor="middle" fill="#cbd5e1" font-size="11" font-family="system-ui">Diagrama de Arquitectura Segura MEP \u2022 pracTICAtecnica.com</text></svg>';
   }
 
-  // ATLAS CURRICULAR OFICIAL MEP: Materia > Nivel > Contenido > Saber Esencial > Desempeno > Repaso
   var ATLAS_MEP = [
     {
       id: "mep-en", materia: "Ingl\u00e9s", nivel: "10.\u00b0, 11.\u00b0 y 12.\u00b0 (MEP)", diag: "mapa-idiomas", lang: "en-US",
       contenido: "Discourse Markers, Connectors & Listening Comprehension",
-      saberEsencial: "Reconocimiento de conectores de secuencia (After that = Subsequently), adici\u00f3n (Also = Furthermore) y concesi\u00f3n (Even so = Nevertheless) en contextos reales.",
-      desempeno: "Infere significados equivalentes a partir de p\u00e1rrafos escritos y audios en tiempo real sin traducci\u00f3n literal.",
+      saberEsencial: "Reconocimiento de conectores de secuencia (After that = Subsequently), adici\u00f3n (Also = Furthermore) y concesi\u00f3n (Even so = Nevertheless).",
+      desempeno: "Infere significados equivalentes a partir de p\u00e1rrafos escritos y audios reales sin traducci\u00f3n literal.",
       repaso: [
-        "Identifica la relaci\u00f3n entre la primera y segunda oraci\u00f3n antes de mirar las opciones.",
-        "After that / Afterwards \u2192 Subsequently (tiempo). Also / In addition \u2192 Furthermore (suma).",
+        "Identifica la relaci\u00f3n l\u00f3gica entre oraciones antes de elegir la opci\u00f3n.",
+        "After that \u2192 Subsequently (tiempo). Also \u2192 Furthermore (suma).",
         "Even so / Still \u2192 Nevertheless / However (contraste)."
       ],
-      audio: "English MEP review: After that equals Subsequently. Also equals Furthermore. Even so equals Nevertheless. Focus on logical relationship between sentences."
+      audio: "English MEP review: After that equals Subsequently. Also equals Furthermore. Even so equals Nevertheless."
     },
     {
       id: "mep-idiomas", materia: "Franc\u00e9s / Alem\u00e1n / Portugu\u00e9s", nivel: "Ciclo Diversificado (MEP)", diag: "mapa-idiomas", lang: "es-CR",
       contenido: "Cohesi\u00f3n discursiva y comprensi\u00f3n auditiva multiling\u00fce",
-      saberEsencial: "Equivalencias funcionales de secuencia, causa, consecuencia y adici\u00f3n en Franc\u00e9s (Ensuite, Parce que, De plus), Alem\u00e1n (Danach, Deshalb, Au\u00dferdem) y Portugu\u00e9s (Em seguida, Portanto, Ademais).",
+      saberEsencial: "Equivalencias funcionales en Franc\u00e9s (Ensuite, Parce que, De plus), Alem\u00e1n (Danach, Deshalb, Au\u00dferdem) y Portugu\u00e9s (Em seguida, Portanto, Ademais).",
       desempeno: "Comprende mensajes orales cotidianos y t\u00e9cnicos seleccionando el conector l\u00f3gico exacto.",
       repaso: [
         "Franc\u00e9s: Ensuite = Apr\u00e8s cela; Aussi = De plus; Parce que introduce causa.",
-        "Alem\u00e1n: Danach = Anschlie\u00dfend; Deshalb = Darum; Au\u00dferdem suma informaci\u00f3n.",
+        "Alem\u00e1n: Danach = Anschlie\u00dfend; Deshalb = Darum; Au\u00dferdem suma ideas.",
         "Portugu\u00e9s: Em seguida = Logo depois; Portanto = Por conseguinte; Al\u00e9m disso = Ademais."
       ],
-      audio: "Repaso oficial de idiomas: En frances ensuite es despues y de plus suma ideas. En aleman danach es despues y deshalb equivale a darum. En portugues em seguida es logo depois y portanto equivale a por conseguinte."
+      audio: "Repaso multilingue MEP: En frances ensuite es despues y de plus suma ideas. En aleman danach es despues y deshalb equivale a darum. En portugues em seguida es logo depois y portanto equivale a por conseguinte."
     },
     {
       id: "mep-es", materia: "Espa\u00f1ol", nivel: "10.\u00b0, 11.\u00b0 y 12.\u00b0 (MEP)", diag: "mapa-idiomas", lang: "es-CR",
       contenido: "Comprensi\u00f3n lectora inferencial y conectores discursivos",
-      saberEsencial: "Uso preciso de conectores consecutivos (por lo tanto, por consiguiente) y adversativos (sin embargo, no obstante) en textos informativos y t\u00e9cnicos.",
-      desempeno: "Eval\u00faa la coherencia global de un texto y deduce intenciones comunicativas impl\u00edcitas.",
+      saberEsencial: "Uso preciso de conectores consecutivos (por lo tanto, por consiguiente) y adversativos (sin embargo, no obstante).",
+      desempeno: "Eval\u00faa coherencia global y deduce intenciones comunicativas impl\u00edcitas.",
       repaso: [
         "Consecuencia: Por lo tanto = Por consiguiente = En consecuencia.",
         "Oposici\u00f3n parcial: Sin embargo = No obstante.",
-        "Verifica siempre que la opci\u00f3n elegida no contradiga el argumento principal del p\u00e1rrafo."
+        "Comprueba siempre que la respuesta elegida respete la idea principal."
       ],
-      audio: "Repaso oficial de Espanol MEP: Por lo tanto y por consiguiente introducen consecuencias. Sin embargo y no obstante introducen contrastes sin negar el hecho anterior."
+      audio: "Repaso oficial de Espanol MEP: Por lo tanto y por consiguiente introducen consecuencias. Sin embargo y no obstante introducen contrastes."
     },
     {
       id: "mep-mat", materia: "Matem\u00e1ticas", nivel: "10.\u00b0, 11.\u00b0 y 12.\u00b0 (MEP)", diag: "mapa-mate", lang: "es-CR",
-      contenido: "Relaciones y \u00c1lgebra (Funci\u00f3n Lineal) + Estad\u00edstica y Probabilidad",
-      saberEsencial: "Modelado de situaciones cotidianas mediante C(x) = m\u00b7x + b, c\u00e1lculo porcentual aplicado a facturaci\u00f3n y probabilidad cl\u00e1sica de eventos simples.",
-      desempeno: "Resuelve problemas contextualizados de costos, descuentos y probabilidad justificando su criterio algebraico.",
+      contenido: "Relaciones y \u00c1lgebra (Funci\u00f3n Lineal) + Probabilidad",
+      saberEsencial: "Modelado mediante C(x) = m\u00b7x + b, porcentajes aplicados a facturaci\u00f3n y probabilidad cl\u00e1sica.",
+      desempeno: "Resuelve problemas contextualizados de costos, descuentos y probabilidad justificando su criterio.",
       repaso: [
-        "En C(x) = m\u00b7x + b: b es el monto fijo (sin variable) y m es la tarifa por unidad x.",
-        "Descuento del 10 %: resta 0,10 del total o multiplica directo por 0,90.",
-        "Probabilidad: divide casos favorables entre casos totales y simplifica la fracci\u00f3n."
+        "En C(x) = m\u00b7x + b: b es el cargo fijo y m es la tarifa por unidad x.",
+        "Descuento del 10 %: multiplica el subtotal por 0,90.",
+        "Probabilidad: divide casos favorables entre casos totales y simplifica."
       ],
-      audio: "Repaso oficial de Matematicas MEP: En la funcion lineal C de x igual a m por x mas b, b es el cargo fijo y m la pendiente por unidad. La probabilidad es casos favorables entre casos totales."
+      audio: "Repaso oficial de Matematicas MEP: En C de x igual a m por x mas b, b es el cargo fijo y m la pendiente por unidad."
     },
     {
       id: "mep-web-cib", materia: "Especialidad: Desarrollo Web y Ciberseguridad", nivel: "10.\u00b0, 11.\u00b0 y 12.\u00b0 ETP (MEP)", diag: "mapa-tech", lang: "es-CR",
-      contenido: "Arquitectura Web Segura, RBAC/RLS, Integridad SHA-256 y Cumplimiento Legal CR",
-      saberEsencial: "Control de acceso basado en roles (RBAC) con principio de m\u00ednimo privilegio, Row-Level Security (RLS) en PostgreSQL/Supabase, cookies HttpOnly/Secure, Service Workers PWA y Ley N.\u00b0 8968 (PRODHAB).",
-      desempeno: "Dise\u00f1a, audita y despliega aplicaciones web resilientes que protegen datos personales y verifican documentos mediante firmas SHA-256.",
+      contenido: "Arquitectura Web Segura, RBAC/RLS, SHA-256 y PRODHAB CR",
+      saberEsencial: "Control RBAC con m\u00ednimo privilegio (Estudiante por defecto), Row-Level Security en PostgreSQL/Supabase, cookies HttpOnly/Secure, PWA y Ley N.\u00b0 8968.",
+      desempeno: "Dise\u00f1a y audita aplicaciones web que protegen datos personales y verifican integridad con SHA-256.",
       repaso: [
-        "M\u00ednimo privilegio: toda cuenta nueva nace como Estudiante; solo SuperAdmin promueve roles con bit\u00e1cora SHA-256.",
-        "Mitigaci\u00f3n XSS: usar cookies HttpOnly + Secure y sanitizar entradas en cliente y servidor.",
-        "PWA sin cach\u00e9 vieja: un \u00fanico Service Worker Network-First que purga versiones obsoletas al activarse."
+        "M\u00ednimo privilegio: toda cuenta nueva nace como Estudiante; solo SuperAdmin promueve roles con SHA-256.",
+        "Mitigaci\u00f3n XSS: cookies HttpOnly + Secure y validaci\u00f3n estricta en servidor.",
+        "PWA limpia: un \u00fanico Service Worker Network-First sin versiones viejas."
       ],
-      audio: "Repaso oficial de Desarrollo Web y Ciberseguridad: Por minimo privilegio cada cuenta nueva inicia como Estudiante y solo el SuperAdmin modifica roles. HttpOnly mitiga robo de sesiones por XSS y SHA doscientos cincuenta y seis asegura integridad."
+      audio: "Repaso oficial de Desarrollo Web y Ciberseguridad: Por minimo privilegio toda cuenta nueva nace como Estudiante y solo SuperAdmin promueve roles. HttpOnly protege cookies contra XSS."
     }
   ];
 
@@ -257,7 +256,7 @@
 
   function bloquearSelectoresRolPublicos() {
     document.querySelectorAll("select").forEach(function (sel) {
-      if (sel.closest("#bds-v50-modal")) return;
+      if (sel.closest("#bds-v51-modal")) return;
       var txt = (sel.textContent || "").toLowerCase();
       if (txt.indexOf("superadmin") !== -1 || (txt.indexOf("jefatura") !== -1 && txt.indexOf("docente") !== -1 && txt.indexOf("estudiante") !== -1)) {
         for (var i = 0; i < sel.options.length; i++) {
@@ -293,10 +292,10 @@
   }
 
   function montarCentroBDS() {
-    if (document.getElementById("bds-v50-launcher")) return;
+    if (document.getElementById("bds-v51-launcher")) return;
 
     var btn = document.createElement("button");
-    btn.id = "bds-v50-launcher";
+    btn.id = "bds-v51-launcher";
     btn.type = "button";
     btn.style.cssText =
       "position:fixed;right:14px;bottom:78px;z-index:2147483630;display:flex;align-items:center;gap:8px;" +
@@ -306,7 +305,7 @@
     document.body.appendChild(btn);
 
     var modal = document.createElement("div");
-    modal.id = "bds-v50-modal";
+    modal.id = "bds-v51-modal";
     modal.style.cssText = "display:none;position:fixed;inset:0;z-index:2147483640;background:rgba(15,23,42,.78);overflow:auto;padding:14px;font-family:system-ui,-apple-system,sans-serif";
     document.body.appendChild(modal);
 
@@ -356,7 +355,7 @@
           '<h3 style="margin:0;font-size:17px;font-weight:900;color:#0f172a">' + it.consigna + '</h3>' +
           diagramaSvg(it.diag, it.area) +
           '<div style="background:#f1f5f9;border:1.5px solid #cbd5e1;border-radius:10px;padding:12px;font-size:14px;font-weight:600;color:#0f172a">' + it.contexto + '</div>' +
-          '<button id="bds-v50-play" type="button" style="align-self:flex-start;background:#c2410c;color:#fff;border:none;border-radius:999px;padding:9px 16px;font-size:13px;font-weight:800;cursor:pointer">&#9654; Escuchar pregunta (' + it.lang + ')</button></div>' +
+          '<button id="bds-v51-play" type="button" style="align-self:flex-start;background:#c2410c;color:#fff;border:none;border-radius:999px;padding:9px 16px;font-size:13px;font-weight:800;cursor:pointer">&#9654; Escuchar pregunta (' + it.lang + ')</button></div>' +
           '<div style="background:#fff;border:1.5px solid #94a3b8;border-radius:16px;padding:16px;display:flex;flex-direction:column;justify-content:space-between"><div>' +
           prep.ops.map(function (o) {
             var act = ui.pSel === o.l;
@@ -365,8 +364,8 @@
           }).join("") +
           (ui.pSel ? '<div style="margin-top:10px;padding:12px;border-radius:10px;font-size:13px;font-weight:700;background:' + (ui.pSel === prep.ok ? "#dcfce7;color:#14532d;border:1.5px solid #15803d" : "#fef3c7;color:#451a03;border:1.5px solid #b45309") + '">' + (ui.pSel === prep.ok ? "Correcto. " : "Sugerida: " + prep.ok + ". ") + it.exp + '</div>' : '') +
           '</div><div style="display:flex;justify-content:space-between;margin-top:14px;padding-top:10px;border-top:1.5px solid #e2e8f0">' +
-          '<button id="bds-v50-prev" type="button" ' + (ui.pIdx === 0 ? "disabled " : "") + 'style="padding:8px 14px;border-radius:10px;border:2px solid #64748b;background:#fff;color:#0f172a;font-weight:800;cursor:pointer">Anterior</button>' +
-          '<button id="bds-v50-next" type="button" ' + (ui.pIdx >= PRACTICAS.length - 1 ? "disabled " : "") + 'style="padding:8px 14px;border-radius:10px;border:none;background:#1e40af;color:#fff;font-weight:800;cursor:pointer">Siguiente</button>' +
+          '<button id="bds-v51-prev" type="button" ' + (ui.pIdx === 0 ? "disabled " : "") + 'style="padding:8px 14px;border-radius:10px;border:2px solid #64748b;background:#fff;color:#0f172a;font-weight:800;cursor:pointer">Anterior</button>' +
+          '<button id="bds-v51-next" type="button" ' + (ui.pIdx >= PRACTICAS.length - 1 ? "disabled " : "") + 'style="padding:8px 14px;border-radius:10px;border:none;background:#1e40af;color:#fff;font-weight:800;cursor:pointer">Siguiente</button>' +
           '</div></div></div>';
       } else if (ui.tab === "trazabilidad") {
         var filtrados = ingresos.filter(function (r) {
@@ -383,10 +382,10 @@
           '<div style="background:#fff;border:1.5px solid #94a3b8;border-radius:16px;padding:16px;margin-bottom:14px">' +
           '<div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px">' +
           '<div><h3 style="margin:0;font-size:16px;font-weight:900;color:#0f172a">Control RBAC (Regla: toda cuenta inicia como Estudiante)</h3><p style="margin:4px 0 0;font-size:12px;color:#334155">Solo SuperAdmin puede cambiar roles con firma SHA-256.</p></div>' +
-          '<button id="bds-v50-sa" type="button" style="padding:8px 14px;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;border:2px solid ' + (esSuper ? "#15803d;background:#dcfce7;color:#14532d" : "#1e40af;background:#1e40af;color:#fff") + '">' + (esSuper ? "SuperAdmin ACTIVO (Bloquear)" : "Activar gesti\u00f3n SuperAdmin") + '</button></div>' +
+          '<button id="bds-v51-sa" type="button" style="padding:8px 14px;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;border:2px solid ' + (esSuper ? "#15803d;background:#dcfce7;color:#14532d" : "#1e40af;background:#1e40af;color:#fff") + '">' + (esSuper ? "SuperAdmin ACTIVO (Bloquear)" : "Activar gesti\u00f3n SuperAdmin") + '</button></div>' +
           (ui.aviso ? '<div style="margin-bottom:10px;padding:10px;border-radius:10px;background:#dbeafe;color:#1e3a8a;font-size:12px;font-weight:800">' + ui.aviso + '</div>' : '') +
-          '<form id="bds-v50-add" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">' +
-          '<input id="bds-v50-mail" type="email" required placeholder="usuario@est.mep.go.cr o usuario@gmail.com" style="flex:1;min-width:210px;padding:9px 12px;border:2px solid #64748b;border-radius:10px;font-size:13px;color:#0f172a;background:#fff"/>' +
+          '<form id="bds-v51-add" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">' +
+          '<input id="bds-v51-mail" type="email" required placeholder="usuario@est.mep.go.cr o usuario@gmail.com" style="flex:1;min-width:210px;padding:9px 12px;border:2px solid #64748b;border-radius:10px;font-size:13px;color:#0f172a;background:#fff"/>' +
           '<button type="submit" style="background:#0f172a;color:#fff;border:none;border-radius:10px;padding:9px 14px;font-size:12px;font-weight:800;cursor:pointer">+ Registrar como Estudiante</button></form>' +
           '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;color:#0f172a"><thead><tr style="border-bottom:2px solid #cbd5e1;text-align:left"><th style="padding:8px">Correo</th><th style="padding:8px">Cuenta</th><th style="padding:8px">Rol</th><th style="padding:8px">Cambiar rol (SuperAdmin)</th></tr></thead><tbody>' +
           (perfiles.length === 0 ? '<tr><td colspan="4" style="padding:12px;color:#475569">Sin correos registrados a\u00fan.</td></tr>' : perfiles.map(function (p) {
@@ -401,28 +400,27 @@
           }).join("") + '</tbody></table></div>' +
           (auditoria.length > 0 ? '<div style="margin-top:10px;font-size:11px;color:#334155"><strong>\u00daltimo cambio RBAC:</strong> ' + auditoria[0].correo + ' (' + auditoria[0].prev + ' \u2192 ' + auditoria[0].nuevo + ') \u2022 SHA-256: <code>' + auditoria[0].sha.slice(0, 18) + '...</code></div>' : '') + '</div>';
       } else {
-        // TAB LEGAL PRODHAB + MEP + SEGURIDAD INFORMATICA
         body =
           '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px">' +
           '<section style="background:#fff;border:1.5px solid #94a3b8;border-radius:16px;padding:18px">' +
           '<h3 style="margin:0 0 8px;font-size:17px;font-weight:900;color:#0f172a">Cumplimiento Legal Costa Rica &amp; PRODHAB (Ley N.\u00b0 8968)</h3>' +
           '<ul style="margin:0;padding-left:18px;font-size:13px;line-height:1.55;color:#1e293b">' +
-          '<li><strong>Consentimiento Informado:</strong> Los datos de acceso (correo y rol) se utilizan exclusivamente para fines educativos y trazabilidad en pracTICAtecnica.com.</li>' +
-          '<li><strong>Derechos ARCO:</strong> Toda persona usuaria puede solicitar Acceso, Rectificaci\u00f3n, Cancelaci\u00f3n u Oposici\u00f3n de sus registros ante la administraci\u00f3n institucional.</li>' +
-          '<li><strong>Alineaci\u00f3n MEP (REA / SEA):</strong> Estructura de pr\u00e1cticas diferenciada en Macroevaluaci\u00f3n (A-B-C-D) y Microevaluaci\u00f3n (A-B-C), sin venta ni cesi\u00f3n de datos estudiantiles a terceros.</li>' +
+          '<li><strong>Consentimiento Informado:</strong> Los datos de acceso (correo y rol) se usan exclusivamente para fines educativos y trazabilidad en pracTICAtecnica.com.</li>' +
+          '<li><strong>Derechos ARCO:</strong> Toda persona usuaria puede ejercer Acceso, Rectificaci\u00f3n, Cancelaci\u00f3n u Oposici\u00f3n de sus registros ante la administraci\u00f3n.</li>' +
+          '<li><strong>Alineaci\u00f3n MEP (REA / SEA):</strong> Pr\u00e1cticas en Macroevaluaci\u00f3n (A-B-C-D) y Microevaluaci\u00f3n (A-B-C), sin venta ni cesi\u00f3n de datos estudiantiles.</li>' +
           '</ul>' +
           '<div style="margin-top:14px">' +
           (prodhab
             ? '<div style="background:#dcfce7;border:1.5px solid #15803d;color:#14532d;padding:10px;border-radius:10px;font-size:12px;font-weight:700">Consentimiento Ley N.\u00b0 8968 registrado (' + prodhab.fecha + ').<br/>SHA-256: <code>' + prodhab.sha.slice(0, 26) + '...</code></div>'
-            : '<button id="bds-v50-prodhab-ok" type="button" style="background:#15803d;color:#fff;border:none;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:800;cursor:pointer">Aceptar Consentimiento Informado PRODHAB (SHA-256)</button>') +
+            : '<button id="bds-v51-prodhab-ok" type="button" style="background:#15803d;color:#fff;border:none;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:800;cursor:pointer">Aceptar Consentimiento Informado PRODHAB (SHA-256)</button>') +
           '</div></section>' +
           '<section style="background:#fff;border:1.5px solid #94a3b8;border-radius:16px;padding:18px">' +
           '<h3 style="margin:0 0 8px;font-size:17px;font-weight:900;color:#0f172a">Arquitectura de Seguridad Inform\u00e1tica BDS</h3>' +
           diagramaSvg("mapa-tech", "Seguridad Informatica BDS") +
           '<ul style="margin:10px 0 0;padding-left:18px;font-size:13px;line-height:1.5;color:#1e293b">' +
           '<li><strong>RBAC &amp; M\u00ednimo Privilegio:</strong> Rol base obligatorio Estudiante + bloqueo de auto-escalada por trigger SQL y RLS.</li>' +
-          '<li><strong>Antifraude:</strong> Bloqueo por 5 intentos fallidos, validaci\u00f3n de dominios @gmail.com / @mep.go.cr y cero credenciales en placeholders.</li>' +
-          '<li><strong>Integridad Criptogr\u00e1fica:</strong> Sellos SHA-256 en documentos QR, facturas de cooperativa, cambios de rol y consentimientos.</li>' +
+          '<li><strong>Antifraude:</strong> Bloqueo por 5 intentos fallidos, validaci\u00f3n @gmail.com / @mep.go.cr y cero credenciales en placeholders.</li>' +
+          '<li><strong>Integridad Criptogr\u00e1fica:</strong> Sellos SHA-256 en QR, facturas, cambios de rol y consentimientos PRODHAB.</li>' +
           '</ul></section></div>';
       }
 
@@ -430,18 +428,18 @@
         '<div style="max-width:1100px;margin:8px auto;background:#f1f5f9;color:#0f172a;border-radius:20px;border:2px solid #94a3b8;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.45)">' +
         '<div style="background:#fff;border-bottom:2px solid #cbd5e1;padding:12px 16px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px">' +
         '<div style="display:flex;align-items:center;gap:10px">' + BUHO_CIRCULAR +
-        '<div><div style="font-size:15px;font-weight:900;color:#0f172a">pracTICAtecnica.com \u2022 Suite Internacional BDS v5.0</div>' +
+        '<div><div style="font-size:15px;font-weight:900;color:#0f172a">pracTICAtecnica.com \u2022 Suite Internacional BDS v5.1</div>' +
         '<div style="font-size:11px;font-weight:700;color:#475569">Atlas MEP Ilustrado \u2022 Pr\u00e1cticas \u2022 Trazabilidad &amp; RBAC \u2022 PRODHAB CR</div></div></div>' +
         '<div style="display:flex;flex-wrap:wrap;gap:6px">' +
         '<button data-mtab="atlas" type="button" style="padding:8px 11px;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;border:2px solid #1e40af;background:' + (ui.tab === "atlas" ? "#1e40af;color:#fff" : "#fff;color:#1e40af") + '">Atlas MEP</button>' +
         '<button data-mtab="practicas" type="button" style="padding:8px 11px;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;border:2px solid #1e40af;background:' + (ui.tab === "practicas" ? "#1e40af;color:#fff" : "#fff;color:#1e40af") + '">Pr\u00e1cticas (A-D/A-C)</button>' +
         '<button data-mtab="trazabilidad" type="button" style="padding:8px 11px;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;border:2px solid #0f172a;background:' + (ui.tab === "trazabilidad" ? "#0f172a;color:#fff" : "#fff;color:#0f172a") + '">Trazabilidad &amp; RBAC</button>' +
         '<button data-mtab="legal" type="button" style="padding:8px 11px;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;border:2px solid #15803d;background:' + (ui.tab === "legal" ? "#15803d;color:#fff" : "#fff;color:#15803d") + '">PRODHAB &amp; Seguridad</button>' +
-        '<button id="bds-v50-close" type="button" style="padding:8px 11px;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;border:none;background:#b91c1c;color:#fff">Cerrar</button>' +
+        '<button id="bds-v51-close" type="button" style="padding:8px 11px;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;border:none;background:#b91c1c;color:#fff">Cerrar</button>' +
         '</div></div><div style="padding:16px">' + body + '</div></div>';
 
       modal.querySelectorAll("[data-mtab]").forEach(function (b) { b.onclick = function () { ui.tab = b.getAttribute("data-mtab"); ui.aviso = ""; render(); }; });
-      document.getElementById("bds-v50-close").onclick = function () { modal.style.display = "none"; };
+      document.getElementById("bds-v51-close").onclick = function () { modal.style.display = "none"; };
 
       if (ui.tab === "atlas") {
         modal.querySelectorAll("[data-atlas-play]").forEach(function (b) {
@@ -455,19 +453,19 @@
         modal.querySelectorAll("[data-niv]").forEach(function (b) { b.onclick = function () { ui.nivel = b.getAttribute("data-niv"); ui.pSel = null; render(); }; });
         modal.querySelectorAll("[data-pop]").forEach(function (b) { b.onclick = function () { ui.pSel = b.getAttribute("data-pop"); render(); }; });
         var cur = PRACTICAS[ui.pIdx] || PRACTICAS[0];
-        document.getElementById("bds-v50-play").onclick = function () { hablar(cur.consigna + ". " + cur.contexto, cur.lang); };
-        document.getElementById("bds-v50-prev").onclick = function () { ui.pIdx = Math.max(0, ui.pIdx - 1); ui.pSel = null; render(); };
-        document.getElementById("bds-v50-next").onclick = function () { ui.pIdx = Math.min(PRACTICAS.length - 1, ui.pIdx + 1); ui.pSel = null; render(); };
+        document.getElementById("bds-v51-play").onclick = function () { hablar(cur.consigna + ". " + cur.contexto, cur.lang); };
+        document.getElementById("bds-v51-prev").onclick = function () { ui.pIdx = Math.max(0, ui.pIdx - 1); ui.pSel = null; render(); };
+        document.getElementById("bds-v51-next").onclick = function () { ui.pIdx = Math.min(PRACTICAS.length - 1, ui.pIdx + 1); ui.pSel = null; render(); };
       } else if (ui.tab === "trazabilidad") {
         modal.querySelectorAll("[data-tf]").forEach(function (b) { b.onclick = function () { ui.filtro = b.getAttribute("data-tf"); render(); }; });
-        document.getElementById("bds-v50-sa").onclick = function () {
+        document.getElementById("bds-v51-sa").onclick = function () {
           localStorage.setItem(KEY_SA_MODE, esSuper ? "0" : "1");
           ui.aviso = esSuper ? "Gesti\u00f3n SuperAdmin bloqueada." : "Gesti\u00f3n SuperAdmin habilitada para cambio de roles.";
           render();
         };
-        document.getElementById("bds-v50-add").onsubmit = function (ev) {
+        document.getElementById("bds-v51-add").onsubmit = function (ev) {
           ev.preventDefault();
-          var m = document.getElementById("bds-v50-mail").value;
+          var m = document.getElementById("bds-v51-mail").value;
           if (!esCorreoValido(m)) { ui.aviso = "Solo se permiten correos @gmail.com, @mep.go.cr o @est.mep.go.cr."; render(); return; }
           var p = asegurarEstudiante(m);
           syncSupabase("perfiles_rbac", { correo: p.correo, nombre_visible: p.nombre, tipo_cuenta: p.tipo_cuenta, rol: "Estudiante" });
@@ -489,12 +487,12 @@
           };
         });
       } else {
-        var btnP = document.getElementById("bds-v50-prodhab-ok");
+        var btnP = document.getElementById("bds-v51-prodhab-ok");
         if (btnP) {
           btnP.onclick = async function () {
             var mail = detectarCorreoApp() || "visitante@practicatecnica.com";
             var fecha = new Date().toLocaleString("es-CR");
-            var sha = await sha256Hex(mail + "|Ley8968-PRODHAB-v5.0|" + fecha);
+            var sha = await sha256Hex(mail + "|Ley8968-PRODHAB-v5.1|" + fecha);
             guardarJson(KEY_PRODHAB, { correo: mail, fecha: fecha, sha: sha });
             syncSupabase("consentimientos_prodhab", { correo: mail, sha256_constancia: sha });
             render();
@@ -503,7 +501,7 @@
       }
     }
 
-    btn.onclick = function () { registrarLatido("Centro BDS v5.0"); modal.style.display = "block"; render(); };
+    btn.onclick = function () { registrarLatido("Centro BDS v5.1"); modal.style.display = "block"; render(); };
   }
 
   function arrancar() {

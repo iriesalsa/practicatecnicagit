@@ -1,12 +1,12 @@
-const CACHE_NAME = "practicatecnica-bds-v500";
+const CACHE_NAME = "practicatecnica-bds-v510";
 const CORE_ASSETS = [
   "/",
   "/index.html",
   "/manifest.webmanifest",
   "/buho-azul-circular.svg",
-  "/bds-responsive-pro.css?v=500",
-  "/bds-responsive-pro.js?v=500",
-  "/bds-trazabilidad-rbac-ux.js?v=500"
+  "/bds-responsive-pro.css?v=510",
+  "/bds-responsive-pro.js?v=510",
+  "/bds-trazabilidad-rbac-ux.js?v=510"
 ];
 self.addEventListener("install", (e) => {
   self.skipWaiting();

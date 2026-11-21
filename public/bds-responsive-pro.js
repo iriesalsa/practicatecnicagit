@@ -1,7 +1,7 @@
 (function () {
   "use strict";
-  if (window.__BDS_RESPONSIVE_PRO_V5__) return;
-  window.__BDS_RESPONSIVE_PRO_V5__ = true;
+  if (window.__BDS_RESPONSIVE_PRO_V51__) return;
+  window.__BDS_RESPONSIVE_PRO_V51__ = true;
 
   var DOMINIOS_OK = ["gmail.com", "mep.go.cr", "est.mep.go.cr"];
 
@@ -62,7 +62,7 @@
     var btn = ev.target && ev.target.closest ? ev.target.closest("button") : null;
     if (!btn) return;
     var label = (btn.textContent || "").toLowerCase();
-    if (label.indexOf("escuchar") !== -1 && !btn.closest("#bds-v50-modal")) {
+    if (label.indexOf("escuchar") !== -1 && !btn.closest("#bds-v51-modal")) {
       setTimeout(function () {
         if ("speechSynthesis" in window && !window.speechSynthesis.speaking) {
           var card = btn.closest("section, article, [class*='rounded-'], main") || document.body;
@@ -120,7 +120,7 @@
 
   document.addEventListener("submit", function (ev) {
     var form = ev.target;
-    if (!form || !form.querySelector || form.closest("#bds-v50-modal")) return;
+    if (!form || !form.querySelector || form.closest("#bds-v51-modal")) return;
     var pass = form.querySelector("input[type='password']");
     var mail = form.querySelector("input[type='email'], input[name*='mail' i], input[placeholder*='correo' i], input[placeholder*='mep' i]");
     if (pass && mail && !validarDominioAutorizado(mail.value)) {

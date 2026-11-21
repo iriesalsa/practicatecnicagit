@@ -1,0 +1,56 @@
+﻿
+/* --- REGLAS SUPREMAS RESPONSIVE (MOBILE-FIRST) --- */
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+/* Ajustes táctiles y de contenedores para Tablets y Celulares */
+@media (max-width: 768px) {
+  body {
+    font-size: 15px;
+  }
+  .container, max-w-7xl {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* --- BLINDAJE INDUSTRIAL UI / SVG / RESPONSIVE --- */
+*, ::before, ::after {
+  box-sizing: border-box;
+}
+
+img, svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+body {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden !important;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Contenedores flexibles para evitar desbordes en móviles */
+.flex, .grid {
+  min-width: 0;
+}
+
+/* Corrección de barras de navegación y tarjetas en móviles */
+@media (max-width: 768px) {
+  .container {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+}

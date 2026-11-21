@@ -1,9 +1,14 @@
 (function () {
   "use strict";
-  if (window.__BDS_QR_VERIF_V88__) return;
-  window.__BDS_QR_VERIF_V88__ = true;
+  if (window.__BDS_QR_VERIF_V89__) return;
+  window.__BDS_QR_VERIF_V89__ = true;
 
-  var STORAGE_KEY = "bds_qr_canjeados_v88";
+  // Remover barra flotante estorbosa de versiones anteriores si existiera
+  var viejaBarra = document.getElementById("bds-v86-dua-bar");
+  if (viejaBarra && viejaBarra.parentNode) viejaBarra.parentNode.removeChild(viejaBarra);
+  try { if ("speechSynthesis" in window) window.speechSynthesis.cancel(); } catch (_e) {}
+
+  var STORAGE_KEY = "bds_qr_canjeados_v89";
   var streamActual = null;
   var scanTimer = null;
 
@@ -18,9 +23,7 @@
       var raw = localStorage.getItem(STORAGE_KEY);
       var obj = raw ? JSON.parse(raw) : {};
       return (obj && typeof obj === "object") ? obj : {};
-    } catch (_e) {
-      return {};
-    }
+    } catch (_e) { return {}; }
   }
 
   function marcarUsado(token) {
@@ -43,7 +46,6 @@
     return "";
   }
 
-  // Formato recomendado: ROL|TITULAR_ID|PASE_ID|DETALLE|SHA256
   function parsearQr(rawText) {
     var txt = String(rawText || "").trim();
     var rol = "ESTUDIANTE";
@@ -66,10 +68,7 @@
         hashDeclarado = String(obj.sha256 || obj.hash || "").toLowerCase();
         return {
           ok: Boolean(titularId && paseId),
-          rol: rol,
-          titularId: titularId,
-          paseId: paseId,
-          detalle: detalle,
+          rol: rol, titularId: titularId, paseId: paseId, detalle: detalle,
           hashDeclarado: hashDeclarado,
           baseCarga: rol + "|" + titularId + "|" + paseId + "|" + detalle
         };
@@ -89,23 +88,15 @@
       }
       return {
         ok: Boolean(titularId && paseId),
-        rol: rol,
-        titularId: titularId,
-        paseId: paseId,
-        detalle: detalle,
+        rol: rol, titularId: titularId, paseId: paseId, detalle: detalle,
         hashDeclarado: hashDeclarado,
         baseCarga: rol + "|" + titularId + "|" + paseId + "|" + detalle
       };
     }
 
     return {
-      ok: false,
-      rol: rol,
-      titularId: titularId,
-      paseId: txt,
-      detalle: "",
-      hashDeclarado: "",
-      baseCarga: rol + "||" + txt + "|"
+      ok: false, rol: rol, titularId: titularId, paseId: txt, detalle: "",
+      hashDeclarado: "", baseCarga: rol + "||" + txt + "|"
     };
   }
 
@@ -114,38 +105,34 @@
     var hashCalculado = await sha256Hex(parsed.baseCarga || rawText);
     var coincide = false;
     if (parsed.hashDeclarado) {
-      if (parsed.hashDeclarado.length === 64) {
-        coincide = (parsed.hashDeclarado === hashCalculado);
-      } else {
-        coincide = (hashCalculado.indexOf(parsed.hashDeclarado) === 0);
-      }
+      if (parsed.hashDeclarado.length === 64) coincide = (parsed.hashDeclarado === hashCalculado);
+      else coincide = (hashCalculado.indexOf(parsed.hashDeclarado) === 0);
     }
 
     var titularIngresado = String(titularPresente || "").trim();
     var titularCoincide = !titularIngresado || (titularIngresado.toLowerCase() === String(parsed.titularId || "").toLowerCase());
-
     var tokenUso = (parsed.rol + "::" + parsed.titularId + "::" + parsed.paseId + "::" + (hashCalculado || rawText)).toLowerCase();
     var usados = leerUsados();
     var yaUsado = Boolean(usados[tokenUso]);
 
-    var estadoTexto = "INCOMPLETO O SIN SELLO: revise rol, titular ID y pase ID.";
+    var estadoTexto = "INCOMPLETO: requiere Rol, Titular ID y Pase/Folio.";
     if (!parsed.titularId || !parsed.paseId) {
-      estadoTexto = "DATOS INCOMPLETOS: un QR intransferible requiere Titular ID y Pase ID.";
+      estadoTexto = "INCOMPLETO: un QR intransferible requiere Titular ID y Pase/Folio.";
     } else if (parsed.hashDeclarado && !coincide) {
-      estadoTexto = "NO COINCIDE LA VERIFICACI\u00d3N: el QR fue alterado o no corresponde.";
+      estadoTexto = "NO COINCIDE: el c\u00f3digo fue alterado.";
     } else if (!titularCoincide) {
-      estadoTexto = "TRANSFERENCIA BLOQUEADA: este QR pertenece a otro titular (" + parsed.titularId + ").";
+      estadoTexto = "BLOQUEADO: pertenece a otro titular (" + parsed.titularId + ").";
     } else if (yaUsado) {
-      estadoTexto = "YA CANJEADO / USADO: este QR \u00fanico ya fue utilizado.";
+      estadoTexto = "YA CANJEADO: este QR \u00fanico ya fue usado.";
     } else if (coincide) {
       if (consumirUso) {
         marcarUsado(tokenUso);
-        estadoTexto = "APROBADO Y CANJEADO: QR \u00fanico verificado para " + parsed.titularId + ".";
+        estadoTexto = "APROBADO Y CANJEADO (" + parsed.rol + " \u2022 " + parsed.titularId + ").";
       } else {
-        estadoTexto = "V\u00c1LIDO E INTRANSFERIBLE: listo para validar/canjear.";
+        estadoTexto = "V\u00c1LIDO E INTRANSFERIBLE: listo para canjear.";
       }
     } else {
-      estadoTexto = "SIN SELLO PREVIO: se calcul\u00f3 su huella de verificaci\u00f3n actual.";
+      estadoTexto = "SIN SELLO PREVIO: se calcul\u00f3 huella actual.";
     }
 
     return {
@@ -160,7 +147,7 @@
   }
 
   async function generarQrUnico(rol, titularId, paseId, detalle) {
-    var rClean = String(rol || "ESTUDIANTE").trim().toUpperCase();
+    var rClean = String(rol || "COMEDOR").trim().toUpperCase();
     var tClean = String(titularId || "").trim();
     var pClean = String(paseId || "").trim();
     var dClean = String(detalle || "").trim();
@@ -173,42 +160,56 @@
     };
   }
 
+  async function leerQrDesdeImagen(file) {
+    if ("BarcodeDetector" in window && typeof createImageBitmap === "function") {
+      try {
+        var bmp = await createImageBitmap(file);
+        var det = new window.BarcodeDetector({ formats: ["qr_code"] });
+        var codes = await det.detect(bmp);
+        if (codes && codes.length > 0 && codes[0].rawValue) {
+          return String(codes[0].rawValue);
+        }
+      } catch (_e) {}
+    }
+    return "";
+  }
+
   function detenerCamara() {
     if (scanTimer) { clearInterval(scanTimer); scanTimer = null; }
     if (streamActual) {
       try { streamActual.getTracks().forEach(function (t) { t.stop(); }); } catch (_e) {}
       streamActual = null;
     }
-    var vid = document.getElementById("bds-qr88-video");
+    var vid = document.getElementById("bds-qr89-video");
     if (vid) { vid.style.display = "none"; vid.srcObject = null; }
   }
 
   function montarModalQr() {
-    if (document.getElementById("bds-v88-qr-btn")) return;
+    if (document.getElementById("bds-v89-qr-btn")) return;
 
     var btn = document.createElement("button");
-    btn.id = "bds-v88-qr-btn";
+    btn.id = "bds-v89-qr-btn";
     btn.type = "button";
-    btn.setAttribute("aria-label", "Abrir validador de QR unicos e intransferibles");
+    btn.setAttribute("aria-label", "Abrir caja rapida de QR unicos para comedor, cooperativa, compras y notas");
     btn.style.cssText =
-      "position:fixed;left:12px;bottom:124px;z-index:2147483635;" +
+      "position:fixed;left:12px;bottom:118px;z-index:2147483635;" +
       "background:#1e293b;color:#f8fafc;border:2px solid #fbbf24;border-radius:999px;" +
       "padding:8px 13px;font:800 12px system-ui,sans-serif;box-shadow:0 8px 22px rgba(0,0,0,.45);cursor:pointer";
-    btn.textContent = "\ud83d\udcf1 QR \u00danico";
+    btn.textContent = "\ud83d\udcf1 QR Caja / \u00danico";
     document.body.appendChild(btn);
 
     var modal = document.createElement("div");
-    modal.id = "bds-v88-qr-modal";
+    modal.id = "bds-v89-qr-modal";
     modal.style.cssText =
       "display:none;position:fixed;inset:0;z-index:2147483647;background:rgba(2,6,23,.86);" +
       "overflow:hidden;padding:12px;font-family:system-ui,-apple-system,sans-serif";
     document.body.appendChild(modal);
 
     var state = {
-      rol: "ESTUDIANTE",
+      rol: "COMEDOR",
       titularId: "1-1234-5678",
-      paseId: "PASE-2026-001",
-      detalle: "Beneficio / Acceso / Nota",
+      paseId: "COM-2026-01",
+      detalle: "Almuerzo / Servicio interno",
       titularCheck: "",
       qrInput: "",
       camMsg: "",
@@ -218,8 +219,8 @@
     function pintarResultado(ver) {
       state.resultadoHtml =
         '<div style="background:#f8fafc;border:1.5px solid #94a3b8;border-radius:12px;padding:11px;font-size:12.5px;color:#0f172a">' +
-        '<div><strong>Estado:</strong> ' + esc(ver.estadoTexto) + '</div>' +
-        '<div style="margin-top:4px"><strong>Rol:</strong> ' + esc(ver.parsed.rol) + ' | <strong>Titular ID:</strong> ' + esc(ver.parsed.titularId || "-") + ' | <strong>Pase/ID:</strong> ' + esc(ver.parsed.paseId || "-") + '</div>' +
+        '<div><strong>Resultado:</strong> ' + esc(ver.estadoTexto) + '</div>' +
+        '<div style="margin-top:4px"><strong>Tipo/Rol:</strong> ' + esc(ver.parsed.rol) + ' | <strong>Titular ID:</strong> ' + esc(ver.parsed.titularId || "-") + ' | <strong>Folio/ID:</strong> ' + esc(ver.parsed.paseId || "-") + '</div>' +
         '<div style="margin-top:4px"><strong>Detalle:</strong> ' + esc(ver.parsed.detalle || "-") + '</div>' +
         '<div style="margin-top:4px"><strong>C\u00f3digo:</strong> ' + esc(ver.codigoCorto) + '</div>' +
         '<div style="margin-top:4px;word-break:break-all"><strong>Verificaci\u00f3n:</strong> ' + esc(ver.hashCalculado) + '</div>' +
@@ -234,10 +235,10 @@
       renderModal();
     }
 
-    async function iniciarCamaraNativa() {
+    async function iniciarCamara() {
       state.camMsg = "";
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        state.camMsg = "C\u00e1mara no disponible en este navegador; use foto o pegue el c\u00f3digo.";
+        state.camMsg = "Sin c\u00e1mara activa en este equipo; use lector de c\u00f3digo/teclado o foto.";
         renderModal();
         return;
       }
@@ -245,7 +246,7 @@
         detenerCamara();
         streamActual = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
         renderModal();
-        var vid = document.getElementById("bds-qr88-video");
+        var vid = document.getElementById("bds-qr89-video");
         if (vid) {
           vid.style.display = "block";
           vid.srcObject = streamActual;
@@ -260,106 +261,130 @@
               if (codes && codes.length > 0 && codes[0].rawValue) {
                 state.qrInput = String(codes[0].rawValue);
                 detenerCamara();
-                var ver = await verificarQrCompleto(state.qrInput, state.titularCheck, false);
+                var ver = await verificarQrCompleto(state.qrInput, state.titularCheck, true);
                 pintarResultado(ver);
                 renderModal();
               }
             } catch (_e) {}
-          }, 450);
+          }, 400);
         } else {
-          state.camMsg = "C\u00e1mara activa; si el navegador no lee QR en vivo, tome foto o pegue el texto.";
+          state.camMsg = "C\u00e1mara abierta; para lectura r\u00e1pida en PC use pist\u00f3n/lector o pegue el c\u00f3digo y pulse Enter.";
           renderModal();
         }
       } catch (_err) {
-        state.camMsg = "Permiso de c\u00e1mara no concedido; puede usar foto o texto directo.";
+        state.camMsg = "C\u00e1mara no disponible o sin permiso; use lector/teclado o foto.";
         renderModal();
       }
     }
 
     function renderModal() {
       modal.innerHTML =
-        '<div style="max-width:670px;margin:10px auto;background:#ffffff;color:#0f172a;border-radius:16px;border:2px solid #64748b;overflow:hidden">' +
+        '<div style="max-width:680px;margin:10px auto;background:#ffffff;color:#0f172a;border-radius:16px;border:2px solid #64748b;overflow:hidden">' +
         '<div style="background:#0f172a;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center">' +
-        '<strong style="font-size:14px">QR \u00danicos e Intransferibles + C\u00e1mara Nativa</strong>' +
-        '<button id="bds-v88-close" type="button" style="background:#b91c1c;color:#fff;border:none;border-radius:8px;padding:6px 11px;font-weight:800;cursor:pointer">Cerrar</button>' +
+        '<strong style="font-size:14px">QR \u00danico \u2022 Comedor, Cooperativa, Compras y Notas</strong>' +
+        '<button id="bds-v89-close" type="button" style="background:#b91c1c;color:#fff;border:none;border-radius:8px;padding:6px 11px;font-weight:800;cursor:pointer">Cerrar</button>' +
         '</div>' +
         '<div style="padding:13px">' +
-        '<div style="font-size:12px;font-weight:800;color:#334155;margin-bottom:6px">1. Emitir QR \u00fanico por rol y titular:</div>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">' +
+        '<button type="button" data-preset="COMEDOR" class="bds-qr89-pre" style="padding:5px 10px;border-radius:8px;border:1px solid #0f766e;background:#ecfdf5;color:#065f46;font-size:11.5px;font-weight:800;cursor:pointer">Comedor</button>' +
+        '<button type="button" data-preset="COOPERATIVA" class="bds-qr89-pre" style="padding:5px 10px;border-radius:8px;border:1px solid #1d4ed8;background:#eff6ff;color:#1e40af;font-size:11.5px;font-weight:800;cursor:pointer">Cooperativa</button>' +
+        '<button type="button" data-preset="COMPRA" class="bds-qr89-pre" style="padding:5px 10px;border-radius:8px;border:1px solid #b45309;background:#fffbeb;color:#92400e;font-size:11.5px;font-weight:800;cursor:pointer">Compra</button>' +
+        '<button type="button" data-preset="NOTA" class="bds-qr89-pre" style="padding:5px 10px;border-radius:8px;border:1px solid #4338ca;background:#eef2ff;color:#3730a3;font-size:11.5px;font-weight:800;cursor:pointer">Nota</button>' +
+        '</div>' +
         '<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px">' +
-        '<select id="bds-qr88-rol" style="padding:7px 9px;border-radius:8px;border:1.5px solid #475569;font-weight:700">' +
-        '<option value="ESTUDIANTE">ESTUDIANTE</option><option value="DOCENTE">DOCENTE</option><option value="ENCARGADO">ENCARGADO</option><option value="PERSONAL">PERSONAL</option><option value="BENEFICIO">BENEFICIO</option><option value="COMPRA">COMPRA</option><option value="FACTURA">FACTURA</option><option value="NOTA">NOTA</option><option value="MATRICULA">MATRICULA</option>' +
+        '<select id="bds-qr89-rol" style="padding:7px 9px;border-radius:8px;border:1.5px solid #475569;font-weight:700">' +
+        '<option value="COMEDOR">COMEDOR</option><option value="COOPERATIVA">COOPERATIVA</option><option value="COMPRA">COMPRA</option><option value="NOTA">NOTA</option><option value="ESTUDIANTE">ESTUDIANTE</option><option value="DOCENTE">DOCENTE</option><option value="ENCARGADO">ENCARGADO</option><option value="PERSONAL">PERSONAL</option><option value="MATRICULA">MATRICULA</option>' +
         '</select>' +
-        '<input id="bds-qr88-titular" type="text" value="' + esc(state.titularId) + '" placeholder="Titular ID (c\u00e9dula/carn\u00e9)" style="padding:7px 9px;border-radius:8px;border:1.5px solid #475569;flex:1;min-width:120px"/>' +
-        '<input id="bds-qr88-pase" type="text" value="' + esc(state.paseId) + '" placeholder="ID Pase / Folio" style="padding:7px 9px;border-radius:8px;border:1.5px solid #475569;flex:1;min-width:120px"/>' +
-        '<input id="bds-qr88-det" type="text" value="' + esc(state.detalle) + '" placeholder="Detalle" style="padding:7px 9px;border-radius:8px;border:1.5px solid #475569;flex:1;min-width:120px"/>' +
-        '<button id="bds-qr88-gen" type="button" style="padding:7px 11px;border-radius:8px;border:none;background:#1e40af;color:#fff;font-size:12px;font-weight:800;cursor:pointer">Generar QR</button>' +
+        '<input id="bds-qr89-titular" type="text" value="' + esc(state.titularId) + '" placeholder="Titular ID" style="padding:7px 9px;border-radius:8px;border:1.5px solid #475569;flex:1;min-width:115px"/>' +
+        '<input id="bds-qr89-pase" type="text" value="' + esc(state.paseId) + '" placeholder="Folio / ID" style="padding:7px 9px;border-radius:8px;border:1.5px solid #475569;flex:1;min-width:115px"/>' +
+        '<input id="bds-qr89-det" type="text" value="' + esc(state.detalle) + '" placeholder="Detalle / Monto / Nota" style="padding:7px 9px;border-radius:8px;border:1.5px solid #475569;flex:1;min-width:125px"/>' +
+        '<button id="bds-qr89-gen" type="button" style="padding:7px 11px;border-radius:8px;border:none;background:#1e40af;color:#fff;font-size:12px;font-weight:800;cursor:pointer">Generar</button>' +
         '</div>' +
-        '<div style="font-size:12px;font-weight:800;color:#334155;margin-bottom:6px">2. Escanear con c\u00e1mara, foto o texto y validar titular:</div>' +
         '<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px">' +
-        '<button id="bds-qr88-cam" type="button" style="padding:7px 11px;border-radius:8px;border:none;background:#0f766e;color:#fff;font-size:12px;font-weight:800;cursor:pointer">Abrir C\u00e1mara</button>' +
-        '<label style="padding:7px 11px;border-radius:8px;background:#334155;color:#fff;font-size:12px;font-weight:800;cursor:pointer">Foto/C\u00e1mara Archivo<input id="bds-qr88-file" type="file" accept="image/*" capture="environment" style="display:none"/></label>' +
-        '<input id="bds-qr88-check-tit" type="text" value="' + esc(state.titularCheck) + '" placeholder="Confirmar Titular ID (opcional)" style="padding:7px 9px;border-radius:8px;border:1.5px solid #475569;flex:1;min-width:150px"/>' +
+        '<button id="bds-qr89-cam" type="button" style="padding:7px 11px;border-radius:8px;border:none;background:#0f766e;color:#fff;font-size:12px;font-weight:800;cursor:pointer">C\u00e1mara</button>' +
+        '<label style="padding:7px 11px;border-radius:8px;background:#334155;color:#fff;font-size:12px;font-weight:800;cursor:pointer">Foto QR<input id="bds-qr89-file" type="file" accept="image/*" capture="environment" style="display:none"/></label>' +
+        '<input id="bds-qr89-check-tit" type="text" value="' + esc(state.titularCheck) + '" placeholder="Titular a confirmar (opcional)" style="padding:7px 9px;border-radius:8px;border:1.5px solid #475569;flex:1;min-width:150px"/>' +
         '</div>' +
-        '<video id="bds-qr88-video" playsinline muted style="display:none;width:100%;max-height:190px;border-radius:10px;background:#000;margin-bottom:8px"></video>' +
+        '<video id="bds-qr89-video" playsinline muted style="display:none;width:100%;max-height:175px;border-radius:10px;background:#000;margin-bottom:8px"></video>' +
         (state.camMsg ? '<div style="font-size:12px;color:#b45309;margin-bottom:8px">' + esc(state.camMsg) + '</div>' : '') +
         '<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px">' +
-        '<input id="bds-qr88-raw" type="text" value="' + esc(state.qrInput) + '" placeholder="Contenido QR..." style="padding:8px 9px;border-radius:8px;border:1.5px solid #475569;flex:1;min-width:180px"/>' +
-        '<button id="bds-qr88-val" type="button" style="padding:8px 11px;border-radius:8px;border:none;background:#0284c7;color:#fff;font-size:12px;font-weight:800;cursor:pointer">Validar</button>' +
-        '<button id="bds-qr88-canj" type="button" style="padding:8px 11px;border-radius:8px;border:none;background:#047857;color:#fff;font-size:12px;font-weight:800;cursor:pointer">Validar y Canjear</button>' +
+        '<input id="bds-qr89-raw" type="text" value="' + esc(state.qrInput) + '" placeholder="Escanee con lector o pegue el QR y pulse Enter..." style="padding:8px 9px;border-radius:8px;border:1.5px solid #475569;flex:1;min-width:190px"/>' +
+        '<button id="bds-qr89-val" type="button" style="padding:8px 11px;border-radius:8px;border:none;background:#0284c7;color:#fff;font-size:12px;font-weight:800;cursor:pointer">Validar</button>' +
+        '<button id="bds-qr89-canj" type="button" style="padding:8px 11px;border-radius:8px;border:none;background:#047857;color:#fff;font-size:12px;font-weight:800;cursor:pointer">Canjear R\u00e1pido</button>' +
         '</div>' +
         (state.resultadoHtml || "") +
         '</div></div>';
 
-      document.getElementById("bds-v88-close").onclick = function () { detenerCamara(); modal.style.display = "none"; };
-      var rSel = document.getElementById("bds-qr88-rol");
+      document.getElementById("bds-v89-close").onclick = function () { detenerCamara(); modal.style.display = "none"; };
+
+      Array.prototype.forEach.call(modal.querySelectorAll(".bds-qr89-pre"), function (bPre) {
+        bPre.onclick = function () {
+          var p = bPre.getAttribute("data-preset") || "COMEDOR";
+          state.rol = p;
+          state.paseId = p.slice(0, 3) + "-2026-01";
+          state.detalle = (p === "COMEDOR") ? "Servicio comedor" : (p === "COOPERATIVA") ? "Caja cooperativa" : (p === "COMPRA") ? "Compra interna" : "Registro nota";
+          refrescarNuevoQr();
+        };
+      });
+
+      var rSel = document.getElementById("bds-qr89-rol");
       if (rSel) rSel.value = state.rol;
 
-      document.getElementById("bds-qr88-gen").onclick = function () {
+      document.getElementById("bds-qr89-gen").onclick = function () {
         state.rol = rSel ? rSel.value : state.rol;
-        state.titularId = document.getElementById("bds-qr88-titular").value;
-        state.paseId = document.getElementById("bds-qr88-pase").value;
-        state.detalle = document.getElementById("bds-qr88-det").value;
+        state.titularId = document.getElementById("bds-qr89-titular").value;
+        state.paseId = document.getElementById("bds-qr89-pase").value;
+        state.detalle = document.getElementById("bds-qr89-det").value;
         refrescarNuevoQr();
       };
 
-      document.getElementById("bds-qr88-cam").onclick = function () { iniciarCamaraNativa(); };
+      document.getElementById("bds-qr89-cam").onclick = function () { iniciarCamara(); };
 
-      var fInp = document.getElementById("bds-qr88-file");
+      var fInp = document.getElementById("bds-qr89-file");
       if (fInp) {
         fInp.onchange = async function () {
           var file = fInp.files && fInp.files[0];
           if (!file) return;
-          if ("BarcodeDetector" in window && typeof createImageBitmap === "function") {
-            try {
-              var bmp = await createImageBitmap(file);
-              var det = new window.BarcodeDetector({ formats: ["qr_code"] });
-              var codes = await det.detect(bmp);
-              if (codes && codes.length > 0 && codes[0].rawValue) {
-                state.qrInput = String(codes[0].rawValue);
-                var ver = await verificarQrCompleto(state.qrInput, state.titularCheck, false);
-                pintarResultado(ver);
-                renderModal();
-                return;
-              }
-            } catch (_e) {}
+          var leido = await leerQrDesdeImagen(file);
+          if (leido) {
+            state.qrInput = leido;
+            var ver = await verificarQrCompleto(state.qrInput, state.titularCheck, false);
+            pintarResultado(ver);
+            renderModal();
+          } else {
+            state.camMsg = "No se detect\u00f3 QR en la imagen; pegue el c\u00f3digo o use lector directo.";
+            renderModal();
           }
-          state.camMsg = "Imagen cargada; si no ley\u00f3 QR autom\u00e1tico, pegue el texto del QR o pruebe en Chrome/Android actualizado.";
-          renderModal();
         };
       }
 
-      document.getElementById("bds-qr88-val").onclick = function () {
-        state.qrInput = document.getElementById("bds-qr88-raw").value;
-        state.titularCheck = document.getElementById("bds-qr88-check-tit").value;
+      var rawInp = document.getElementById("bds-qr89-raw");
+      if (rawInp) {
+        rawInp.onkeydown = function (ev) {
+          if (ev.key === "Enter") {
+            ev.preventDefault();
+            state.qrInput = rawInp.value;
+            state.titularCheck = document.getElementById("bds-qr89-check-tit").value;
+            verificarQrCompleto(state.qrInput, state.titularCheck, true).then(function (ver) {
+              pintarResultado(ver);
+              renderModal();
+            });
+          }
+        };
+      }
+
+      document.getElementById("bds-qr89-val").onclick = function () {
+        state.qrInput = document.getElementById("bds-qr89-raw").value;
+        state.titularCheck = document.getElementById("bds-qr89-check-tit").value;
         verificarQrCompleto(state.qrInput, state.titularCheck, false).then(function (ver) {
           pintarResultado(ver);
           renderModal();
         });
       };
 
-      document.getElementById("bds-qr88-canj").onclick = function () {
-        state.qrInput = document.getElementById("bds-qr88-raw").value;
-        state.titularCheck = document.getElementById("bds-qr88-check-tit").value;
+      document.getElementById("bds-qr89-canj").onclick = function () {
+        state.qrInput = document.getElementById("bds-qr89-raw").value;
+        state.titularCheck = document.getElementById("bds-qr89-check-tit").value;
         verificarQrCompleto(state.qrInput, state.titularCheck, true).then(function (ver) {
           pintarResultado(ver);
           renderModal();
@@ -372,7 +397,7 @@
       refrescarNuevoQr();
     };
 
-    window.BDSQrVerifV88 = {
+    window.BDSQrVerifV89 = {
       open: function () { modal.style.display = "block"; refrescarNuevoQr(); },
       close: function () { detenerCamara(); modal.style.display = "none"; },
       signAndVerify: async function (rol, titularId, paseId, detalle) {
